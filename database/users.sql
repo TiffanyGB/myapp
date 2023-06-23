@@ -31,29 +31,25 @@ CREATE TABLE Utilisateur(
 
 -- Créer les tables
 CREATE TABLE Etudiant(
-    idEtudiant SERIAL PRIMARY KEY,
+    idEtudiant INT PRIMARY KEY REFERENCES Utilisateur(idUser),
     ecole VARCHAR(100),
     niveau_etude VARCHAR(15),
-    code_postale_ecole VARCHAR (5),
-    idUser INT REFERENCES Utilisateur(idUser)
+    code_postale_ecole VARCHAR (5)
 );
 
 CREATE TABLE Admini(
-    idAdmin SERIAL PRIMARY KEY,
-    idUser INT REFERENCES Utilisateur(idUser)
+    idAdmin INT PRIMARY KEY REFERENCES Utilisateur(idUser)
 );
 
 CREATE TABLE Gestionnaire_iapau(
-    id SERIAL PRIMARY KEY,
-    role_asso VARCHAR(100),
-    idUser INT REFERENCES Utilisateur(idUser)
+    id_g_iapau INT PRIMARY KEY REFERENCES Utilisateur(idUser),
+    role_asso VARCHAR(100)
 );
 
 CREATE TABLE Gestionnaire_externe(
-    id SERIAL PRIMARY KEY,
+    id_g_externe INT PRIMARY KEY REFERENCES Utilisateur(idUser),
     entreprise VARCHAR(100),
-    metier VARCHAR(100),
-    idUser INT REFERENCES Utilisateur(idUser)
+    metier VARCHAR(100)
 );
 
 DELETE FROM Utilisateur WHERE email =  'admin@admin.fr';

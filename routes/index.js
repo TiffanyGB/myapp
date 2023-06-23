@@ -1,10 +1,11 @@
 var express = require('express');
 var router = express.Router();
 const pool = require('../database/configDB');
-const fc = require('../public/javascripts/fonctions_connexion');
+const fc = require('../public/javascripts/fonctions_inscription');
 const fmdp = require('../public/javascripts/fonctions_mdp');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
+const { error } = require('console');
 
 
 const generateSecretKey = () => {
@@ -53,6 +54,12 @@ router.all('/inscription', function(req, res) {
       userMail,
     ];
 
+    const values3 = [
+      userEcole,
+      userNiveauEtude,
+      userCodeEcole
+    ];
+
     /** Insérer utilisateur et mdp dans la bdd */
     fc.insererUser(values, values2)
     .then((inserer) => {
@@ -62,7 +69,7 @@ router.all('/inscription', function(req, res) {
 
           .then((hashedPassword) => {
             console.log('Mot de passe crypté avec succès');
-            fc.insererMdp(hashedPassword, userPseudo)
+            fc.insererMdp(hashedPassword, userPseudo);
             res.status(200).send('Inscription réussie');
 
           })
@@ -71,6 +78,17 @@ router.all('/inscription', function(req, res) {
             res.status(400).send('Erreur lors du salage du mot de passe:');
 
           });
+
+          fc.insererEtudiant(values3, userPseudo)
+          .then(() => {
+            console.log('Etudiant inséré');
+            res.status(200);
+          })
+          .catch((error) => {
+            console.error('Erreur Inscription etudiant', error);
+            res.status(400).send('Erreur Inscription etudiant');
+          });
+          
       }else{
         res.status(400).end();
       }
@@ -80,6 +98,8 @@ router.all('/inscription', function(req, res) {
       res.status(400).send('Erreur lors de l\'insertion de l\'utilisateur.');
 
     });
+
+
   
 
   }

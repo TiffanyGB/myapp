@@ -2,8 +2,6 @@ const bcrypt = require('bcrypt');
 const pool = require('../../database/configDB');
 
 
-
-
 function verifExistence(values) {
     const verifExistence = `SELECT * FROM UTILISATEUR WHERE (pseudo = $1) OR (email = $2)`;
 
@@ -70,6 +68,33 @@ function insererMdp(mdp, pseudo) {
     });
 }
 
+async function insererEtudiant(values, pseudo){
+
+  try{
+    const idUser = await chercherUser(pseudo);
+
+    console.log("L'id est " + idUser);
+    
+    const requet = `INSERT INTO etudiant (idEtudiant, ecole, niveau_etude, code_postale_ecole)
+    VALUES ('${idUser}', $1, $2, $3)`;
+
+    return new Promise((resolve, reject) => {
+      pool.query(requet, values)
+      .then(()=> {
+        console.log('Données insérées avec succès dans la table etudiant');
+        resolve(true);  
+      })
+      .catch((error) => {
+        console.error('Erreur lors de l\'insertion des données côté etudiant:', error);
+        reject(error);
+      });
+    });
+  } catch (error){
+    console.error('Erreur lors de l\'insertion des données côté etudiant vol2:', error);
+    throw error;
+  }
+}
+
   
 function chercherUser(pseudo) {
     const user = `SELECT idUser FROM utilisateur WHERE pseudo = '${pseudo}'`;
@@ -93,6 +118,7 @@ function chercherUser(pseudo) {
   module.exports = {
     insererUser,
     insererMdp,
+    insererEtudiant
   };
   
 
