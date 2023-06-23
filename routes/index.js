@@ -15,6 +15,10 @@ const cors = require('cors');
 // };
 // app.use(cors(corsOptions));
 
+const generateSecretKey = () => {
+  return crypto.randomBytes(64).toString('hex');
+};
+const secretKey = generateSecretKey();
 
 router.use(cors());
 
@@ -27,7 +31,7 @@ const verifyToken = (req, res, next) => {
     return res.sendStatus(401); // Unauthorized si aucun token n'est fourni
   }
 
-  jwt.verify(token, 'secretKey', (err, user) => {
+  jwt.verify(token, secretKey, (err, user) => {
     if (err) {
       return res.sendStatus(403); // Forbidden si le token est invalide
     }
@@ -35,14 +39,6 @@ const verifyToken = (req, res, next) => {
     next(); // Passe à la prochaine étape de traitement de la requête
   });
 };
-
-
-
-const generateSecretKey = () => {
-  return crypto.randomBytes(64).toString('hex');
-};
-const secretKey = generateSecretKey();
-
 
 /* GET home page. */
 router.get('/', function(req, res, next) {

@@ -86,7 +86,6 @@ async function insererEtudiant(values, pseudo){
   }
 }
 
-  
 function chercherUser(pseudo) {
     const user = `SELECT idUser FROM utilisateur WHERE pseudo = '${pseudo}'`;
     
