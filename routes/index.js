@@ -6,6 +6,36 @@ const fmdp = require('../public/javascripts/fonctions_mdp');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const { error } = require('console');
+const cors = require('cors');
+
+// const corsOptions = {
+//   origin: ['http://app.exemple.com', 'http://autre.exemple.com'], // Origines autorisées
+//   methods: ['GET', 'POST', 'PUT', 'DELETE'], // Méthodes autorisées
+//   allowedHeaders: ['Content-Type', 'Authorization'] // En-têtes autorisés
+// };
+// app.use(cors(corsOptions));
+
+
+router.use(cors());
+
+// Middleware de vérification du token
+const verifyToken = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+
+  if (!token) {
+    return res.sendStatus(401); // Unauthorized si aucun token n'est fourni
+  }
+
+  jwt.verify(token, 'secretKey', (err, user) => {
+    if (err) {
+      return res.sendStatus(403); // Forbidden si le token est invalide
+    }
+    req.user = user; // Ajoute les informations de l'utilisateur décodées à l'objet `req`
+    next(); // Passe à la prochaine étape de traitement de la requête
+  });
+};
+
 
 
 const generateSecretKey = () => {
@@ -20,7 +50,7 @@ router.get('/', function(req, res, next) {
 });
 
 /** Inscription */
-router.all('/inscription', function(req, res) {
+router.all('/inscription',function(req, res) {
   if (req.method === 'GET') {
     res.render('inscription', { title: 'Inscription' });
   } else if (req.method === 'POST') {
@@ -106,6 +136,8 @@ router.all('/inscription', function(req, res) {
 
 /** Connexion */
 router.all('/connexion', async function(req, res) {
+  console.log(JSON.stringify(req.headers));
+
   if (req.method === 'GET') {
     res.render('connexion', { title: 'Connexion' });
   } else if (req.method === 'POST') {
