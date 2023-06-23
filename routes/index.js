@@ -65,8 +65,9 @@ router.all('/inscription', function(req, res) {
     .then((inserer) => {
       /**L'insertion dans la bdd a réussi, on passe au mdp */
       if (inserer === true) {
+        console.log('Données insérées avec succès dans la table utilisateur');
         fmdp.salageMdp(password)
-
+          
           .then((hashedPassword) => {
             console.log('Mot de passe crypté avec succès');
             fc.insererMdp(hashedPassword, userPseudo);
@@ -87,7 +88,12 @@ router.all('/inscription', function(req, res) {
             res.status(400).json({message:'Erreur Inscription etudiant'});
           });
 
-          res.status(200).json({message:'Inscription finie et réussie'});
+          console.log('Inscription finie');
+          res.status(200).json({message:'Inscription réussie'});
+      }
+      else{
+        console.log('Utilisateur existant avec le même pseudo ou email');
+        res.status(400).json({message:'Pseudo ou email existant'});
       }
     })
     .catch((error) => {
@@ -113,13 +119,11 @@ router.all('/connexion', async function(req, res) {
 
       // Aucun email ou login ne correspond
       if (result.rowCount === 0) {
-        res.status(400).send('La connexion a échoué');
+        res.status(400).json({message:'Aucun email/login ne correspond'});
       } else {
         const user = result.rows[0];
         const match = await fmdp.comparerMdp(password, user.hashmdp);
-        
-        console.log("Les mdp sont identiques " + match);
-
+      
         if (match) {
           
           console.log('Connexion de ' + user.prenom);
@@ -128,20 +132,18 @@ router.all('/connexion', async function(req, res) {
             utilisateurType: user.type
           };
 
-          // Générer le JWT
-          console.log("SECRET " + secretKey);
-
+          /**  Générer le JWT */
           const token = jwt.sign(payload, secretKey, { expiresIn: '180h' });
 
-          res.status(200).json({ token: token }); // Envoyer le JWT dans la réponse JSON
+          res.status(200).json({ token: token, idUser: user.iduser, role: user.typeuser}); // Envoyer le JWT dans la réponse JSON
 
         } else {
-          res.status(400).send('Le mot de passe est incorrect');
+          res.status(400).json({message: 'Le mot de passe est incorrect'});
         }
       }
     } catch (error) {
       console.error('Erreur lors de l\'exécution de la requête:', error);
-      res.status(400).send('Erreur lors de l\'exécution de la requête');
+      res.status(400).json('Erreur lors de l\'exécution de la requête');
     }
   }
 });

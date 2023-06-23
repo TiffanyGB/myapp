@@ -9,14 +9,13 @@ function verifExistence(values) {
     pool.query(verifExistence, values)
       .then((result) => {
         if (result.rows.length > 0) {
-          console.log('Utilisateur existant avec le même pseudo ou email');
           resolve(false);
         } else {
           resolve(true);
         }
       })
       .catch((error) => {
-        console.error('Erreur lors de l\'insertion des données côté utilisateur:', error);
+        console.error('Fichier "' + __filename + '" fonction: "'+ arguments.callee.name +':\nErreur lors de l\'insertion des données côté utilisateur:', error);
         reject(error);
       });
   });
@@ -35,16 +34,14 @@ async function insererUser(values, values2) {
         return new Promise((resolve, reject) => {
           pool.query(insertUser, values)
             .then(() => {
-              console.log('Données insérées avec succès dans la table utilisateur');
               resolve(true);
             })
             .catch((error) => {
-              console.error('Erreur lors de l\'insertion des données côté utilisateur:', error);
+              console.error('Fichier "' + __filename + '" fonction: "'+ arguments.callee.name +':\nErreur lors de l\'insertion des données côté utilisateur:', error);
               reject(error);
             });
         });
       } else {
-        console.log('Utilisateur pris');
         return false;
       }
     } catch (error) {
@@ -60,12 +57,8 @@ function insererMdp(mdp, pseudo) {
     WHERE pseudo='${pseudo}'`;
 
     pool.query(inserer)
-    .then(() =>
-        console.log('Mot de passe inséré avec succès')
-    
-    )
     .catch((error) => {
-    console.error('Erreur lors de l\'insertion du mot de passe:', error);
+    console.error('Fichier "' + __filename + '" fonction: "'+ arguments.callee.name +':\nErreur lors de l\'insertion du mot de passe:', error);
     });
 }
 
@@ -73,8 +66,6 @@ async function insererEtudiant(values, pseudo){
 
   try{
     const idUser = await chercherUser(pseudo);
-
-    console.log("L'id est " + idUser);
     
     const requet = `INSERT INTO etudiant (idEtudiant, ecole, niveau_etude, code_postale_ecole)
     VALUES ('${idUser}', $1, $2, $3)`;
@@ -82,16 +73,15 @@ async function insererEtudiant(values, pseudo){
     return new Promise((resolve, reject) => {
       pool.query(requet, values)
       .then(()=> {
-        console.log('Données insérées avec succès dans la table etudiant');
         resolve(true);  
       })
       .catch((error) => {
-        console.error('Erreur lors de l\'insertion des données côté etudiant:', error);
+        console.error('Fichier "' + __filename + '" fonction: "'+ arguments.callee.name +':\nErreur lors de l\'insertion des données côté etudiant (requete sql)', error);
         reject(error);
       });
     });
   } catch (error){
-    console.error('Erreur lors de l\'insertion des données côté etudiant vol2:', error);
+    console.error('Fichier "' + __filename + '" fonction: "'+ arguments.callee.name +':\nErreur lors de l\'insertion des données côté etudiant (requete sql).', error);
     throw error;
   }
 }
@@ -104,10 +94,9 @@ function chercherUser(pseudo) {
         pool.query(user)
         .then((result) => {
             if (result.rows.length > 0) {
-            console.log('Utilisateur trouvé');
             resolve(result.rows[0].iduser);
             } else {
-            reject(new Error('Utilisateur non trouvé'));
+            reject(new Error('Utilisateur non trouvé: erreur dans le fichier "' + __filename + '" dans "'  + arguments.callee.name + '"'));
             }
         })
         .catch((error) => {
