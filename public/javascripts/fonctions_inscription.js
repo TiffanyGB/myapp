@@ -3,24 +3,25 @@ const pool = require('../../database/configDB');
 
 
 function verifExistence(values) {
-    const verifExistence = `SELECT * FROM UTILISATEUR WHERE (pseudo = $1) OR (email = $2)`;
+  const verifExistence = `SELECT * FROM UTILISATEUR WHERE (pseudo = $1) OR (email = $2)`;
 
-    return new Promise((resolve, reject) => {
-        pool.query(verifExistence, values)
-        .then((result) => {
-            if (result.rows.length > 0) {
-              console.log('Utilisateur existant avec le même pseudo ou email');
-            resolve(false);
-            } else {
-            resolve(true);
-            }
-        })
-        .catch((error) => {
-            console.error('Erreur lors de l\'insertion des données côté utilisateur:', error);
-            reject(error);
-        });
-    });
+  return new Promise((resolve, reject) => {
+    pool.query(verifExistence, values)
+      .then((result) => {
+        if (result.rows.length > 0) {
+          console.log('Utilisateur existant avec le même pseudo ou email');
+          resolve(false);
+        } else {
+          resolve(true);
+        }
+      })
+      .catch((error) => {
+        console.error('Erreur lors de l\'insertion des données côté utilisateur:', error);
+        reject(error);
+      });
+  });
 }
+
 
 async function insererUser(values, values2) {
     const insertUser = `

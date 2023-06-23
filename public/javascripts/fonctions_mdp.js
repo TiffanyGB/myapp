@@ -12,7 +12,7 @@ function salageMdp(password) {
         } else {
           bcrypt.hash(password, salt, function(err, hash) {
             if (err) {
-              console.error('Erreur lors du hachage du mot de passe:', err);
+              console.error('Erreur lors du hachage du mot de passe dans la fonction ${err.name} à la ligne ${err.lineNumber}:', err);
               reject(err);
             } else {
               resolve(hash);
@@ -28,7 +28,6 @@ function salageMdp(password) {
       const match = await bcrypt.compare(mdpClair, mdpCrypte);
       return match; 
     } catch (error) {
-      console.log('Clair: ' + typeof(mdpClair) + ', crypté: ' + typeof(mdpCrypte));
   
       console.error('Erreur lors de la comparaison des mots de passe:', error);
       throw error;

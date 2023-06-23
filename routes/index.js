@@ -70,37 +70,30 @@ router.all('/inscription', function(req, res) {
           .then((hashedPassword) => {
             console.log('Mot de passe crypté avec succès');
             fc.insererMdp(hashedPassword, userPseudo);
-            res.status(200).send('Inscription réussie');
 
           })
           .catch((error) => {
             console.error('Erreur lors du salage du mot de passe:', error);
-            res.status(400).send('Erreur lors du salage du mot de passe:');
+            res.status(400).json({message:'Erreur lors du salage du mot de passe:'});
 
           });
 
           fc.insererEtudiant(values3, userPseudo)
           .then(() => {
             console.log('Etudiant inséré');
-            res.status(200);
           })
           .catch((error) => {
             console.error('Erreur Inscription etudiant', error);
-            res.status(400).send('Erreur Inscription etudiant');
+            res.status(400).json({message:'Erreur Inscription etudiant'});
           });
-          
-      }else{
-        res.status(400).end();
+
+          res.status(200).json({message:'Inscription finie et réussie'});
       }
     })
     .catch((error) => {
       console.error('Erreur lors de l\'insertion de l\'utilisateur:', error);
-      res.status(400).send('Erreur lors de l\'insertion de l\'utilisateur.');
-
+      res.status(400).json({message: 'Erreur lors de l\'insertion de l\'utilisateur.'});
     });
-
-
-  
 
   }
 });
