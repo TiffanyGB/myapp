@@ -21,34 +21,34 @@ function verifExistence(values) {
   });
 }
 
+async function insererUser(values, values2, type) {
 
-async function insererUser(values, values2) {
-    const insertUser = `
-      INSERT INTO Utilisateur (nom, prenom, pseudo, email, lien_linkedin, lien_github, ville, date_inscription, typeUser)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, CURRENT_TIMESTAMP, 'etudiant')`;
-  
-    try {
-      const nonExiste = await verifExistence(values2);
-  
-      if (nonExiste) {
-        return new Promise((resolve, reject) => {
-          pool.query(insertUser, values)
-            .then(() => {
-              resolve(true);
-            })
-            .catch((error) => {
-              console.error('Fichier "' + __filename + '" fonction: "'+ arguments.callee.name +':\nErreur lors de l\'insertion des données côté utilisateur:', error);
-              reject(error);
-            });
-        });
-      } else {
-        return false;
-      }
-    } catch (error) {
-      console.error('Erreur lors de l\'insertion des données côté utilisateur:', error);
-      throw error;
+  const insertUser = `
+    INSERT INTO Utilisateur (nom, prenom, pseudo, email, lien_linkedin, lien_github, ville, date_inscription, typeUser)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, CURRENT_TIMESTAMP, '${type}')`;
+
+  try {
+    const nonExiste = await verifExistence(values2);
+
+    if (nonExiste) {
+      return new Promise((resolve, reject) => {
+        pool.query(insertUser, values)
+          .then(() => {
+            resolve(true);
+          })
+          .catch((error) => {
+            console.error('Fichier "' + __filename + '" fonction: "'+ arguments.callee.name +':\nErreur lors de l\'insertion des données côté utilisateur:', error);
+            reject(error);
+          });
+      });
+    } else {
+      return false;
     }
+  } catch (error) {
+    console.error('Erreur lors de l\'insertion des données côté utilisateur:', error);
+    throw error;
   }
+}
   
 function insererMdp(mdp, pseudo) {
 
@@ -107,7 +107,8 @@ function chercherUser(pseudo) {
   module.exports = {
     insererUser,
     insererMdp,
-    insererEtudiant
+    insererEtudiant,
+    chercherUser
   };
   
 

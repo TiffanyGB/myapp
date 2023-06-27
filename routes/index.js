@@ -5,9 +5,14 @@ const fc = require('../public/javascripts/fonctions_inscription');
 const fmdp = require('../public/javascripts/fonctions_mdp');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
-const { error } = require('console');
 const cors = require('cors');
+const adminRouter = require('./admin');
+router.use('/admin', adminRouter);
+const bodyParser = require('body-parser');
 
+router.use(bodyParser.json());
+router.use(express.json());
+router.use(express.urlencoded({ extended: false }));
 // const corsOptions = {
 //   origin: ['http://app.exemple.com', 'http://autre.exemple.com'], // Origines autorisées
 //   methods: ['GET', 'POST', 'PUT', 'DELETE'], // Méthodes autorisées
@@ -40,29 +45,31 @@ const verifyToken = (req, res, next) => {
   });
 };
 
-/* GET home page. */
+/* Page accueil */
 router.get('/', function(req, res, next) {
   res.render('index', { title: 'Accueil' });
 });
 
-/** Inscription */
 router.all('/inscription',function(req, res) {
   if (req.method === 'GET') {
     res.render('inscription', { title: 'Inscription' });
   } else if (req.method === 'POST') {
 
     /**Données du formulaire */
-    const userNom = req.body.nom;
-    const userPrenom = req.body.prenom;
-    const userPseudo = req.body.pseudo;
-    const userMail = req.body.email;
-    const userLinkedin = req.body.linkedin;
-    const userGitHub = req.body.github;
-    const userVille = req.body.ville;
-    const userEcole = req.body.ecole;
-    const userCodeEcole = req.body.codeEcole;
-    const userNiveauEtude = req.body.niveau_etude;
-    const password = req.body.password;
+    const {
+      nom: userNom,
+      prenom: userPrenom,
+      pseudo: userPseudo,
+      email: userMail,
+      linkedin: userLinkedin,
+      github: userGitHub,
+      ville: userVille,
+      ecole: userEcole,
+      codeEcole: userCodeEcole,
+      niveauEtude: userNiveauEtude,
+      password
+    } = req.body;
+    
 
     /**A insérer dans la bdd */
     const values = [
@@ -75,22 +82,22 @@ router.all('/inscription',function(req, res) {
       userVille,
     ];
 
-    const values2 = [
+    const values_id = [
       userPseudo,
       userMail,
     ];
 
-    const values3 = [
+    const values_etudiant = [
       userEcole,
       userNiveauEtude,
       userCodeEcole
     ];
 
     /** Insérer utilisateur et mdp dans la bdd */
-    fc.insererUser(values, values2)
+    fc.insererUser(values, values_id, 'etudiant')
     .then((inserer) => {
       /**L'insertion dans la bdd a réussi, on passe au mdp */
-      if (inserer === true) {
+      if (inserer) {
         console.log('Données insérées avec succès dans la table utilisateur');
         fmdp.salageMdp(password)
           
@@ -105,7 +112,7 @@ router.all('/inscription',function(req, res) {
 
           });
 
-          fc.insererEtudiant(values3, userPseudo)
+          fc.insererEtudiant(values_etudiant, userPseudo)
           .then(() => {
             console.log('Etudiant inséré');
           })
@@ -129,18 +136,17 @@ router.all('/inscription',function(req, res) {
 
   }
 });
-
 /** Connexion */
 router.all('/connexion', async function(req, res) {
-  console.log(JSON.stringify(req.headers));
 
   if (req.method === 'GET') {
     res.render('connexion', { title: 'Connexion' });
   } else if (req.method === 'POST') {
 
-    const idConnexion = req.body.idConnexion;
+    const idPseudo = req.body.pseudo;
+    const idMail = req.body.email;
     const password = req.body.password;
-    const requeteChercher = `SELECT * FROM Utilisateur WHERE (email='${idConnexion}') OR (pseudo='${idConnexion}')`;
+    const requeteChercher = `SELECT * FROM Utilisateur WHERE (email='${idMail}') OR (pseudo='${idPseudo}')`;
 
     try {
       const result = await pool.query(requeteChercher);
@@ -164,6 +170,8 @@ router.all('/connexion', async function(req, res) {
           const token = jwt.sign(payload, secretKey, { expiresIn: '180h' });
 
           res.status(200).json({ token: token, idUser: user.iduser, role: user.typeuser}); // Envoyer le JWT dans la réponse JSON
+          // res.set('Authorization', `Bearer ${token}`);
+          // res.redirect('/liste');
 
         } else {
           res.status(400).json({message: 'Le mot de passe est incorrect'});
@@ -176,18 +184,11 @@ router.all('/connexion', async function(req, res) {
   }
 });
 
-
-router.get('/admin/liste', function(req, res) {
-  res.render('admin/liste', { title: 'Liste' });
-});
-
-
 /*Liste des utilisateurs*/
-router.get('/liste', (req, res) => {
+router.get('/liste',(req, res) => {
   pool.query('SELECT * FROM Utilisateur', (err, result) => {
     if (!err) {
       const users = result.rows;
-      console.log(users)
       res.render('liste', { users });
     } else {
       console.log(err.message);
