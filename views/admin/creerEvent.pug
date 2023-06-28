@@ -4,98 +4,161 @@ block content
   h1= ' ADMIN: ' + title 
 
 
-  form(action="/admin/creerEvent", method="POST")
+  form(id="eventForm" action="/admin/creerEvent", method="POST")
 
+    h2 Event
     div
-    label(for='type') Type:
-    select(name='type')
-        option(value='etudiant') Etudiant
-        option(value='administrateur') Administrateur
-        option(value='gestionnaire_iapau') Gestionnaire IAPAU
-        option(value='gestionnaire_externe') Gestionnaire externe
-
+    label(for='typeEvent') Type:
+    select(name='typeEvent')
+        option(value='challenge') Challenge
+        option(value='battle') Battle
+    br
     br
 
     div
-      label(for="nom") Nom:
-      input(type="text", id="nom", name="nom" required)
+      label(for="nomEvent") Nom:
+      input(type="text", id="nomEvent", name="nomEvent" )
     
     br
 
     div
-      label(for="prenom") Prenom:
-      input(type="text", id="prenom", name="prenom" required)
+      label(for="dateInscription") Date de début des inscription:
+      input(type="date", id="dateInscription", name="dateInscription" )
+    
+    
+    br
+    div
+      label(for="dateDebut") Date de début:
+      input(type="date", id="dateDebut", name="dateDebut" )
     
     
     br
 
     div
-      label(for="pseudo") Pseudo:
-      input(type="text", id="pseudo", name="pseudo" required)
+      label(for="dateFin") Date de fin:
+      input(type="date", id="dateFin", name="dateFin" )
     
     br
 
     div
-      label(for="email") E-mail:
-      input(type="email", id="email", name="email" required)
+      label(for="dateResultat") Date des résultats:
+      input(type="date", id="dateResultat", name="dateResultat" )
     
     br
 
     div
-      label(for="lien_linkedin") Lien LinkedIn:
-      input(type="url" id="linkedin" name="linkedin" pattern="https://.*")
+      label(for="regles") Règles:
+      br
+      textarea#regles(name="regles" rows="5" cols="50")
 
     br
 
     div
-      label(for="github") Lien GitHub:
-      input(type="url" id="github" name="github" pattern="https://.*")
+      label(for="nbEquipeMin") Nombre minimum par équipe:
+      input(type="number", id="nbEquipeMin", name="nbEquipeMin" )
     
     br
 
     div
-      label(for="ville") Ville:
-      input(type="text", id="ville", name="ville")
+      label(for="nbEquipeMax") Nombre maximum par équipe:
+      input(type="number", id="nbEquipeMax", name="nbEquipeMax" )
     
     br
 
     div
-      label(for="ecole") Ecole:
-      input(type="text", id="ecole", name="ecole" )
+      label(for="imageEvent") Image:
+      input(type="file" id="imageEvent" name="imageEvent")
+
+    h2 Projets 
+ 
+    div
+      label(for="nomProjet") Nom:
+      input(type="text" id="nomProjet" name="nomProjet" )
+
+    br
+    br
+
+    div
+      label(for="descriptionProjet") Description:
+      br
+      textarea#descriptionProjet(name="descriptionProjet"  rows="5" cols="50")
+
+    br
+    br
+    
+    div
+      label(for="imageProjet") Image:
+      input(type="file" id="imageProjet" name="imageProjet")
+
+    br
+    br
+
+    div
+      label(for="recompense") Récompense:
+      input(type="number" id="recompense" name="recompense" )
+
+    br
+
+    button(onclick="creerTableauProjet()") Ajouter Projet 
+    button Supprimer Projet
+
+    h2 Ressources
+
+    br
+
+    div
+      label(for="titreRessource") Titre:
+      input(type="text", id="titreRessource", name="titreRessource")
     
     br
 
     div
-      label(for="codeEcole") Code postale de l'école:
-      input(type="text" id="codeEcole" name="codeEcole" )
+      label(for="descriptionRessource") Description:
+      br
+      textarea#descriptionRessource(name="descriptionRessource" rows="5" cols="50")
     
     br
 
+    label(for='typeRessources') Type:
+    select#typeRessources(name='typeRessources')
+        option(value='challenge') Drive
+        option(value='battle') Téléchargement 
+        option(value='lien') Lien 
+        option(value='video') Vidéo 
+    br
+    br
+
     div
-      label(for="niveau_etude") Niveau d'études:
-      input(type="text" id="niveau_etude" name="niveau_etude" )
+      label(for='statut') Statut:
+      select#statut(name='statut')
+          option(value='challenge') Public
+          option(value='battle') Privé 
 
     br
 
     div
-      label(for="entreprise") Entreprise:
-      input(type="text" id="entreprise" name="entreprise" )
+      label(for="lien") Lien:
+      input(type="text" id="lien" name="lien")
 
     br
 
     div
-      label(for="metier") Métier:
-      input(type="text" id="metier" name="metier" )
+      label(for="dateApparition") Date apparaition:
+      input(type="date", id="dateApparition", name="dateApparition")
 
     br
 
-    div
-      label(for="role_asso") Rôle association:
-      input(type="role_asso", id="role_asso", name="role_asso" )
+    br
+    br
+
+    button(onclick="creerTableauRessources()") Ajouter Ressource
+    button Supprimer Ressource
 
     div
-      label(for="password") Mot de passe:
-      input(type="password", id="password", name="password" )
+      button(type="submit", onclick="envoyerDonnees(event)") login
 
-    div
-      input(type="submit", value="Login")
+      
+
+    script(src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js")
+    script(src="/javascripts/admin/creerTableaux.js")
+

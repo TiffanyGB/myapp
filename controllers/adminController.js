@@ -1,6 +1,7 @@
-const fi = require('../public/javascripts/fonctions_inscription');
-const cu = require('../public/javascripts/creerUser');
-const fmdp = require('../public/javascripts/fonctions_mdp');
+const fi = require('../public/javascripts/index/fonctions_inscription');
+const cu = require('../public/javascripts/admin/creerUser');
+const ce = require('../public/javascripts/admin/creerEvent');
+const fmdp = require('../public/javascripts/index/fonctions_mdp');
 
 async function createUser(req, res) {
   if (req.method === 'GET') {
@@ -164,6 +165,70 @@ async function createUser(req, res) {
   }
 }
 
+function createEvent(req, res){
+  if (req.method === 'GET') {
+    res.render('admin/creerEvent', { title: 'Créer Event' });
+  } else if (req.method === 'POST') {
+
+    const {
+      typeEvent,
+      nomEvent,
+      dateInscription,
+      dateDebut,
+      dateFin,
+      dateResultat,
+      regles,
+      nbEquipeMin,
+      nbEquipeMax,
+      imageEvent,
+
+    } = req.body;
+
+  const valeurs_event = [
+    typeEvent,
+    nomEvent,
+    dateInscription,
+    dateDebut,
+    dateFin,
+    dateResultat,
+    regles,
+    nbEquipeMin,
+    nbEquipeMax,
+    imageEvent
+  ]
+
+  const { projet, ressources } = req.body;
+
+  // Traiter les données et les enregistrer dans la base de données
+
+  // Exemple : afficher les tableaux dans la console
+  console.log('Tableau des projets :', projet);
+  console.log('Tableau des ressources :', ressources);
+  console.log('Tableau des events: ', valeurs_event);
+
+
+  // try{
+  //   ce.creerEvent(nomEvent);
+  //   //res.status(200).json({message:'Carré'});
+  // }
+  // catch{
+  //   console.log('Erreur dans la création d\'un event');
+  //   //es.status(400).json({message:'Erreur lors de la création d\'un event'});
+  // }
+  
+  //   // .then(()=> {
+  //   //   res.status(200).json({message:'Carré'});
+
+  //   // })
+  //   // .catch((err)=> {
+  //   //   console.log('Erreur dans la création d\'un event');
+  //   //   res.status(400).json({message:'Erreur lors de la création d\'un event'});
+
+  //   // })
+    }
+}
+
 module.exports = {
   createUser,
+  createEvent
 };

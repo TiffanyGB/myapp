@@ -52,10 +52,10 @@ function recupererEvent(idEvent){
         .then((res) => {
             if(res.rows.length = 1){
                 const event = res.rows[0];
-                //let info = event.nom;
+                let info = event.nom;
 
-                //tabRetour.title = "'" + info + "'";
-                console.log('BBBBBBBBB' + res.rows.length);
+                tabRetour.title = "'" + info + "'";
+                console.log('BBBBBBBBB' + info);
                 resolve(event);
             }else{
                 reject(new Error('Evenement non trouvé: erreur dans le fichier "' + __filename + '" dans "'  + arguments.callee.name + '"'));

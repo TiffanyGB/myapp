@@ -10,18 +10,18 @@ const indexController = require('../controllers/indexController');
 router.use(bodyParser.json());
 router.use(express.json());
 router.use(express.urlencoded({ extended: false }));
-
 router.use(cors());
 
-/* Page accueil */
+
 router.get('/', function(req, res, next) {
   res.render('index', { title: 'Accueil' });
 });
 
 router.all('/inscription', indexController.inscriptionEleve);
 
-/** Connexion */
 router.all('/connexion', indexController.connexion);
+
+router.all('/voir_event', indexController.voirEvent);
 
 /*Liste des utilisateurs*/
 router.get('/liste',(req, res) => {
@@ -34,5 +34,7 @@ router.get('/liste',(req, res) => {
     }
   });
 });
+
+
 
 module.exports = router;

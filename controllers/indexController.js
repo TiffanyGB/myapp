@@ -1,15 +1,11 @@
-const fi = require('../public/javascripts/fonctions_inscription');
-const fmdp = require('../public/javascripts/fonctions_mdp');
+const fi = require('../public/javascripts/index/fonctions_inscription');
+const fmdp = require('../public/javascripts/index/fonctions_mdp');
+const re = require('../public/javascripts/index/recuperer_event');
 const pool = require('../database/configDB');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 
-// const corsOptions = {
-//   origin: ['http://app.exemple.com', 'http://autre.exemple.com'], // Origines autorisées
-//   methods: ['GET', 'POST', 'PUT', 'DELETE'], // Méthodes autorisées
-//   allowedHeaders: ['Content-Type', 'Authorization'] // En-têtes autorisés
-// };
-// app.use(cors(corsOptions));
+
 
 const generateSecretKey = () => {
   return crypto.randomBytes(64).toString('hex');
@@ -32,7 +28,7 @@ const verifyToken = (req, res, next) => {
       req.user = user; // Ajoute les informations de l'utilisateur décodées à l'objet `req`
       next(); // Passe à la prochaine étape de traitement de la requête
     });
-  };
+};
 
 function inscriptionEleve(req, res){      
     if (req.method === 'GET') {
@@ -170,8 +166,76 @@ async function connexion(req, res){
       }
 }
 
+function voirEvent(req, res){
+  if (req.method === 'GET') {
+    res.render('voir_event', { title: 'Voir Events' });
+  } else if (req.method === 'POST') {
+    re.recupererEvent(1)
+    .then((count) => {
+      console.log('AAAA', count);
+    })
+    .catch((error) => {
+      console.error('Une erreur s\'est produite :', error);
+    });
+  }
+}
+
+// function voirEvent(req, res) {
+//   if (req.method === 'GET') {
+//     // Récupérer le token du header Authorization
+//     const token = req.headers.authorization;
+
+//     if (!token) {
+//       // Le token n'est pas fourni, renvoyer une réponse d'erreur ou rediriger vers la page de connexion
+//       return res.status(401).json({ message: 'Authentification requise.' });
+//     }
+
+//     try {
+//       // Vérifier et décoder le token
+//       const decoded = jwt.verify(token, secretKey);
+
+//       // Le token est valide, vous pouvez accéder aux informations de l'utilisateur à partir de decoded
+//       const userId = decoded.userId;
+
+//       // Charger les informations spécifiques à l'utilisateur dans la page ou effectuer d'autres opérations nécessaires
+
+//       // Renvoyer une réponse réussie
+//       return res.render('voir_event', { title: 'Voir Events' });
+//     } catch (error) {
+//       // Le token est invalide ou expiré, renvoyer une réponse d'erreur
+//       return res.status(401).json({ message: 'Token invalide.' });
+//     }
+//   } else if (req.method === 'POST') {
+//     // Récupérer le token du header Authorization
+//     const token = req.headers.authorization;
+
+//     if (!token) {
+//       // Le token n'est pas fourni, renvoyer une réponse d'erreur ou rediriger vers la page de connexion
+//       return res.status(401).json({ message: 'Authentification requise (post).' });
+//     }
+
+//     try {
+//       // Vérifier et décoder le token
+//       const decoded = jwt.verify(token, secretKey);
+
+//       // Le token est valide, vous pouvez accéder aux informations de l'utilisateur à partir de decoded
+//       const userId = decoded.userId;
+
+//       // Traiter les données de la requête POST et effectuer d'autres opérations nécessaires
+
+//       // Renvoyer une réponse réussie
+//       return res.status(200).json({ message: 'Opération réussie.' });
+//     } catch (error) {
+//       // Le token est invalide ou expiré, renvoyer une réponse d'erreur
+//       return res.status(401).json({ message: 'Token invalide.' });
+//     }
+//   }
+// }
+
+
 module.exports = {
     inscriptionEleve,
-    connexion
+    connexion,
+    voirEvent
   };
   
