@@ -108,7 +108,8 @@ function chercherUser(pseudo) {
     insererUser,
     insererMdp,
     insererEtudiant,
-    chercherUser
+    chercherUser, 
+    verifExistence
   };
   
 
