@@ -18,6 +18,9 @@ DROP TABLE IF EXISTS Gestionnaire_iapau CASCADE;
 DROP TABLE IF EXISTS Admini CASCADE;
 DROP TABLE IF EXISTS Etudiant CASCADE;
 DROP TABLE IF EXISTS Utilisateur CASCADE;
+DROP TABLE IF EXISTS Mot_cle CASCADE;
+DROP TABLE IF EXISTS Appartenir CASCADE;
+DROP TABLE IF EXISTS Represente CASCADE;
 
 CREATE TABLE Utilisateur(
     idUser SERIAL PRIMARY KEY,
@@ -142,22 +145,6 @@ CREATE TABLE Represente(
 
 DELETE FROM Utilisateur WHERE email = 'admin@admin.fr';
 
-
-CREATE OR REPLACE FUNCTION hash_password(text) RETURNS text AS
-$$
-BEGIN
-  RETURN crypt($1, gen_salt('bf'));
-END;
-$$
-LANGUAGE plpgsql;
-
-
--- défaut
--- INSERT INTO Utilisateur (nom, prenom, pseudo, email, date_inscription, hashMdp, typeUser)
--- VALUES ('admin', 'admin', 'admin', 'admin@admin.fr', CURRENT_DATE, 'admin', 'administrateur');
-
--- INSERT INTO admini (idAdmin)
--- VALUES (1);
 
 INSERT INTO Evenement (nom, debut_inscription, date_debut, date_fin, regles, nombre_min_equipe, nombre_max_equipe, type_event)
 VALUES ('Nom', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Lorem ipsum', 2, 5, 'challenge');
