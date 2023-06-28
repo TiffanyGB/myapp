@@ -29,6 +29,11 @@ function nbProjets(idEvent) {
     });
 }
 
+function recuperer_projets(idEvent) {
+
+    const chercherProjets = `SELECT * FROM Projets WHERE idevent = ${idEvent}`
+}
+
 function nbRessources(idProjet) {
     const nb = `SELECT COUNT(*) AS total FROM projet where idprojet = '${idProjet}'`;
 
@@ -42,31 +47,46 @@ function nbRessources(idProjet) {
             });
     });
 }
-function recupererEvent(idEvent){
+async function recupererEvent(idEvent) {
+    const chercherEvent = `SELECT * FROM Evenement WHERE idevent = ${idEvent}`;
+    let tabRetour = {};
 
-    const chercherEvent = `SELECT * FROM Evenement where idevent = ${idEvent}`;
-    let tabRetour = {}; 
+    try {
+        const res = await pool.query(chercherEvent);
+        if (res.rows.length === 1) {
+            const event = res.rows[0];
 
-    return new Promise((resolve, reject) => {
-        pool.query(chercherEvent)
-        .then((res) => {
-            if(res.rows.length = 1){
-                const event = res.rows[0];
-                let info = event.nom;
+            /**Insertion des données de l'event */
+            tabRetour.title = event.nom;
+            tabRetour.date_creation = '' + event.debut_inscription + '';
+            tabRetour.date_debut = event.date_debut;
+            tabRetour.date_fin = event.date_fin;
+            tabRetour.type_challenge = event.type_event;
+            tabRetour.nbMinParEquipe = event.nombre_min_equipe;
+            tabRetour.nbMaxParEquipe = event.nombre_max_equipe;
 
-                tabRetour.title = "'" + info + "'";
-                console.log('BBBBBBBBB' + info);
-                resolve(event);
-            }else{
-                reject(new Error('Evenement non trouvé: erreur dans le fichier "' + __filename + '" dans "'  + arguments.callee.name + '"'));
+            /**Récupérer nombre de projets */
+            const countProjets = await nbProjets(idEvent);
+
+            console.log('Nb projets', countProjets);
+
+            /**Faire les regles */
+
+            /**Les projets */
+            for (i = 0; i < countProjets; i++) {
+
             }
-        })
-        .catch((error) => {
-            reject(error);
-        });
+            /**Les ressources */
 
-    });
+            return tabRetour;
+        } else {
+            throw new Error('Evenement non trouvé: erreur dans le fichier "' + __filename + '" dans "' + arguments.callee.name + '"');
+        }
+    } catch (error) {
+        throw error;
+    }
 }
+
 
 module.exports = {
     nbEvent,

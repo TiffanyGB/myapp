@@ -15,7 +15,7 @@ function verifExistence(values) {
         }
       })
       .catch((error) => {
-        console.error('Fichier "' + __filename + '" fonction: "'+ arguments.callee.name +':\nErreur lors de l\'insertion des données côté utilisateur:', error);
+        console.error('Fichier "' + __filename + '" fonction: "' + arguments.callee.name + ':\nErreur lors de l\'insertion des données côté utilisateur:', error);
         reject(error);
       });
   });
@@ -37,7 +37,7 @@ async function insererUser(values, values2, type) {
             resolve(true);
           })
           .catch((error) => {
-            console.error('Fichier "' + __filename + '" fonction: "'+ arguments.callee.name +':\nErreur lors de l\'insertion des données côté utilisateur:', error);
+            console.error('Fichier "' + __filename + '" fonction: "' + arguments.callee.name + ':\nErreur lors de l\'insertion des données côté utilisateur:', error);
             reject(error);
           });
       });
@@ -49,68 +49,68 @@ async function insererUser(values, values2, type) {
     throw error;
   }
 }
-  
+
 function insererMdp(mdp, pseudo) {
 
-    const inserer = `UPDATE utilisateur
+  const inserer = `UPDATE utilisateur
     SET hashMdp = '${mdp}'
     WHERE pseudo='${pseudo}'`;
 
-    pool.query(inserer)
+  pool.query(inserer)
     .catch((error) => {
-    console.error('Fichier "' + __filename + '" fonction: "'+ arguments.callee.name +':\nErreur lors de l\'insertion du mot de passe:', error);
+      console.error('Fichier "' + __filename + '" fonction: "' + arguments.callee.name + ':\nErreur lors de l\'insertion du mot de passe:', error);
     });
 }
 
-async function insererEtudiant(values, pseudo){
+async function insererEtudiant(values, pseudo) {
 
-  try{
+  try {
     const idUser = await chercherUser(pseudo);
-    
+
     const requet = `INSERT INTO etudiant (idEtudiant, ecole, niveau_etude, code_postale_ecole)
     VALUES ('${idUser}', $1, $2, $3)`;
 
     return new Promise((resolve, reject) => {
       pool.query(requet, values)
-      .then(()=> {
-        resolve(true);  
-      })
-      .catch((error) => {
-        console.error('Fichier "' + __filename + '" fonction: "'+ arguments.callee.name +':\nErreur lors de l\'insertion des données côté etudiant (requete sql)', error);
-        reject(error);
-      });
+        .then(() => {
+          resolve(true);
+        })
+        .catch((error) => {
+          console.error('Fichier "' + __filename + '" fonction: "' + arguments.callee.name + ':\nErreur lors de l\'insertion des données côté etudiant (requete sql)', error);
+          reject(error);
+        });
     });
-  } catch (error){
-    console.error('Fichier "' + __filename + '" fonction: "'+ arguments.callee.name +':\nErreur lors de l\'insertion des données côté etudiant (requete sql).', error);
+  } catch (error) {
+    console.error('Fichier "' + __filename + '" fonction: "' + arguments.callee.name + ':\nErreur lors de l\'insertion des données côté etudiant (requete sql).', error);
     throw error;
   }
 }
 
 function chercherUser(pseudo) {
-    const user = `SELECT idUser FROM utilisateur WHERE pseudo = '${pseudo}'`;
-    
-    return new Promise((resolve, reject) => {
-        pool.query(user)
-        .then((result) => {
-            if (result.rows.length > 0) {
-            resolve(result.rows[0].iduser);
-            } else {
-            reject(new Error('Utilisateur non trouvé: erreur dans le fichier "' + __filename + '" dans "'  + arguments.callee.name + '"'));
-            }
-        })
-        .catch((error) => {
-            reject(error);
-        });
-    });
-    }
+  const user = `SELECT idUser FROM utilisateur WHERE pseudo = '${pseudo}'`;
 
-  module.exports = {
-    insererUser,
-    insererMdp,
-    insererEtudiant,
-    chercherUser, 
-    verifExistence
-  };
-  
+  return new Promise((resolve, reject) => {
+    pool.query(user)
+      .then((result) => {
+        if (result.rows.length > 0) {
+          resolve(result.rows[0].iduser);
+        } else {
+          reject(new Error('Utilisateur non trouvé: erreur dans le fichier "' + __filename + '" dans "' + arguments.callee.name + '"'));
+        }
+      })
+      .catch((error) => {
+        reject(error);
+      });
+  });
+}
+
+module.exports = {
+  insererUser,
+  insererMdp,
+  insererEtudiant,
+  chercherUser,
+  verifExistence
+};
+
 
 
