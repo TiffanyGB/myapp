@@ -59,11 +59,11 @@ CREATE TABLE Gestionnaire_externe(
 CREATE TABLE Evenement(
     idEvent SERIAL PRIMARY KEY,
     nom VARCHAR (50) NOT NULL,
-    date_creation TIMESTAMP NOT NULL,
+    debut_inscription TIMESTAMP NOT NULL,
     date_debut TIMESTAMP NOT NULL,
     date_fin TIMESTAMP NOT NULL,
     date_resultat TIMESTAMP NOT NULL,
-    img BYTEA NOT NULL,
+    img BYTEA, -- NOT NULL,
     regles TEXT NOT NULL,
     nombre_min_equipe INTEGER,
     nombre_max_equipe INTEGER,
@@ -75,8 +75,8 @@ CREATE TABLE Projet(
     nom VARCHAR (30) NOT NULL,
     description_projet TEXT NOT NULL,
     recompense INTEGER,   
-    idEvent INT REFERENCES Evenement(idEvent) ON DELETE CASCADE,
-    idEquipeGagnante INT REFERENCES Equipe(idEquipe)
+    imgProjet BYTEA, -- NOT NULL,
+    idEvent INT REFERENCES Evenement(idEvent) ON DELETE CASCADE
 );
 
 CREATE TABLE Equipe(
@@ -89,6 +89,9 @@ CREATE TABLE Equipe(
     idProjet INT REFERENCES Projet(idProjet) ON DELETE CASCADE,
     idCapitaine INT REFERENCES Etudiant(idEtudiant)
 );
+
+ALTER TABLE Projet
+ADD COLUMN idEquipeGagnante INT REFERENCES Equipe(idEquipe);
 
 CREATE TABLE Ressource(
     idRessource SERIAL PRIMARY KEY,
@@ -122,6 +125,22 @@ CREATE TABLE Reponse(
     idQuestionnaire INT REFERENCES Questionnaire(idQuestionnaire)
 );
 
+CREATE TABLE Mot_cle(
+    idMot SERIAL PRIMARY KEY,
+    mot VARCHAR(100),
+    idProjet INT REFERENCES Projet(idProjet)
+);
+
+CREATE TABLE Appartenir(
+    idUser INT REFERENCES Utilisateur(idUser),
+    idEquipe INT REFERENCES Equipe(idEquipe)
+);
+
+CREATE TABLE Represente(
+    idMot INT REFERENCES Mot_cle(idMot),
+    idProjet Int REFERENCES Projet(idProjet)
+);
+
 DELETE FROM Utilisateur WHERE email = 'admin@admin.fr';
 
 
@@ -134,6 +153,9 @@ $$
 LANGUAGE plpgsql;
 
 
--- Admin par défaut
--- INSERT INTO Utilisateur (nom, prenom, pseudo, email, date_inscription, hashMdp, typeUser)
--- VALUES ('admin', 'admin', 'admin', 'admin@admin.fr', CURRENT_DATE, 'admin', 'administrateur');
+-- défaut
+INSERT INTO Utilisateur (nom, prenom, pseudo, email, date_inscription, hashMdp, typeUser)
+VALUES ('admin', 'admin', 'admin', 'admin@admin.fr', CURRENT_DATE, 'admin', 'administrateur');
+
+INSERT INTO Evenement (nom, debut_inscription, date_debut, date_fin, date_resultat, regles, nombre_min_equipe, nombre_max_equipe, type_event)
+VALUES ('Nom', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Lorem ipsum', 2, 5, 'challenge');
