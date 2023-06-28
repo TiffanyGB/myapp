@@ -1,5 +1,5 @@
 const bcrypt = require('bcrypt');
-const pool = require('../../database/configDB');
+const pool = require('../../../database/configDB');
 
 
 function verifExistence(values) {

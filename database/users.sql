@@ -154,8 +154,11 @@ LANGUAGE plpgsql;
 
 
 -- défaut
-INSERT INTO Utilisateur (nom, prenom, pseudo, email, date_inscription, hashMdp, typeUser)
-VALUES ('admin', 'admin', 'admin', 'admin@admin.fr', CURRENT_DATE, 'admin', 'administrateur');
+-- INSERT INTO Utilisateur (nom, prenom, pseudo, email, date_inscription, hashMdp, typeUser)
+-- VALUES ('admin', 'admin', 'admin', 'admin@admin.fr', CURRENT_DATE, 'admin', 'administrateur');
+
+-- INSERT INTO admini (idAdmin)
+-- VALUES (1);
 
 INSERT INTO Evenement (nom, debut_inscription, date_debut, date_fin, date_resultat, regles, nombre_min_equipe, nombre_max_equipe, type_event)
 VALUES ('Nom', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Lorem ipsum', 2, 5, 'challenge');
