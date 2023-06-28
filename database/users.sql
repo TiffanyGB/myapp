@@ -21,6 +21,8 @@ DROP TABLE IF EXISTS Utilisateur CASCADE;
 DROP TABLE IF EXISTS Mot_cle CASCADE;
 DROP TABLE IF EXISTS Appartenir CASCADE;
 DROP TABLE IF EXISTS Represente CASCADE;
+DROP TABLE IF EXISTS Regle CASCADE;
+
 
 CREATE TABLE Utilisateur(
     idUser SERIAL PRIMARY KEY,
@@ -89,11 +91,18 @@ CREATE TABLE Equipe(
     statut_recrutement VARCHAR(30) CHECK (statut_recrutement IN ('ouvert', 'fermé')),
     lien_github TEXT DEFAULT NULL,
     idProjet INT REFERENCES Projet(idProjet) ON DELETE CASCADE,
-    idCapitaine INT REFERENCES Etudiant(idEtudiant)
+    idCapitaine INT REFERENCES Etudiant(idEtudiant) ON DELETE CASCADE
+);
+
+CREATE TABLE Regle(
+    idRegles SERIAL PRIMARY KEY,
+    titre VARCHAR(50) NOT NULL,
+    contenu TEXT NOT NULL,
+    idEvent INT REFERENCES Evenement(idEvent) ON DELETE CASCADE
 );
 
 ALTER TABLE Projet
-ADD COLUMN idEquipeGagnante INT REFERENCES Equipe(idEquipe);
+ADD COLUMN idEquipeGagnante INT REFERENCES Equipe(idEquipe) ON DELETE CASCADE;
 
 CREATE TABLE Ressource(
     idRessource SERIAL PRIMARY KEY,
@@ -124,23 +133,23 @@ CREATE TABLE Reponse(
     idReponse SERIAL PRIMARY KEY,
     reponse TEXT,
     score FLOAT,
-    idQuestionnaire INT REFERENCES Questionnaire(idQuestionnaire)
+    idQuestionnaire INT REFERENCES Questionnaire(idQuestionnaire) ON DELETE CASCADE
 );
 
 CREATE TABLE Mot_cle(
     idMot SERIAL PRIMARY KEY,
     mot VARCHAR(100),
-    idProjet INT REFERENCES Projet(idProjet)
+    idProjet INT REFERENCES Projet(idProjet) ON DELETE CASCADE
 );
 
 CREATE TABLE Appartenir(
-    idUser INT REFERENCES Utilisateur(idUser),
-    idEquipe INT REFERENCES Equipe(idEquipe)
+    idUser INT REFERENCES Utilisateur(idUser) ON DELETE CASCADE,
+    idEquipe INT REFERENCES Equipe(idEquipe) ON DELETE CASCADE
 );
 
 CREATE TABLE Represente(
-    idMot INT REFERENCES Mot_cle(idMot),
-    idProjet Int REFERENCES Projet(idProjet)
+    idMot INT REFERENCES Mot_cle(idMot) ON DELETE CASCADE,
+    idProjet Int REFERENCES Projet(idProjet) ON DELETE CASCADE
 );
 
 DELETE FROM Utilisateur WHERE email = 'admin@admin.fr';
@@ -153,7 +162,18 @@ VALUES ('Nom', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Lorem i
 
 
 INSERT INTO Projet (nom, description_projet, recompense, imgProjet, idEvent)
-VALUES ('p1', 'Description du projet P1', 10000, 'valeur_du_bytea', 1);
+VALUES 
+    ('p1', 'Description du projet P1', 10000, 'valeur_du_bytea', 1),
+    ('p2', 'Description du projet p2', 20000, E'\\x0123456789ABCDEF', 1);
 
-INSERT INTO Projet (nom, description_projet, recompense, imgProjet, idEvent)
-VALUES ('p2', 'Description du projet p2', 20000, E'\\x0123456789ABCDEF', 1);
+INSERT INTO Ressource (titre, type_ressource, lien, date_apparition, statut, description_ressource, idProjet)
+VALUES
+    ('Ressource 1', 'lien', 'https://example.com/ressource1', '2023-06-28 12:00:00', 'public', 'Description de la ressource 1', 1),
+    ('Ressource 2', 'drive', 'https://example.com/ressource2', '2023-06-28 13:00:00', 'privé', 'Description de la ressource 2', 2),
+    ('Ressource 3', 'téléchargement', 'https://example.com/ressource2', '2023-06-28 13:00:00', 'privé', 'Description de la ressource ', 2);
+
+
+INSERT INTO Regles (titre, contenu, idEvent)
+VALUES
+    ('Titre règle 1', 'Contenu règle 1', 1),
+    ('Titre règle 2', 'Contenu règle 2', 1);
