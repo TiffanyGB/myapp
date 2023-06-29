@@ -76,7 +76,7 @@ function inscriptionEleve(req, res) {
     fi.insererUser(values, values_id, 'etudiant')
       .then((inserer) => {
         /**L'insertion dans la bdd a réussi, on passe au mdp */
-        if (inserer) {
+        if (inserer === "true") {
           console.log('Données insérées avec succès dans la table utilisateur');
           fmdp.salageMdp(password)
 
@@ -101,11 +101,17 @@ function inscriptionEleve(req, res) {
             });
 
           console.log('Inscription finie');
-          res.status(200).json({ message: 'Inscription réussie' });
+          res.status(200).json({pseudo: userPseudo,nom: userNom , prenom: userPrenom,message: 'Inscription réussie' });
         }
-        else {
-          console.log('Utilisateur existant avec le même pseudo ou email');
-          res.status(400).json({ message: 'Pseudo ou email existant' });
+        else if (inserer === "pseudo"){
+          console.log('Utilisateur existant avec le même pseudo');
+          res.status(400).json({ champ: 'Pseudo', message: 'Pseudo existant' });
+        }else if (inserer === "mail"){
+          console.log('Utilisateur existant avec le même mail');
+          res.status(400).json({ champ: 'email', message: 'Adresse mail existante' });
+        } else if (inserer === "les2"){
+          console.log('Utilisateur existant avec le même mail et pseudo');
+          res.status(400).json({ champ1: 'pseudo', champ2: 'email', message: 'Adresse mail et pseudo existants' });
         }
       })
       .catch((error) => {
@@ -133,14 +139,13 @@ async function connexion(req, res) {
 
       // Aucun email ou login ne correspond
       if (result.rowCount === 0) {
-        res.status(400).json({ message: 'Aucun email/login ne correspond' });
+        res.status(400).json({champ: 'login', message: 'Aucun email/login ne correspond' });
       } else {
         const user = result.rows[0];
         const match = await fmdp.comparerMdp(password, user.hashmdp);
 
         if (match) {
 
-          console.log('Connexion de ' + user.prenom);
           const payload = {
             utilisateurId: user.id,
             utilisateurType: user.type
@@ -149,12 +154,12 @@ async function connexion(req, res) {
           /**  Générer le JWT */
           const token = jwt.sign(payload, secretKey, { expiresIn: '180h' });
 
-          res.status(200).json({ token: token, idUser: user.iduser, role: user.typeuser }); // Envoyer le JWT dans la réponse JSON
+          res.status(200).json({ token: token, id: user.iduser, prenom: user.prenom, nom: user.nom, pseudo: user.pseudo ,role: user.typeuser }); // Envoyer le JWT dans la réponse JSON
           // res.set('Authorization', `Bearer ${token}`);
           // res.redirect('/liste');
 
         } else {
-          res.status(400).json({ message: 'Le mot de passe est incorrect' });
+          res.status(400).json({champ: 'mot de passe', message: 'Le mot de passe est incorrect' });
         }
       }
     } catch (error) {
@@ -171,8 +176,8 @@ function voirEvent(req, res) {
 
   } else if (req.method === 'POST') {
     re.recupererEvent(1)
-      .then((res) => {
-        console.log('', res);
+      .then((result) => {
+        console.log('JSON A RENVOYER\n', result);
       })
       .catch((error) => {
         console.error('Une erreur s\'est produite :', error);
