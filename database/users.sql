@@ -24,6 +24,7 @@ DROP TABLE IF EXISTS Represente CASCADE;
 DROP TABLE IF EXISTS Regle CASCADE;
 
 
+
 CREATE TABLE Utilisateur(
     idUser SERIAL PRIMARY KEY,
     nom VARCHAR (30) NOT NULL,
@@ -68,7 +69,6 @@ CREATE TABLE Evenement(
     date_debut TIMESTAMP NOT NULL,
     date_fin TIMESTAMP NOT NULL,
     img BYTEA, -- NOT NULL,
-    regles TEXT NOT NULL,
     nombre_min_equipe INTEGER,
     nombre_max_equipe INTEGER,
     type_event VARCHAR(30) CHECK (type_event IN ('battle', 'challenge'))
@@ -80,6 +80,7 @@ CREATE TABLE Projet(
     description_projet TEXT NOT NULL,
     recompense INTEGER,   
     imgProjet BYTEA, -- NOT NULL,
+    sujet VARCHAR(100),
     idEvent INT REFERENCES Evenement(idEvent) ON DELETE CASCADE
 );
 
@@ -155,16 +156,17 @@ CREATE TABLE Represente(
 DELETE FROM Utilisateur WHERE email = 'admin@admin.fr';
 
 
-INSERT INTO Evenement (nom, debut_inscription, date_debut, date_fin, regles, nombre_min_equipe, nombre_max_equipe, type_event)
-VALUES ('Nom', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'Lorem ipsum', 2, 5, 'challenge');
+INSERT INTO Evenement (nom, debut_inscription, date_debut, date_fin, nombre_min_equipe, nombre_max_equipe, type_event)
+VALUES ('Nom', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 2, 5, 'challenge'),
+       ('Event2', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 3, 8, 'battle');
 
 
 
 
-INSERT INTO Projet (nom, description_projet, recompense, imgProjet, idEvent)
+INSERT INTO Projet (nom, description_projet, recompense, imgProjet, sujet,idEvent)
 VALUES 
-    ('p1', 'Description du projet P1', 10000, 'valeur_du_bytea', 1),
-    ('p2', 'Description du projet p2', 20000, E'\\x0123456789ABCDEF', 1);
+    ('p1', 'Description du projet P1', 10000, 'valeur_du_bytea', 'Sujet 1' ,1),
+    ('p2', 'Description du projet p2', 20000, E'\\x0123456789ABCDEF','Sujet principal' ,1);
 
 INSERT INTO Ressource (titre, type_ressource, lien, date_apparition, statut, description_ressource, idProjet)
 VALUES
@@ -173,7 +175,14 @@ VALUES
     ('Ressource 3', 'téléchargement', 'https://example.com/ressource2', '2023-06-28 13:00:00', 'privé', 'Description de la ressource ', 2);
 
 
-INSERT INTO Regles (titre, contenu, idEvent)
+INSERT INTO Regle (titre, contenu, idEvent)
 VALUES
     ('Titre règle 1', 'Contenu règle 1', 1),
     ('Titre règle 2', 'Contenu règle 2', 1);
+
+INSERT INTO Mot_cle (mot, idProjet) VALUES
+  ('Environnement', 1),
+  ('Code', 1),
+  ('ODD', 2),
+  ('Education', 2);
+
