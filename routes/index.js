@@ -21,7 +21,7 @@ router.all('/inscription', indexController.inscriptionEleve);
 
 router.all('/connexion', indexController.connexion);
 
-router.all('/voir_event', indexController.voirEvent);
+router.all('/voir_event', indexController.verifyToken ,indexController.voirEvent);
 
 /*Liste des utilisateurs*/
 router.get('/liste',(req, res) => {

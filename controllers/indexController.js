@@ -5,30 +5,45 @@ const pool = require('../database/configDB');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 
-
-
 const generateSecretKey = () => {
   return crypto.randomBytes(64).toString('hex');
 };
 const secretKey = generateSecretKey();
 
 // Middleware de vérification du token
-const verifyToken = (req, res, next) => {
+function verifyToken(req, res, next) {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
 
   if (!token) {
-    return res.sendStatus(401); // Unauthorized si aucun token n'est fourni
+    req.userProfile = 'aucun';
+    return next();
   }
 
-  jwt.verify(token, secretKey, (err, user) => {
+  jwt.verify(token, secretKey, (err, decoded) => {
     if (err) {
-      return res.sendStatus(403); // Forbidden si le token est invalide
+      return res.status(403).json({ message: 'Token invalide ou expiré.' });
     }
-    req.user = user; // Ajoute les informations de l'utilisateur décodées à l'objet `req`
-    next(); // Passe à la prochaine étape de traitement de la requête
+
+    if (decoded.utilisateurType === 'administrateur') {
+
+      console.log("admin");
+      req.userProfile = 'admin';
+
+    } else if (decoded.utilisateurType === 'etudiant') {
+
+      console.log("etudiant");
+      req.userProfile = 'etudiant';
+
+    } else if ((decoded.utilisateurType === 'gestionnaireIA') || (decoded.utilisateurType === 'gestionnaireExterne')){
+      console.log(decoded.utilisateurType);
+      req.userProfile = 'gestionnaire';
+    }
+      req.decodedToken = decoded;
+
+    next();
   });
-};
+}
 
 function inscriptionEleve(req, res) {
   if (req.method === 'GET') {
@@ -101,15 +116,15 @@ function inscriptionEleve(req, res) {
             });
 
           console.log('Inscription finie');
-          res.status(200).json({pseudo: userPseudo,nom: userNom , prenom: userPrenom,message: 'Inscription réussie' });
+          res.status(200).json({ pseudo: userPseudo, nom: userNom, prenom: userPrenom, message: 'Inscription réussie' });
         }
-        else if (inserer === "pseudo"){
+        else if (inserer === "pseudo") {
           console.log('Utilisateur existant avec le même pseudo');
           res.status(400).json({ champ: 'Pseudo', message: 'Pseudo existant' });
-        }else if (inserer === "mail"){
+        } else if (inserer === "mail") {
           console.log('Utilisateur existant avec le même mail');
           res.status(400).json({ champ: 'email', message: 'Adresse mail existante' });
-        } else if (inserer === "les2"){
+        } else if (inserer === "les2") {
           console.log('Utilisateur existant avec le même mail et pseudo');
           res.status(400).json({ champ1: 'pseudo', champ2: 'email', message: 'Adresse mail et pseudo existants' });
         }
@@ -128,8 +143,6 @@ async function connexion(req, res) {
     res.render('connexion', { title: 'Connexion' });
   } else if (req.method === 'POST') {
 
-
-
     const identifiant = req.body.identifiant;
     const password = req.body.password;
     const requeteChercher = `SELECT * FROM Utilisateur WHERE (email='${identifiant}') OR (pseudo='${identifiant}')`;
@@ -139,27 +152,27 @@ async function connexion(req, res) {
 
       // Aucun email ou login ne correspond
       if (result.rowCount === 0) {
-        res.status(400).json({champ: 'login', message: 'Aucun email/login ne correspond' });
+        res.status(400).json({ champ: 'login', message: 'Aucun email/login ne correspond' });
       } else {
         const user = result.rows[0];
         const match = await fmdp.comparerMdp(password, user.hashmdp);
 
         if (match) {
 
+          /**  Générer le JWT */
           const payload = {
-            utilisateurId: user.id,
-            utilisateurType: user.type
+            "utilisateurId": user.iduser,
+            "utilisateurType": user.typeuser
           };
 
           /**  Générer le JWT */
-          const token = jwt.sign(payload, secretKey, { expiresIn: '180h' });
+          const token = jwt.sign(payload, secretKey, { expiresIn: '50d' });
 
-          res.status(200).json({ token: token, id: user.iduser, prenom: user.prenom, nom: user.nom, pseudo: user.pseudo ,role: user.typeuser }); // Envoyer le JWT dans la réponse JSON
+          res.status(200).json({ token: token, id: user.iduser, prenom: user.prenom, nom: user.nom, pseudo: user.pseudo, role: user.typeuser }); // Envoyer le JWT dans la réponse JSON
           // res.set('Authorization', `Bearer ${token}`);
-          // res.redirect('/liste');
 
         } else {
-          res.status(400).json({champ: 'mot de passe', message: 'Le mot de passe est incorrect' });
+          res.status(400).json({ champ: 'mot de passe', message: 'Le mot de passe est incorrect' });
         }
       }
     } catch (error) {
@@ -172,74 +185,52 @@ async function connexion(req, res) {
 function voirEvent(req, res) {
   if (req.method === 'GET') {
 
-    res.render('voir_event', { title: 'Voir Events' });
+    /**Si c'est un admin, afficher les infos de l'admin */
+    if (req.userProfile === 'admin' || req.userProfile === 'gestionnaire') {
+      console.log('admin');
 
-  } else if (req.method === 'POST') {
-    re.recupererEvent(1)
-      .then((result) => {
-        console.log('JSON A RENVOYER\n', result);
-      })
-      .catch((error) => {
-        console.error('Une erreur s\'est produite :', error);
-      });
+      re.recupererEvent(1, 'admin')
+        .then((result) => {
+          res.status(200).json(result);
+        })
+
+        .catch((error) => {
+          console.error('Une erreur s\'est produite :', error);
+          res.status(500).json({ message: 'Une erreur s\'est produite lors de la récupération des événements.' });
+        });
+    }
+    /**Si c'est un etudiant, afficher les infos de l'etudiant en plus, (equipe) */
+    else if (req.userProfile === 'etudiant') {
+      console.log('Etudiant');
+      re.recupererEvent(1, 'etudiant')
+        .then((result) => {
+          res.status(200).json(result);
+        })
+        .catch((error) => {
+          console.error('Une erreur s\'est produite :', error);
+          res.status(500).json({ message: 'Une erreur s\'est produite lors de la récupération des événements.' });
+        });
+    }
+    /**Si non connecté ne pas envoyer les infos des ressources privées */
+    else if (req.userProfile === 'aucun') {
+      console.log('non connecté');
+      re.recupererEvent(1, 'aucun')
+        .then((result) => {
+          res.status(200).json(result);
+        })
+        .catch((error) => {
+          console.error('Une erreur s\'est produite :', error);
+          res.status(500).json({ message: 'Une erreur s\'est produite lors de la récupération des événements.' });
+        });
+    }
+
   }
+
 }
-
-// function voirEvent(req, res) {
-//   if (req.method === 'GET') {
-//     // Récupérer le token du header Authorization
-//     const token = req.headers.authorization;
-
-//     if (!token) {
-//       // Le token n'est pas fourni, renvoyer une réponse d'erreur ou rediriger vers la page de connexion
-//       return res.status(401).json({ message: 'Authentification requise.' });
-//     }
-
-//     try {
-//       // Vérifier et décoder le token
-//       const decoded = jwt.verify(token, secretKey);
-
-//       // Le token est valide, vous pouvez accéder aux informations de l'utilisateur à partir de decoded
-//       const userId = decoded.userId;
-
-//       // Charger les informations spécifiques à l'utilisateur dans la page ou effectuer d'autres opérations nécessaires
-
-//       // Renvoyer une réponse réussie
-//       return res.render('voir_event', { title: 'Voir Events' });
-//     } catch (error) {
-//       // Le token est invalide ou expiré, renvoyer une réponse d'erreur
-//       return res.status(401).json({ message: 'Token invalide.' });
-//     }
-//   } else if (req.method === 'POST') {
-//     // Récupérer le token du header Authorization
-//     const token = req.headers.authorization;
-
-//     if (!token) {
-//       // Le token n'est pas fourni, renvoyer une réponse d'erreur ou rediriger vers la page de connexion
-//       return res.status(401).json({ message: 'Authentification requise (post).' });
-//     }
-
-//     try {
-//       // Vérifier et décoder le token
-//       const decoded = jwt.verify(token, secretKey);
-
-//       // Le token est valide, vous pouvez accéder aux informations de l'utilisateur à partir de decoded
-//       const userId = decoded.userId;
-
-//       // Traiter les données de la requête POST et effectuer d'autres opérations nécessaires
-
-//       // Renvoyer une réponse réussie
-//       return res.status(200).json({ message: 'Opération réussie.' });
-//     } catch (error) {
-//       // Le token est invalide ou expiré, renvoyer une réponse d'erreur
-//       return res.status(401).json({ message: 'Token invalide.' });
-//     }
-//   }
-// }
-
 
 module.exports = {
   inscriptionEleve,
   connexion,
-  voirEvent
+  voirEvent,
+  verifyToken
 };
