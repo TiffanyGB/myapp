@@ -1,8 +1,46 @@
-const fi = require('../public/javascripts/index/fonctions_inscription');
+/**
+ * Contrôleur pour gérer les pages sans nécessité de compte.
+ * @controller Index
+ */
+
+/**
+ * Module de fonctions pour la gestion des mots de passe.
+ * @module fonctions_mdp
+ */
 const fmdp = require('../public/javascripts/index/fonctions_mdp');
-const re = require('../public/javascripts/index/recuperer_event');
+
+/**
+ * Module de fonctions pour l'inscription des utilisateurs.
+ * @module fonctions_inscription
+ */
+const fi = require('../public/javascripts/index/fonctions_inscription');
+
+/**
+ * Module de fonctions pour la récupération d'un événement choisi.
+ * @module recuperer_event_choisi
+ */
+const re = require('../public/javascripts/index/recuperer_event_choisi');
+/**
+ * Module de fonctions pour la récupération de la liste des événements.
+ * @module recuperer_liste_events
+ */
+const la = require('../public/javascripts/index/recuperer_liste_events');
+/**
+ * Module de configuration pour la base de données.
+ * @module configDB
+ */
 const pool = require('../database/configDB');
+
+/**
+ * Module pour la manipulation des fonctions de chiffrement.
+ * @module crypto
+ */
 const crypto = require('crypto');
+
+/**
+ * Module pour la gestion des JSON Web Tokens (JWT).
+ * @module jsonwebtoken
+ */
 const jwt = require('jsonwebtoken');
 
 const generateSecretKey = () => {
@@ -35,22 +73,35 @@ function verifyToken(req, res, next) {
       console.log("etudiant");
       req.userProfile = 'etudiant';
 
-    } else if ((decoded.utilisateurType === 'gestionnaireIA') || (decoded.utilisateurType === 'gestionnaireExterne')){
+    } else if ((decoded.utilisateurType === 'gestionnaireIA') || (decoded.utilisateurType === 'gestionnaireExterne')) {
       console.log(decoded.utilisateurType);
       req.userProfile = 'gestionnaire';
     }
-      req.decodedToken = decoded;
+    req.decodedToken = decoded;
 
     next();
   });
 }
 
-function inscriptionEleve(req, res) {
-  if (req.method === 'GET') {
-    res.render('inscription', { title: 'Inscription' });
-  } else if (req.method === 'POST') {
+/**
+ * Inscription d'un élève.
+ * @route POST /utilisateurs/connexion
+ * @param {object} req - L'objet de requête HTTP.
+ * @param {object} res - L'objet de réponse HTTP.
+ * @returns {object} La réponse JSON indiquant le succès ou l'échec de l'inscription.
+ * @throws {Error} Si le cryptage du mot de passe a échoué.
+ * @throws {Error}Si l'étudiant n'a pas pu être inséré (table étudiant).
+ * @throws {Error}Si l'insertion de l'utilisateur a échoué (table Utilisateur).
+ * @throws {Error}Si un pseudo ou un email identique existe.
+ * @description Cette fonction permet à un utilisateur de se créer un compte étudiant.
+ * @headers
+ *    {string} Authorization - Token d'authentification JWT.
+ */
 
-    /**Données du formulaire */
+function inscriptionEleve(req, res) {
+  if (req.method === 'POST') {
+
+    /**Données du formulaire d'inscription */
     const {
       nom: userNom,
       prenom: userPrenom,
@@ -65,7 +116,7 @@ function inscriptionEleve(req, res) {
       password
     } = req.body;
 
-    /**A insérer dans la bdd */
+    /** Informations spécifique à un utilisateur */
     const values = [
       userNom,
       userPrenom,
@@ -76,11 +127,13 @@ function inscriptionEleve(req, res) {
       userVille,
     ];
 
+    /** Pour retrouver l'id de l'utilisateur inséré, pour inséré un etudiant du même id */
     const values_id = [
       userPseudo,
       userMail,
     ];
 
+    /** Informations spécifiques à un étudiant */
     const values_etudiant = [
       userEcole,
       userNiveauEtude,
@@ -137,11 +190,17 @@ function inscriptionEleve(req, res) {
   }
 }
 
+/**
+ * Connexion d'un utilisateur.
+ * @param {object} req - L'objet de requête HTTP.
+ * @param {object} res - L'objet de réponse HTTP.
+ * @returns {object} Un JSON contenant le token généré, les informations de l'utilisateur suivantes:
+ * id, nom, prénom, pseudo, rôle (Etudiant, gestionnaire externe, gestionnaire IA Pau, administrateur)
+ * @throws {Error}Erreur lors de la requete qui recherche un utilisateur ayant le même identifiant.
+ * @description Cette fonction permet à un utilisateur de se connecter à son compte avec un login/email et un mot de passe.
+ */
 async function connexion(req, res) {
-
-  if (req.method === 'GET') {
-    res.render('connexion', { title: 'Connexion' });
-  } else if (req.method === 'POST') {
+  if (req.method === 'POST') {
 
     const identifiant = req.body.identifiant;
     const password = req.body.password;
@@ -150,7 +209,7 @@ async function connexion(req, res) {
     try {
       const result = await pool.query(requeteChercher);
 
-      // Aucun email ou login ne correspond
+      /** Aucun email ou pseudo ne correspond*/
       if (result.rowCount === 0) {
         res.status(400).json({ champ: 'login', message: 'Aucun email/login ne correspond' });
       } else {
@@ -159,7 +218,7 @@ async function connexion(req, res) {
 
         if (match) {
 
-          /**  Générer le JWT */
+          /**  Informations à insérer dans le token */
           const payload = {
             "utilisateurId": user.iduser,
             "utilisateurType": user.typeuser
@@ -168,9 +227,7 @@ async function connexion(req, res) {
           /**  Générer le JWT */
           const token = jwt.sign(payload, secretKey, { expiresIn: '50d' });
 
-          res.status(200).json({ token: token, id: user.iduser, prenom: user.prenom, nom: user.nom, pseudo: user.pseudo, role: user.typeuser }); // Envoyer le JWT dans la réponse JSON
-          // res.set('Authorization', `Bearer ${token}`);
-
+          res.status(200).json({ token: token, id: user.iduser, prenom: user.prenom, nom: user.nom, pseudo: user.pseudo, role: user.typeuser });
         } else {
           res.status(400).json({ champ: 'mot de passe', message: 'Le mot de passe est incorrect' });
         }
@@ -182,6 +239,17 @@ async function connexion(req, res) {
   }
 }
 
+/**
+ * Voir un événement spécifique.
+ * @param {object} req - L'objet de requête HTTP.
+ * @param {object} res - L'objet de réponse HTTP.
+ * @returns {object} Un JSON contenant les informations de l'événement nécessaires pour l'affichage
+ * @throws {Error}Erreur lors de la récupération des informations de l'événement.
+ * @description Cette fonction permet à un utilisateur voir les informations d'un événement selon son statut ie 
+ * gestionnaire (IA ou externe), administrateur, étudiant, non connecté.
+ * Informations en plus pour un étudiant: Numéro équipe (si existe).
+ * Informations en moins pour un non connecté: Ressources privées d'un projet.
+ */
 function voirEvent(req, res) {
   if (req.method === 'GET') {
 
@@ -196,7 +264,7 @@ function voirEvent(req, res) {
 
         .catch((error) => {
           console.error('Une erreur s\'est produite :', error);
-          res.status(500).json({ message: 'Une erreur s\'est produite lors de la récupération des événements.' });
+          res.status(500).json({ message: 'Une erreur s\'est produite lors de la récupération de l\'événement.' });
         });
     }
     /**Si c'est un etudiant, afficher les infos de l'etudiant en plus, (equipe) */
@@ -208,7 +276,7 @@ function voirEvent(req, res) {
         })
         .catch((error) => {
           console.error('Une erreur s\'est produite :', error);
-          res.status(500).json({ message: 'Une erreur s\'est produite lors de la récupération des événements.' });
+          res.status(500).json({ message: 'Une erreur s\'est produite lors de la récupération de l\'événement.' });
         });
     }
     /**Si non connecté ne pas envoyer les infos des ressources privées */
@@ -220,17 +288,38 @@ function voirEvent(req, res) {
         })
         .catch((error) => {
           console.error('Une erreur s\'est produite :', error);
-          res.status(500).json({ message: 'Une erreur s\'est produite lors de la récupération des événements.' });
+          res.status(500).json({ message: 'Une erreur s\'est produite lors de la récupération de l\'événement.' });
         });
     }
-
   }
+}
 
+/**
+ * Voir la liste des événements (anciens et actuels).
+ * @param {object} req - L'objet de requête HTTP.
+ * @param {object} res - L'objet de réponse HTTP.
+ * @returns {object} Un JSON contenant les informations des événements ie:
+ * Titre, image, date début, fin, statut(en cours, inscription, fini), gain.
+ * @throws {Error}Erreur lors de la requete qui récupère tous les événements de la bdd.
+ * @description Cette fonction permet d'envoyer au client les informations à afficher pour tous les événements.
+ */
+function voirTousEvents(req, res) {
+  if (req.method === 'GET') {
+    la.creerJsonEvent()
+      .then((result) => {
+        res.status(200).json(result);
+      })
+      .catch((error) => {
+        console.error('Une erreur s\'est produite :', error);
+        res.status(500).json({ message: 'Une erreur s\'est produite lors de la récupération des événements.' });
+      });
+  }
 }
 
 module.exports = {
   inscriptionEleve,
   connexion,
   voirEvent,
-  verifyToken
+  verifyToken,
+  voirTousEvents
 };

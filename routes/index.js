@@ -6,6 +6,7 @@ const adminRouter = require('./admin');
 router.use('/admin', adminRouter);
 const bodyParser = require('body-parser');
 const indexController = require('../controllers/indexController');
+const tokenCOntroller = require('../controllers/tokenController');
 
 router.use(bodyParser.json());
 router.use(express.json());
@@ -23,18 +24,7 @@ router.all('/connexion', indexController.connexion);
 
 router.all('/voir_event', indexController.verifyToken ,indexController.voirEvent);
 
-/*Liste des utilisateurs*/
-router.get('/liste',(req, res) => {
-  pool.query('SELECT * FROM Utilisateur', (err, result) => {
-    if (!err) {
-      const users = result.rows;
-      res.render('liste', { users });
-    } else {
-      console.log(err.message);
-    }
-  });
-});
-
+router.all('/voir_tous_events', indexController.voirTousEvents);
 
 
 module.exports = router;
