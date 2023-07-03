@@ -1,7 +1,14 @@
+/**
+ * Contrôleur pour la création d'utilisateurs et d'événements en tant qu'administrateur.
+ * @module Contrôleur/Admin
+ */
+
+
 const fi = require('../public/javascripts/index/fonctions_inscription');
 const cu = require('../public/javascripts/admin/creerUser');
 const ce = require('../public/javascripts/admin/creerEvent');
 const fmdp = require('../public/javascripts/index/fonctions_mdp');
+
 
 async function createUser(req, res) {
   if (req.method === 'GET') {

@@ -1,9 +1,28 @@
+/**
+ * @fileoverview Fichier contenant les fonctions liées à la création des utilisateurs en tant qu'adminisnitrateur.
+ * Les 4 types d'utilisateurs: gestionnaire IA Pau, gestionnaire externe, étudiant, administrateur
+ * @module Contrôleur/Admin
+ * 
+ */
+
+
 const bcrypt = require('bcrypt');
 const pool = require('../../../database/configDB');
 const fi = require('../index/fonctions_inscription');
 
 
-
+/**
+ * Création d'un administrateur
+ * @async
+ * @param {Array} values_user - Les valeurs des champs utilisateur.
+ * @param {Array} values_id - Les valeurs des champs identifiant (pseudo et email).
+ * @returns {string} - Résultat de la création de l'administrateur.
+ * - 'true' si l'administrateur a été créé avec succès.
+ * - 'erreur' en cas d'échec de l'insertion dans la table admin.
+ * - 'les2' si à la fois le pseudo et l'email existent déjà.
+ * - 'pseudo' si le pseudo existe déjà.
+ * - 'mail' si l'email existe déjà.
+ */
 async function creerAdmin(values_user, values_id) {
     try {
         const libre = await fi.verifExistence(values_id);
@@ -45,6 +64,19 @@ async function creerAdmin(values_user, values_id) {
     }
 }
 
+/**
+ * Crée un nouveau gestionnaire IA.
+ * @async
+ * @param {Array} values_user - Les valeurs des champs utilisateur.
+ * @param {Array} values_id - Les valeurs des champs identifiant (pseudo et email).
+ * @param {string} role - Le rôle du gestionnaire IA au sein de l'association.
+ * @returns {string} - Résultat de la création du gestionnaire IA.
+ * - 'true' si le gestionnaire IA a été créé avec succès.
+ * - 'erreur' en cas d'échec de l'insertion dans la table gestionnaire ia.
+ * - 'les2' si à la fois le pseudo et l'email existent déjà.
+ * - 'pseudo' si le pseudo existe déjà.
+ * - 'mail' si l'email existe déjà.
+ */
 async function creerGestionnaireIA(values_user, values_id, role) {
 
     try {
@@ -88,6 +120,20 @@ async function creerGestionnaireIA(values_user, values_id, role) {
     }
 }
 
+/**
+ * Crée un nouveau gestionnaire externe.
+ * @async
+ * @param {Array} values_user - Les valeurs des champs utilisateur.
+ * @param {Array} values_id - Les valeurs des champs identifiant (pseudo et email).
+ * @param {string} entreprise - L'entreprise du gestionnaire externe.
+ * @param {string} metier - Le métier du gestionnaire externe.
+ * @returns {string} - Résultat de la création du gestionnaire externe.
+ * - 'true' si le gestionnaire externe a été créé avec succès.
+ * - 'erreur' en cas d'échec de l'insertion dans la table gestionnaire externe.
+ * - 'les2' si à la fois le pseudo et l'email existent déjà.
+ * - 'pseudo' si le pseudo existe déjà.
+ * - 'mail' si l'email existe déjà.
+ */
 async function creerGestionnaireExterne(values_user, values_id, entreprise, metier) {
 
     try {
@@ -129,6 +175,21 @@ async function creerGestionnaireExterne(values_user, values_id, entreprise, meti
     }
 }
 
+/**
+ * Crée un nouvel étudiant.
+ * @async
+ * @param {Array} values_user - Les valeurs des champs utilisateur.
+ * @param {Array} values_id - Les valeurs des champs identifiant (pseudo et email).
+ * @param {string} ecole - L'école de l'étudiant.
+ * @param {string} codePostale - Le code postal de l'école de l'étudiant.
+ * @param {string} niveau - Le niveau d'étude de l'étudiant.
+ * @returns {string} - Résultat de la création de l'étudiant.
+ * - 'true' si l'étudiant a été créé avec succès.
+ * - 'erreur' en cas d'échec de l'insertion dans la table étudiant.
+ * - 'les2' si à la fois le pseudo et l'email existent déjà.
+ * - 'pseudo' si le pseudo existe déjà.
+ * - 'mail' si l'email existe déjà.
+ */
 async function creerEtudiant(values_user, values_id, ecole, codePostale, niveau) {
 
     try {
