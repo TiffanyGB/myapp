@@ -1,0 +1,19 @@
+{
+    "source": {
+      "include": ["controllers", "database", "public", "routes"],
+      "exclude": ["node_modules"] 
+    },
+    "opts": {
+      "destination": "docs" 
+    },
+    "plugins": [],
+    "templates": {
+      "cleverLinks": false,
+      "monospaceLinks": false
+    },
+    "tags": {
+      "allowUnknownTags": true
+    },
+    "recurseDepth": 10
+  }
+  
