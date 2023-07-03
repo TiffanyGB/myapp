@@ -206,27 +206,3 @@ INSERT INTO Mot_cle (mot, idProjet) VALUES
   ('Code', 1),
   ('ODD', 2),
   ('Education', 2);
-
--- INSERT INTO Utilisateur (nom, prenom, pseudo, email, date_inscription, hashMdp, typeUser)
--- VALUES
---   ('Nom2', 'Prénom2', 'Pseudo2', 'email2@example.com', CURRENT_TIMESTAMP, 'hash2', 'etudiant'),
---   ('Nom3', 'Prénom3', 'Pseudo3', 'email3@example.com', CURRENT_TIMESTAMP, 'hash3', 'etudiant'),
---   ('Nom4', 'Prénom4', 'Pseudo4', 'email4@example.com', CURRENT_TIMESTAMP, 'hash4', 'etudiant'),
---   ('Nom5', 'Prénom5', 'Pseudo5', 'email5@example.com', CURRENT_TIMESTAMP, 'hash5', 'etudiant'),
---   ('Nom6', 'Prénom6', 'Pseudo6', 'email6@example.com', CURRENT_TIMESTAMP, 'hash6', 'etudiant'),
---   ('Nom7', 'Prénom7', 'Pseudo7', 'email7@example.com', CURRENT_TIMESTAMP, 'hash7', 'etudiant'),
---   ('Nom8', 'Prénom8', 'Pseudo8', 'email8@example.com', CURRENT_TIMESTAMP, 'hash8', 'etudiant'),
---   ('Nom9', 'Prénom9', 'Pseudo9', 'email9@example.com', CURRENT_TIMESTAMP, 'hash9', 'etudiant'),
---   ('Nom10', 'Prénom10', 'Pseudo10', 'email10@example.com', CURRENT_TIMESTAMP, 'hash10', 'etudiant');
-
--- INSERT INTO Etudiant (idEtudiant, ecole, niveau_etude, code_postale_ecole)
--- VALUES
---   (2, 'École 2', 'Niveau 2', '23456'),
---   (3, 'École 3', 'Niveau 3', '34567'),
---   (4, 'École 4', 'Niveau 4', '45678'),
---   (5, 'École 5', 'Niveau 5', '56789'),
---   (6, 'École 6', 'Niveau 6', '67890'),
---   (7, 'École 7', 'Niveau 7', '78901'),
---   (8, 'École 8', 'Niveau 8', '89012'),
---   (9, 'École 9', 'Niveau 9', '90123'),
---   (10, 'École 10', 'Niveau 10', '01234');

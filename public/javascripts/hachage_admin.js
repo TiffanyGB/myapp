@@ -71,4 +71,6 @@ const createDefaultAdmin = async () => {
     }
 
     pool.end();
+
+    process.exit();
 })();
