@@ -22,7 +22,7 @@ router.all('/inscription', indexController.inscriptionEleve);
 
 router.all('/connexion', indexController.connexion);
 
-router.all('/voir_event', indexController.verifyToken ,indexController.voirEvent);
+router.all('/voir_event',indexController.voirEvent);
 
 router.all('/voir_tous_events', indexController.voirTousEvents);
 

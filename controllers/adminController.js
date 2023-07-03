@@ -8,6 +8,8 @@ const fi = require('../public/javascripts/index/fonctions_inscription');
 const cu = require('../public/javascripts/admin/creerUser');
 const ce = require('../public/javascripts/admin/creerEvent');
 const fmdp = require('../public/javascripts/index/fonctions_mdp');
+const lu = require('../public/javascripts/admin/voirListeUsers');
+
 
 
 async function createUser(req, res) {
@@ -262,7 +264,38 @@ function createEvent(req, res) {
   }
 }
 
+function voirUtilisateurs(req, res) {
+  if (req.method === 'GET') {
+
+    if (req.userProfile === 'admin') {
+      lu.envoyer_json_liste_user()
+        .then((result) => {
+          if (result === 'aucun') {
+            res.status(400).json({ erreur: "Erreur lors de la récupération des utilisateurs" })
+          } else if (result === "erreur_student") {
+            res.status(400).json({ erreur: "Erreur lors de la récupération des données côté étudiant" })
+          } else {
+            res.status(200).json(result);
+          }
+        })
+        .catch((error) => {
+          console.error('Une erreur s\'est produite :', error);
+          res.status(500).json({ message: 'Une erreur s\'est produite lors de la récupération des utilisateurs.' });
+
+        });
+    } else if (req.userProfile === 'etudiant'){
+      res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "etudiant"});
+    }else if(req.userProfile === 'gestionnaire'){
+      res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "gestionnaire"});
+    }else if(req.userProfile === 'aucun'){
+      res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "Aucun"});
+
+    }
+  }
+}
+
 module.exports = {
   createUser,
-  createEvent
+  createEvent,
+  voirUtilisateurs
 };

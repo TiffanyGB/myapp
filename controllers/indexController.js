@@ -228,6 +228,7 @@ async function connexion(req, res) {
 
           /**  Générer le JWT */
           const token = jwt.sign(payload, secretKey, { expiresIn: '50d' });
+          // const token = tk.creerToken(payload);
 
           res.status(200).json({ token: token, id: user.iduser, prenom: user.prenom, nom: user.nom, pseudo: user.pseudo, role: user.typeuser });
         } else {
@@ -257,7 +258,6 @@ function voirEvent(req, res) {
 
     /**Si c'est un admin, afficher les infos de l'admin */
     if (req.userProfile === 'admin' || req.userProfile === 'gestionnaire') {
-      console.log('admin');
 
       re.recupererEvent(1, 'admin')
         .then((result) => {
@@ -326,6 +326,6 @@ module.exports = {
   inscriptionEleve,
   connexion,
   voirEvent,
-  verifyToken,
-  voirTousEvents
+  voirTousEvents,
+  verifyToken
 };

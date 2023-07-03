@@ -2,7 +2,6 @@ const jwt = require('jsonwebtoken');
 const tk = require('../public/javascripts/token/token')
 
 
-const secretKey = tk.genererSecretKey ();
 
 
 function verifyToken(req, res, next, secretKey) {
@@ -39,11 +38,9 @@ function verifyToken(req, res, next, secretKey) {
     });
 }
 
-function creerToken(){
-    
-}
+
 
 module.exports = {
     verifyToken,
-    creerToken
+    
 };
