@@ -1,46 +1,46 @@
-/**
- * Contrôleur pour gérer les pages sans nécessité de compte.
- * @controller Index
- */
+// /**
+//  * Contrôleur pour gérer les pages sans nécessité de compte.
+//  * @controller Index
+//  */
 
-/**
- * Module de fonctions pour la gestion des mots de passe.
- * @module fonctions_mdp
- */
+// /**
+//  * Module de fonctions pour la gestion des mots de passe.
+//  * @module fonctions_mdp
+//  */
 const fmdp = require('../public/javascripts/index/fonctions_mdp');
 
-/**
- * Module de fonctions pour l'inscription des utilisateurs.
- * @module fonctions_inscription
- */
+// /**
+//  * Module de fonctions pour l'inscription des utilisateurs.
+//  * @module fonctions_inscription
+//  */
 const fi = require('../public/javascripts/index/fonctions_inscription');
 
-/**
- * Module de fonctions pour la récupération d'un événement choisi.
- * @module recuperer_event_choisi
- */
+// /**
+//  * Module de fonctions pour la récupération d'un événement choisi.
+//  * @module recuperer_event_choisi
+//  */
 const re = require('../public/javascripts/index/recuperer_event_choisi');
-/**
- * Module de fonctions pour la récupération de la liste des événements.
- * @module recuperer_liste_events
- */
+// /**
+//  * Module de fonctions pour la récupération de la liste des événements.
+//  * @module recuperer_liste_events
+//  */
 const la = require('../public/javascripts/index/recuperer_liste_events');
-/**
- * Module de configuration pour la base de données.
- * @module configDB
- */
+// /**
+//  * Module de configuration pour la base de données.
+//  * @module configDB
+//  */
 const pool = require('../database/configDB');
 
-/**
- * Module pour la manipulation des fonctions de chiffrement.
- * @module crypto
- */
+// /**
+//  * Module pour la manipulation des fonctions de chiffrement.
+//  * @module crypto
+//  */
 const crypto = require('crypto');
 
-/**
- * Module pour la gestion des JSON Web Tokens (JWT).
- * @module jsonwebtoken
- */
+// /**
+//  * Module pour la gestion des JSON Web Tokens (JWT).
+//  * @module jsonwebtoken
+//  */
 const jwt = require('jsonwebtoken');
 
 const generateSecretKey = () => {
@@ -198,6 +198,8 @@ function inscriptionEleve(req, res) {
  * id, nom, prénom, pseudo, rôle (Etudiant, gestionnaire externe, gestionnaire IA Pau, administrateur)
  * @throws {Error}Erreur lors de la requete qui recherche un utilisateur ayant le même identifiant.
  * @description Cette fonction permet à un utilisateur de se connecter à son compte avec un login/email et un mot de passe.
+ * @headers
+ *    {string} Authorization - Token d'authentification JWT.
  */
 async function connexion(req, res) {
   if (req.method === 'POST') {
@@ -307,7 +309,11 @@ function voirTousEvents(req, res) {
   if (req.method === 'GET') {
     la.creerJsonEvent()
       .then((result) => {
-        res.status(200).json(result);
+        if(result === false){
+          res.status(400).json({message: 'Aucun événement'});
+        }else{
+          res.status(200).json(result);
+        }
       })
       .catch((error) => {
         console.error('Une erreur s\'est produite :', error);
