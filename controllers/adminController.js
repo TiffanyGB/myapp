@@ -50,23 +50,35 @@ async function createUser(req, res) {
       switch(type){
         case 'administrateur':
           cu.creerAdmin(valeurs_communes, valeurs_id)
-            .then(()=>{
-              fmdp.salageMdp(password)
-                .then((hashedPassword) => {
-                  console.log('Mot de passe crypté avec succès');
-                  fi.insererMdp(hashedPassword, userPseudo);
-                  res.status(200).json({message:'Inscription réussie'});
-      
-                })
-                .catch((error) => {
-                  console.error('Erreur lors du salage du mot de passe (Création admin)', error);
-                  res.status(400).json({message:'Erreur lors du salage du mot de passe (Création admin)'});
-      
-                });
-            })
-            .catch((error) => {
-              console.error('Erreur lors de la création de l\'admin', error);
-              res.status(400).json({message:'Erreur lors de la création de l\'admin'});
+            .then((result)=>{
+              if (result === 'true') {
+                fmdp.salageMdp(password)
+                  .then((hashedPassword) => {
+                    console.log('Mot de passe crypté avec succès');
+                    fi.insererMdp(hashedPassword, userPseudo);
+                    res.status(200).json({message:'Inscription réussie'});
+                  })
+                  .catch((error) => {
+                    console.error('Erreur lors du salage du mot de passe (Création admin)', error);
+                    res.status(400).json({message:'Erreur lors du salage du mot de passe (Création admin)'});
+                  });
+              } else if (result === 'les2') {
+                console.error('Pseudo et email pris');
+                res.status(400).json({message:'Pseudo et email pris'});
+              }else if (result === 'pseudo'){
+
+                console.error('Pseudo pris');
+                res.status(400).json({message:'Pseudo pris'});
+              }else if (result === 'mail'){
+
+                console.error('Email pris');
+                res.status(400).json({message:'Email pris'});
+
+              } else {
+                console.error('Erreur lors de la création de l\'admin');
+                res.status(400).json({message:'Erreur lors de la création de l\'admin'});
+              }
+              
             });
   
           break;
@@ -115,49 +127,71 @@ async function createUser(req, res) {
   
         case 'gestionnaire_iapau':
           cu.creerGestionnaireIA(valeurs_communes, valeurs_id, userRole)
-            .then(()=>{
+          .then((result)=>{
+            if (result === 'true') {
               fmdp.salageMdp(password)
                 .then((hashedPassword) => {
                   console.log('Mot de passe crypté avec succès');
                   fi.insererMdp(hashedPassword, userPseudo);
                   res.status(200).json({message:'Inscription réussie'});
-  
                 })
                 .catch((error) => {
                   console.error('Erreur lors du salage du mot de passe (Création admin)', error);
                   res.status(400).json({message:'Erreur lors du salage du mot de passe (Création admin)'});
-  
                 });
-            })
-            .catch((error) => {
-              console.error('Erreur lors de la création de l\'admin', error);
+            } else if (result === 'les2') {
+              console.error('Pseudo et email pris');
+              res.status(400).json({message:'Pseudo et email pris'});
+            }else if (result === 'pseudo'){
+
+              console.error('Pseudo pris');
+              res.status(400).json({message:'Pseudo pris'});
+            }else if (result === 'mail'){
+
+              console.error('Email pris');
+              res.status(400).json({message:'Email pris'});
+
+            } else {
+              console.error('Erreur lors de la création de l\'admin');
               res.status(400).json({message:'Erreur lors de la création de l\'admin'});
-            });
-  
-          break;
+            }
+            
+          });
+
+        break;
   
         case 'gestionnaire_externe':
            cu.creerGestionnaireExterne(valeurs_communes, valeurs_id, userEntreprise, userMetier)
-           .then(()=>{
-            fmdp.salageMdp(password)
-              .then((hashedPassword) => {
-                console.log('Mot de passe crypté avec succès');
-                fi.insererMdp(hashedPassword, userPseudo);
-                res.status(200).json({message:'Inscription réussie'});
-    
-              })
-              .catch((error) => {
-                console.error('Erreur lors du salage du mot de passe (Création admin)', error);
-                res.status(400).json({message:'Erreur lors du salage du mot de passe (Création admin)'});
-    
-              });
-          })
-          .catch((error) => {
-            console.error('Erreur lors de la création de l\'admin', error);
-            res.status(400).json({message:'Erreur lors de la création de l\'admin'});
+           .then((result)=>{
+            if (result === 'true') {
+              fmdp.salageMdp(password)
+                .then((hashedPassword) => {
+                  console.log('Mot de passe crypté avec succès');
+                  fi.insererMdp(hashedPassword, userPseudo);
+                  res.status(200).json({message:'Inscription réussie'});
+                })
+                .catch((error) => {
+                  console.error('Erreur lors du salage du mot de passe (Création admin)', error);
+                  res.status(400).json({message:'Erreur lors du salage du mot de passe (Création admin)'});
+                });
+            } else if (result === 'les2') {
+              console.error('Pseudo et email pris');
+              res.status(400).json({message:'Pseudo et email pris'});
+            }else if (result === 'pseudo'){
+
+              console.error('Pseudo pris');
+              res.status(400).json({message:'Pseudo pris'});
+            }else if (result === 'mail'){
+
+              console.error('Email pris');
+              res.status(400).json({message:'Email pris'});
+
+            } else {
+              console.error('Erreur lors de la création de l\'admin');
+              res.status(400).json({message:'Erreur lors de la création de l\'admin'});
+            }
+            
           });
-  
-          break;
   
         default: 
           break;
