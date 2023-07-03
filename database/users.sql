@@ -181,7 +181,7 @@ DELETE FROM Utilisateur WHERE email = 'admin@admin.fr';
 
 INSERT INTO Evenement (nom, debut_inscription, date_debut, date_fin, nombre_min_equipe, nombre_max_equipe, type_event)
 VALUES ('Nom', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 2, 5, 'challenge'),
-       ('Event2', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 3, 8, 'battle');
+       ('Event2', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, '2028-07-30 12:18:47.564106', 3, 8, 'battle');
 
 
 INSERT INTO Projet (nom, description_projet, recompense, imgProjet, sujet,idEvent)
