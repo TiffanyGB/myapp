@@ -129,7 +129,7 @@ async function creerGestionnaireExterne(values_user, values_id, entreprise, meti
     }
 }
 
-async function creerEtudiant(values_user, values_id, entreprise, metier) {
+async function creerEtudiant(values_user, values_id, ecole, codePostale, niveau) {
 
     try {
         const libre = await fi.verifExistence(values_id);
@@ -153,7 +153,7 @@ async function creerEtudiant(values_user, values_id, entreprise, metier) {
                 console.log('Etudiant inséré dans la table etudiant');
                 try {
                     const idUser = await fi.chercherUser(values_id[0]);
-                    const requet = `INSERT INTO Gestionnaire_externe (id_g_externe, entreprise, metier) VALUES ('${idUser}', '${entreprise}', '${metier}')`;
+                    const requet = `INSERT INTO Etudiant (idEtudiant, ecole, niveau_etude, code_postale_ecole) VALUES ('${idUser}', '${ecole}', '${codePostale}', '${niveau}')`;
                     await pool.query(requet);
                     return 'true';
                 }
