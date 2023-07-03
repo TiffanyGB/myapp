@@ -161,7 +161,9 @@ module.exports = {
   insererMdp,
   insererEtudiant,
   chercherUser,
-  verifExistence
+  verifExistence,
+  existeMail,
+  existePseudo
 };
 
 
