@@ -1,39 +1,12 @@
-const pool = require('../../../database/configDB');
+const pool = require('../../../../database/configDB');
+const recherche = require('../../recherche');
 
-function chercherUser() {
 
-    const users = `SELECT * FROM Utilisateur`;
-
-    return new Promise((resolve, reject) => {
-        pool.query(users)
-            .then((res) => {
-                resolve(res.rows);
-            })
-            .catch((error) => {
-                reject(error);
-            });
-    });
-}
-
-function chercherEtudiant(idEtudiant) {
-
-    const users = `SELECT * FROM Etudiant WHERE idEtudiant = '${idEtudiant}'`;
-
-    return new Promise((resolve, reject) => {
-        pool.query(users)
-            .then((res) => {
-                resolve(res.rows);
-            })
-            .catch((error) => {
-                reject(error);
-            });
-    });
-}
 
 async function envoyer_json_liste_user() {
 
     try {
-        const listeUsers = await chercherUser();
+        const listeUsers = await recherche.chercherUtilisateur();
 
         jsonRetour = {};
         jsonRetour.utilisateurs = [];
@@ -61,7 +34,7 @@ async function envoyer_json_liste_user() {
                 console.log(userCourant.iduser);
 
                 if (userCourant.typeuser === 'etudiant') {
-                    let chercherStudent = await chercherEtudiant(userCourant.iduser);
+                    let chercherStudent = await recherche.chercherUtilisateur(userCourant.iduser, 'Etudiant');
 
                     if (chercherStudent === 0) {
                         return 'erreur_student'
@@ -76,7 +49,6 @@ async function envoyer_json_liste_user() {
             }
             return jsonRetour;
         }
-
     } catch (error) {
         throw error;
     }

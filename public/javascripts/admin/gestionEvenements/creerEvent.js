@@ -1,4 +1,4 @@
-const pool = require('../../../database/configDB');
+const pool = require('../../../../database/configDB');
 
 function creerEvent(a){
 

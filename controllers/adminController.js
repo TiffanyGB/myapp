@@ -5,10 +5,10 @@
 
 
 const fi = require('../public/javascripts/index/fonctions_inscription');
-const cu = require('../public/javascripts/admin/creerUser');
-const ce = require('../public/javascripts/admin/creerEvent');
+const cu = require('../public/javascripts/admin/gestionUsers/creerUser');
+const ce = require('../public/javascripts/admin/gestionEvenements/creerEvent');
 const fmdp = require('../public/javascripts/index/fonctions_mdp');
-const lu = require('../public/javascripts/admin/voirListeUsers');
+const lu = require('../public/javascripts/admin/gestionUsers/voirListeUsers');
 
 
 
@@ -265,9 +265,10 @@ function createEvent(req, res) {
 }
 
 function voirUtilisateurs(req, res) {
-  if (req.method === 'GET') {
 
-    if (req.userProfile === 'admin') {
+  if (req.userProfile === 'admin') {
+    if (req.method === 'GET') {
+
       lu.envoyer_json_liste_user()
         .then((result) => {
           if (result === 'aucun') {
@@ -283,15 +284,22 @@ function voirUtilisateurs(req, res) {
           res.status(500).json({ message: 'Une erreur s\'est produite lors de la récupération des utilisateurs.' });
 
         });
-    } else if (req.userProfile === 'etudiant'){
-      res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "etudiant"});
-    }else if(req.userProfile === 'gestionnaire'){
-      res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "gestionnaire"});
-    }else if(req.userProfile === 'aucun'){
-      res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "Aucun"});
+    } else if (req.method === 'PATCH') {
+
+    } else if (req.method === 'DELETE') {
 
     }
+  } else if (req.userProfile === 'etudiant') {
+
+    res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "etudiant" });
+  } else if (req.userProfile === 'gestionnaire') {
+
+    res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "gestionnaire" });
+  } else if (req.userProfile === 'aucun') {
+    
+    res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "Aucun" });
   }
+
 }
 
 module.exports = {
