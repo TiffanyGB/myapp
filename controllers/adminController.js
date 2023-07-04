@@ -46,7 +46,10 @@ function voirUtilisateurs(req, res) {
 
 /**Création users */
 async function createUser(req, res) {
-  if (req.method === 'GET') {
+  if(req.method == "OPTIONS"){
+    res.status(200).json({sucess: 'Agress granted'});
+  }
+  else if (req.method === 'GET') {
     if (req.userProfile != 'admin') {
       res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur" });
     }
