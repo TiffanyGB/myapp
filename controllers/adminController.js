@@ -46,8 +46,8 @@ function voirUtilisateurs(req, res) {
 
 /**Création users */
 async function createUser(req, res) {
-  if(req.method == "OPTIONS"){
-    res.status(200).json({sucess: 'Agress granted'});
+  if (req.method == "OPTIONS") {
+    res.status(200).json({ sucess: 'Agress granted' });
   }
   else if (req.method === 'GET') {
     if (req.userProfile != 'admin') {
@@ -240,16 +240,19 @@ async function createUser(req, res) {
   }
 }
 
+/**Modification users */
 function modifierUser(req, res) {
   if (req.method === 'GET') {
     if (req.userProfile != 'admin') {
       res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur" });
     }
+    else if (req.method == "OPTIONS") {
+      res.status(200).json({ sucess: 'Agress granted' });
+    }
 
     else if (req.method === 'PATCH') {
 
-      const idUser = req.params.id;
-      console.log(idUser);
+      const userId = res.locals.userId; 
 
       const {
         type: type,
@@ -290,19 +293,28 @@ function modifierUser(req, res) {
   }
 }
 
+function supprimerUser(req, res) {
+  if (req.method == "OPTIONS") {
+    res.status(200).json({ success: 'Access granted' });
+  } else if (req.method === 'GET') {
+    if (req.userProfile != 'admin') {
+      res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur" });
+    }
+  } else if (req.method === 'DELETE') {
+    const userId = res.locals.userId; 
 
-// } else if (req.method === 'DELETE') {
+    modif.supprimerUser(userId, 'admini')
+      .then((result) => {
+        if (result === 'ok')
+          res.status(200).json({ message: "Suppression réussie" });
+      })
+      .catch(() => {
+        res.status(400).json({ erreur: 'Echec de la suppression' });
+      });
+  }
+}
 
-//   modif.supprimerUser(2, 'etudiant')
-//     .then((result) => {
-//       if (result === 'ok')
-//         res.status(200).json({ message: "Suppression réussie" })
-//     })
-//     .catch(() => {
-//       res.status(400).json({ erreur: 'Echec de la suppression' });
-//     });
 
-// }
 
 // function createEvent(req, res) {
 //   if (req.method === 'GET') {
@@ -372,5 +384,6 @@ module.exports = {
   createUser,
   // createEvent,
   voirUtilisateurs,
-  modifierUser
+  modifierUser,
+  supprimerUser
 };
