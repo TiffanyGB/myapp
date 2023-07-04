@@ -30,7 +30,6 @@ async function envoyer_json_liste_user() {
                 userInfos.github = userCourant.github;
                 userInfos.linkedin = userCourant.linkedin;
 
-                console.log(userCourant.iduser);
 
                 if (userCourant.typeuser === 'etudiant') {
                     let chercherStudent = await recherche.chercherUtilisateur(userCourant.iduser, 'Etudiant');
