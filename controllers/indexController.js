@@ -49,7 +49,7 @@ const generateSecretKey = () => {
 const secretKey = generateSecretKey();
 
 // Middleware de vérification du token
-function verifyToken(req, res, next) {
+function verifyToken(req, res, next) {  
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
 
@@ -256,10 +256,11 @@ async function connexion(req, res) {
 function voirEvent(req, res) {
   if (req.method === 'GET') {
 
+    const eventID = req.params.id;
     /**Si c'est un admin, afficher les infos de l'admin */
     if (req.userProfile === 'admin' || req.userProfile === 'gestionnaire') {
 
-      re.recupererEvent(1, 'admin')
+      re.recupererEvent(eventID, 'admin')
         .then((result) => {
           res.status(200).json(result);
         })
@@ -272,7 +273,7 @@ function voirEvent(req, res) {
     /**Si c'est un etudiant, afficher les infos de l'etudiant en plus, (equipe) */
     else if (req.userProfile === 'etudiant') {
       console.log('Etudiant');
-      re.recupererEvent(1, 'etudiant')
+      re.recupererEvent(eventID, 'etudiant')
         .then((result) => {
           res.status(200).json(result);
         })
@@ -284,7 +285,7 @@ function voirEvent(req, res) {
     /**Si non connecté ne pas envoyer les infos des ressources privées */
     else if (req.userProfile === 'aucun') {
       console.log('non connecté');
-      re.recupererEvent(1, 'aucun')
+      re.recupererEvent(eventID, 'aucun')
         .then((result) => {
           res.status(200).json(result);
         })
