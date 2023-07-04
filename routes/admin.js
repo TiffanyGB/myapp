@@ -4,13 +4,18 @@ const adminController = require('../controllers/adminController');
 const indexController = require('../controllers/indexController');
 
 
+/** Voir les utilisateurs */
+router.all('/', indexController.verifyToken,adminController.voirUtilisateurs);
 
 /**Page de création d'un nouvel utilisateur */
-router.all('/creerUser', adminController.createUser);
+router.all('/create', indexController.verifyToken, adminController.createUser);
 
-router.all('/voirUtilisateurs', indexController.verifyToken,adminController.voirUtilisateurs);
+router.all('/edit/:id', indexController.verifyToken, adminController.modifierUser);
 
-router.all('/creerEvent', adminController.createEvent);
+router.all('/delete/:id', indexController.verifyToken);
+
+
+// router.all('/creerEvent', adminController.createEvent);
 
 
 module.exports = router;

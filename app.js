@@ -6,7 +6,7 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
-
+const cors = require('cors');
 
 /**Routes */
 var indexRouter = require('./routes/index');
@@ -30,6 +30,15 @@ app.use(cookieParser());
 
 /**configure le middleware express.static() pour servir les fichiers statiques du répertoire public, tels que les images, les fichiers CSS, etc */
 app.use(express.static(path.join(__dirname, 'public')));
+
+const corsOptions = {
+  origin: '*',
+  methods: 'GET, POST, OPTIONS, PUT, DELETE, PATCH',
+  allowedHeaders: 'Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With, method',
+  maxAge: 3600,
+};
+
+app.use(cors(corsOptions));
 
 /** définit les routes en utilisant les routeurs pour gérer les requêtes correspondantes. */
 app.use('/', indexRouter);

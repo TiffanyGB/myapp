@@ -1,7 +1,7 @@
 const bcrypt = require('bcrypt');
-const pool = require('../../database/configDB');
-const fmdp = require('../javascripts/index/fonctions_mdp');
-const fi = require('../javascripts/index/fonctions_inscription');
+const pool = require('./configDB');
+const fmdp = require('../public/javascripts/index/fonctions_mdp');
+const fi = require('../public/javascripts/index/fonctions_inscription');
 
 
 const valeurs = ['admin', 'admin'];

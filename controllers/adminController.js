@@ -3,18 +3,54 @@
  * @module Contrôleur/Admin
  */
 
-
 const fi = require('../public/javascripts/index/fonctions_inscription');
 const cu = require('../public/javascripts/admin/gestionUsers/creerUser');
 const ce = require('../public/javascripts/admin/gestionEvenements/creerEvent');
 const fmdp = require('../public/javascripts/index/fonctions_mdp');
 const lu = require('../public/javascripts/admin/gestionUsers/voirListeUsers');
+const modif = require('../public/javascripts/admin/gestionUsers/modifierUtilisateurs');
 
+/**Voir les users */
+function voirUtilisateurs(req, res) {
 
+  if (req.userProfile === 'admin') {
+    if (req.method === 'GET') {
 
+      lu.envoyer_json_liste_user()
+        .then((result) => {
+          if (result === 'aucun') {
+            res.status(400).json({ erreur: "Erreur lors de la récupération des utilisateurs" })
+          } else if (result === "erreur_student") {
+            res.status(400).json({ erreur: "Erreur lors de la récupération des données côté étudiant" })
+          } else {
+            res.status(200).json(result);
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+          res.status(500).json({ message: 'Une erreur s\'est produite lors de la récupération des utilisateurs.' });
+
+        });
+    }
+  } else if (req.userProfile === 'etudiant') {
+
+    res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "etudiant" });
+  } else if (req.userProfile === 'gestionnaire') {
+
+    res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "gestionnaire" });
+  } else if (req.userProfile === 'aucun') {
+
+    res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "Aucun" });
+  }
+}
+
+/**Création users */
 async function createUser(req, res) {
   if (req.method === 'GET') {
-    res.render('admin/creerUser', { title: 'Créer user' });
+    if (req.userProfile != 'admin') {
+      res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur" });
+    }
+
   } else if (req.method === 'POST') {
 
     const {
@@ -201,109 +237,137 @@ async function createUser(req, res) {
   }
 }
 
-function createEvent(req, res) {
+function modifierUser(req, res) {
   if (req.method === 'GET') {
-    res.render('admin/creerEvent', { title: 'Créer Event' });
-  } else if (req.method === 'POST') {
+    if (req.userProfile != 'admin') {
+      res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur" });
+    }
 
-    const {
-      typeEvent,
-      nomEvent,
-      dateInscription,
-      dateDebut,
-      dateFin,
-      dateResultat,
-      regles,
-      nbEquipeMin,
-      nbEquipeMax,
-      imageEvent,
+    else if (req.method === 'PATCH') {
 
-    } = req.body;
+      const idUser = req.params.id;
+      console.log(idUser);
 
-    const valeurs_event = [
-      typeEvent,
-      nomEvent,
-      dateInscription,
-      dateDebut,
-      dateFin,
-      dateResultat,
-      regles,
-      nbEquipeMin,
-      nbEquipeMax,
-      imageEvent
-    ]
+      const {
+        type: type,
+        nom: userNom,
+        prenom: userPrenom,
+        pseudo: userPseudo,
+        email: userMail,
+        ecole: userEcole,
+        codeEcole: userCodeEcole,
+        niveau_etude: userNiveauEtude,
+        password,
+      } = req.body;
 
-    const { projet, ressources } = req.body;
+      const valeurs = [
+        type,
+        userNom,
+        userPrenom,
+        userPseudo,
+        userMail
+      ]
 
-    // Traiter les données et les enregistrer dans la base de données
+      const valeurs_etudiant = [
+        userCodeEcole,
+        userEcole,
+        userNiveauEtude
+      ]
 
-    // Exemple : afficher les tableaux dans la console
-    console.log('Tableau des projets :', projet);
-    console.log('Tableau des ressources :', ressources);
-    console.log('Tableau des events: ', valeurs_event);
-
-
-    // try{
-    //   ce.creerEvent(nomEvent);
-    //   //res.status(200).json({message:'Carré'});
-    // }
-    // catch{
-    //   console.log('Erreur dans la création d\'un event');
-    //   //es.status(400).json({message:'Erreur lors de la création d\'un event'});
-    // }
-
-    //   // .then(()=> {
-    //   //   res.status(200).json({message:'Carré'});
-
-    //   // })
-    //   // .catch((err)=> {
-    //   //   console.log('Erreur dans la création d\'un event');
-    //   //   res.status(400).json({message:'Erreur lors de la création d\'un event'});
-
-    //   // })
-  }
-}
-
-function voirUtilisateurs(req, res) {
-
-  if (req.userProfile === 'admin') {
-    if (req.method === 'GET') {
-
-      lu.envoyer_json_liste_user()
-        .then((result) => {
-          if (result === 'aucun') {
-            res.status(400).json({ erreur: "Erreur lors de la récupération des utilisateurs" })
-          } else if (result === "erreur_student") {
-            res.status(400).json({ erreur: "Erreur lors de la récupération des données côté étudiant" })
-          } else {
-            res.status(200).json(result);
-          }
+      modif.modifierUser(idUser, valeurs, valeurs_etudiant)
+        .then(() => {
+          res.status(200).json({ message: "Utilisateur modifié avec succès" });
         })
-        .catch((error) => {
-          console.error('Une erreur s\'est produite :', error);
-          res.status(500).json({ message: 'Une erreur s\'est produite lors de la récupération des utilisateurs.' });
-
+        .catch(() => {
+          res.status(400).json({ erreur: 'Echec de la modification' });
         });
-    } else if (req.method === 'PATCH') {
 
-    } else if (req.method === 'DELETE') {
 
     }
-  } else if (req.userProfile === 'etudiant') {
-
-    res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "etudiant" });
-  } else if (req.userProfile === 'gestionnaire') {
-
-    res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "gestionnaire" });
-  } else if (req.userProfile === 'aucun') {
-    
-    res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "Aucun" });
   }
-
 }
+
+
+// } else if (req.method === 'DELETE') {
+
+//   modif.supprimerUser(2, 'etudiant')
+//     .then((result) => {
+//       if (result === 'ok')
+//         res.status(200).json({ message: "Suppression réussie" })
+//     })
+//     .catch(() => {
+//       res.status(400).json({ erreur: 'Echec de la suppression' });
+//     });
+
+// }
+
+// function createEvent(req, res) {
+//   if (req.method === 'GET') {
+//     res.render('admin/creerEvent', { title: 'Créer Event' });
+//   } else if (req.method === 'POST') {
+
+//     const {
+//       typeEvent,
+//       nomEvent,
+//       dateInscription,
+//       dateDebut,
+//       dateFin,
+//       dateResultat,
+//       regles,
+//       nbEquipeMin,
+//       nbEquipeMax,
+//       imageEvent,
+
+//     } = req.body;
+
+//     const valeurs_event = [
+//       typeEvent,
+//       nomEvent,
+//       dateInscription,
+//       dateDebut,
+//       dateFin,
+//       dateResultat,
+//       regles,
+//       nbEquipeMin,
+//       nbEquipeMax,
+//       imageEvent
+//     ]
+
+//     const { projet, ressources } = req.body;
+
+//     // Traiter les données et les enregistrer dans la base de données
+
+//     // Exemple : afficher les tableaux dans la console
+//     console.log('Tableau des projets :', projet);
+//     console.log('Tableau des ressources :', ressources);
+//     console.log('Tableau des events: ', valeurs_event);
+
+
+//     // try{
+//     //   ce.creerEvent(nomEvent);
+//     //   //res.status(200).json({message:'Carré'});
+//     // }
+//     // catch{
+//     //   console.log('Erreur dans la création d\'un event');
+//     //   //es.status(400).json({message:'Erreur lors de la création d\'un event'});
+//     // }
+
+//     //   // .then(()=> {
+//     //   //   res.status(200).json({message:'Carré'});
+
+//     //   // })
+//     //   // .catch((err)=> {
+//     //   //   console.log('Erreur dans la création d\'un event');
+//     //   //   res.status(400).json({message:'Erreur lors de la création d\'un event'});
+
+//     //   // })
+//   }
+// }
+
 
 module.exports = {
   createUser,
-  createEvent,
-  voirUtilisateurs
+  // createEvent,
+  voirUtilisateurs,
+  modifierUser
 };

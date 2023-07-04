@@ -5,8 +5,6 @@
  * 
  */
 
-
-const bcrypt = require('bcrypt');
 const pool = require('../../../../database/configDB');
 const fi = require('../../index/fonctions_inscription');
 

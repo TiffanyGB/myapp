@@ -65,12 +65,10 @@ function verifyToken(req, res, next) {
 
     if (decoded.utilisateurType === 'administrateur') {
 
-      console.log("admin");
       req.userProfile = 'admin';
 
     } else if (decoded.utilisateurType === 'etudiant') {
 
-      console.log("etudiant");
       req.userProfile = 'etudiant';
 
     } else if ((decoded.utilisateurType === 'gestionnaireIA') || (decoded.utilisateurType === 'gestionnaireExterne')) {
