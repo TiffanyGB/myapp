@@ -2,7 +2,7 @@ const pool = require('../../../../database/configDB');
 const fi = require('../../index/fonctions_inscription');
 const recherche = require('../../recherche');
 
-async function modifierUser(idUser, valeurs){
+async function modifierUser(idUser, valeurs) {
     const temp = await recherche.chercherTableUserID(idUser);
 
     infoUser = temp[0];
@@ -17,40 +17,41 @@ async function modifierUser(idUser, valeurs){
 
 
     pool.query(modif)
-    .then(() => {
-        console.log("Mise à jour côté étudiant réussie");
-    })
-    .catch((error)=> {
-        console.log(error);
-    })
+        .then(() => {
+            console.log("Mise à jour côté Utilisateur réussie");
+
+        })
+        .catch((error) => {
+            console.log(error);
+        })
 }
 
 async function modifierEtudiant(idUser, valeurs, valeurs_etudiant) {
 
     try {
         modifierUser(idUser, valeurs)
-        .then(() => {
+            .then(() => {
 
-            // const student = `UPDATE Etudiant
-            // SET ecole = '${valeurs_etudiant[1]}',
-            // code_postale_ecole = '${valeurs_etudiant[0]}',
-            // niveau_etude = '${valeurs_etudiant[2]}' 
-            // WHERE idEtudiant = ${idUser}`;
+                const student = `UPDATE Etudiant
+            SET ecole = '${valeurs_etudiant[1]}',
+            niveau_etude = '${valeurs_etudiant[2]}' 
+            WHERE idEtudiant = ${idUser}`;
 
-            // try{
-            //     pool.query(student);
-            //     console.log(reussi);
-            // }
-            // catch(error){
-            //     console.error("Erreur lors de la mise à jour de l'étudiant", error);
-            // }
+                console.log()
+                try {
+                    pool.query(student);
+                    console.log("reussi");
+                }
+                catch (error) {
+                    console.error("Erreur lors de la mise à jour de l'étudiant", error);
+                }
 
-        })
-        .catch((error) =>{
-            console.error("Erreur lors de la mise à jour de l'étudiant", error);
-        });
+            })
+            .catch((error) => {
+                console.error("Erreur lors de la mise à jour de l'étudiant", error);
+            });
 
-        
+
     } catch (error) {
         console.error("Erreur lors de la mise à jour de l'étudiant", error);
         throw error;
@@ -58,15 +59,77 @@ async function modifierEtudiant(idUser, valeurs, valeurs_etudiant) {
 
 }
 
-function modifierAdministrateur() {
+/**Fini */
+async function modifierAdministrateur(idUser, valeurs) {
 
+    try {
+        modifierUser(idUser, valeurs);
+
+    } catch (error) {
+        console.error("Erreur lors de la mise à jour de l'admin", error);
+        throw error;
+    }
 }
 
-function modifierExterne() {
+async function modifierExterne(idUser, valeurs, metier, entreprise) {
 
+    try {
+        modifierUser(idUser, valeurs)
+            .then(() => {
+
+                const student = `UPDATE Gestionnaire_externe
+            SET entreprise = '${entreprise}',
+            metier = '${metier}' 
+            WHERE id_g_externe = ${idUser}`;
+
+                console.log()
+                try {
+                    pool.query(student);
+                    console.log("reussi");
+                }
+                catch (error) {
+                    console.error("Erreur lors de la mise à jour du gestionnaire externe", error);
+                }
+
+            })
+            .catch((error) => {
+                console.error("Erreur lors de la mise à jour u gestionnaire externe", error);
+            });
+
+    } catch (error) {
+        console.error("Erreur lors de la mise à jour du gestionnaire externe", error);
+        throw error;
+    }
 }
 
-function modifierIapau() { }
+async function modifierIapau(idUser, valeurs, role_asso) {
+    try {
+        modifierUser(idUser, valeurs)
+            .then(() => {
+
+                const student = `UPDATE Gestionnaire_iapau
+                SET role_asso = '${role_asso}'
+                WHERE id_g_iapau = ${idUser}`;
+
+                console.log()
+                try {
+                    pool.query(student);
+                    console.log("reussi");
+                }
+                catch (error) {
+                    console.error("Erreur lors de la mise à jour du gestionnaire iapau", error);
+                }
+
+            })
+            .catch((error) => {
+                console.error("Erreur lors de la mise à jour du gestionnaire iapau", error);
+            });
+
+    } catch (error) {
+        console.error("Erreur lors de la mise à jour du gestionnaire iapau", error);
+        throw error;
+    }
+}
 
 //Doit être Etudiant, admini, gestionnaire_iapau ou gestionnaire_externe
 function supprimerUser(idUser, role) {

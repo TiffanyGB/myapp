@@ -310,7 +310,7 @@ function modifierUser(req, res) {
 
         break;
 
-      case 'gestionnaire_externe':
+      case 'gestionnaireExterne':
         modif.modifierExterne(idUser, valeurs, userMetier, userEntreprise)
           .then(() => {
             res.status(200).json({ message: "Gestionnaire externe modifié avec succès" });
@@ -321,7 +321,7 @@ function modifierUser(req, res) {
 
         break;
         
-      case 'gestionnaire_iapau':
+      case 'gestionnaireIA':
         modif.modifierIapau(idUser, valeurs, userRole)
           .then(() => {
             res.status(200).json({ message: "Gestionnaire iapau modifié avec succès" });

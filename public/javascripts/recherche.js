@@ -32,8 +32,6 @@ function chercherTableUserID(idUser) {
   }
   
   
-console.log(chercherTableUserID(5));
-
 /**Chercher tous les users dans la table user */
 
 function chercherUtilisateur() {
