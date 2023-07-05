@@ -316,5 +316,6 @@ async function recupererEvent(idEvent, typeUser) {
 
 module.exports = {
     nbEvent,
-    recupererEvent
+    recupererEvent,
+    recuperer_projets
 }

@@ -254,7 +254,7 @@ async function connexion(req, res) {
 function voirEvent(req, res) {
   if (req.method === 'GET') {
 
-    const eventID = req.params.id;
+    const eventID = res.locals.eventID;
     /**Si c'est un admin, afficher les infos de l'admin */
     if (req.userProfile === 'admin' || req.userProfile === 'gestionnaire') {
 

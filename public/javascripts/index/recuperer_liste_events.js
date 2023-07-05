@@ -1,4 +1,5 @@
 const pool = require('../../../database/configDB');
+const recupEvent = require('./recuperer_event_choisi');
 
 /**
  * Récupérer les événements terminés dans la base de données
@@ -66,6 +67,9 @@ async function creerJsonEvent() {
                 courantInfos.image = ancienCourant.img;
                 courantInfos.debut = ancienCourant.date_debut;
                 courantInfos.fin = ancienCourant.date_fin;
+                courantInfos.phase = "Terminé";
+
+            
 
 
                 tabRetour.oldEvents.push(courantInfos);
