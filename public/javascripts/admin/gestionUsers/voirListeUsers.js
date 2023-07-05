@@ -20,6 +20,7 @@ async function envoyer_json_liste_user() {
                 let userCourant = listeUsers[i];
                 let userInfos = {};
 
+                userInfos.id = userCourant.iduser;
                 userInfos.nom = userCourant.nom;
                 userInfos.prenom = userCourant.prenom;
                 userInfos.pseudo = userCourant.pseudo;
@@ -30,9 +31,8 @@ async function envoyer_json_liste_user() {
                 userInfos.github = userCourant.github;
                 userInfos.linkedin = userCourant.linkedin;
 
-
                 if (userCourant.typeuser === 'etudiant') {
-                    let chercherStudent = await recherche.chercherUtilisateur(userCourant.iduser, 'Etudiant');
+                    let chercherStudent = await recherche.chercherStudent(userCourant.iduser);
 
                     if (chercherStudent === 0) {
                         return 'erreur_student'
@@ -43,6 +43,35 @@ async function envoyer_json_liste_user() {
                         userInfos.niveauEtude = etudiantCourant.niveau_etude;
                     }
                 }
+
+                if (userCourant.typeuser === 'gestionnaireIA') {
+
+                    let chercherGIA = await recherche.chercherGestionnaireIapau(userCourant.iduser);
+
+                    if (chercherGIA === 0) {
+                        return 'erreur_student'
+                    } else {
+                        gia = chercherGIA[0];
+
+                        userInfos.role_asso = gia.role_asso;
+                    }
+                }
+
+                if (userCourant.typeuser === 'gestionnaireExterne') {
+
+                    let chercherGE = await recherche.chercherGestionnaireExterne(userCourant.iduser);
+
+                    if (chercherGE === 0) {
+                        return 'erreur_student'
+                    } else {
+                        gex = chercherGE[0];
+
+                        userInfos.entreprise = gex.entreprise;
+                        userInfos.metier = gex.metier;
+                    }
+                }
+
+
                 jsonRetour.utilisateurs.push(userInfos);
             }
             return jsonRetour;

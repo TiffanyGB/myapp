@@ -257,6 +257,9 @@ function modifierUser(req, res) {
 
     const idUser = res.locals.userId;
 
+    /**Vérifier que l'id existe dans la bdd, sinon 404 error */
+    
+
     const {
       type: type,
       nom: userNom,
