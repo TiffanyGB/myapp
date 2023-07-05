@@ -1,35 +1,49 @@
 const pool = require('../../../../database/configDB');
 const fi = require('../../index/fonctions_inscription');
+const recherche = require('../../recherche');
 
-async function modifierUser(idUser, valeurs, valeurs_etudiant) {
 
-    const temp = await recherche.chercherUserID(idUser);
+async function modifierEtudiant(idUser, valeurs, valeurs_etudiant) {
 
-    infoUser = temp[0];
+    try {
+        const temp = await recherche.chercherTableUserID(idUser);
 
-    if(valeurs[0] == infoUser.typeUser){
-        //Modifier type
-    } 
+        infoUser = temp[0];
 
-    if(valeurs[1] != infoUser.nom){
-        //modifier le nom avec update
+        const modif = `UPDATE Utilisateur 
+        SET typeUser = '${valeurs[0]}', 
+        nom = '${valeurs[1]}',
+        prenom = '${valeurs[2]}',
+        pseudo = '${valeurs[3]}',
+        email = '${valeurs[4]}'
+        WHERE idUser = '${idUser}'`;
+
+
+        pool.query(modif)
+        .then(() => {
+            console.log("Mise à jour côté étudiant réussie");
+        })
+        .catch((error)=> {
+            console.log(error);
+        })
+
+        
+    } catch (error) {
+        console.error("Erreur lors de la mise à jour de l'étudiant", error);
+        throw error;
     }
-
-    if(valeurs[2] != infoUser.prenom){
-        //modifier prenom
-    }
-
-    // if(valeurs[3] != infoUser.)
-
-    const modif = `UPDATE Utilisateur 
-        SET typeUser = $1, 
-        nom = $2,
-        prenom = $3,
-        pseudo = $4,
-        email = $5,
-        WHERE idUser = ${idUser}`;
 
 }
+
+function modifierAdministrateur() {
+
+}
+
+function modifierExterne() {
+
+}
+
+function modifierIapau() { }
 
 //Doit être Etudiant, admini, gestionnaire_iapau ou gestionnaire_externe
 function supprimerUser(idUser, role) {
@@ -71,6 +85,9 @@ function supprimerUser(idUser, role) {
 }
 
 module.exports = {
-    modifierUser,
-    supprimerUser
+    modifierEtudiant,
+    supprimerUser,
+    modifierAdministrateur,
+    modifierExterne,
+    modifierIapau
 }

@@ -16,8 +16,11 @@ router.all('/inscription', indexController.inscriptionEleve);
 
 router.all('/connexion', indexController.connexion);
 
-router.all('/voir_event/:id',indexController.voirEvent);
-
 router.all('/voir_tous_events', indexController.voirTousEvents);
+
+router.all('/voir_event/:id', (req, res, next) => {
+    res.locals.eventID = req.params.id;
+    next();
+  }, indexController.verifyToken, indexController.voirEvent);
 
 module.exports = router;

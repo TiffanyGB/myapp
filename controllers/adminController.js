@@ -242,56 +242,99 @@ async function createUser(req, res) {
 
 /**Modification users */
 function modifierUser(req, res) {
-  if (req.method === 'GET') {
+
+  if (req.method == "OPTIONS") {
+    res.status(200).json({ sucess: 'Agress granted' });
+  }
+
+  else if (req.method === 'GET') {
     if (req.userProfile != 'admin') {
       res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur" });
     }
-    else if (req.method == "OPTIONS") {
-      res.status(200).json({ sucess: 'Agress granted' });
-    }
+  }
 
-    else if (req.method === 'PATCH') {
+  else if (req.method === 'PATCH') {
 
-      const userId = res.locals.userId; 
+    const idUser = res.locals.userId;
 
-      const {
-        type: type,
-        nom: userNom,
-        prenom: userPrenom,
-        pseudo: userPseudo,
-        email: userMail,
-        ecole: userEcole,
-        codeEcole: userCodeEcole,
-        niveau_etude: userNiveauEtude,
-        password,
-      } = req.body;
+    const {
+      type: type,
+      nom: userNom,
+      prenom: userPrenom,
+      pseudo: userPseudo,
+      email: userMail,
+      ecole: userEcole,
+      codeEcole: userCodeEcole,
+      niveau_etude: userNiveauEtude,
+      entreprise: userEntreprise,
+      metier: userMetier,
+      role_asso: userRole,
+      password,
+    } = req.body;
 
-      const valeurs = [
-        type,
-        userNom,
-        userPrenom,
-        userPseudo,
-        userMail
-      ]
+    const valeurs = [
+      type,
+      userNom,
+      userPrenom,
+      userPseudo,
+      userMail
+    ]
 
-      const valeurs_etudiant = [
-        userCodeEcole,
-        userEcole,
-        userNiveauEtude
-      ]
+    const valeurs_etudiant = [
+      userCodeEcole,
+      userEcole,
+      userNiveauEtude
+    ]
 
-      modif.modifierUser(idUser, valeurs, valeurs_etudiant)
-        .then(() => {
-          res.status(200).json({ message: "Utilisateur modifié avec succès" });
-        })
-        .catch(() => {
-          res.status(400).json({ erreur: 'Echec de la modification' });
-        });
+    switch (type) {
+      case 'etudiant':
 
+        modif.modifierEtudiant(idUser, valeurs, valeurs_etudiant)
+          .then(() => {
+            res.status(200).json({ message: "Etudiant modifié avec succès" });
+          })
+          .catch(() => {
+            res.status(400).json({ erreur: 'Echec de la modification de l\' étudiant' });
+          });
 
+        break;
+
+      case 'administrateur':
+        modif.modifierAdministrateur(idUser, valeurs)
+          .then(() => {
+            res.status(200).json({ message: "Administrateur modifié avec succès" });
+          })
+          .catch(() => {
+            res.status(400).json({ erreur: 'Echec de la modification de l\'administrateur' });
+          });
+
+        break;
+
+      case 'gestionnaire_externe':
+        modif.modifierExterne(idUser, valeurs, userMetier, userEntreprise)
+          .then(() => {
+            res.status(200).json({ message: "Gestionnaire externe modifié avec succès" });
+          })
+          .catch(() => {
+            res.status(400).json({ erreur: 'Echec de la modification du gestionnaire externe' });
+          });
+
+        break;
+        
+      case 'gestionnaire_iapau':
+        modif.modifierIapau(idUser, valeurs, userRole)
+          .then(() => {
+            res.status(200).json({ message: "Gestionnaire iapau modifié avec succès" });
+          })
+          .catch(() => {
+            res.status(400).json({ erreur: 'Echec de la modification du gestionnaire iapau' });
+          });
+
+        break;
     }
   }
 }
+
 
 function supprimerUser(req, res) {
   if (req.method == "OPTIONS") {
@@ -301,7 +344,7 @@ function supprimerUser(req, res) {
       res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur" });
     }
   } else if (req.method === 'DELETE') {
-    const userId = res.locals.userId; 
+    const userId = res.locals.userId;
 
     modif.supprimerUser(userId, 'admini')
       .then((result) => {
