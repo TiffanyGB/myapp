@@ -137,6 +137,8 @@ function estInteresse(idEvent, idEtudiant) {
 
 }
 
+function trouverEquipe(){}
+
 function chercher_finalistes(idEvent) {
     const finaliste = `SELECT * FROM Equipe WHERE finaliste = '${idEvent}'`;
 
@@ -239,7 +241,6 @@ async function recupererEvent(idEvent, typeUser) {
 
                     for (j = 0; j < listeRessourcePv.length; j++) {
 
-                        console.log();
                         let ressourceCourante = listeRessourcePv[j];
                         let ressourcesPvInfos = {};    
                         ressourcesPvInfos.titre = ressourceCourante.titre;
@@ -253,6 +254,8 @@ async function recupererEvent(idEvent, typeUser) {
 
                     }
                 }
+
+
 
                 // Ajoute le tableau projetTab au tableau principal tabRetour.projet
                 tabRetour.projet.push(projetInfos);
@@ -303,10 +306,13 @@ async function recupererEvent(idEvent, typeUser) {
                 tabRetour.userIsInterested = false;
 
                 if (equipe > 0) {
-                    tabRetour.equipe = 5;
+                    tabRetour.team = 5;
                 } else {
-                    tabRetour.equipe = -1;
+                    tabRetour.team = -1;
                 }
+            }else{
+                tabRetour.userIsInterested = false;
+                tabRetour.team = -1;
             }
             return tabRetour;
         } else {
