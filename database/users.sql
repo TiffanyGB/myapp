@@ -71,7 +71,8 @@ CREATE TABLE Evenement(
     debut_inscription TIMESTAMP NOT NULL,
     date_debut TIMESTAMP NOT NULL,
     date_fin TIMESTAMP NOT NULL,
-    img BYTEA, -- NOT NULL,
+    description_event TEXT,
+    img VARCHAR(100), -- NOT NULL,
     nombre_min_equipe INTEGER,
     nombre_max_equipe INTEGER,
     message_fin TEXT DEFAULT NULL,
@@ -82,8 +83,8 @@ CREATE TABLE Projet(
     idProjet SERIAL PRIMARY KEY,
     nom VARCHAR (30) NOT NULL,
     description_projet TEXT NOT NULL,
-    recompense INTEGER,   
-    imgProjet BYTEA, -- NOT NULL,
+    recompense VARCHAR(100),   
+    imgProjet VARCHAR(100), -- NOT NULL,
     sujet VARCHAR(100),
     idEvent INT REFERENCES Evenement(idEvent) ON DELETE CASCADE
 );
@@ -91,7 +92,7 @@ CREATE TABLE Projet(
 CREATE TABLE Equipe(
     idEquipe SERIAL PRIMARY KEY,
     nom VARCHAR(30) NOT NULL,
-    img BYTEA DEFAULT NULL,
+    img VARCHAR(100) DEFAULT NULL,
     description_equipe TEXT DEFAULT NULL,
     statut_recrutement VARCHAR(30) CHECK (statut_recrutement IN ('ouvert', 'fermé')),
     lien_github TEXT DEFAULT NULL,
@@ -179,15 +180,15 @@ CREATE TABLE Resultat(
 DELETE FROM Utilisateur WHERE email = 'admin@admin.fr';
 
 
-INSERT INTO Evenement (nom, debut_inscription, date_debut, date_fin, nombre_min_equipe, nombre_max_equipe, type_event)
-VALUES ('Nom', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 2, 5, 'challenge'),
-       ('Event2', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, '2028-07-30 12:18:47.564106', 3, 8, 'battle');
+INSERT INTO Evenement (nom,description_event, debut_inscription, date_debut, date_fin, nombre_min_equipe, nombre_max_equipe, type_event)
+VALUES ('Nom','tgrggg' ,CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 2, 5, 'challenge'),
+       ('Event2','ghh' ,CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, '2028-07-30 12:18:47.564106', 3, 8, 'battle');
 
 
 INSERT INTO Projet (nom, description_projet, recompense, imgProjet, sujet,idEvent)
 VALUES 
-    ('p1', 'Description du projet P1', 10000, 'valeur_du_bytea', 'Sujet 1' ,1),
-    ('p2', 'Description du projet p2', 20000, E'\\x0123456789ABCDEF','Sujet principal' ,1);
+    ('p1', 'Description du projet P1', '10000', '../valeur_du_bytea', 'Sujet 1' ,1),
+    ('p2', 'Description du projet p2', '20000', './x0123456789ABCDEF','Sujet principal' ,1);
 
 INSERT INTO Ressource (titre, type_ressource, lien, date_apparition, statut, description_ressource, idProjet)
 VALUES

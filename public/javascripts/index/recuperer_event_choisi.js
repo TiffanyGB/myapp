@@ -133,21 +133,21 @@ function chercherClassement(idEvent) {
     });
 }
 
-function estInteresse(idEvent, idEtudiant){
+function estInteresse(idEvent, idEtudiant) {
 
 }
 
-function chercher_finalistes(idEvent){
+function chercher_finalistes(idEvent) {
     const finaliste = `SELECT * FROM Equipe WHERE finaliste = '${idEvent}'`;
 
-    return new Promise((resolve, reject) =>{
+    return new Promise((resolve, reject) => {
         pool.query(finaliste)
-        .then((res) => {
-            resolve(res.rows);
-        })
-        .catch((error) => {
-            reject(error);
-        });
+            .then((res) => {
+                resolve(res.rows);
+            })
+            .catch((error) => {
+                reject(error);
+            });
     });
 }
 
@@ -162,14 +162,17 @@ async function recupererEvent(idEvent, typeUser) {
 
             /**Insertion des données de l'event */
             tabRetour.title = event.nom;
-            tabRetour.date_creation = '' + event.debut_inscription + '';
+            tabRetour.themes = [];
+            tabRetour.date_creation = event.debut_inscription;
             tabRetour.date_debut = event.date_debut;
             tabRetour.date_fin = event.date_fin;
             tabRetour.type_challenge = event.type_event;
+            tabRetour.description = event.description_event;
             tabRetour.nbMinParEquipe = event.nombre_min_equipe;
             tabRetour.nbMaxParEquipe = event.nombre_max_equipe;
             tabRetour.projet = [];
             tabRetour.regles = [];
+
 
             /**Récupérer les projets associé à l'event*/
             const listeProjets = await recuperer_projets(idEvent);
@@ -199,11 +202,14 @@ async function recupererEvent(idEvent, typeUser) {
                 projetInfos.sujet = projetCourant.sujet;
                 projetInfos.thematique = [];
 
+
                 const listeMots = await recupererMot(projetCourant.idprojet);
 
                 for (j = 0; j < listeMots.length; j++) {
 
                     let motCourant = listeMots[j];
+
+                    tabRetour.themes.push(motCourant.mot);
 
                     projetInfos.thematique.push(motCourant.mot);
                 }
@@ -211,7 +217,7 @@ async function recupererEvent(idEvent, typeUser) {
                 /**Les ressources */
                 const listeRessource = await recuperer_ressourcesPubliques(projetCourant.idprojet);
 
-                projetInfos.ressourcesPubliques = [];
+                projetInfos.ressources = [];
 
                 for (j = 0; j < listeRessource.length; j++) {
 
@@ -222,28 +228,28 @@ async function recupererEvent(idEvent, typeUser) {
                     ressourcesInfos.type = ressourceCourante.type_ressource;
                     ressourcesInfos.lien = ressourceCourante.lien;
                     ressourcesInfos.description = ressourceCourante.description_ressource;
+                    ressourcesInfos.statut = ressourceCourante.statut;
 
-                    projetInfos.ressourcesPubliques.push(ressourcesInfos);
+                    projetInfos.ressources.push(ressourcesInfos);
 
                 }
 
                 if (typeUser != 'aucun') {
                     const listeRessourcePv = await recuperer_ressourcesPrivées(projetCourant.idprojet);
 
-                    projetInfos.ressourcesPv = [];
-
                     for (j = 0; j < listeRessourcePv.length; j++) {
 
+                        console.log();
                         let ressourceCourante = listeRessourcePv[j];
-                        let ressourcesPvInfos = {};
-
+                        let ressourcesPvInfos = {};    
                         ressourcesPvInfos.titre = ressourceCourante.titre;
                         ressourcesPvInfos.type = ressourceCourante.type_ressource;
                         ressourcesPvInfos.lien = ressourceCourante.lien;
                         ressourcesPvInfos.statut = ressourceCourante.statut;
                         ressourcesPvInfos.description = ressourceCourante.description_ressource;
+                        ressourcesPvInfos.statut = ressourceCourante.statut;
 
-                        projetInfos.ressourcesPv.push(ressourcesPvInfos);
+                        projetInfos.ressources.push(ressourcesPvInfos);
 
                     }
                 }
@@ -272,25 +278,24 @@ async function recupererEvent(idEvent, typeUser) {
 
             let finalistes = await chercher_finalistes(idEvent);
 
-            if(finalistes = []){
+            if (finalistes = []) {
                 tabRetour.finalistes = null;
-            }else{
-                
+            } else {
+
                 tabRetour.finalistes = [];
 
-                for (i = 0; i < finalistes.length; i++){
+                for (i = 0; i < finalistes.length; i++) {
                     tabRetour.finalistes.push(finalistes[i]);
                 }
             }
 
             let message = await recuperer_message_fin(idEvent);
 
-            if(message = null){
+            if (message = null) {
                 tabRetour.messageFin = null;
-            }else{
+            } else {
                 tabRetour.messageFin = message;
             }
-        
 
             if (typeUser === 'etudiant') {
 
@@ -303,8 +308,6 @@ async function recupererEvent(idEvent, typeUser) {
                     tabRetour.equipe = -1;
                 }
             }
-
-
             return tabRetour;
         } else {
             throw new Error('Evenement non trouvé: erreur dans le fichier "' + __filename + '" dans "' + arguments.callee.name + '"');
