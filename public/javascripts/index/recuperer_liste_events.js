@@ -81,10 +81,10 @@ async function creerJsonEvent() {
                     let recupeMot = await recupEvent.recupererMot(listeProjets[j].idprojet);
 
                     for(k = 0; k < recupeMot.length; k++){
-                        motCle.push = recupeMot[k].mot;
+                        motCle.push(recupeMot[k].mot);
                         console.log(recupeMot[k].mot);
                     }
-                    
+                    console.log(motCle);
                     courantInfos.mot = motCle;
                 }
 
