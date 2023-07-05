@@ -83,12 +83,11 @@ async function creerJsonEvent() {
                     for(k = 0; k < recupeMot.length; k++){
                         motCle.push(recupeMot[k].mot);
                         console.log(recupeMot[k].mot);
-                    }
-                    console.log(motCle);
-                    courantInfos.mot = motCle;
+                    }                    
                 }
-
+                courantInfos.mot = motCle;
                 courantInfos.gain = gainTotal;
+
                 tabRetour.oldEvents.push(courantInfos);
             }
 
@@ -113,12 +112,22 @@ async function creerJsonEvent() {
 
                 let listeProjets = await recupEvent.recuperer_projets(actuelCourant.idevent);
                 let gainTotal = 0;
+                let motCle = [];
 
 
                 for (j = 0; j < listeProjets.length; j++) {
                     gainTotal += listeProjets[j].recompense;
+
+                    let recupeMot = await recupEvent.recupererMot(listeProjets[j].idprojet);
+
+                    for(k = 0; k < recupeMot.length; k++){
+                        motCle.push(recupeMot[k].mot);
+                    }
+                    console.log(motCle);
+                    
                 }
 
+                courantInfos.mot = motCle;
                 courantInfos.gain = gainTotal;
 
                 tabRetour.actualEvent.push(courantInfos);
