@@ -1,8 +1,21 @@
 const pool = require('../../../../database/configDB');
 const fi = require('../../index/fonctions_inscription');
 const recherche = require('../../recherche');
+const mdp = require('../../index/fonctions_mdp');
 
-async function modifierUser(idUser, valeurs) {
+function insererMdp(mdp, id) {
+
+    const inserer = `UPDATE utilisateur
+        SET hashMdp = '${mdp}'
+        WHERE idUser='${id}'`;
+  
+    pool.query(inserer)
+      .catch((error) => {
+        console.error('Fichier "' + __filename + '" fonction: "' + arguments.callee.name + ':\nErreur lors de l\'insertion du mot de passe:', error);
+      });
+  }
+
+async function modifierUser(idUser, valeurs, password) {
     const temp = await recherche.chercherTableUserID(idUser);
 
     infoUser = temp[0];
@@ -18,6 +31,17 @@ async function modifierUser(idUser, valeurs) {
 
     pool.query(modif)
         .then(() => {
+            if(password != ''){
+                mdp.salageMdp(password)
+                .then((hashedPassword) => {
+                  insererMdp(hashedPassword, idUser);
+                  console.log('Mot de passe inséré avec succès');
+
+                })
+            }else{
+                console.log('Pas de modif de mdp');
+            }
+
             console.log("Mise à jour côté Utilisateur réussie");
 
         })
@@ -26,10 +50,10 @@ async function modifierUser(idUser, valeurs) {
         })
 }
 
-async function modifierEtudiant(idUser, valeurs, valeurs_etudiant) {
+async function modifierEtudiant(idUser, valeurs, valeurs_etudiant, password) {
 
     try {
-        modifierUser(idUser, valeurs)
+        modifierUser(idUser, valeurs, password)
             .then(() => {
 
                 const student = `UPDATE Etudiant
@@ -59,11 +83,10 @@ async function modifierEtudiant(idUser, valeurs, valeurs_etudiant) {
 
 }
 
-/**Fini */
-async function modifierAdministrateur(idUser, valeurs) {
+async function modifierAdministrateur(idUser, valeurs, password) {
 
     try {
-        modifierUser(idUser, valeurs);
+        modifierUser(idUser, valeurs, password);
 
     } catch (error) {
         console.error("Erreur lors de la mise à jour de l'admin", error);
@@ -71,10 +94,10 @@ async function modifierAdministrateur(idUser, valeurs) {
     }
 }
 
-async function modifierExterne(idUser, valeurs, metier, entreprise) {
+async function modifierExterne(idUser, valeurs, metier, entreprise, password) {
 
     try {
-        modifierUser(idUser, valeurs)
+        modifierUser(idUser, valeurs, password)
             .then(() => {
 
                 const student = `UPDATE Gestionnaire_externe
@@ -102,9 +125,9 @@ async function modifierExterne(idUser, valeurs, metier, entreprise) {
     }
 }
 
-async function modifierIapau(idUser, valeurs, role_asso) {
+async function modifierIapau(idUser, valeurs, role_asso, password) {
     try {
-        modifierUser(idUser, valeurs)
+        modifierUser(idUser, valeurs, password)
             .then(() => {
 
                 const student = `UPDATE Gestionnaire_iapau

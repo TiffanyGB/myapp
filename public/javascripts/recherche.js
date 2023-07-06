@@ -1,11 +1,10 @@
 const pool = require('../../database/configDB')
 
-
-
 /** Table: USER */
 /**Identifié par : RIEN */
 /**Renvoie: TOUS */
 
+/**Changer le nom, porte à confusion */
 function chercherUtilisateur() {
 
     const users = `SELECT * FROM Utilisateur`;
@@ -98,33 +97,6 @@ function chercherGestionnaireExterne(idUser) {
     });
 }
 
-/**Chercher un user dans une table selon son id*/
-// function chercherUserID(idUser, type) {
-
-//     const users = `SELECT * FROM ${type} WHERE id = '${idUser}'`;
-
-//     return new Promise((resolve, reject) => {
-//         pool.query(users)
-//             .then((res) => {
-//                 resolve(res.rows);
-//             })
-//             .catch((error) => {
-//                 reject(error);
-//             });
-//     });
-// }
-
-
-
-
-
-
-
-
-
-
-
-/**Chercher un event */
 
 module.exports = {
     chercherUtilisateur,

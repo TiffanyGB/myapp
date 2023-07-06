@@ -5,10 +5,10 @@
 
 const fi = require('../public/javascripts/index/fonctions_inscription');
 const cu = require('../public/javascripts/admin/gestionUsers/creerUser');
-const ce = require('../public/javascripts/admin/gestionEvenements/creerEvent');
 const fmdp = require('../public/javascripts/index/fonctions_mdp');
 const lu = require('../public/javascripts/admin/gestionUsers/voirListeUsers');
 const modif = require('../public/javascripts/admin/gestionUsers/modifierUtilisateurs');
+const recherche = require('../public/javascripts/recherche');
 
 /**Voir les users */
 function voirUtilisateurs(req, res) {
@@ -257,87 +257,97 @@ function modifierUser(req, res) {
 
     const idUser = res.locals.userId;
 
+    console.log(idUser);
+
     /**Vérifier que l'id existe dans la bdd, sinon 404 error */
-    
+    recherche.chercherTableUserID(idUser)
+      .then((result) => {
 
-    const {
-      type: type,
-      nom: userNom,
-      prenom: userPrenom,
-      pseudo: userPseudo,
-      email: userMail,
-      ecole: userEcole,
-      codeEcole: userCodeEcole,
-      niveau_etude: userNiveauEtude,
-      entreprise: userEntreprise,
-      metier: userMetier,
-      role_asso: userRole,
-      password,
-    } = req.body;
-
-    const valeurs = [
-      type,
-      userNom,
-      userPrenom,
-      userPseudo,
-      userMail
-    ]
-
-    const valeurs_etudiant = [
-      userCodeEcole,
-      userEcole,
-      userNiveauEtude
-    ]
-
-    switch (type) {
-      case 'etudiant':
-
-        modif.modifierEtudiant(idUser, valeurs, valeurs_etudiant)
-          .then(() => {
-            res.status(200).json({ message: "Etudiant modifié avec succès" });
-          })
-          .catch(() => {
-            res.status(400).json({ erreur: 'Echec de la modification de l\' étudiant' });
-          });
-
-        break;
-
-      case 'administrateur':
-        modif.modifierAdministrateur(idUser, valeurs)
-          .then(() => {
-            res.status(200).json({ message: "Administrateur modifié avec succès" });
-          })
-          .catch(() => {
-            res.status(400).json({ erreur: 'Echec de la modification de l\'administrateur' });
-          });
-
-        break;
-
-      case 'gestionnaireExterne':
-        modif.modifierExterne(idUser, valeurs, userMetier, userEntreprise)
-          .then(() => {
-            res.status(200).json({ message: "Gestionnaire externe modifié avec succès" });
-          })
-          .catch(() => {
-            res.status(400).json({ erreur: 'Echec de la modification du gestionnaire externe' });
-          });
-
-        break;
+        if (result.length === 0) {
+          res.status(404).json({ erreur: 'Erreur lors de la vérification de l\'existence de l\'utilisateur' })
+        }
+      })
+      .catch((error) => {
         
-      case 'gestionnaireIA':
-        modif.modifierIapau(idUser, valeurs, userRole)
-          .then(() => {
-            res.status(200).json({ message: "Gestionnaire iapau modifié avec succès" });
-          })
-          .catch(() => {
-            res.status(400).json({ erreur: 'Echec de la modification du gestionnaire iapau' });
-          });
+      });
 
-        break;
-    }
+  const {
+    type: type,
+    nom: userNom,
+    prenom: userPrenom,
+    pseudo: userPseudo,
+    email: userMail,
+    ecole: userEcole,
+    codeEcole: userCodeEcole,
+    niveau_etude: userNiveauEtude,
+    entreprise: userEntreprise,
+    metier: userMetier,
+    role_asso: userRole,
+    password,
+  } = req.body;
+
+  const valeurs = [
+    type,
+    userNom,
+    userPrenom,
+    userPseudo,
+    userMail
+  ]
+
+  const valeurs_etudiant = [
+    userCodeEcole,
+    userEcole,
+    userNiveauEtude
+  ]
+
+  switch (type) {
+    case 'etudiant':
+
+      modif.modifierEtudiant(idUser, valeurs, valeurs_etudiant, password)
+        .then(() => {
+          res.status(200).json({ message: "Etudiant modifié avec succès" });
+        })
+        .catch(() => {
+          res.status(400).json({ erreur: 'Echec de la modification de l\' étudiant' });
+        });
+
+      break;
+
+    case 'administrateur':
+      modif.modifierAdministrateur(idUser, valeurs, password)
+        .then(() => {
+          res.status(200).json({ message: "Administrateur modifié avec succès" });
+        })
+        .catch(() => {
+          res.status(400).json({ erreur: 'Echec de la modification de l\'administrateur' });
+        });
+
+      break;
+
+    case 'gestionnaireExterne':
+      modif.modifierExterne(idUser, valeurs, userMetier, userEntreprise, password)
+        .then(() => {
+          res.status(200).json({ message: "Gestionnaire externe modifié avec succès" });
+        })
+        .catch(() => {
+          res.status(400).json({ erreur: 'Echec de la modification du gestionnaire externe' });
+        });
+
+      break;
+
+    case 'gestionnaireIA':
+      modif.modifierIapau(idUser, valeurs, userRole, password)
+        .then(() => {
+          res.status(200).json({ message: "Gestionnaire iapau modifié avec succès" });
+        })
+        .catch(() => {
+          res.status(400).json({ erreur: 'Echec de la modification du gestionnaire iapau' });
+        });
+
+      break;
   }
 }
-
+}
 
 function supprimerUser(req, res) {
   if (req.method == "OPTIONS") {

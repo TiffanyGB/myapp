@@ -28,8 +28,8 @@ async function envoyer_json_liste_user() {
                 userInfos.mail = userCourant.email;
                 userInfos.dateCreation = userCourant.date_inscription;
                 userInfos.ville = userCourant.ville;
-                userInfos.github = userCourant.github;
-                userInfos.linkedin = userCourant.linkedin;
+                userInfos.github = userCourant.lien_github;
+                userInfos.linkedin = userCourant.lien_linkedin;
 
                 if (userCourant.typeuser === 'etudiant') {
                     let chercherStudent = await recherche.chercherStudent(userCourant.iduser);
@@ -44,19 +44,6 @@ async function envoyer_json_liste_user() {
                     }
                 }
 
-                if (userCourant.typeuser === 'gestionnaireIA') {
-
-                    let chercherGIA = await recherche.chercherGestionnaireIapau(userCourant.iduser);
-
-                    if (chercherGIA === 0) {
-                        return 'erreur_student'
-                    } else {
-                        gia = chercherGIA[0];
-
-                        userInfos.role_asso = gia.role_asso;
-                    }
-                }
-
                 if (userCourant.typeuser === 'gestionnaireExterne') {
 
                     let chercherGE = await recherche.chercherGestionnaireExterne(userCourant.iduser);
@@ -64,14 +51,25 @@ async function envoyer_json_liste_user() {
                     if (chercherGE === 0) {
                         return 'erreur_student'
                     } else {
-                        gex = chercherGE[0];
+                        let gex = chercherGE[0];
 
                         userInfos.entreprise = gex.entreprise;
                         userInfos.metier = gex.metier;
                     }
                 }
 
+                if (userCourant.typeuser === 'gestionnaireIA') {
 
+                    let chercherGIA = await recherche.chercherGestionnaireIapau(userCourant.iduser);
+
+                    if (chercherGIA === 0) {
+                        return 'erreur_student'
+                    } else {
+                        let gia = chercherGIA[0];
+
+                        userInfos.role_asso = gia.role_asso;
+                    }
+                }
                 jsonRetour.utilisateurs.push(userInfos);
             }
             return jsonRetour;

@@ -225,7 +225,7 @@ async function connexion(req, res) {
           };
 
           /**  Générer le JWT */
-          const token = jwt.sign(payload, secretKey, { expiresIn: '50d' });
+          const token = jwt.sign(payload, secretKey, { expiresIn: '24h' });
           // const token = tk.creerToken(payload);
 
           res.status(200).json({ token: token, id: user.iduser, prenom: user.prenom, nom: user.nom, pseudo: user.pseudo, role: user.typeuser });
