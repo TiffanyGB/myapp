@@ -1,6 +1,6 @@
 const pool = require('../../../../database/configDB');
 const fi = require('../../index/fonctions_inscription');
-const recherche = require('../../recherche');
+const recherche = require('../../rechercheUsers');
 const mdp = require('../../index/fonctions_mdp');
 
 function insererMdp(mdp, id) {

@@ -21,8 +21,4 @@ router.all('/delete/:id', (req, res, next) => {
     next();
   }, indexController.verifyToken, adminController.supprimerUser);
   
-
-// router.all('/creerEvent', adminController.createEvent);
-
-
 module.exports = router;

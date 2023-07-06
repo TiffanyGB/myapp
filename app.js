@@ -13,6 +13,7 @@ var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var gestionnaireRouter = require('./routes/gestionnaire');
 var adminRouter = require('./routes/admin');
+var eventsRouter = require('./routes/events');
 var etudiantRouter = require('./routes/etudiant');
 
 /**crée une instance de l'application Express */
@@ -45,6 +46,7 @@ app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/gestionnaire', gestionnaireRouter);
 app.use('/admin', adminRouter);
+app.use('/events', eventsRouter);
 app.use('/etudiant', etudiantRouter);
 
 // Exécution du script pour créer l'utilisateur par défaut

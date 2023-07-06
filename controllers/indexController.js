@@ -8,6 +8,7 @@
 //  * @module fonctions_mdp
 //  */
 const fmdp = require('../public/javascripts/index/fonctions_mdp');
+const { body, validationResult } = require('express-validator');
 
 // /**
 //  * Module de fonctions pour l'inscription des utilisateurs.
@@ -49,7 +50,7 @@ const generateSecretKey = () => {
 const secretKey = generateSecretKey();
 
 // Middleware de vérification du token
-function verifyToken(req, res, next) {  
+function verifyToken(req, res, next) {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
 
@@ -96,7 +97,7 @@ function verifyToken(req, res, next) {
  *    {string} Authorization - Token d'authentification JWT.
  */
 
-function inscriptionEleve(req, res) {
+async function inscriptionEleve(req, res) {
   if (req.method === 'POST') {
 
     /**Données du formulaire d'inscription */
@@ -113,6 +114,89 @@ function inscriptionEleve(req, res) {
       niveauEtude: userNiveauEtude,
       password
     } = req.body;
+
+    // Vérification des erreurs de validation
+    /**Fonction pour cela */
+    await body('nom')
+      .matches(/^[a-zA-Z]+$/)
+      .isLength({ min: 3, max: 25 })
+      .not().isEmpty()
+      .withMessage('Le nom doit contenir uniquement des lettres et avoir une longueur comprise entre 3 et 25 caractères.')
+      .run(req);
+
+    await body('prenom')
+      .matches(/^[a-zA-Z]+$/)
+      .isLength({ min: 3, max: 25 })
+      .not().isEmpty()
+      .withMessage('Le prenom doit contenir uniquement des lettres et avoir une longueur comprise entre 3 et 25 caractères.')
+      .run(req);
+
+    await body('pseudo')
+      .matches(/^[a-zA-Z0-9!&#(~)_^%?]+$/)
+      .isLength({ min: 3, max: 20 })
+      .custom((value) => {
+        if (value.trim() !== value) {
+          throw new Error('Le nom ne doit pas contenir d\'espaces entre les lettres.');
+        }
+        return true;
+      })
+      .not().isEmpty()
+      .withMessage('Le nom doit contenir uniquement des lettres et avoir une longueur comprise entre 3 et 25 caractères.')
+      .run(req);
+
+    await body('password')
+      .isLength({ min: 8, max: 40 })
+      .not().isEmpty()
+      .withMessage('Le mot de passe doit contenir au moins 8 caractères')
+      .matches(/[A-Z]/)
+      .withMessage('Le mot de passe doit contenir au moins une lettre majuscule')
+      .matches(/[0-9]/)
+      .withMessage('Le mot de passe doit contenir au moins un chiffre')
+      .matches(/[!@#$%^&*]/)
+      .withMessage('Le mot de passe doit contenir au moins un caractère spécial')
+      .run(req);
+
+    await body('linkedin')
+      .isLength({ max: 150 })
+      .optional()
+      .isURL()
+      .withMessage('Le lien LinkedIn n\'est pas valide')
+      .run(req);
+
+    await body('github')
+      .isLength({ max: 150 })
+      .optional()
+      .isURL({ protocols: ['http', 'https'], require_protocol: true })
+      .withMessage('Le lien GitHub n\'est pas valide')
+      .run(req);
+
+    await body('email')
+      .isLength({ max: 60 })
+      .isEmail()
+      .withMessage('L\'adresse email n\'est pas valide')
+      .run(req);
+
+    await body('niveauEtude')
+      .isIn(['L1', 'L2', 'L3', 'M1', 'M2', 'Doctorat'])
+      .withMessage('Le niveau d\'études n\'est pas valide')
+      .run(req);
+
+    /**Peut etre vérfier avec la liste */
+    await body('ecole')
+      .isLength({ max: 70 })
+      .run(req);
+
+    await body('ville')
+      .isLength({ min: 3, max: 40 })
+      .run(req);
+
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+
+
 
     /** Informations spécifique à un utilisateur */
     const values = [
@@ -204,6 +288,38 @@ async function connexion(req, res) {
 
     const identifiant = req.body.identifiant;
     const password = req.body.password;
+
+    await body('identifiant')
+      .matches(/^[a-zA-Z0-9!&#(~)_^%?]+$/)
+      .isLength({ min: 3, max: 60 })
+      .custom((value) => {
+        if (value.trim() !== value) {
+          throw new Error('Le nom ne doit pas contenir d\'espaces entre les lettres.');
+        }
+        return true;
+      })
+      .not().isEmpty()
+      .withMessage('Le nom doit contenir uniquement des lettres et avoir une longueur comprise entre 3 et 25 caractères.')
+      .run(req);
+
+    await body('password')
+      .isLength({ min: 8, max: 40 })
+      .withMessage('Le mot de passe doit contenir au moins 8 caractères')
+      .not().isEmpty()
+      .matches(/[A-Z]/)
+      .withMessage('Le mot de passe doit contenir au moins une lettre majuscule')
+      .matches(/[0-9]/)
+      .withMessage('Le mot de passe doit contenir au moins un chiffre')
+      .matches(/[!@#$%^&*]/)
+      .withMessage('Le mot de passe doit contenir au moins un caractère spécial')
+      .run(req);
+
+
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
     const requeteChercher = `SELECT * FROM Utilisateur WHERE (email='${identifiant}') OR (pseudo='${identifiant}')`;
 
     try {
@@ -308,9 +424,9 @@ function voirTousEvents(req, res) {
   if (req.method === 'GET') {
     la.creerJsonEvent()
       .then((result) => {
-        if(result === false){
-          res.status(400).json({message: 'Aucun événement'});
-        }else{
+        if (result === false) {
+          res.status(400).json({ message: 'Aucun événement' });
+        } else {
           res.status(200).json(result);
         }
       })

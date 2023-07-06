@@ -9,7 +9,7 @@ const valeurs = ['admin', 'admin'];
 
 const createDefaultUser = async () => {
     try {
-        const password = 'admin';
+        const password = 'Admin2023!';
 
         /* Génération du mot de passe */
         const nonExiste = await fi.verifExistence(valeurs);

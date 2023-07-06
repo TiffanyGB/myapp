@@ -8,7 +8,8 @@ const cu = require('../public/javascripts/admin/gestionUsers/creerUser');
 const fmdp = require('../public/javascripts/index/fonctions_mdp');
 const lu = require('../public/javascripts/admin/gestionUsers/voirListeUsers');
 const modif = require('../public/javascripts/admin/gestionUsers/modifierUtilisateurs');
-const recherche = require('../public/javascripts/recherche');
+const recherche = require('../public/javascripts/rechercheUsers');
+const { body, validationResult } = require('express-validator');
 
 /**Voir les users */
 function voirUtilisateurs(req, res) {
@@ -73,6 +74,44 @@ async function createUser(req, res) {
       metier: userMetier,
       role_asso: userRole
     } = req.body;
+
+    await body('password')
+      .isLength({ min: 8 })
+      .withMessage('Le mot de passe doit contenir au moins 8 caractères')
+      .matches(/[A-Z]/)
+      .withMessage('Le mot de passe doit contenir au moins une lettre majuscule')
+      .matches(/[0-9]/)
+      .withMessage('Le mot de passe doit contenir au moins un chiffre')
+      .matches(/[!@#$%^&*]/)
+      .withMessage('Le mot de passe doit contenir au moins un caractère spécial')
+      .run(req);
+
+    await body('linkedin')
+      .optional()
+      .isURL()
+      .withMessage('Le lien LinkedIn n\'est pas valide')
+      .run(req);
+
+    await body('github')
+      .optional()
+      .isURL({ protocols: ['http', 'https'], require_protocol: true })
+      .withMessage('Le lien GitHub n\'est pas valide')
+      .run(req);
+
+    await body('email')
+      .isEmail()
+      .withMessage('L\'adresse email n\'est pas valide')
+      .run(req);
+
+    await body('niveau_etude')
+      .isIn(['L1', 'L2', 'L3', 'M1', 'M2', 'Doctorat'])
+      .withMessage('Le niveau d\'études n\'est pas valide')
+      .run(req);
+
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
 
     const valeurs_communes = [
       userNom,
@@ -241,7 +280,7 @@ async function createUser(req, res) {
 }
 
 /**Modification users */
-function modifierUser(req, res) {
+async function modifierUser(req, res) {
 
   if (req.method == "OPTIONS") {
     res.status(200).json({ sucess: 'Agress granted' });
@@ -268,85 +307,176 @@ function modifierUser(req, res) {
         }
       })
       .catch((error) => {
-        
+
       });
 
-  const {
-    type: type,
-    nom: userNom,
-    prenom: userPrenom,
-    pseudo: userPseudo,
-    email: userMail,
-    ecole: userEcole,
-    codeEcole: userCodeEcole,
-    niveau_etude: userNiveauEtude,
-    entreprise: userEntreprise,
-    metier: userMetier,
-    role_asso: userRole,
-    password,
-  } = req.body;
+    const {
+      type: type,
+      nom: userNom,
+      prenom: userPrenom,
+      pseudo: userPseudo,
+      email: userMail,
+      ecole: userEcole,
+      codeEcole: userCodeEcole,
+      niveau_etude: userNiveauEtude,
+      entreprise: userEntreprise,
+      metier: userMetier,
+      role_asso: userRole,
+      password,
+    } = req.body;
 
-  const valeurs = [
-    type,
-    userNom,
-    userPrenom,
-    userPseudo,
-    userMail
-  ]
+    await body('nom')
+      .matches(/^[a-zA-Z]+$/)
+      .isLength({ min: 3, max: 25 })
+      .not().isEmpty()
+      .withMessage('Le nom doit contenir uniquement des lettres et avoir une longueur comprise entre 3 et 25 caractères.')
+      .run(req);
 
-  const valeurs_etudiant = [
-    userCodeEcole,
-    userEcole,
-    userNiveauEtude
-  ]
+    await body('prenom')
+      .matches(/^[a-zA-Z]+$/)
+      .isLength({ min: 3, max: 25 })
+      .not().isEmpty()
+      .withMessage('Le prenom doit contenir uniquement des lettres et avoir une longueur comprise entre 3 et 25 caractères.')
+      .run(req);
 
-  switch (type) {
-    case 'etudiant':
+    await body('pseudo')
+      .matches(/^[a-zA-Z0-9!&#(~)_^%?]+$/)
+      .isLength({ min: 3, max: 20 })
+      .custom((value) => {
+        if (value.trim() !== value) {
+          throw new Error('Le nom ne doit pas contenir d\'espaces entre les lettres.');
+        }
+        return true;
+      })
+      .not().isEmpty()
+      .withMessage('Le nom doit contenir uniquement des lettres et avoir une longueur comprise entre 3 et 25 caractères.')
+      .run(req);
 
-      modif.modifierEtudiant(idUser, valeurs, valeurs_etudiant, password)
-        .then(() => {
-          res.status(200).json({ message: "Etudiant modifié avec succès" });
-        })
-        .catch(() => {
-          res.status(400).json({ erreur: 'Echec de la modification de l\' étudiant' });
-        });
+    await body('password')
+      .isLength({ min: 8, max: 40 })
+      .withMessage('Le mot de passe doit contenir au moins 8 caractères')
+      .matches(/[A-Z]/)
+      .withMessage('Le mot de passe doit contenir au moins une lettre majuscule')
+      .matches(/[0-9]/)
+      .withMessage('Le mot de passe doit contenir au moins un chiffre')
+      .matches(/[!@#$%^&*]/)
+      .withMessage('Le mot de passe doit contenir au moins un caractère spécial')
+      .run(req);
 
-      break;
+    await body('linkedin')
+      .isLength({ max: 150 })
+      .optional()
+      .isURL()
+      .withMessage('Le lien LinkedIn n\'est pas valide')
+      .run(req);
 
-    case 'administrateur':
-      modif.modifierAdministrateur(idUser, valeurs, password)
-        .then(() => {
-          res.status(200).json({ message: "Administrateur modifié avec succès" });
-        })
-        .catch(() => {
-          res.status(400).json({ erreur: 'Echec de la modification de l\'administrateur' });
-        });
+    await body('github')
+      .isLength({ max: 150 })
+      .optional()
+      .isURL({ protocols: ['http', 'https'], require_protocol: true })
+      .withMessage('Le lien GitHub n\'est pas valide')
+      .run(req);
 
-      break;
+    await body('email')
+      .isLength({ max: 60 })
+      .isEmail()
+      .not().isEmpty()
+      .withMessage('L\'adresse email n\'est pas valide')
+      .run(req);
 
-    case 'gestionnaireExterne':
-      modif.modifierExterne(idUser, valeurs, userMetier, userEntreprise, password)
-        .then(() => {
-          res.status(200).json({ message: "Gestionnaire externe modifié avec succès" });
-        })
-        .catch(() => {
-          res.status(400).json({ erreur: 'Echec de la modification du gestionnaire externe' });
-        });
+    await body('niveauEtude')
+      .isIn(['L1', 'L2', 'L3', 'M1', 'M2', 'Doctorat'])
+      .withMessage('Le niveau d\'études n\'est pas valide')
+      .run(req);
 
-      break;
+    /**Peut etre vérfier avec la liste */
+    await body('ecole')
+      .isLength({ max: 70 })
+      .run(req);
 
-    case 'gestionnaireIA':
-      modif.modifierIapau(idUser, valeurs, userRole, password)
-        .then(() => {
-          res.status(200).json({ message: "Gestionnaire iapau modifié avec succès" });
-        })
-        .catch(() => {
-          res.status(400).json({ erreur: 'Echec de la modification du gestionnaire iapau' });
-        });
+    await body('ville')
+      .isLength({ min: 3, max: 40 })
+      .run(req);
 
-      break;
+    await body('entreprise')
+      .isLength({ min: 2, max: 40 })
+      .run(req);
+
+    await body('metier')
+      .isLength({ min: 2, max: 40 })
+      .run(req);
+
+    await body('role_asso')
+      .matches(/^[a-zA-Z]+$/)
+      .isLength({ min: 2, max: 40 })
+      .run(req);
+
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const valeurs = [
+      type,
+      userNom,
+      userPrenom,
+      userPseudo,
+      userMail
+    ]
+
+    const valeurs_etudiant = [
+      userCodeEcole,
+      userEcole,
+      userNiveauEtude
+    ]
+
+    switch (type) {
+      case 'etudiant':
+
+        modif.modifierEtudiant(idUser, valeurs, valeurs_etudiant, password)
+          .then(() => {
+            res.status(200).json({ message: "Etudiant modifié avec succès" });
+          })
+          .catch(() => {
+            res.status(400).json({ erreur: 'Echec de la modification de l\' étudiant' });
+          });
+
+        break;
+
+      case 'administrateur':
+        modif.modifierAdministrateur(idUser, valeurs, password)
+          .then(() => {
+            res.status(200).json({ message: "Administrateur modifié avec succès" });
+          })
+          .catch(() => {
+            res.status(400).json({ erreur: 'Echec de la modification de l\'administrateur' });
+          });
+
+        break;
+
+      case 'gestionnaireExterne':
+        modif.modifierExterne(idUser, valeurs, userMetier, userEntreprise, password)
+          .then(() => {
+            res.status(200).json({ message: "Gestionnaire externe modifié avec succès" });
+          })
+          .catch(() => {
+            res.status(400).json({ erreur: 'Echec de la modification du gestionnaire externe' });
+          });
+
+        break;
+
+      case 'gestionnaireIA':
+        modif.modifierIapau(idUser, valeurs, userRole, password)
+          .then(() => {
+            res.status(200).json({ message: "Gestionnaire iapau modifié avec succès" });
+          })
+          .catch(() => {
+            res.status(400).json({ erreur: 'Echec de la modification du gestionnaire iapau' });
+          });
+
+        break;
+    }
   }
-}
 }
 
 function supprimerUser(req, res) {
@@ -370,75 +500,8 @@ function supprimerUser(req, res) {
   }
 }
 
-
-
-// function createEvent(req, res) {
-//   if (req.method === 'GET') {
-//     res.render('admin/creerEvent', { title: 'Créer Event' });
-//   } else if (req.method === 'POST') {
-
-//     const {
-//       typeEvent,
-//       nomEvent,
-//       dateInscription,
-//       dateDebut,
-//       dateFin,
-//       dateResultat,
-//       regles,
-//       nbEquipeMin,
-//       nbEquipeMax,
-//       imageEvent,
-
-//     } = req.body;
-
-//     const valeurs_event = [
-//       typeEvent,
-//       nomEvent,
-//       dateInscription,
-//       dateDebut,
-//       dateFin,
-//       dateResultat,
-//       regles,
-//       nbEquipeMin,
-//       nbEquipeMax,
-//       imageEvent
-//     ]
-
-//     const { projet, ressources } = req.body;
-
-//     // Traiter les données et les enregistrer dans la base de données
-
-//     // Exemple : afficher les tableaux dans la console
-//     console.log('Tableau des projets :', projet);
-//     console.log('Tableau des ressources :', ressources);
-//     console.log('Tableau des events: ', valeurs_event);
-
-
-//     // try{
-//     //   ce.creerEvent(nomEvent);
-//     //   //res.status(200).json({message:'Carré'});
-//     // }
-//     // catch{
-//     //   console.log('Erreur dans la création d\'un event');
-//     //   //es.status(400).json({message:'Erreur lors de la création d\'un event'});
-//     // }
-
-//     //   // .then(()=> {
-//     //   //   res.status(200).json({message:'Carré'});
-
-//     //   // })
-//     //   // .catch((err)=> {
-//     //   //   console.log('Erreur dans la création d\'un event');
-//     //   //   res.status(400).json({message:'Erreur lors de la création d\'un event'});
-
-//     //   // })
-//   }
-// }
-
-
 module.exports = {
   createUser,
-  // createEvent,
   voirUtilisateurs,
   modifierUser,
   supprimerUser
