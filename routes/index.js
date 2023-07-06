@@ -1,8 +1,8 @@
 var express = require('express');
 var router = express.Router();
 // const cors = require('cors');
-// const adminRouter = require('./admin');
-// router.use('/users', adminRouter);
+const adminRouter = require('./admin');
+router.use('/users', adminRouter);
 
 // const eventsRouter = require('./events');
 // router.use('/events', eventsRouter);

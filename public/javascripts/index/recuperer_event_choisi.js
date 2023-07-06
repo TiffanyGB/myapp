@@ -74,6 +74,21 @@ function recuperer_ressourcesPubliques(idProjet) {
     });
 }
 
+function recuperer_toutes_ressources(idProjet) {
+
+    const chercherRessources = `SELECT * FROM Ressource WHERE idprojet = '${idProjet}'`;
+
+    return new Promise((resolve, reject) => {
+        pool.query(chercherRessources)
+            .then((res) => {
+                resolve(res.rows);
+            })
+            .catch((error) => {
+                reject(error);
+            });
+    });
+}
+
 function recuperer_message_fin(idEvent) {
 
     const message = `SELECT * FROM Evenement WHERE idEvent = '${idEvent}'`;
@@ -327,5 +342,5 @@ module.exports = {
     nbEvent,
     recupererEvent,
     recuperer_projets,
-    recupererMot
+    recupererMot,recuperer_toutes_ressources
 }
