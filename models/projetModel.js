@@ -1,17 +1,39 @@
-const pool = require('../../../../database/configDB');
-const fi = require('../../index/fonctions_inscription');
-const rechercheProjet = require('../../rechercheEvents');
-const recup = require('../../index/recuperer_event_choisi');
+const pool = require('../database/configDB');
+const recup = require('../public/javascripts/index/recuperer_event_choisi');
 
 
-function listeEvents() {
+/**Liste des projets */
+function tousLesProjets(){
 
+    const projets = `SELECT * FROM Projet`;
+
+    return new Promise((resolve, reject) => {
+        pool.query(projets)
+            .then((res) => {
+                resolve(res.rows);
+            })
+            .catch((error) => {
+                reject(error);
+            });
+    });
 }
 
+/**Chercher un projet par son id*/
+
+/**Créer un projet */
+
+/**Modifier un projet */
+
+/**Supprimer un projet */
+
+/**Valider les données */
+
+
+/**JSON avec tous les projets */
 async function listeProjetsJson() {
 
     try {
-        let projetsListe = await rechercheProjet.tousLesProjets();
+        let projetsListe = await tousLesProjets();
 
         if (projetsListe === 0) {
             json.message = "Aucun projet n'existe";
@@ -62,9 +84,6 @@ async function listeProjetsJson() {
                     temp.ressources.push(ressourcesInfos);
 
                 }
-
-
-
                 jsonRetour.projets.push(temp);
             }
 
@@ -78,8 +97,39 @@ async function listeProjetsJson() {
     }
 }
 
-listeProjetsJson();
+
+
+
+
+
+
+// Pour gérer le lien entre projet et ressources, exemple chat gpt
+
+
+// Modèle Projet
+// const Projet = {
+//     // Méthode pour récupérer les ressources d'un projet donné
+//     getResources: async function (projetId) {
+//       try {
+//         // Effectuer une requête à la base de données pour récupérer les ressources du projet
+//         const ressources = await db.query('SELECT * FROM ressources WHERE projet_id = ?', [projetId]);
+//         return ressources;
+//       } catch (error) {
+//         throw new Error('Erreur lors de la récupération des ressources du projet');
+//       }
+//     },
+//     // ... Autres méthodes du modèle Projet
+//   };
+  
+//   // Modèle Ressource
+//   const Ressource = {
+//     // ... Méthodes du modèle Ressource
+//   };
+  
+//   module.exports = { Projet, Ressource };
+  
 
 module.exports = {
+    tousLesProjets,
     listeProjetsJson
 }

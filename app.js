@@ -9,12 +9,16 @@ var logger = require('morgan');
 const cors = require('cors');
 
 /**Routes */
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
-var gestionnaireRouter = require('./routes/gestionnaire');
 var adminRouter = require('./routes/admin');
-var eventsRouter = require('./routes/events');
 var etudiantRouter = require('./routes/etudiant');
+var eventsRouter = require('./routes/events');
+var gestionnaireExterneRouter = require('./routes/gestionnaireExterne');
+var gestionnaireIaRouter = require('./routes/gestionnaireIa');
+var indexRouter = require('./routes/index');
+var projetRouter = require('./routes/projet');
+var ressourceRouteur = require('./routes/ressource');
+var usersRouter = require('./routes/users');
+// var gestionnaireRouter = require('./routes/gestionnaire');
 
 /**crée une instance de l'application Express */
 var app = express();
@@ -42,12 +46,16 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 /** définit les routes en utilisant les routeurs pour gérer les requêtes correspondantes. */
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
-app.use('/gestionnaire', gestionnaireRouter);
 app.use('/admin', adminRouter);
-app.use('/events', eventsRouter);
 app.use('/etudiant', etudiantRouter);
+app.use('/events', eventsRouter);
+app.use('/gestionnaireExterne', gestionnaireExterneRouter);
+app.use('/gestionnaireIA', gestionnaireIaRouter)
+app.use('/', indexRouter);
+app.use('/projet', projetRouter);
+app.use('/ressource', ressourceRouteur);
+app.use('/users', usersRouter);
+// app.use('/gestionnaire', gestionnaireRouter);
 
 // Exécution du script pour créer l'utilisateur par défaut
 // createDefaultUser();

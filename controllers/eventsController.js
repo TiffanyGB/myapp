@@ -1,7 +1,8 @@
 const fi = require('../public/javascripts/index/fonctions_inscription');
 const cu = require('../public/javascripts/admin/gestionUsers/creerUser');
-const listeEvent = require('../public/javascripts/admin/gestionEvenements/voirListeEvents');
+const listeg = require('../public/javascripts/admin/gestionEvenements/voirListeGestionnaires')
 const modif = require('../public/javascripts/admin/gestionUsers/modifierUtilisateurs');
+const projetModel = require('../models/projetModel');
 const { body, validationResult } = require('express-validator');
 
 
@@ -14,7 +15,7 @@ function voirListeEvents(req, res) {
         else if (req.method === 'GET') {
 
 
-            listeEvent.listeProjetsJson()
+            projetModel.listeProjetsJson()
                 .then((result) => {
                     if (result === 'aucun') {
                         res.status(400).json({ erreur: "Erreur lors de la récupération des utilisateurs" })
@@ -23,23 +24,7 @@ function voirListeEvents(req, res) {
                     } else {
                         res.status(200).json(result);
                     }
-                })
-
-            // lu.envoyer_json_liste_user()
-            //     .then((result) => {
-            //         if (result === 'aucun') {
-            //             res.status(400).json({ erreur: "Erreur lors de la récupération des utilisateurs" })
-            //         } else if (result === "erreur_student") {
-            //             res.status(400).json({ erreur: "Erreur lors de la récupération des données côté étudiant" })
-            //         } else {
-            //             res.status(200).json(result);
-            //         }
-            //     })
-            //     .catch((error) => {
-            //         console.log(error);
-            //         res.status(500).json({ message: 'Une erreur s\'est produite lors de la récupération des utilisateurs.' });
-
-            //     });
+                });
 
         }
     } else if (req.userProfile === 'etudiant') {
@@ -54,7 +39,37 @@ function voirListeEvents(req, res) {
     }
 }
 
+function voirListeGestionnaires(req, res) {
 
+    if (req.userProfile === 'admin') {
+        if (req.method === 'OPTION') {
+            res.status(200).json({ sucess: 'Agress granted' });
+        }
+        else if (req.method === 'GET') {
+
+
+            listeg.listegestionnaireJSON()
+                .then((result) => {
+                    if (result === 'aucun') {
+                        res.status(400).json({ erreur: "Erreur lors de la récupération des utilisateurs" })
+                    } else if (result === "erreur_student") {
+                        res.status(400).json({ erreur: "Erreur lors de la récupération des données côté étudiant" })
+                    } else {
+                        res.status(200).json(result);
+                    }
+                });
+        }
+    } else if (req.userProfile === 'etudiant') {
+
+        res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "etudiant" });
+    } else if (req.userProfile === 'gestionnaire') {
+
+        res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "gestionnaire" });
+    } else if (req.userProfile === 'aucun') {
+
+        res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "Aucun" });
+    }
+}
 
 // function createEvent(req, res) {
 //   if (req.method === 'GET') {
@@ -120,5 +135,6 @@ function voirListeEvents(req, res) {
 // }
 
 module.exports = {
-    voirListeEvents
+    voirListeEvents,
+    voirListeGestionnaires
 }

@@ -1,7 +1,55 @@
-const pool = require('../../../../database/configDB');
-const fi = require('../../index/fonctions_inscription');
-const recherche = require('../../rechercheUsers');
+const pool = require('../database/configDB');
+const recherche = require('../public/javascripts/rechercheUsers');
 
+
+/**Liste des utilisateurs  */
+function chercherListeUtilisateurs() {
+
+    const users = `SELECT * FROM Utilisateur`;
+
+    return new Promise((resolve, reject) => {
+        pool.query(users)
+            .then((res) => {
+                resolve(res.rows);
+            })
+            .catch((error) => {
+                reject(error);
+            });
+    });
+}
+
+/**Chercher un utilisateur par son id*/
+function chercherUserID(idUser) {
+    const users = 'SELECT * FROM Utilisateur WHERE idUser = $1';
+    const params = [idUser];
+
+    return new Promise((resolve, reject) => {
+        pool.query(users, params)
+            .then((res) => {
+                resolve(res.rows);
+            })
+            .catch((error) => {
+                reject(error);
+            });
+    });
+}
+
+/**Chercher un utilisateur par son pseudo */
+
+
+/**Créer un utilisateur */
+
+
+/**Modifier un utilisateur */
+
+
+/**Supprimer */
+
+
+/**Valider les données */
+
+
+/**JSON de la liste des utilisateurs */
 async function envoyer_json_liste_user() {
 
     try {
@@ -79,6 +127,9 @@ async function envoyer_json_liste_user() {
     }
 }
 
-module.exports = {
+
+module.exports = { 
+    chercherListeUtilisateurs,
+    chercherUserID,
     envoyer_json_liste_user
 }

@@ -1,10 +1,5 @@
 const pool = require('../../database/configDB')
-
-/** Table: USER */
-/**Identifié par : RIEN */
-/**Renvoie: TOUS */
-
-/**Changer le nom, porte à confusion */
+/*Mis*/
 function chercherUtilisateur() {
 
     const users = `SELECT * FROM Utilisateur`;
@@ -20,9 +15,8 @@ function chercherUtilisateur() {
     });
 }
 
-/** Table: USER */
-/**Identifié par : ID */
-/**Renvoie: UN SEUL */
+
+/** Mis dans le model */
 
 function chercherTableUserID(idUser) {
     const users = 'SELECT * FROM Utilisateur WHERE idUser = $1';
@@ -39,9 +33,8 @@ function chercherTableUserID(idUser) {
     });
 }
 
-/** Table: ETUDIANT */
-/**Identifié par : ID */
-/**Renvoie: UN SEUL */
+/** Mis dans le model */
+
 function chercherStudent(idUser) {
 
     const users = 'SELECT * FROM Etudiant WHERE idEtudiant = $1';
@@ -59,9 +52,8 @@ function chercherStudent(idUser) {
 }
 
 
-/** Table: GESTIONNAIRE IA PAU */
-/**Identifié par : ID */
-/**Renvoie: UN SEUL */
+/** Mis dans le model */
+
 function chercherGestionnaireIapau(idUser) {
 
     const users = 'SELECT * FROM Gestionnaire_iapau WHERE id_g_iapau = $1';
@@ -78,12 +70,26 @@ function chercherGestionnaireIapau(idUser) {
     });
 }
 
-/** Table: GESTIONNAIRE EXTERNE */
-/**Identifié par : ID */
-/**Renvoie: UN SEUL */
+/** Mis dans le model */
 function chercherGestionnaireExterne(idUser) {
 
     const users = 'SELECT * FROM Gestionnaire_externe WHERE id_g_externe = $1';
+    const params = [idUser];
+
+    return new Promise((resolve, reject) => {
+        pool.query(users, params)
+            .then((res) => {
+                resolve(res.rows);
+            })
+            .catch((error) => {
+                reject(error);
+            });
+    });
+}
+
+function chercherTousGestionnaireExterne() {
+
+    const users = 'SELECT * FROM Gestionnaire_externe';
     const params = [idUser];
 
     return new Promise((resolve, reject) => {
@@ -103,5 +109,6 @@ module.exports = {
     chercherStudent,
     chercherTableUserID,
     chercherGestionnaireIapau,
-    chercherGestionnaireExterne
+    chercherGestionnaireExterne,
+    chercherTousGestionnaireExterne
 }

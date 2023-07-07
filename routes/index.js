@@ -4,8 +4,6 @@ var router = express.Router();
 const adminRouter = require('./admin');
 router.use('/users', adminRouter);
 
-// const eventsRouter = require('./events');
-// router.use('/events', eventsRouter);
 
 const bodyParser = require('body-parser');
 const indexController = require('../controllers/indexController');
