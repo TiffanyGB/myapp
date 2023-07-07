@@ -1,9 +1,9 @@
-const fi = require('../public/javascripts/index/fonctions_inscription');
-const cu = require('../public/javascripts/admin/gestionUsers/creerUser');
-const projetModel = require('../models/projetModel');
+const pool = require('../database/configDB');
+const gestionnaireModel = require('../models/gestionnaireModel');
 
-/**Liste des projets */
-function voirListeProjets(req, res) {
+
+/**Liste des gestionnaire IA et externes */
+function voirListeGestionnaires(req, res) {
 
     if (req.userProfile === 'admin') {
         if (req.method === 'OPTION') {
@@ -11,18 +11,19 @@ function voirListeProjets(req, res) {
         }
         else if (req.method === 'GET') {
 
-
-            projetModel.listeProjetsJson()
+            gestionnaireModel.envoyer_json_liste_gestionnaires()
                 .then((result) => {
-                    if (result === 'aucun') {
-                        res.status(400).json({ erreur: "Erreur lors de la récupération des utilisateurs" })
-                    } else if (result === "erreur_student") {
-                        res.status(400).json({ erreur: "Erreur lors de la récupération des données côté étudiant" })
+                    if (result === 'aucun_gestionnaires') {
+                        res.status(200).json({ message: 'Aucun utilisateur trouvé.' });
+                    } else if (result === "error_no_user") {
+                        res.status(400).json({ erreur: "Aucun utilisateur ne possède l'id du gestionnaire" })
                     } else {
                         res.status(200).json(result);
                     }
+                })
+                .catch(() => {
+                    res.status(500).json({ erreur: "Erreur lors de la récupération des gestionnaires." });
                 });
-
         }
     } else if (req.userProfile === 'etudiant') {
 
@@ -35,13 +36,6 @@ function voirListeProjets(req, res) {
         res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "Aucun" });
     }
 }
-
-/**Créer */
-
-/**Modifier */
-
-/**Supprimer */
-
 module.exports = {
-    voirListeProjets
+    voirListeGestionnaires
 }

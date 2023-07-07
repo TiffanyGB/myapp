@@ -1,9 +1,10 @@
 var express = require('express');
 var router = express.Router();
+const indexController = require('../controllers/indexController');
+const gestionnaireController = require('../controllers/gestionnaireController');
 
-/* GET users listing. */
-router.get('/', function(req, res, next) {
-  res.send('respond with a resource');
-});
+/* Liste de tous les gestionnaires*/
+router.all('/', indexController.verifyToken, gestionnaireController.voirListeGestionnaires);
+
 
 module.exports = router;

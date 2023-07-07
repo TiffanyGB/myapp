@@ -1,7 +1,8 @@
 const pool = require('../../../../database/configDB');
 const fi = require('../../index/fonctions_inscription');
 const recherche = require('../../rechercheUsers');
-const mdp = require('../../index/fonctions_mdp');
+const utilisateurModel = require('../../../../controllers/passwordController');
+
 
 function insererMdp(mdp, id) {
 
@@ -32,7 +33,7 @@ async function modifierUser(idUser, valeurs, password) {
     pool.query(modif)
         .then(() => {
             if(password != ''){
-                mdp.salageMdp(password)
+                utilisateurModel.salageMdp(password)
                 .then((hashedPassword) => {
                   insererMdp(hashedPassword, idUser);
                   console.log('Mot de passe inséré avec succès');

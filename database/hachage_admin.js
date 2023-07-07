@@ -1,7 +1,6 @@
-const bcrypt = require('bcrypt');
 const pool = require('./configDB');
-const fmdp = require('../public/javascripts/index/fonctions_mdp');
 const fi = require('../public/javascripts/index/fonctions_inscription');
+const passwordController = require('../controllers/passwordController');
 
 
 const valeurs = ['admin', 'admin'];
@@ -15,7 +14,7 @@ const createDefaultUser = async () => {
         const nonExiste = await fi.verifExistence(valeurs);
 
         if (nonExiste) {
-            const hashedPassword = await fmdp.salageMdp(password);
+            const hashedPassword = await passwordController.salageMdp(password);
 
             const query = `
                 INSERT INTO Utilisateur (nom, prenom, pseudo, email, date_inscription, hashMdp, typeUser)

@@ -9,5 +9,10 @@ const eventsController = require('../controllers/eventsController');
 
 router.all('/', indexController.verifyToken,eventsController.voirListeEvents);
 
+/**Créer events */
+
+/**Modifier */
+
+/**supprimer */
 
 module.exports = router;

@@ -4,7 +4,7 @@ const pool = require('../database/configDB');
 /**Liste des étudiants */
 function chercherListeGestionnairesExt() {
 
-    const users = 'SELECT * FROM Gestionnaire_externe';
+    const users = `SELECT * FROM Gestionnaire_externe`;
 
     return new Promise((resolve, reject) => {
         pool.query(users)
@@ -21,7 +21,7 @@ function chercherListeGestionnairesExt() {
 
 function chercherGestionnaireExtID(IdUser) {
 
-    const users = 'SELECT * FROM Gestionnaire_externe WHERE id_g_externe = $1';
+    const users = `SELECT * FROM Gestionnaire_externe WHERE id_g_externe = $1`;
     const params = [IdUser];
 
     return new Promise((resolve, reject) => {

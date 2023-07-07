@@ -2,13 +2,12 @@ const pool = require('../database/configDB');
 
 
 /**Liste des gestionnaires ia pau */
-function chercherListeGestionnaireIapau(idUser) {
+function chercherListeGestionnaireIapau() {
 
-    const users = 'SELECT * FROM Gestionnaire_iapau WHERE id_g_iapau = $1';
-    const params = [idUser];
+    const users = `SELECT * FROM Gestionnaire_iapau`;
 
     return new Promise((resolve, reject) => {
-        pool.query(users, params)
+        pool.query(users)
             .then((res) => {
                 resolve(res.rows);
             })
@@ -22,7 +21,7 @@ function chercherListeGestionnaireIapau(idUser) {
 /**Chercher un gestionnaire ia pau par son id*/
 function chercherGestionnaireIapau(idUser) {
 
-    const users = 'SELECT * FROM Gestionnaire_iapau WHERE id_g_iapau = $1';
+    const users = `SELECT * FROM Gestionnaire_iapau WHERE id_g_iapau = $1`;
     const params = [idUser];
 
     return new Promise((resolve, reject) => {

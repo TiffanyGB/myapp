@@ -7,12 +7,12 @@
 
 const fi = require('../public/javascripts/index/fonctions_inscription');
 const cu = require('../public/javascripts/admin/gestionUsers/creerUser');
-const fmdp = require('../public/javascripts/index/fonctions_mdp');
+const passwordController = require('../controllers/passwordController');
+const utilisateurModel = require('../models/userModel');
+
 const modif = require('../public/javascripts/admin/gestionUsers/modifierUtilisateurs');
-const recherche = require('../public/javascripts/rechercheUsers');
 const { body, validationResult } = require('express-validator');
 
-const utilisateurModel = require('../models/userModel');
 
 /**Voir les users */
 function voirUtilisateurs(req, res) {
@@ -142,7 +142,7 @@ async function createUser(req, res) {
         cu.creerAdmin(valeurs_communes, valeurs_id)
           .then((result) => {
             if (result === 'true') {
-              fmdp.salageMdp(password)
+              passwordController.salageMdp(password)
                 .then((hashedPassword) => {
                   console.log('Mot de passe crypté avec succès');
                   fi.insererMdp(hashedPassword, userPseudo);
@@ -177,7 +177,7 @@ async function createUser(req, res) {
         cu.creerEtudiant(valeurs_communes, valeurs_id, userEcole, userCodeEcole, userNiveauEtude)
           .then((result) => {
             if (result === 'true') {
-              fmdp.salageMdp(password)
+              passwordController.salageMdp(password)
                 .then((hashedPassword) => {
                   console.log('Mot de passe crypté avec succès');
                   fi.insererMdp(hashedPassword, userPseudo);
@@ -212,7 +212,7 @@ async function createUser(req, res) {
         cu.creerGestionnaireIA(valeurs_communes, valeurs_id, userRole)
           .then((result) => {
             if (result === 'true') {
-              fmdp.salageMdp(password)
+              passwordController.salageMdp(password)
                 .then((hashedPassword) => {
                   console.log('Mot de passe crypté avec succès');
                   fi.insererMdp(hashedPassword, userPseudo);
@@ -247,7 +247,7 @@ async function createUser(req, res) {
         cu.creerGestionnaireExterne(valeurs_communes, valeurs_id, userEntreprise, userMetier)
           .then((result) => {
             if (result === 'true') {
-              fmdp.salageMdp(password)
+              passwordController.salageMdp(password)
                 .then((hashedPassword) => {
                   console.log('Mot de passe crypté avec succès');
                   fi.insererMdp(hashedPassword, userPseudo);

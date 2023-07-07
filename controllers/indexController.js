@@ -3,45 +3,13 @@
 //  * @controller Index
 //  */
 
-// /**
-//  * Module de fonctions pour la gestion des mots de passe.
-//  * @module fonctions_mdp
-//  */
-const fmdp = require('../public/javascripts/index/fonctions_mdp');
+const passwordController = require('../controllers/passwordController');
 const { body, validationResult } = require('express-validator');
-
-// /**
-//  * Module de fonctions pour l'inscription des utilisateurs.
-//  * @module fonctions_inscription
-//  */
 const fi = require('../public/javascripts/index/fonctions_inscription');
-
-// /**
-//  * Module de fonctions pour la récupération d'un événement choisi.
-//  * @module recuperer_event_choisi
-//  */
 const re = require('../public/javascripts/index/recuperer_event_choisi');
-// /**
-//  * Module de fonctions pour la récupération de la liste des événements.
-//  * @module recuperer_liste_events
-//  */
 const la = require('../public/javascripts/index/recuperer_liste_events');
-// /**
-//  * Module de configuration pour la base de données.
-//  * @module configDB
-//  */
 const pool = require('../database/configDB');
-
-// /**
-//  * Module pour la manipulation des fonctions de chiffrement.
-//  * @module crypto
-//  */
 const crypto = require('crypto');
-
-// /**
-//  * Module pour la gestion des JSON Web Tokens (JWT).
-//  * @module jsonwebtoken
-//  */
 const jwt = require('jsonwebtoken');
 
 const generateSecretKey = () => {
@@ -228,7 +196,7 @@ async function inscriptionEleve(req, res) {
         /**L'insertion dans la bdd a réussi, on passe au mdp */
         if (inserer === "true") {
           console.log('Données insérées avec succès dans la table utilisateur');
-          fmdp.salageMdp(password)
+          passwordController.salageMdp(password)
 
             .then((hashedPassword) => {
               console.log('Mot de passe crypté avec succès');
@@ -330,7 +298,7 @@ async function connexion(req, res) {
         res.status(400).json({ champ: 'login', message: 'Aucun email/login ne correspond' });
       } else {
         const user = result.rows[0];
-        const match = await fmdp.comparerMdp(password, user.hashmdp);
+        const match = await passwordController.comparerMdp(password, user.hashmdp);
 
         if (match) {
 
