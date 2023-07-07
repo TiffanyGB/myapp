@@ -1,5 +1,6 @@
 const pool = require('../database/configDB');
 const recherche = require('../public/javascripts/rechercheUsers');
+const passwordModel = require('../models/passwordModel');
 
 
 /**Liste des utilisateurs  */
@@ -41,10 +42,78 @@ function chercherUserID(idUser) {
 
 
 /**Modifier un utilisateur */
+async function modifierUser(idUser, valeurs, password) {
+    const temp = await chercherUserID(idUser);
 
+    infoUser = temp[0];
+
+    const modif = `UPDATE Utilisateur 
+    SET typeUser = '${valeurs[0]}', 
+    nom = '${valeurs[1]}',
+    prenom = '${valeurs[2]}',
+    pseudo = '${valeurs[3]}',
+    email = '${valeurs[4]}'
+    WHERE idUser = '${idUser}'`;
+
+
+    pool.query(modif)
+        .then(() => {
+            if(password != ''){
+                passwordModel.salageMdp(password)
+                .then((hashedPassword) => {
+                  insererMdp(hashedPassword, idUser);
+                  console.log('Mot de passe inséré avec succès');
+
+                })
+            }else{
+                console.log('Pas de modif de mdp');
+            }
+            console.log("Mise à jour côté Utilisateur réussie");
+        })
+        .catch((error) => {
+            console.log(error);
+        })
+}
 
 /**Supprimer */
+//Doit être Etudiant, admini, gestionnaire_iapau ou gestionnaire_externe
+function supprimerUser(idUser, role) {
 
+    let id;
+    switch (role) {
+        case 'idadmin':
+            id = 'idadmin';
+            break;
+        case 'etudiant':
+            id = 'idetudiant';
+            break;
+        case 'gestionnaire_iapau':
+            id = 'id_g_iapau';
+            break;
+        case 'gestionnaire_externe':
+            id = 'id_g_externe';
+            break;
+    }
+
+    const suppRole = `DELETE FROM ${role} WHERE $1 = '${idUser}'`;
+    const suppr = `DELETE FROM Utilisateur WHERE idUser = '${idUser}'`;
+
+    return new Promise((resolve, reject) => {
+        pool.query(suppRole, [id])
+            .then(() => {
+                pool.query(suppr)
+                    .then(() => {
+                        resolve('ok');
+                    })
+                    .catch((error) => {
+                        reject(error);
+                    });
+            })
+            .catch((error) => {
+                reject(error);
+            });
+    });
+}
 
 /**Valider les données */
 
@@ -131,5 +200,7 @@ async function envoyer_json_liste_user() {
 module.exports = { 
     chercherListeUtilisateurs,
     chercherUserID,
-    envoyer_json_liste_user
+    envoyer_json_liste_user,
+    supprimerUser,
+    modifierUser
 }

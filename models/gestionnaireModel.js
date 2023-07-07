@@ -94,7 +94,6 @@ async function envoyer_json_liste_gestionnaires() {
     }
 }
 
-envoyer_json_liste_gestionnaires();
 
 module.exports = {
     envoyer_json_liste_gestionnaires

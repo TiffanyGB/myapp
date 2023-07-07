@@ -3,10 +3,11 @@
 //  * @controller Index
 //  */
 
-const passwordController = require('../controllers/passwordController');
+const passwordModel = require('../models/passwordModel');
+const eventModel = require('../models/eventModel');
+
 const { body, validationResult } = require('express-validator');
 const fi = require('../public/javascripts/index/fonctions_inscription');
-const re = require('../public/javascripts/index/recuperer_event_choisi');
 const la = require('../public/javascripts/index/recuperer_liste_events');
 const pool = require('../database/configDB');
 const crypto = require('crypto');
@@ -196,7 +197,7 @@ async function inscriptionEleve(req, res) {
         /**L'insertion dans la bdd a réussi, on passe au mdp */
         if (inserer === "true") {
           console.log('Données insérées avec succès dans la table utilisateur');
-          passwordController.salageMdp(password)
+          passwordModel.salageMdp(password)
 
             .then((hashedPassword) => {
               console.log('Mot de passe crypté avec succès');
@@ -298,7 +299,7 @@ async function connexion(req, res) {
         res.status(400).json({ champ: 'login', message: 'Aucun email/login ne correspond' });
       } else {
         const user = result.rows[0];
-        const match = await passwordController.comparerMdp(password, user.hashmdp);
+        const match = await passwordModel.comparerMdp(password, user.hashmdp);
 
         if (match) {
 
@@ -342,7 +343,7 @@ function voirEvent(req, res) {
     /**Si c'est un admin, afficher les infos de l'admin */
     if (req.userProfile === 'admin' || req.userProfile === 'gestionnaire') {
 
-      re.recupererEvent(eventID, 'admin')
+      eventModel.jsonEventChoisi(eventID, 'admin')
         .then((result) => {
           res.status(200).json(result);
         })
@@ -354,20 +355,18 @@ function voirEvent(req, res) {
     }
     /**Si c'est un etudiant, afficher les infos de l'etudiant en plus, (equipe) */
     else if (req.userProfile === 'etudiant') {
-      console.log('Etudiant');
-      re.recupererEvent(eventID, 'etudiant')
+      eventModel.jsonEventChoisi(eventID, 'etudiant')
         .then((result) => {
           res.status(200).json(result);
         })
         .catch((error) => {
-          console.error('Une erreur s\'est produite :', error);
           res.status(500).json({ message: 'Une erreur s\'est produite lors de la récupération de l\'événement.' });
         });
     }
     /**Si non connecté ne pas envoyer les infos des ressources privées */
     else if (req.userProfile === 'aucun') {
       console.log('non connecté');
-      re.recupererEvent(eventID, 'aucun')
+      eventModel.jsonEventChoisi(eventID, 'aucun')
         .then((result) => {
           res.status(200).json(result);
         })

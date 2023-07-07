@@ -1,6 +1,6 @@
 const pool = require('./configDB');
 const fi = require('../public/javascripts/index/fonctions_inscription');
-const passwordController = require('../controllers/passwordController');
+const passwordModel = require('../models/passwordModel');
 
 
 const valeurs = ['admin', 'admin'];
@@ -14,7 +14,7 @@ const createDefaultUser = async () => {
         const nonExiste = await fi.verifExistence(valeurs);
 
         if (nonExiste) {
-            const hashedPassword = await passwordController.salageMdp(password);
+            const hashedPassword = await passwordModel.salageMdp(password);
 
             const query = `
                 INSERT INTO Utilisateur (nom, prenom, pseudo, email, date_inscription, hashMdp, typeUser)

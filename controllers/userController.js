@@ -3,14 +3,16 @@
  * @module Contrôleur/Admin
  */
 
-/**Créer, modifier, supprimer, voir liste */
 
 const fi = require('../public/javascripts/index/fonctions_inscription');
-const cu = require('../public/javascripts/admin/gestionUsers/creerUser');
-const passwordController = require('../controllers/passwordController');
-const utilisateurModel = require('../models/userModel');
 
-const modif = require('../public/javascripts/admin/gestionUsers/modifierUtilisateurs');
+const passwordModel = require('../models/passwordModel');
+const userModel = require('../models/userModel');
+const adminModel = require('../models/adminModel');
+const etudiantModel = require('../models/etudiantModel');
+const gestionnaireIaModel = require('../models/gestionnaireIaModel');
+const gestionnaireExterneModel = require('../models/gestionnaireExterneModel');
+
 const { body, validationResult } = require('express-validator');
 
 
@@ -20,7 +22,7 @@ function voirUtilisateurs(req, res) {
   if (req.userProfile === 'admin') {
     if (req.method === 'GET') {
 
-      utilisateurModel.envoyer_json_liste_user()
+      userModel.envoyer_json_liste_user()
         .then((result) => {
           if (result === 'aucun') {
             res.status(400).json({ erreur: "Erreur lors de la récupération des utilisateurs" })
@@ -139,10 +141,10 @@ async function createUser(req, res) {
 
     switch (type) {
       case 'administrateur':
-        cu.creerAdmin(valeurs_communes, valeurs_id)
+        adminModel.creerAdmin(valeurs_communes, valeurs_id)
           .then((result) => {
             if (result === 'true') {
-              passwordController.salageMdp(password)
+              passwordModel.salageMdp(password)
                 .then((hashedPassword) => {
                   console.log('Mot de passe crypté avec succès');
                   fi.insererMdp(hashedPassword, userPseudo);
@@ -174,10 +176,10 @@ async function createUser(req, res) {
         break;
 
       case 'etudiant':
-        cu.creerEtudiant(valeurs_communes, valeurs_id, userEcole, userCodeEcole, userNiveauEtude)
+        etudiantModel.creerEtudiant(valeurs_communes, valeurs_id, userEcole, userCodeEcole, userNiveauEtude)
           .then((result) => {
             if (result === 'true') {
-              passwordController.salageMdp(password)
+              passwordModel.salageMdp(password)
                 .then((hashedPassword) => {
                   console.log('Mot de passe crypté avec succès');
                   fi.insererMdp(hashedPassword, userPseudo);
@@ -209,10 +211,10 @@ async function createUser(req, res) {
         break;
 
       case 'gestionnaire_iapau':
-        cu.creerGestionnaireIA(valeurs_communes, valeurs_id, userRole)
+        gestionnaireIaModel.creerGestionnaireIA(valeurs_communes, valeurs_id, userRole)
           .then((result) => {
             if (result === 'true') {
-              passwordController.salageMdp(password)
+              passwordModel.salageMdp(password)
                 .then((hashedPassword) => {
                   console.log('Mot de passe crypté avec succès');
                   fi.insererMdp(hashedPassword, userPseudo);
@@ -244,10 +246,10 @@ async function createUser(req, res) {
         break;
 
       case 'gestionnaire_externe':
-        cu.creerGestionnaireExterne(valeurs_communes, valeurs_id, userEntreprise, userMetier)
+        gestionnaireExterneModel.creerGestionnaireExterne(valeurs_communes, valeurs_id, userEntreprise, userMetier)
           .then((result) => {
             if (result === 'true') {
-              passwordController.salageMdp(password)
+              passwordModel.salageMdp(password)
                 .then((hashedPassword) => {
                   console.log('Mot de passe crypté avec succès');
                   fi.insererMdp(hashedPassword, userPseudo);
@@ -302,7 +304,7 @@ async function modifierUser(req, res) {
     console.log(idUser);
 
     /**Vérifier que l'id existe dans la bdd, sinon 404 error */
-    utilisateurModel.chercherUserID(idUser)
+    userModel.chercherUserID(idUser)
       .then((result) => {
 
         if (result.length === 0) {
@@ -436,7 +438,7 @@ async function modifierUser(req, res) {
     switch (type) {
       case 'etudiant':
 
-        modif.modifierEtudiant(idUser, valeurs, valeurs_etudiant, password)
+        etudiantModel.modifierEtudiant(idUser, valeurs, valeurs_etudiant, password)
           .then(() => {
             res.status(200).json({ message: "Etudiant modifié avec succès" });
           })
@@ -447,7 +449,7 @@ async function modifierUser(req, res) {
         break;
 
       case 'administrateur':
-        modif.modifierAdministrateur(idUser, valeurs, password)
+        adminModel.modifierAdministrateur(idUser, valeurs, password)
           .then(() => {
             res.status(200).json({ message: "Administrateur modifié avec succès" });
           })
@@ -458,7 +460,7 @@ async function modifierUser(req, res) {
         break;
 
       case 'gestionnaireExterne':
-        modif.modifierExterne(idUser, valeurs, userMetier, userEntreprise, password)
+        gestionnaireExterneModel.modifierExterne(idUser, valeurs, userMetier, userEntreprise, password)
           .then(() => {
             res.status(200).json({ message: "Gestionnaire externe modifié avec succès" });
           })
@@ -469,7 +471,7 @@ async function modifierUser(req, res) {
         break;
 
       case 'gestionnaireIA':
-        modif.modifierIapau(idUser, valeurs, userRole, password)
+        gestionnaireIaModel.modifierIapau(idUser, valeurs, userRole, password)
           .then(() => {
             res.status(200).json({ message: "Gestionnaire iapau modifié avec succès" });
           })
@@ -482,6 +484,7 @@ async function modifierUser(req, res) {
   }
 }
 
+/**Suppression */
 function supprimerUser(req, res) {
   if (req.method == "OPTIONS") {
     res.status(200).json({ success: 'Access granted' });
@@ -492,7 +495,7 @@ function supprimerUser(req, res) {
   } else if (req.method === 'DELETE') {
     const userId = res.locals.userId;
 
-    modif.supprimerUser(userId, 'admini')
+    userModel.supprimerUser(userId, 'admini')
       .then((result) => {
         if (result === 'ok')
           res.status(200).json({ message: "Suppression réussie" });

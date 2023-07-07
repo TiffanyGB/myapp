@@ -82,7 +82,7 @@ CREATE TABLE Projet(
     idProjet SERIAL PRIMARY KEY,
     nom VARCHAR (30) NOT NULL,
     description_projet TEXT NOT NULL,
-    recompense VARCHAR(100),   
+    recompense INTEGER,   
     imgProjet VARCHAR(100), -- NOT NULL,
     sujet VARCHAR(100),
     idEvent INT REFERENCES Evenement(idEvent) ON DELETE CASCADE
@@ -114,7 +114,7 @@ CREATE TABLE Ressource(
     idRessource SERIAL PRIMARY KEY,
     titre VARCHAR(100),
     type_ressource VARCHAR(100) CHECK (type_ressource IN ('drive', 'téléchargement', 'lien', 'video')),
-    lien VARCHAR(1000),
+    lien VARCHAR(1000), 
     date_apparition TIMESTAMP,
     statut VARCHAR(30) CHECK (statut IN ('public', 'privé')),
     description_ressource TEXT NOT NULL,
@@ -186,8 +186,8 @@ VALUES ('Nom','tgrggg' ,CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP,
 
 INSERT INTO Projet (nom, description_projet, recompense, imgProjet, sujet,idEvent)
 VALUES 
-    ('p1', 'Description du projet P1', '10000', '../valeur_du_bytea', 'Sujet 1' ,1),
-    ('p2', 'Description du projet p2', '20000', './x0123456789ABCDEF','Sujet principal' ,1);
+    ('p1', 'Description du projet P1', 10000, '../valeur_du_bytea', 'Sujet 1' ,1),
+    ('p2', 'Description du projet p2', 20000, './x0123456789ABCDEF','Sujet principal' ,1);
 
 INSERT INTO Ressource (titre, type_ressource, lien, date_apparition, statut, description_ressource, idProjet)
 VALUES

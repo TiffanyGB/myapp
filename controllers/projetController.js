@@ -1,5 +1,3 @@
-const fi = require('../public/javascripts/index/fonctions_inscription');
-const cu = require('../public/javascripts/admin/gestionUsers/creerUser');
 const projetModel = require('../models/projetModel');
 
 /**Liste des projets */

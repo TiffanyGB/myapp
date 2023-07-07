@@ -1,6 +1,6 @@
 const pool = require('../database/configDB');
-const recup = require('../public/javascripts/index/recuperer_event_choisi');
-
+const motcleModel = require('./motCleModel');
+const ressourceModel = require('./ressourceModel');
 
 /**Liste des projets */
 function tousLesProjets(){
@@ -18,7 +18,26 @@ function tousLesProjets(){
     });
 }
 
+/**Chercher la liste des projets d'un event */
+function recuperer_projets(idEvent) {
+
+    const chercherProjets = `SELECT * FROM Projet WHERE idevent = ${idEvent}`
+
+    return new Promise((resolve, reject) => {
+        pool.query(chercherProjets)
+            .then((res) => {
+                resolve(res.rows);
+            })
+            .catch((error) => {
+                reject(error);
+            });
+    });
+}
+
+
+
 /**Chercher un projet par son id*/
+
 
 /**Créer un projet */
 
@@ -58,7 +77,7 @@ async function listeProjetsJson() {
                 temp.sujet = projetCourant.sujet;
                 temp.themes = [];
 
-                const listeMots = await recup.recupererMot(projetCourant.idprojet);
+                const listeMots = await motcleModel.recupererMot(projetCourant.idprojet);
 
                 for (j = 0; j < listeMots.length; j++) {
 
@@ -68,7 +87,7 @@ async function listeProjetsJson() {
 
                 temp.ressources = [];
 
-                let listeRessource = await recup.recuperer_toutes_ressources(projetCourant.idprojet);
+                let listeRessource = await ressourceModel.recuperer_toutes_ressources(projetCourant.idprojet);
                 console.log
                 for (j = 0; j < listeRessource.length; j++) {
 
@@ -131,5 +150,6 @@ async function listeProjetsJson() {
 
 module.exports = {
     tousLesProjets,
-    listeProjetsJson
+    listeProjetsJson,
+    recuperer_projets
 }
