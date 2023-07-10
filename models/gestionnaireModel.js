@@ -39,7 +39,7 @@ async function envoyer_json_liste_gestionnaires() {
 
                 for (j = 0; j < userCourant.length; j++) {
 
-                    tempInfo.nom = userCourant[0].nom;
+                    tempInfo.Nom = userCourant[0].nom;
                     tempInfo.Prenom = userCourant[0].prenom;
                     tempInfo.Mail = userCourant[0].email;
 
@@ -72,7 +72,7 @@ async function envoyer_json_liste_gestionnaires() {
 
                 for (j = 0; j < userCourant.length; j++) {
 
-                    tempInfo.nom = userCourant[0].nom;
+                    tempInfo.Nom = userCourant[0].nom;
                     tempInfo.Prenom = userCourant[0].prenom;
                     tempInfo.Mail = userCourant[0].email;
 

@@ -2,6 +2,8 @@ const pool = require('../database/configDB');
 const userModel = require('./userModel');
 const fi = require('../public/javascripts/index/fonctions_inscription');
 const Joi = require('joi');
+const verifExistenceController = require('../controllers/Auth/verificationExistenceController');
+
 
 
 /**Valider les données */
@@ -9,8 +11,7 @@ const schemaInscription = Joi.object({
     ecole: Joi.string().min(2).max(100).required(),
     niveauEtude: Joi.string().required()
 
-  });
-  
+});
 
 /**Liste des étudiants */
 function chercherListeStudents() {
@@ -29,7 +30,6 @@ function chercherListeStudents() {
 }
 
 /**Chercher un étudiant par son id*/
-
 function chercherStudent(idUser) {
 
     const users = 'SELECT * FROM Etudiant WHERE idEtudiant = $1';
@@ -62,46 +62,29 @@ function chercherStudent(idUser) {
  * - 'pseudo' si le pseudo existe déjà.
  * - 'mail' si l'email existe déjà.
  */
-async function creerEtudiant(values_user, values_id, ecole, codePostale, niveau) {
+async function creerEtudiant(ecole, niveau, id) {
+
+    const values_etudiant = [ecole, niveau];
+    const requet = `INSERT INTO Etudiant (idEtudiant, ecole, niveau_etude) VALUES ('${id}', $1, $2)`;
 
     try {
-        const libre = await fi.verifExistence(values_id);
-        if (!libre) {
-            const existeP = await fi.existePseudo(values_id[0]);
-            const existeM = await fi.existeMail(values_id[1]);
-
-
-            if (existeM && existeP) {
-                return "les2";
-            }
-            else if (existeP) {
-                return "pseudo";
-            } else if (existeM) {
-                return "mail";
-            }
-        } else {
-
-            const inserer = await fi.insererUser(values_user, values_id, 'etudiant');
-            if (inserer) {
-                console.log('Etudiant inséré dans la table etudiant');
-                try {
-                    const idUser = await fi.chercherUser(values_id[0]);
-                    const requet = `INSERT INTO Etudiant (idEtudiant, ecole, niveau_etude, code_postale_ecole) VALUES ('${idUser}', '${ecole}', '${codePostale}', '${niveau}')`;
-                    await pool.query(requet);
-                    return 'true';
-                }
-                catch (error) {
-                    console.error('Erreur lors de l\'insertion des données côté etudiant :', error);
-                    throw error;
-                }
-            } else {
-                console.log('Insertion dans la table etudiant échouée');
-            }
-        }
-    } catch (err) {
-        console.error('Erreur lors de l\'insertion de l\'utilisateur :', err);
+        return new Promise((resolve, reject) => {
+            pool.query(requet, values_etudiant)
+                .then(() => {
+                    resolve('true');
+                })
+                .catch((error) => {
+                    reject(error);
+                });
+        });
     }
+    catch (error) {
+        console.error('Erreur lors de l\'insertion des données côté etudiant :', error);
+        throw error;
+    }
+
 }
+
 
 /**Modifier un étudiant */
 async function modifierEtudiant(idUser, valeurs, valeurs_etudiant, password) {

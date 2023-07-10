@@ -3,7 +3,6 @@
  * @module Contrôleur/Admin
  */
 
-
 const fi = require('../public/javascripts/index/fonctions_inscription');
 
 const passwordModel = require('../models/passwordModel');
@@ -187,7 +186,7 @@ async function createUser(req, res) {
                 })
                 .catch((error) => {
                   console.error('Erreur lors du salage du mot de passe (Création admin)', error);
-                  res.status(400).json({ message: 'Erreur lors du salage du mot de passe (Création admin)' });
+                  res.status(400).json({ message: 'Erreur lors du salage du mot de passe (Création user)' });
                 });
             } else if (result === 'les2') {
               console.error('Pseudo et email pris');
@@ -203,7 +202,7 @@ async function createUser(req, res) {
 
             } else {
               console.error('Erreur lors de la création de l\'admin');
-              res.status(400).json({ message: 'Erreur lors de la création de l\'admin' });
+              res.status(400).json({ message: 'Erreur lors de la création de l\'utilisateur' });
             }
 
           });

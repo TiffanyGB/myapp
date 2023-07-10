@@ -80,18 +80,9 @@ async function inscriptionEleve(req, res) {
       github: userGitHub,
       ville: userVille,
       ecole: userEcole,
-      codeEcole: userCodeEcole,
       niveauEtude: userNiveauEtude,
       password
     } = req.body;
-
-
-    //const { error, value } = etudiantModel.schemaInscription.validate(req.body);
-
-    // if (error) {
-    //   const errorMessage = error.details[0].message;
-    //   return res.status(400).json({ error: errorMessage });
-    // }
 
     /** Informations spécifique à un utilisateur */
     const values = [
@@ -110,67 +101,38 @@ async function inscriptionEleve(req, res) {
       userMail,
     ];
 
-    /** Informations spécifiques à un étudiant */
-    const values_etudiant = [
-      userEcole,
-      userNiveauEtude,
-      userCodeEcole
-    ];
-
-
-
-    /** Insérer utilisateur et mdp dans la bdd */
-    fi.insererUser(values, values_id, 'etudiant')
-      .then((inserer) => {
-        /**L'insertion dans la bdd a réussi, on passe au mdp */
-        if (inserer === "true") {
-          console.log('Données insérées avec succès dans la table utilisateur');
-          passwordModel.salageMdp(password)
-
-            .then((hashedPassword) => {
-              console.log('Mot de passe crypté avec succès');
-              fi.insererMdp(hashedPassword, userPseudo);
-
-            })
-            .catch((error) => {
-              console.error('Erreur lors du salage du mot de passe:', error);
-              res.status(400).json({ message: 'Erreur lors du salage du mot de passe:' });
-
-            });
-
-          fi.insererEtudiant(values_etudiant, userPseudo)
+    userModel.insererUser(values, password, values_id, 'etudiant')
+      .then((insertion) => {
+        if (typeof insertion === 'number') {
+          etudiantModel.creerEtudiant(userEcole, userNiveauEtude, insertion)
             .then(() => {
-              console.log('Etudiant inséré');
+
+              /**  Informations à insérer dans le token */
+              const payload = {
+                "utilisateurId": insertion,
+                "utilisateurType": 'etudiant'
+              };
+
+              /**  Générer le JWT */
+              const token = jwt.sign(payload, secretKey, { expiresIn: '24h' });
+
+              res.status(200).json({ token: token, id: insertion, prenom: userPrenom, nom: userNom, pseudo: userPseudo, role: 'etudiant' });
             })
-            .catch((error) => {
-              console.error('Erreur Inscription etudiant', error);
-              res.status(400).json({ message: 'Erreur Inscription etudiant' });
+            .catch(() => {
+              /**Supprimer l'utilisateur */
+              userModel.supprimerUser(insertion, 'etudiant')
+              res.status(400).json({ erreur: "erreur", Détails: "Utilisateur supprimé de la table utilisateur" });
             });
 
+        } else if (insertion === 'les2') {
+          res.status(400).json({ Existe: 'Mail et pseudo' });
 
-            const id = userModel.chercherUserPseudo(userPseudo);
-          
-          /**  Informations à insérer dans le token */
-          const payload = {
-            "utilisateurId": id,
-            "utilisateurType": "etudiant"
-          };
+        } else if (insertion === 'pseudo') {
+          res.status(400).json({ Existe: 'Pseudo' });
 
-          /**  Générer le JWT */
-          const token = jwt.sign(payload, secretKey, { expiresIn: '24h' });
+        } else if (insertion === 'mail') {
+          res.status(400).json({ Existe: 'Mail' });
 
-
-          res.status(200).json({ token: token, pseudo: userPseudo, nom: userNom, prenom: userPrenom, message: 'Inscription réussie' });
-        }
-        else if (inserer === "pseudo") {
-          console.log('Utilisateur existant avec le même pseudo');
-          res.status(400).json({ champ: 'Pseudo', message: 'Pseudo existant' });
-        } else if (inserer === "mail") {
-          console.log('Utilisateur existant avec le même mail');
-          res.status(400).json({ champ: 'email', message: 'Adresse mail existante' });
-        } else if (inserer === "les2") {
-          console.log('Utilisateur existant avec le même mail et pseudo');
-          res.status(400).json({ champ1: 'pseudo', champ2: 'email', message: 'Adresse mail et pseudo existants' });
         }
       })
       .catch((error) => {

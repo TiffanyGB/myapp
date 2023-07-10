@@ -1,6 +1,6 @@
 const pool = require('../database/configDB');
 const passwordModel = require('../models/passwordModel');
-const etudiantmodel = require('./etudiantModel');
+// const etudiantmodel = require('./etudiantModel');
 const gestionnaireExterneModel = require('./gestionnaireExterneModel');
 const gestionnaireIAModel = require('./gestionnaireIaModel');
 const verif = require('../controllers/Auth/verificationExistenceController');
@@ -16,7 +16,7 @@ const schemaInscription = Joi.object({
         'string.min': 'Le champ {#label} doit contenir au moins {#limit} caractères.',
         'string.max': 'Le champ {#label} doit contenir au maximum {#limit} caractères.',
         'any.required': 'Le champ {#label} est requis.',
-      }),
+    }),
     prenom: Joi.string().regex(/^[A-Za-z]+$/).min(3).max(40).required(),
     pseudo: Joi.string().regex(/^[a-zA-Z0-9!&#(~)_^%?]+$/).min(3).max(25).required(),
     email: Joi.string().email().regex(/^[a-zA-Z0-9!&#(~)_^%?]+$/).max(100).required(),
@@ -24,7 +24,7 @@ const schemaInscription = Joi.object({
     github: Joi.string().uri().regex(/^[^<>]+$/).max(150).optional(),
     ville: Joi.string().regex(/^[A-Za-z]+$/).min(3).max(45),
     password: Joi.string().min(8).max(100).required()
-  });
+});
 
 /**Liste des utilisateurs  */
 function chercherListeUtilisateurs() {
@@ -64,22 +64,70 @@ function chercherUserID(idUser) {
 
 function chercherUserPseudo(pseudo) {
     const user = `SELECT idUser FROM utilisateur WHERE pseudo = '${pseudo}'`;
-  
+
     return new Promise((resolve, reject) => {
-      pool.query(user)
-        .then((result) => {
-          if (result.rows.length > 0) {
-            resolve(result.rows[0].iduser);
-          } else {
-            reject(new Error('Utilisateur non trouvé: erreur dans le fichier "' + __filename + '" dans "' + arguments.callee.name + '"'));
-          }
-        })
-        .catch((error) => {
-          reject(error);
-        });
+        pool.query(user)
+            .then((result) => {
+                if (result.rows.length > 0) {
+                    resolve(result.rows[0].iduser);
+                } else {
+                    reject(new Error('Utilisateur non trouvé: erreur dans le fichier "' + __filename + '" dans "' + arguments.callee.name + '"'));
+                }
+            })
+            .catch((error) => {
+                reject(error);
+            });
     });
-  }
-  
+}
+
+
+/**Création utilisateur */
+async function insererUser(values, password,values2, type) {
+
+    let mdp = await passwordModel.salageMdp(password);
+
+    /**inserr mdp avec un tableau */
+
+    const insertUser = `
+      INSERT INTO Utilisateur (nom, prenom, pseudo, email, lien_linkedin, lien_github, ville, date_inscription, typeUser, hashMdp)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, CURRENT_TIMESTAMP, '${type}', '${mdp}')  RETURNING iduser`;
+
+    try {
+        const nonExiste = await verif.verifExistence(values2);
+
+        /**Pas d'utilisateur ayant les mêmes id, on peut insérer */
+        if (nonExiste) {
+            return new Promise((resolve, reject) => {
+                pool.query(insertUser, values)
+                    .then((result) => {
+                        let id = result.rows[0].iduser;
+                        resolve(id);
+                    })
+                    .catch((error) => {
+                        console.error('Fichier "' + __filename + '" fonction: "' + arguments.callee.name + ':\nErreur lors de l\'insertion des données côté utilisateur:', error);
+                        reject(error);
+                    });
+            });
+        }
+        else {
+            const existeP = await verif.existePseudo(values2[0]);
+            const existeM = await verif.existeMail(values2[1]);
+
+            if (existeM && existeP) {
+                return "les2";
+            }
+            else if (existeP) {
+                return "pseudo";
+            } else if (existeM) {
+                return "mail";
+            }
+        }
+    } catch (error) {
+        console.error('Erreur lors de l\'insertion des données côté utilisateur:', error);
+        throw error;
+    }
+}
+
 
 
 /**Modifier un utilisateur */
@@ -88,21 +136,21 @@ async function modifierUser(idUser, valeurs, password) {
 
     infoUser = temp[0];
 
-    const id = [ valeurs[3], valeurs[4]];
+    const id = [valeurs[3], valeurs[4]];
 
     const les2 = await verif.verifExistence(id);
 
-    if(les2 === false){
+    if (les2 === false) {
 
         const pseudo = await verif.existePseudo(valeurs[3]);
         const email = await verif.existeMail(valeurs[4]);
 
-        if(pseudo === true && email === true){
+        if (pseudo === true && email === true) {
             return 'les2'
         }
-        else if(pseudo === false){
+        else if (pseudo === false) {
             return 'mail';
-        }else{
+        } else {
             return 'pseudo';
         }
     }
@@ -118,14 +166,14 @@ async function modifierUser(idUser, valeurs, password) {
 
     pool.query(modif)
         .then(() => {
-            if(password != ''){
+            if (password != '') {
                 passwordModel.salageMdp(password)
-                .then((hashedPassword) => {
-                  insererMdp(hashedPassword, idUser);
-                  console.log('Mot de passe inséré avec succès');
+                    .then((hashedPassword) => {
+                        insererMdp(hashedPassword, idUser);
+                        console.log('Mot de passe inséré avec succès');
 
-                })
-            }else{
+                    })
+            } else {
                 console.log('Pas de modif de mdp');
             }
             console.log("Mise à jour côté Utilisateur réussie");
@@ -177,91 +225,92 @@ function supprimerUser(idUser, role) {
 
 
 /**JSON de la liste des utilisateurs */
-async function envoyer_json_liste_user() {
+// async function envoyer_json_liste_user() {
 
-    try {
-        const listeUsers = await chercherListeUtilisateurs();
+//     try {
+//         const listeUsers = await chercherListeUtilisateurs();
 
-        jsonRetour = {};
-        jsonRetour.utilisateurs = [];
+//         jsonRetour = {};
+//         jsonRetour.utilisateurs = [];
 
-        if (listeUsers === 0) {
-            json.message = "Aucun utilisateur";
-            return 'aucun';
-        } else {
+//         if (listeUsers === 0) {
+//             json.message = "Aucun utilisateur";
+//             return 'aucun';
+//         } else {
 
-            for (i = 0; i < listeUsers.length; i++) {
+//             for (i = 0; i < listeUsers.length; i++) {
 
-                let userCourant = listeUsers[i];
-                let userInfos = {};
+//                 let userCourant = listeUsers[i];
+//                 let userInfos = {};
 
-                userInfos.id = userCourant.iduser;
-                userInfos.nom = userCourant.nom;
-                userInfos.prenom = userCourant.prenom;
-                userInfos.pseudo = userCourant.pseudo;
-                userInfos.role = userCourant.typeuser;
-                userInfos.mail = userCourant.email;
-                userInfos.dateCreation = userCourant.date_inscription;
-                userInfos.ville = userCourant.ville;
-                userInfos.github = userCourant.lien_github;
-                userInfos.linkedin = userCourant.lien_linkedin;
+//                 userInfos.id = userCourant.iduser;
+//                 userInfos.nom = userCourant.nom;
+//                 userInfos.prenom = userCourant.prenom;
+//                 userInfos.pseudo = userCourant.pseudo;
+//                 userInfos.role = userCourant.typeuser;
+//                 userInfos.mail = userCourant.email;
+//                 userInfos.dateCreation = userCourant.date_inscription;
+//                 userInfos.ville = userCourant.ville;
+//                 userInfos.github = userCourant.lien_github;
+//                 userInfos.linkedin = userCourant.lien_linkedin;
 
-                if (userCourant.typeuser === 'etudiant') {
-                    let chercherStudent = await etudiantmodel.chercherStudent(userCourant.iduser);
+//                 if (userCourant.typeuser === 'etudiant') {
+//                     let chercherStudent = await etudiantmodel.chercherStudent(userCourant.iduser);
 
-                    if (chercherStudent === 0) {
-                        return 'erreur_student'
-                    } else {
-                        etudiantCourant = chercherStudent[0];
+//                     if (chercherStudent === 0) {
+//                         return 'erreur_student'
+//                     } else {
+//                         etudiantCourant = chercherStudent[0];
 
-                        //console.log("ihhhhh", etudiantCourant.ecole);
-                       // userInfos.ecole = etudiantCourant.ecole;
-                        userInfos.niveauEtude = etudiantCourant.niveau_etude;
-                    }
-                }
+//                         //console.log("ihhhhh", etudiantCourant.ecole);
+//                         // userInfos.ecole = etudiantCourant.ecole;
+//                         userInfos.niveauEtude = etudiantCourant.niveau_etude;
+//                     }
+//                 }
 
-                if (userCourant.typeuser === 'gestionnaireExterne') {
+//                 if (userCourant.typeuser === 'gestionnaireExterne') {
 
-                    let chercherGE = await gestionnaireExterneModel.chercherGestionnaireExtID(userCourant.iduser);
+//                     let chercherGE = await gestionnaireExterneModel.chercherGestionnaireExtID(userCourant.iduser);
 
-                    if (chercherGE === 0) {
-                        return 'erreur_student'
-                    } else {
-                        let gex = chercherGE[0];
+//                     if (chercherGE === 0) {
+//                         return 'erreur_student'
+//                     } else {
+//                         let gex = chercherGE[0];
 
-                        userInfos.entreprise = gex.entreprise;
-                        userInfos.metier = gex.metier;
-                    }
-                }
+//                         userInfos.entreprise = gex.entreprise;
+//                         userInfos.metier = gex.metier;
+//                     }
+//                 }
 
-                if (userCourant.typeuser === 'gestionnaireIA') {
+//                 if (userCourant.typeuser === 'gestionnaireIA') {
 
-                    let chercherGIA = await gestionnaireIAModel.chercherGestionnaireIapau(userCourant.iduser);
+//                     let chercherGIA = await gestionnaireIAModel.chercherGestionnaireIapau(userCourant.iduser);
 
-                    if (chercherGIA === 0) {
-                        return 'erreur_student'
-                    } else {
-                        let gia = chercherGIA[0];
+//                     if (chercherGIA === 0) {
+//                         return 'erreur_student'
+//                     } else {
+//                         let gia = chercherGIA[0];
 
-                        userInfos.role_asso = gia.role_asso;
-                    }
-                }
-                jsonRetour.utilisateurs.push(userInfos);
-            }
-            return jsonRetour;
-        }
-    } catch (error) {
-        throw error;
-    }
-}
+//                         userInfos.role_asso = gia.role_asso;
+//                     }
+//                 }
+//                 jsonRetour.utilisateurs.push(userInfos);
+//             }
+//             return jsonRetour;
+//         }
+//     } catch (error) {
+//         throw error;
+//     }
+// }
 
 
-module.exports = { 
+module.exports = {
     chercherListeUtilisateurs,
     chercherUserID,
-    envoyer_json_liste_user,
+    chercherUserPseudo,
+    // envoyer_json_liste_user,
     supprimerUser,
     modifierUser,
-    chercherUserPseudo,
+    insererUser,
     schemaInscription
 }
