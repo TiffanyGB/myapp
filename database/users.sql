@@ -75,6 +75,7 @@ CREATE TABLE Evenement(
     nombre_min_equipe INTEGER,
     nombre_max_equipe INTEGER,
     message_fin TEXT DEFAULT NULL,
+    derniereModif TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     type_event VARCHAR(30) CHECK (type_event IN ('battle', 'challenge'))
 );
 
@@ -85,6 +86,7 @@ CREATE TABLE Projet(
     recompense INTEGER,   
     imgProjet VARCHAR(100), -- NOT NULL,
     sujet VARCHAR(100),
+    derniereModif TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     idEvent INT REFERENCES Evenement(idEvent) ON DELETE CASCADE
 );
 

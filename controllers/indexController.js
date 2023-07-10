@@ -5,10 +5,11 @@
 
 const passwordModel = require('../models/passwordModel');
 const eventModel = require('../models/eventModel');
+const userModel = require('../models/userModel');
+const etudiantModel = require('../models/etudiantModel');
 
 const { body, validationResult } = require('express-validator');
 const fi = require('../public/javascripts/index/fonctions_inscription');
-const la = require('../public/javascripts/index/recuperer_liste_events');
 const pool = require('../database/configDB');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
@@ -84,88 +85,13 @@ async function inscriptionEleve(req, res) {
       password
     } = req.body;
 
-    // Vérification des erreurs de validation
-    /**Fonction pour cela */
-    await body('nom')
-      .matches(/^[a-zA-Z]+$/)
-      .isLength({ min: 3, max: 25 })
-      .not().isEmpty()
-      .withMessage('Le nom doit contenir uniquement des lettres et avoir une longueur comprise entre 3 et 25 caractères.')
-      .run(req);
 
-    await body('prenom')
-      .matches(/^[a-zA-Z]+$/)
-      .isLength({ min: 3, max: 25 })
-      .not().isEmpty()
-      .withMessage('Le prenom doit contenir uniquement des lettres et avoir une longueur comprise entre 3 et 25 caractères.')
-      .run(req);
+    //const { error, value } = etudiantModel.schemaInscription.validate(req.body);
 
-    await body('pseudo')
-      .matches(/^[a-zA-Z0-9!&#(~)_^%?]+$/)
-      .isLength({ min: 3, max: 20 })
-      .custom((value) => {
-        if (value.trim() !== value) {
-          throw new Error('Le nom ne doit pas contenir d\'espaces entre les lettres.');
-        }
-        return true;
-      })
-      .not().isEmpty()
-      .withMessage('Le nom doit contenir uniquement des lettres et avoir une longueur comprise entre 3 et 25 caractères.')
-      .run(req);
-
-    await body('password')
-      .isLength({ min: 8, max: 40 })
-      .not().isEmpty()
-      .withMessage('Le mot de passe doit contenir au moins 8 caractères')
-      .matches(/[A-Z]/)
-      .withMessage('Le mot de passe doit contenir au moins une lettre majuscule')
-      .matches(/[0-9]/)
-      .withMessage('Le mot de passe doit contenir au moins un chiffre')
-      .matches(/[!@#$%^&*]/)
-      .withMessage('Le mot de passe doit contenir au moins un caractère spécial')
-      .run(req);
-
-    await body('linkedin')
-      .isLength({ max: 150 })
-      .optional()
-      .isURL()
-      .withMessage('Le lien LinkedIn n\'est pas valide')
-      .run(req);
-
-    await body('github')
-      .isLength({ max: 150 })
-      .optional()
-      .isURL({ protocols: ['http', 'https'], require_protocol: true })
-      .withMessage('Le lien GitHub n\'est pas valide')
-      .run(req);
-
-    await body('email')
-      .isLength({ max: 60 })
-      .isEmail()
-      .withMessage('L\'adresse email n\'est pas valide')
-      .run(req);
-
-    await body('niveauEtude')
-      .isIn(['L1', 'L2', 'L3', 'M1', 'M2', 'Doctorat'])
-      .withMessage('Le niveau d\'études n\'est pas valide')
-      .run(req);
-
-    /**Peut etre vérfier avec la liste */
-    await body('ecole')
-      .isLength({ max: 70 })
-      .run(req);
-
-    await body('ville')
-      .isLength({ min: 3, max: 40 })
-      .run(req);
-
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-
-
-
+    // if (error) {
+    //   const errorMessage = error.details[0].message;
+    //   return res.status(400).json({ error: errorMessage });
+    // }
 
     /** Informations spécifique à un utilisateur */
     const values = [
@@ -190,6 +116,8 @@ async function inscriptionEleve(req, res) {
       userNiveauEtude,
       userCodeEcole
     ];
+
+
 
     /** Insérer utilisateur et mdp dans la bdd */
     fi.insererUser(values, values_id, 'etudiant')
@@ -219,8 +147,20 @@ async function inscriptionEleve(req, res) {
               res.status(400).json({ message: 'Erreur Inscription etudiant' });
             });
 
-          console.log('Inscription finie');
-          res.status(200).json({ pseudo: userPseudo, nom: userNom, prenom: userPrenom, message: 'Inscription réussie' });
+
+            const id = userModel.chercherUserPseudo(userPseudo);
+          
+          /**  Informations à insérer dans le token */
+          const payload = {
+            "utilisateurId": id,
+            "utilisateurType": "etudiant"
+          };
+
+          /**  Générer le JWT */
+          const token = jwt.sign(payload, secretKey, { expiresIn: '24h' });
+
+
+          res.status(200).json({ token: token, pseudo: userPseudo, nom: userNom, prenom: userPrenom, message: 'Inscription réussie' });
         }
         else if (inserer === "pseudo") {
           console.log('Utilisateur existant avec le même pseudo');
@@ -311,7 +251,6 @@ async function connexion(req, res) {
 
           /**  Générer le JWT */
           const token = jwt.sign(payload, secretKey, { expiresIn: '24h' });
-          // const token = tk.creerToken(payload);
 
           res.status(200).json({ token: token, id: user.iduser, prenom: user.prenom, nom: user.nom, pseudo: user.pseudo, role: user.typeuser });
         } else {
@@ -389,7 +328,7 @@ function voirEvent(req, res) {
  */
 function voirTousEvents(req, res) {
   if (req.method === 'GET') {
-    la.creerJsonEvent()
+    eventModel.creerJsonTousEvents()
       .then((result) => {
         if (result === false) {
           res.status(400).json({ message: 'Aucun événement' });

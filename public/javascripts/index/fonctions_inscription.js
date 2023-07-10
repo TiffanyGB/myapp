@@ -1,63 +1,9 @@
-const bcrypt = require('bcrypt');
 const pool = require('../../../database/configDB');
+const userModel = require('../../../models/userModel');
+const verifExistenceController = require('../../../controllers/Auth/verificationExistenceController');
 
 
-function verifExistence(values) {
-  const verifExistence = `SELECT * FROM UTILISATEUR WHERE (pseudo = $1) OR (email = $2)`;
-
-  return new Promise((resolve, reject) => {
-    pool.query(verifExistence, values)
-      .then((result) => {
-        if (result.rows.length > 0) {
-          resolve(false);
-        } else {
-          resolve(true);
-        }
-      })
-      .catch((error) => {
-        console.error('Fichier "' + __filename + '" fonction: "' + arguments.callee.name + ':\nErreur lors de l\'insertion des données côté utilisateur:', error);
-        reject(error);
-      });
-  });
-}
-
-function existePseudo(pseudo) {
-  const verif = `SELECT * FROM utilisateur WHERE (pseudo = '${pseudo}')`;
-
-  return new Promise((resolve, reject) => {
-    pool.query(verif)
-      .then((result) => {
-        if (result.rows.length === 0) {
-          resolve(false);
-        } else {
-          resolve(true);
-        }
-      })
-      .catch((error) => {
-        console.error('Fichier "' + __filename + '" fonction: "' + arguments.callee.name + ':\nErreur lors de l\'insertion des données côté utilisateur:', error);
-        reject(error);
-      });
-  });
-}
-
-function existeMail(mail) {
-  const verif = `SELECT * FROM utilisateur WHERE (email = '${mail}')`;
-
-  return new Promise((resolve, reject) => {
-    pool.query(verif)
-      .then((result) => {
-        if (result.rows.length === 0) {
-          resolve(false);
-        } else {
-          resolve(true);
-        }
-      })
-      .catch((error) => {
-        console.error('Fichier "' + __filename + '" fonction: "' + arguments.callee.name + ':\nErreur lors de l\'insertion des données côté utilisateur:', error);
-        reject(error);
-      });
-  });
-}
+/**Apparemment pas besoin, essayer sans */
 
 async function insererUser(values, values2, type) {
 
@@ -66,7 +12,7 @@ async function insererUser(values, values2, type) {
     VALUES ($1, $2, $3, $4, $5, $6, $7, CURRENT_TIMESTAMP, '${type}')`;
 
   try {
-    const nonExiste = await verifExistence(values2);
+    const nonExiste = await verifExistenceController.verifExistence(values2);
 
     if (nonExiste) {
       return new Promise((resolve, reject) => {
@@ -81,11 +27,8 @@ async function insererUser(values, values2, type) {
       });
     } 
     else {
-      const existeP = await existePseudo(values2[0]);
-      const existeM = await existeMail(values2[1]);
-
-      console.log('mail existe: ', existeM);
-      console.log('pseudo existe: ', existeP);
+      const existeP = await verifExistenceController.existePseudo(values2[0]);
+      const existeM = await verifExistenceController.existeMail(values2[1]);
 
       if(existeM && existeP){
         return "les2";
@@ -102,6 +45,7 @@ async function insererUser(values, values2, type) {
   }
 }
 
+/**Je pense que sert à rien */
 function insererMdp(mdp, pseudo) {
 
   const inserer = `UPDATE utilisateur
@@ -117,7 +61,7 @@ function insererMdp(mdp, pseudo) {
 async function insererEtudiant(values, pseudo) {
 
   try {
-    const idUser = await chercherUser(pseudo);
+    const idUser = await userModel.chercherUserPseudo(pseudo);
 
     const requet = `INSERT INTO etudiant (idEtudiant, ecole, niveau_etude, code_postale_ecole)
       VALUES ('${idUser}', $1, $2, $3)`;
@@ -138,32 +82,11 @@ async function insererEtudiant(values, pseudo) {
   }
 }
 
-function chercherUser(pseudo) {
-  const user = `SELECT idUser FROM utilisateur WHERE pseudo = '${pseudo}'`;
-
-  return new Promise((resolve, reject) => {
-    pool.query(user)
-      .then((result) => {
-        if (result.rows.length > 0) {
-          resolve(result.rows[0].iduser);
-        } else {
-          reject(new Error('Utilisateur non trouvé: erreur dans le fichier "' + __filename + '" dans "' + arguments.callee.name + '"'));
-        }
-      })
-      .catch((error) => {
-        reject(error);
-      });
-  });
-}
-
 module.exports = {
   insererUser,
   insererMdp,
   insererEtudiant,
-  chercherUser,
-  verifExistence,
-  existeMail,
-  existePseudo
+
 };
 
 

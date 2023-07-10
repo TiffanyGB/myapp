@@ -7,7 +7,7 @@ const classementModel = require('./classementModel');
 const finalisteModel = require('./finalisteModel');
 const equipeModel = require('./equipeModel');
 
-/**Liste des étudiants */
+/**Liste des événements */
 function chercherListeEvenement() {
 
     const users = 'SELECT * FROM Evenement';
@@ -23,7 +23,7 @@ function chercherListeEvenement() {
     });
 }
 
-/**Chercher un étudiant par son id*/
+/**Chercher un événement par son id*/
 
 function chercherEvenement(idEvent) {
 
@@ -39,6 +39,22 @@ function chercherEvenement(idEvent) {
                 reject(error);
             });
     });
+}
+
+async function creerEvent(valeurs_event) {
+    const inserer = `
+        INSERT INTO Evenement (type_event, nom, debut_inscription, date_debut, date_fin, description_event, img, nombre_min_equipe, nombre_max_equipe)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      `;
+
+    try {
+        await pool.query(inserer, valeurs_event);
+        return 'true';
+    }
+    catch (error) {
+        console.error('Erreur lors de l\'insertion des données côté etudiant :', error);
+        throw error;
+    }
 }
 
 
@@ -181,7 +197,7 @@ async function jsonEventChoisi(idEvent, typeUser) {
                 }
 
                 if (typeUser != 'aucun') {
-                    const listeRessourcePv = await ressourceModel.recuperer_ressourcesPrivées(projetCourant.idprojet);
+                    const listeRessourcePv = await ressourceModel.recuperer_ressourcesPrivees(projetCourant.idprojet);
 
                     for (j = 0; j < listeRessourcePv.length; j++) {
 
@@ -292,7 +308,7 @@ async function creerJsonTousEvents() {
 
                 let listeProjets = await projetModel.recuperer_projets(ancienCourant.idevent);
                 let gainTotal = 0;
-                
+
                 let motCle = [];
 
 
@@ -301,10 +317,9 @@ async function creerJsonTousEvents() {
 
                     let recupeMot = await motCleModel.recupererMot(listeProjets[j].idprojet);
 
-                    for(k = 0; k < recupeMot.length; k++){
+                    for (k = 0; k < recupeMot.length; k++) {
                         motCle.push(recupeMot[k].mot);
-                        console.log(recupeMot[k].mot);
-                    }                    
+                    }
                 }
                 courantInfos.mot = motCle;
                 courantInfos.gain = gainTotal;
@@ -341,11 +356,10 @@ async function creerJsonTousEvents() {
 
                     let recupeMot = await motCleModel.recupererMot(listeProjets[j].idprojet);
 
-                    for(k = 0; k < recupeMot.length; k++){
+                    for (k = 0; k < recupeMot.length; k++) {
                         motCle.push(recupeMot[k].mot);
                     }
-                    console.log(motCle);
-                    
+
                 }
 
                 courantInfos.mot = motCle;
@@ -367,5 +381,6 @@ module.exports = {
     chercherListeEvenement,
     recuperer_message_fin,
     jsonEventChoisi,
-    creerJsonTousEvents
+    creerJsonTousEvents,
+    creerEvent
 }

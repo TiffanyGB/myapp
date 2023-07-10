@@ -16,6 +16,25 @@ function recupererMot(idProjet) {
     });
 }
 
+
+/**Insérer mot clé */
+async function insererMot(valeurs){
+    const inserer = `INSERT INTO Mot_cle (mot, idProjet)
+    VALUES ($1, $2)`;
+
+    try {
+        await pool.query(inserer, valeur_projet);
+        return 'ok';
+    }
+    catch (error) {
+        console.error('Erreur lors de l\'insertion des données côté etudiant :', error);
+        throw error;
+    }
+
+}
+
+
 module.exports = {
-    recupererMot
+    recupererMot,
+    insererMot
 }

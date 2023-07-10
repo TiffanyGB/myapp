@@ -1,10 +1,16 @@
 const pool = require('../database/configDB');
 const userModel = require('./userModel');
 const fi = require('../public/javascripts/index/fonctions_inscription');
+const Joi = require('joi');
 
 
 /**Valider les données */
+const schemaInscription = Joi.object({
+    ecole: Joi.string().min(2).max(100).required(),
+    niveauEtude: Joi.string().required()
 
+  });
+  
 
 /**Liste des étudiants */
 function chercherListeStudents() {
@@ -139,5 +145,6 @@ module.exports = {
     chercherStudent,
     creerEtudiant,
     chercherListeStudents,
-    modifierEtudiant
+    modifierEtudiant,
+    schemaInscription
 }

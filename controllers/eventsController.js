@@ -1,4 +1,5 @@
 const projetModel = require('../models/projetModel');
+const eventModel = require('../models/eventModel');
 
 
 function voirListeEvents(req, res) {
@@ -36,69 +37,66 @@ function voirListeEvents(req, res) {
 
 
 
-// function createEvent(req, res) {
-//   if (req.method === 'GET') {
-//     res.render('admin/creerEvent', { title: 'Créer Event' });
-//   } else if (req.method === 'POST') {
+async function createEvent(req, res) {
+    if (req.userProfile === 'admin') {
+      if (req.method === 'OPTION') {
+        res.status(200).json({ success: 'Access granted' });
+      } else if (req.method === 'POST') {
+        const {
+          typeEvent,
+          nom,
+          inscription,
+          debut,
+          fin,
+          description,
+          image,
+          nombreMinEquipe,
+          nombreMaxEquipe,
+          regles
+        } = req.body;
+  
+        const valeurs_event = [
+          typeEvent,
+          nom,
+          inscription,
+          debut,
+          fin,
+          description,
+          image,
+          nombreMinEquipe,
+          nombreMaxEquipe
+        ];
+  
+        const valeurs_regles = [regles];
+  
+        try {
+          const a = await eventModel.creerEvent(valeurs_event);
+          if(a === 'true'){
+            res.status(200).json({ message: 'ok' });
 
-//     const {
-//       typeEvent,
-//       nomEvent,
-//       dateInscription,
-//       dateDebut,
-//       dateFin,
-//       dateResultat,
-//       regles,
-//       nbEquipeMin,
-//       nbEquipeMax,
-//       imageEvent,
+          }else{
+            res.status(400).json({ error: 'Failed to insert' });
 
-//     } = req.body;
-
-//     const valeurs_event = [
-//       typeEvent,
-//       nomEvent,
-//       dateInscription,
-//       dateDebut,
-//       dateFin,
-//       dateResultat,
-//       regles,
-//       nbEquipeMin,
-//       nbEquipeMax,
-//       imageEvent
-//     ]
-
-//     const { projet, ressources } = req.body;
-
-//     // Traiter les données et les enregistrer dans la base de données
-
-//     // Exemple : afficher les tableaux dans la console
-//     console.log('Tableau des projets :', projet);
-//     console.log('Tableau des ressources :', ressources);
-//     console.log('Tableau des events: ', valeurs_event);
-
-
-//     // try{
-//     //   ce.creerEvent(nomEvent);
-//     //   //res.status(200).json({message:'Carré'});
-//     // }
-//     // catch{
-//     //   console.log('Erreur dans la création d\'un event');
-//     //   //es.status(400).json({message:'Erreur lors de la création d\'un event'});
-//     // }
-
-//     //   // .then(()=> {
-//     //   //   res.status(200).json({message:'Carré'});
-
-//     //   // })
-//     //   // .catch((err)=> {
-//     //   //   console.log('Erreur dans la création d\'un event');
-//     //   //   res.status(400).json({message:'Erreur lors de la création d\'un event'});
-
-//     //   // })
-//   }
-// }
+          }
+        
+        } catch (error) {
+          console.error(error);
+          res.status(400).json({ error: 'Failed to insert' });
+        }
+      }
+    } else {
+      res
+        .status(400)
+        .json({
+          error:
+            'Mauvais profil, il faut être administrateur',
+          profil: req.userProfile
+        });
+    }
+  }
+  
 
 module.exports = {
-    voirListeEvents
+    voirListeEvents,
+    createEvent
 }

@@ -301,8 +301,6 @@ async function modifierUser(req, res) {
 
     const idUser = res.locals.userId;
 
-    console.log(idUser);
-
     /**Vérifier que l'id existe dans la bdd, sinon 404 error */
     userModel.chercherUserID(idUser)
       .then((result) => {

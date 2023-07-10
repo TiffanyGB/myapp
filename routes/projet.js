@@ -8,6 +8,7 @@ const projetController = require('../controllers/projetController');
 router.all('/', indexController.verifyToken, projetController.voirListeProjets);
 
 /**créer un projet */
+router.all('/creerProjet', indexController.verifyToken, projetController.creerProjet);
 
 /**Modifier projet */
 

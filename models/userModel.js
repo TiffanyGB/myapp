@@ -1,7 +1,30 @@
 const pool = require('../database/configDB');
-const recherche = require('../public/javascripts/rechercheUsers');
 const passwordModel = require('../models/passwordModel');
+const etudiantmodel = require('./etudiantModel');
+const gestionnaireExterneModel = require('./gestionnaireExterneModel');
+const gestionnaireIAModel = require('./gestionnaireIaModel');
+const verif = require('../controllers/Auth/verificationExistenceController');
+const Joi = require('joi');
 
+
+/**Valider les données */
+const schemaInscription = Joi.object({
+    nom: Joi.string().regex(/^[A-Za-z]+$/).min(3).max(40).required().messages({
+        'string.base': 'Le champ {#label} doit être une chaîne de caractères.',
+        'string.empty': 'Le champ {#label} ne doit pas être vide.',
+        'string.pattern.base': 'Le champ {#label} ne doit contenir que des lettres.',
+        'string.min': 'Le champ {#label} doit contenir au moins {#limit} caractères.',
+        'string.max': 'Le champ {#label} doit contenir au maximum {#limit} caractères.',
+        'any.required': 'Le champ {#label} est requis.',
+      }),
+    prenom: Joi.string().regex(/^[A-Za-z]+$/).min(3).max(40).required(),
+    pseudo: Joi.string().regex(/^[a-zA-Z0-9!&#(~)_^%?]+$/).min(3).max(25).required(),
+    email: Joi.string().email().regex(/^[a-zA-Z0-9!&#(~)_^%?]+$/).max(100).required(),
+    linkedin: Joi.string().uri().regex(/^[^<>]+$/).max(150).optional(),
+    github: Joi.string().uri().regex(/^[^<>]+$/).max(150).optional(),
+    ville: Joi.string().regex(/^[A-Za-z]+$/).min(3).max(45),
+    password: Joi.string().min(8).max(100).required()
+  });
 
 /**Liste des utilisateurs  */
 function chercherListeUtilisateurs() {
@@ -35,10 +58,28 @@ function chercherUserID(idUser) {
     });
 }
 
-/**Chercher un utilisateur par son pseudo */
+/**Chercher un utilisateur par son pseudo, retourne l'id
+ * Permet de trouver l'id d'un utilisateur si on ne connaît pas l'id
+ */
 
-
-/**Créer un utilisateur */
+function chercherUserPseudo(pseudo) {
+    const user = `SELECT idUser FROM utilisateur WHERE pseudo = '${pseudo}'`;
+  
+    return new Promise((resolve, reject) => {
+      pool.query(user)
+        .then((result) => {
+          if (result.rows.length > 0) {
+            resolve(result.rows[0].iduser);
+          } else {
+            reject(new Error('Utilisateur non trouvé: erreur dans le fichier "' + __filename + '" dans "' + arguments.callee.name + '"'));
+          }
+        })
+        .catch((error) => {
+          reject(error);
+        });
+    });
+  }
+  
 
 
 /**Modifier un utilisateur */
@@ -46,6 +87,25 @@ async function modifierUser(idUser, valeurs, password) {
     const temp = await chercherUserID(idUser);
 
     infoUser = temp[0];
+
+    const id = [ valeurs[3], valeurs[4]];
+
+    const les2 = await verif.verifExistence(id);
+
+    if(les2 === false){
+
+        const pseudo = await verif.existePseudo(valeurs[3]);
+        const email = await verif.existeMail(valeurs[4]);
+
+        if(pseudo === true && email === true){
+            return 'les2'
+        }
+        else if(pseudo === false){
+            return 'mail';
+        }else{
+            return 'pseudo';
+        }
+    }
 
     const modif = `UPDATE Utilisateur 
     SET typeUser = '${valeurs[0]}', 
@@ -81,7 +141,7 @@ function supprimerUser(idUser, role) {
 
     let id;
     switch (role) {
-        case 'idadmin':
+        case 'admini':
             id = 'idadmin';
             break;
         case 'etudiant':
@@ -115,14 +175,12 @@ function supprimerUser(idUser, role) {
     });
 }
 
-/**Valider les données */
-
 
 /**JSON de la liste des utilisateurs */
 async function envoyer_json_liste_user() {
 
     try {
-        const listeUsers = await recherche.chercherUtilisateur();
+        const listeUsers = await chercherListeUtilisateurs();
 
         jsonRetour = {};
         jsonRetour.utilisateurs = [];
@@ -149,21 +207,22 @@ async function envoyer_json_liste_user() {
                 userInfos.linkedin = userCourant.lien_linkedin;
 
                 if (userCourant.typeuser === 'etudiant') {
-                    let chercherStudent = await recherche.chercherStudent(userCourant.iduser);
+                    let chercherStudent = await etudiantmodel.chercherStudent(userCourant.iduser);
 
                     if (chercherStudent === 0) {
                         return 'erreur_student'
                     } else {
                         etudiantCourant = chercherStudent[0];
 
-                        userInfos.ecole = etudiantCourant.ecole;
+                        //console.log("ihhhhh", etudiantCourant.ecole);
+                       // userInfos.ecole = etudiantCourant.ecole;
                         userInfos.niveauEtude = etudiantCourant.niveau_etude;
                     }
                 }
 
                 if (userCourant.typeuser === 'gestionnaireExterne') {
 
-                    let chercherGE = await recherche.chercherGestionnaireExterne(userCourant.iduser);
+                    let chercherGE = await gestionnaireExterneModel.chercherGestionnaireExtID(userCourant.iduser);
 
                     if (chercherGE === 0) {
                         return 'erreur_student'
@@ -177,7 +236,7 @@ async function envoyer_json_liste_user() {
 
                 if (userCourant.typeuser === 'gestionnaireIA') {
 
-                    let chercherGIA = await recherche.chercherGestionnaireIapau(userCourant.iduser);
+                    let chercherGIA = await gestionnaireIAModel.chercherGestionnaireIapau(userCourant.iduser);
 
                     if (chercherGIA === 0) {
                         return 'erreur_student'
@@ -202,5 +261,7 @@ module.exports = {
     chercherUserID,
     envoyer_json_liste_user,
     supprimerUser,
-    modifierUser
+    modifierUser,
+    chercherUserPseudo,
+    schemaInscription
 }

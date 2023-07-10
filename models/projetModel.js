@@ -2,8 +2,11 @@ const pool = require('../database/configDB');
 const motcleModel = require('./motCleModel');
 const ressourceModel = require('./ressourceModel');
 
+/**Valider les données */
+
+
 /**Liste des projets */
-function tousLesProjets(){
+function tousLesProjets() {
 
     const projets = `SELECT * FROM Projet`;
 
@@ -34,18 +37,29 @@ function recuperer_projets(idEvent) {
     });
 }
 
-
-
 /**Chercher un projet par son id*/
 
 
 /**Créer un projet */
+async function creerProjet(valeur_projet) {
+
+    const inserer = `INSERT INTO Projet (nom, description_projet, recompense, sujet)
+    VALUES ($1, $2, $3, $4)`;
+
+    try {
+        await pool.query(inserer, valeur_projet);
+        return 'ok';
+    }
+    catch (error) {
+        console.error('Erreur lors de l\'insertion des données côté etudiant :', error);
+        throw error;
+    }
+}
 
 /**Modifier un projet */
 
 /**Supprimer un projet */
 
-/**Valider les données */
 
 
 /**JSON avec tous les projets */
@@ -117,39 +131,9 @@ async function listeProjetsJson() {
 }
 
 
-
-
-
-
-
-// Pour gérer le lien entre projet et ressources, exemple chat gpt
-
-
-// Modèle Projet
-// const Projet = {
-//     // Méthode pour récupérer les ressources d'un projet donné
-//     getResources: async function (projetId) {
-//       try {
-//         // Effectuer une requête à la base de données pour récupérer les ressources du projet
-//         const ressources = await db.query('SELECT * FROM ressources WHERE projet_id = ?', [projetId]);
-//         return ressources;
-//       } catch (error) {
-//         throw new Error('Erreur lors de la récupération des ressources du projet');
-//       }
-//     },
-//     // ... Autres méthodes du modèle Projet
-//   };
-  
-//   // Modèle Ressource
-//   const Ressource = {
-//     // ... Méthodes du modèle Ressource
-//   };
-  
-//   module.exports = { Projet, Ressource };
-  
-
 module.exports = {
     tousLesProjets,
     listeProjetsJson,
-    recuperer_projets
+    recuperer_projets, 
+    creerProjet
 }
