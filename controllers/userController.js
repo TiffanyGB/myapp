@@ -152,6 +152,7 @@ async function createUser(req, res) {
                   res.status(400).json({ erreur: "erreur", Détails: "Utilisateur supprimé de la table utilisateur" });
                 });
 
+              
               break;
 
             case 'administrateur':
