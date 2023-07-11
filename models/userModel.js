@@ -82,7 +82,7 @@ function chercherUserPseudo(pseudo) {
 
 
 /**Création utilisateur */
-async function insererUser(values, password,values2, type) {
+async function insererUser(values, password, values2, type) {
 
     let mdp = await passwordModel.salageMdp(password);
 
@@ -224,6 +224,23 @@ function supprimerUser(idUser, role) {
 }
 
 
+function supprimerUserID(idUser) {
+
+    const suppr = `DELETE FROM Utilisateur WHERE idUser = '${idUser}'`;
+
+    return new Promise((resolve, reject) => {
+
+        pool.query(suppr)
+            .then(() => {
+                resolve('ok');
+            })
+            .catch((error) => {
+                reject(error);
+            });
+
+    });
+}
+
 /**JSON de la liste des utilisateurs */
 // async function envoyer_json_liste_user() {
 
@@ -312,5 +329,6 @@ module.exports = {
     supprimerUser,
     modifierUser,
     insererUser,
+    supprimerUserID,
     schemaInscription
 }

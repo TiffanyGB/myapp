@@ -51,45 +51,27 @@ function chercherGestionnaireExtID(IdUser) {
  * - 'pseudo' si le pseudo existe déjà.
  * - 'mail' si l'email existe déjà.
  */
-async function creerGestionnaireExterne(values_user, values_id, entreprise, metier) {
+async function creerGestionnaireExterne(id, entreprise, metier) {
+
+    const valeurs_ges = [entreprise, metier];
+    const requet = `INSERT INTO Gestionnaire_externe (id_g_externe, entreprise, metier) VALUES ('${id}', $1, $2)`;
 
     try {
-        const libre = await fi.verifExistence(values_id);
-        if(!libre){
-            const existeP = await fi.existePseudo(values_id[0]);
-            const existeM = await fi.existeMail(values_id[1]);
-    
-      
-            if(existeM && existeP){
-              return "les2";
-            }
-            else if (existeP) {
-              return "pseudo";
-            }else if (existeM) {
-              return "mail";
-            }
-        }else{
-
-            const inserer = await fi.insererUser(values_user, values_id, 'gestionnaireExterne');
-            if (inserer) {
-                console.log('GestionnaireExterne inséré dans la table utilisateur');
-                try {
-                    const idUser = await fi.chercherUser(values_id[0]);
-                    const requet = `INSERT INTO Gestionnaire_externe (id_g_externe, entreprise, metier) VALUES ('${idUser}', '${entreprise}', '${metier}')`;
-                    await pool.query(requet);
-                    return 'true';
-                }
-                catch (error) {
-                    console.error('Erreur lors de l\'insertion des données côté gestionnaire externe :', error);
-                    throw error;
-                }
-            } else {
-                console.log('Insertion dans la table gestionnaire externe échouée');
-            }
-        }
-    } catch (err) {
-        console.error('Erreur lors de l\'insertion de l\'utilisateur :', err);
+        return new Promise((resolve, reject) => {
+            pool.query(requet, valeurs_ges)
+                .then(() => {
+                    resolve('true');
+                })
+                .catch((error) => {
+                    reject(error);
+                });
+        });
     }
+    catch (error) {
+        console.error('Erreur lors de l\'insertion des données côté etudiant :', error);
+        throw error;
+    }
+
 }
 
 /**Modifier */

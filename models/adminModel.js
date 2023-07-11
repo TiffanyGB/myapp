@@ -50,44 +50,23 @@ function chercherAdminID(idUser) {
  * - 'pseudo' si le pseudo existe déjà.
  * - 'mail' si l'email existe déjà.
  */
-async function creerAdmin(values_user, values_id) {
+async function creerAdmin(id) {
+    const requet = `INSERT INTO Admini (idAdmin) VALUES ('${id}')`;
+
     try {
-        const libre = await fi.verifExistence(values_id);
-
-        if(!libre){
-
-            const existeP = await fi.existePseudo(values_id[0]);
-            const existeM = await fi.existeMail(values_id[1]);
-      
-            if(existeM && existeP){
-              return "les2";
-            }
-            else if (existeP) {
-              return "pseudo";
-            }else if (existeM) {
-              return "mail";
-            }
-        }else{
-            const inserer = await fi.insererUser(values_user, values_id, 'administrateur');
-            if (inserer) {
-                console.log('Admin inséré dans la table utilisateur');
-                try {
-                    const idUser = await fi.chercherUser(values_id[0]);
-                    const requet = `INSERT INTO admini (idadmin) VALUES ('${idUser}')`;
-                    await pool.query(requet);
-                    return 'true';
-                } catch (error) {
-                    console.error('Erreur lors de l\'insertion des données côté admin :', error);
-                    throw error;
-                }
-            } else {
-                console.log('Insertion dans la table admin échouée');
-                return 'erreur';
-            }
-        }
-
-    } catch (err) {
-        console.error('Erreur lors de l\'insertion de l\'utilisateur :', err);
+        return new Promise((resolve, reject) => {
+            pool.query(requet)
+                .then(() => {
+                    resolve('true');
+                })
+                .catch((error) => {
+                    reject(error);
+                });
+        });
+    }
+    catch (error) {
+        console.error('Erreur lors de l\'insertion des données côté admin :', error);
+        throw error;
     }
 }
 

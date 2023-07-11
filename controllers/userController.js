@@ -132,154 +132,90 @@ async function createUser(req, res) {
       userMail
     ]
 
-    const valeurs_etudiant = [
-      userEcole,
-      userCodeEcole,
-      userNiveauEtude
-    ]
+    // if(type === 'gestionnaire_externe')
 
-    switch (type) {
-      case 'administrateur':
-        adminModel.creerAdmin(valeurs_communes, valeurs_id)
-          .then((result) => {
-            if (result === 'true') {
-              passwordModel.salageMdp(password)
-                .then((hashedPassword) => {
-                  console.log('Mot de passe crypté avec succès');
-                  fi.insererMdp(hashedPassword, userPseudo);
+    userModel.insererUser(valeurs_communes, password, valeurs_id, type)
+      .then((insertion) => {
+        if (typeof insertion === 'number') {
+
+          switch (type) {
+
+            case 'etudiant':
+              etudiantModel.creerEtudiant(userEcole, userNiveauEtude, insertion)
+                .then(() => {
+
                   res.status(200).json({ message: 'Inscription réussie' });
                 })
-                .catch((error) => {
-                  console.error('Erreur lors du salage du mot de passe (Création admin)', error);
-                  res.status(400).json({ message: 'Erreur lors du salage du mot de passe (Création admin)' });
+                .catch(() => {
+                  /**Supprimer l'utilisateur */
+                  userModel.supprimerUser(insertion, 'etudiant')
+                  res.status(400).json({ erreur: "erreur", Détails: "Utilisateur supprimé de la table utilisateur" });
                 });
-            } else if (result === 'les2') {
-              console.error('Pseudo et email pris');
-              res.status(400).json({ message: 'Pseudo et email pris' });
-            } else if (result === 'pseudo') {
 
-              console.error('Pseudo pris');
-              res.status(400).json({ message: 'Pseudo pris' });
-            } else if (result === 'mail') {
+              break;
 
-              console.error('Email pris');
-              res.status(400).json({ message: 'Email pris' });
+            case 'administrateur':
+              adminModel.creerAdmin(insertion)
+                .then(() => {
+                  res.status(200).json({ message: 'Inscription Admin réussie' });
+                })
+                .catch(() => {
+                  /**Supprimer l'utilisateur */
+                  userModel.supprimerUser(insertion, 'Admini')
+                  res.status(400).json({ erreur: "erreur", Détails: "Utilisateur supprimé de la table utilisateur" });
+                });
 
-            } else {
-              console.error('Erreur lors de la création de l\'admin');
-              res.status(400).json({ message: 'Erreur lors de la création de l\'admin' });
-            }
+              break;
 
-          });
-
-        break;
-
-      case 'etudiant':
-        etudiantModel.creerEtudiant(valeurs_communes, valeurs_id, userEcole, userCodeEcole, userNiveauEtude)
-          .then((result) => {
-            if (result === 'true') {
-              passwordModel.salageMdp(password)
-                .then((hashedPassword) => {
-                  console.log('Mot de passe crypté avec succès');
-                  fi.insererMdp(hashedPassword, userPseudo);
+            case 'gestionnaireExterne':
+              gestionnaireExterneModel.creerGestionnaireExterne(insertion, userEntreprise, userMetier)
+                .then(() => {
                   res.status(200).json({ message: 'Inscription réussie' });
                 })
-                .catch((error) => {
-                  console.error('Erreur lors du salage du mot de passe (Création admin)', error);
-                  res.status(400).json({ message: 'Erreur lors du salage du mot de passe (Création user)' });
+                .catch(() => {
+                  /**Supprimer l'utilisateur */
+                  userModel.supprimerUser(insertion, 'Gestionnaire_externe')
+                  res.status(400).json({ erreur: "erreur", Détails: "Utilisateur supprimé de la table utilisateur" });
                 });
-            } else if (result === 'les2') {
-              console.error('Pseudo et email pris');
-              res.status(400).json({ message: 'Pseudo et email pris' });
-            } else if (result === 'pseudo') {
 
-              console.error('Pseudo pris');
-              res.status(400).json({ message: 'Pseudo pris' });
-            } else if (result === 'mail') {
+              break;
 
-              console.error('Email pris');
-              res.status(400).json({ message: 'Email pris' });
-
-            } else {
-              console.error('Erreur lors de la création de l\'admin');
-              res.status(400).json({ message: 'Erreur lors de la création de l\'utilisateur' });
-            }
-
-          });
-
-        break;
-
-      case 'gestionnaire_iapau':
-        gestionnaireIaModel.creerGestionnaireIA(valeurs_communes, valeurs_id, userRole)
-          .then((result) => {
-            if (result === 'true') {
-              passwordModel.salageMdp(password)
-                .then((hashedPassword) => {
-                  console.log('Mot de passe crypté avec succès');
-                  fi.insererMdp(hashedPassword, userPseudo);
+            case 'gestionnaireIA':
+              gestionnaireIaModel.creerGestionnaireIA(insertion, userRole)
+                .then(() => {
                   res.status(200).json({ message: 'Inscription réussie' });
                 })
-                .catch((error) => {
-                  console.error('Erreur lors du salage du mot de passe (Création admin)', error);
-                  res.status(400).json({ message: 'Erreur lors du salage du mot de passe (Création admin)' });
+                .catch(() => {
+                  /**Supprimer l'utilisateur */
+                  userModel.supprimerUser(insertion, 'Gestionnaire_iapau')
+                  res.status(400).json({ erreur: "erreur", Détails: "Utilisateur supprimé de la table utilisateur" });
                 });
-            } else if (result === 'les2') {
-              console.error('Pseudo et email pris');
-              res.status(400).json({ message: 'Pseudo et email pris' });
-            } else if (result === 'pseudo') {
 
-              console.error('Pseudo pris');
-              res.status(400).json({ message: 'Pseudo pris' });
-            } else if (result === 'mail') {
+              break;
 
-              console.error('Email pris');
-              res.status(400).json({ message: 'Email pris' });
+            default:
+              userModel.supprimerUserID(insertion);
+              res.status(400).json({ message: 'Le type est incorrect.' });
 
-            } else {
-              console.error('Erreur lors de la création de l\'admin');
-              res.status(400).json({ message: 'Erreur lors de la création de l\'admin' });
-            }
+              break;
+          }
+        }
+        else if (insertion === 'les2') {
+          res.status(400).json({ Existe: 'Mail et pseudo' });
 
-          });
+        } else if (insertion === 'pseudo') {
+          res.status(400).json({ Existe: 'Pseudo' });
 
-        break;
+        } else if (insertion === 'mail') {
+          res.status(400).json({ Existe: 'Mail' });
 
-      case 'gestionnaire_externe':
-        gestionnaireExterneModel.creerGestionnaireExterne(valeurs_communes, valeurs_id, userEntreprise, userMetier)
-          .then((result) => {
-            if (result === 'true') {
-              passwordModel.salageMdp(password)
-                .then((hashedPassword) => {
-                  console.log('Mot de passe crypté avec succès');
-                  fi.insererMdp(hashedPassword, userPseudo);
-                  res.status(200).json({ message: 'Inscription réussie' });
-                })
-                .catch((error) => {
-                  console.error('Erreur lors du salage du mot de passe (Création admin)', error);
-                  res.status(400).json({ message: 'Erreur lors du salage du mot de passe (Création admin)' });
-                });
-            } else if (result === 'les2') {
-              console.error('Pseudo et email pris');
-              res.status(400).json({ message: 'Pseudo et email pris' });
-            } else if (result === 'pseudo') {
+        }
 
-              console.error('Pseudo pris');
-              res.status(400).json({ message: 'Pseudo pris' });
-            } else if (result === 'mail') {
+      }).catch(() => {
 
-              console.error('Email pris');
-              res.status(400).json({ message: 'Email pris' });
-
-            } else {
-              console.error('Erreur lors de la création de l\'admin');
-              res.status(400).json({ message: 'Erreur lors de la création de l\'admin' });
-            }
-
-          });
-
-      default:
-        break;
-    }
+        userModel.supprimerUserID(insertion);
+        res.status(400).json({ message: 'Erreur lors de l\'insertion de l\'utilisateur.' });
+      });
   }
 }
 
