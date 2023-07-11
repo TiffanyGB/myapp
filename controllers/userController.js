@@ -90,18 +90,6 @@ async function createUser(req, res) {
       .withMessage('Le mot de passe doit contenir au moins un caractère spécial')
       .run(req);
 
-    await body('linkedin')
-      .optional()
-      .isURL()
-      .withMessage('Le lien LinkedIn n\'est pas valide')
-      .run(req);
-
-    await body('github')
-      .optional()
-      .isURL({ protocols: ['http', 'https'], require_protocol: true })
-      .withMessage('Le lien GitHub n\'est pas valide')
-      .run(req);
-
     await body('email')
       .isEmail()
       .withMessage('L\'adresse email n\'est pas valide')
@@ -131,8 +119,6 @@ async function createUser(req, res) {
       userPseudo,
       userMail
     ]
-
-    // if(type === 'gestionnaire_externe')
 
     userModel.insererUser(valeurs_communes, password, valeurs_id, type)
       .then((insertion) => {
