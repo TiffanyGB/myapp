@@ -219,9 +219,9 @@ async function modifierUser(req, res) {
   }
 
   else if (req.method === 'PATCH') {
-    // if (req.userProfile != 'admin') {
-    //   res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur" });
-    // }
+    if (req.userProfile != 'admin') {
+      res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur" });
+    }
 
     const idUser = res.locals.userId;
 
