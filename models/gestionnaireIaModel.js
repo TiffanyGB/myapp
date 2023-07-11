@@ -1,5 +1,4 @@
 const pool = require('../database/configDB');
-const fi = require('../public/javascripts/index/fonctions_inscription');
 const userModel = require('./userModel');
 
 
@@ -77,32 +76,32 @@ async function creerGestionnaireIA(id, role_asso) {
 
 /**Modifier un gestionnaire ia pau */
 async function modifierIapau(idUser, valeurs, role_asso, password) {
-    try {
-        userModel.modifierUser(idUser, valeurs, password)
-            .then(() => {
+    // try {
+    //     userModel.modifierUser(idUser, valeurs, password)
+    //         .then(() => {
 
-                const student = `UPDATE Gestionnaire_iapau
-                SET role_asso = '${role_asso}'
-                WHERE id_g_iapau = ${idUser}`;
+    //             const student = `UPDATE Gestionnaire_iapau
+    //             SET role_asso = '${role_asso}'
+    //             WHERE id_g_iapau = ${idUser}`;
 
-                console.log()
-                try {
-                    pool.query(student);
-                    console.log("reussi");
-                }
-                catch (error) {
-                    console.error("Erreur lors de la mise à jour du gestionnaire iapau", error);
-                }
+    //             console.log()
+    //             try {
+    //                 pool.query(student);
+    //                 console.log("reussi");
+    //             }
+    //             catch (error) {
+    //                 console.error("Erreur lors de la mise à jour du gestionnaire iapau", error);
+    //             }
 
-            })
-            .catch((error) => {
-                console.error("Erreur lors de la mise à jour du gestionnaire iapau", error);
-            });
+    //         })
+    //         .catch((error) => {
+    //             console.error("Erreur lors de la mise à jour du gestionnaire iapau", error);
+    //         });
 
-    } catch (error) {
-        console.error("Erreur lors de la mise à jour du gestionnaire iapau", error);
-        throw error;
-    }
+    // } catch (error) {
+    //     console.error("Erreur lors de la mise à jour du gestionnaire iapau", error);
+    //     throw error;
+    // }
 }
 
 

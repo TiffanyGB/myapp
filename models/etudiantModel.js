@@ -1,8 +1,6 @@
 const pool = require('../database/configDB');
 const userModel = require('./userModel');
-const fi = require('../public/javascripts/index/fonctions_inscription');
 const Joi = require('joi');
-const verifExistenceController = require('../controllers/Auth/verificationExistenceController');
 
 
 
@@ -90,34 +88,37 @@ async function creerEtudiant(ecole, niveau, id) {
 async function modifierEtudiant(idUser, valeurs, valeurs_etudiant, password) {
 
     try {
-        userModel.modifierUser(idUser, valeurs, password)
-            .then(() => {
+        const result = await userModel.modifierUser(idUser, valeurs, password)
 
-                const student = `UPDATE Etudiant
+        if (result === 'les2') {
+            return 'les2';
+        } else if (result === 'pseudo') {
+            return 'pseudo';
+        }
+        else if (result === 'mail') {
+            return 'mail';
+        }
+        const student = `UPDATE Etudiant
                     SET ecole = '${valeurs_etudiant[1]}',
                     niveau_etude = '${valeurs_etudiant[2]}' 
                     WHERE idEtudiant = ${idUser}`;
 
-                console.log()
-                try {
-                    pool.query(student);
-                    console.log("reussi");
-                }
-                catch (error) {
-                    console.error("Erreur lors de la mise à jour de l'étudiant", error);
-                }
+        console.log()
+        try {
+            pool.query(student);
+            console.log("reussi");
+        }
+        catch (error) {
+            console.error("Erreur lors de la mise à jour de l'étudiant", error);
+        }
 
-            })
-            .catch((error) => {
-                console.error("Erreur lors de la mise à jour de l'étudiant", error);
-            });
+
 
 
     } catch (error) {
         console.error("Erreur lors de la mise à jour de l'étudiant", error);
         throw error;
     }
-
 }
 
 

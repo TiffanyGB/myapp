@@ -9,7 +9,6 @@ const userModel = require('../models/userModel');
 const etudiantModel = require('../models/etudiantModel');
 
 const { body, validationResult } = require('express-validator');
-const fi = require('../public/javascripts/index/fonctions_inscription');
 const pool = require('../database/configDB');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');

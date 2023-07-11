@@ -1,5 +1,4 @@
 const pool = require('../database/configDB');
-const fi = require('../public/javascripts/index/fonctions_inscription');
 const userModel = require('./userModel');
 
 

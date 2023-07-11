@@ -1,3 +1,5 @@
+
+
 const pool = require('../database/configDB');
 const passwordModel = require('../models/passwordModel');
 // const etudiantmodel = require('./etudiantModel');
@@ -58,10 +60,7 @@ function chercherUserID(idUser) {
     });
 }
 
-/**Chercher un utilisateur par son pseudo, retourne l'id
- * Permet de trouver l'id d'un utilisateur si on ne connaît pas l'id
- */
-
+/**Pour supprimer, odifier la fonction de hachage de l'admin */
 function chercherUserPseudo(pseudo) {
     const user = `SELECT idUser FROM utilisateur WHERE pseudo = '${pseudo}'`;
 
@@ -79,7 +78,6 @@ function chercherUserPseudo(pseudo) {
             });
     });
 }
-
 
 /**Création utilisateur */
 async function insererUser(values, password, values2, type) {
@@ -128,40 +126,45 @@ async function insererUser(values, password, values2, type) {
     }
 }
 
-
-
 /**Modifier un utilisateur */
 async function modifierUser(idUser, valeurs, password) {
+
     const temp = await chercherUserID(idUser);
 
     infoUser = temp[0];
 
-    const id = [valeurs[3], valeurs[4]];
+    const id = [valeurs[2], valeurs[3]];
 
-    const les2 = await verif.verifExistence(id);
+    /**Vérifier que le nouveau pseudo et email n'existent pas */
+    const pseudo = await verif.existePseudo(id[0]);
+    const mail = await verif.existeMail(id[1]);
 
-    if (les2 === false) {
+    if ((infoUser.pseudo != id[0]) && (infoUser.email != id[1])) {
 
-        const pseudo = await verif.existePseudo(valeurs[3]);
-        const email = await verif.existeMail(valeurs[4]);
-
-        if (pseudo === true && email === true) {
-            return 'les2'
+        if (pseudo === true && mail === true) {
+            return 'les2';
         }
-        else if (pseudo === false) {
+    }
+    if (infoUser.pseudo != id[0]) {
+
+        if (pseudo === false) {
             return 'mail';
         } else {
             return 'pseudo';
         }
     }
 
-    const modif = `UPDATE Utilisateur 
-    SET typeUser = '${valeurs[0]}', 
-    nom = '${valeurs[1]}',
-    prenom = '${valeurs[2]}',
-    pseudo = '${valeurs[3]}',
-    email = '${valeurs[4]}'
-    WHERE idUser = '${idUser}'`;
+    const modif = `
+  UPDATE Utilisateur 
+  SET
+    nom = ${valeurs[0] ? `'${valeurs[0]}'` : 'nom'},
+    prenom = ${valeurs[1] ? `'${valeurs[1]}'` : 'prenom'},
+    pseudo = ${valeurs[2] ? `'${valeurs[2]}'` : 'pseudo'},
+    email = ${valeurs[3] ? `'${valeurs[3]}'` : 'email'},
+    lien_linkedin = ${valeurs[4] ? `'${valeurs[4]}'` : 'lien_linkedin'},
+    lien_github = ${valeurs[5] ? `'${valeurs[5]}'` : 'lien_github'}
+  WHERE idUser = '${idUser}'`;
+
 
 
     pool.query(modif)
@@ -169,7 +172,7 @@ async function modifierUser(idUser, valeurs, password) {
             if (password != '') {
                 passwordModel.salageMdp(password)
                     .then((hashedPassword) => {
-                        insererMdp(hashedPassword, idUser);
+                        passwordModel.updateMdp(hashedPassword, idUser);
                         console.log('Mot de passe inséré avec succès');
 
                     })
@@ -241,91 +244,12 @@ function supprimerUserID(idUser) {
     });
 }
 
-/**JSON de la liste des utilisateurs */
-// async function envoyer_json_liste_user() {
-
-//     try {
-//         const listeUsers = await chercherListeUtilisateurs();
-
-//         jsonRetour = {};
-//         jsonRetour.utilisateurs = [];
-
-//         if (listeUsers === 0) {
-//             json.message = "Aucun utilisateur";
-//             return 'aucun';
-//         } else {
-
-//             for (i = 0; i < listeUsers.length; i++) {
-
-//                 let userCourant = listeUsers[i];
-//                 let userInfos = {};
-
-//                 userInfos.id = userCourant.iduser;
-//                 userInfos.nom = userCourant.nom;
-//                 userInfos.prenom = userCourant.prenom;
-//                 userInfos.pseudo = userCourant.pseudo;
-//                 userInfos.role = userCourant.typeuser;
-//                 userInfos.mail = userCourant.email;
-//                 userInfos.dateCreation = userCourant.date_inscription;
-//                 userInfos.ville = userCourant.ville;
-//                 userInfos.github = userCourant.lien_github;
-//                 userInfos.linkedin = userCourant.lien_linkedin;
-
-//                 if (userCourant.typeuser === 'etudiant') {
-//                     let chercherStudent = await etudiantmodel.chercherStudent(userCourant.iduser);
-
-//                     if (chercherStudent === 0) {
-//                         return 'erreur_student'
-//                     } else {
-//                         etudiantCourant = chercherStudent[0];
-
-//                         //console.log("ihhhhh", etudiantCourant.ecole);
-//                         // userInfos.ecole = etudiantCourant.ecole;
-//                         userInfos.niveauEtude = etudiantCourant.niveau_etude;
-//                     }
-//                 }
-
-//                 if (userCourant.typeuser === 'gestionnaireExterne') {
-
-//                     let chercherGE = await gestionnaireExterneModel.chercherGestionnaireExtID(userCourant.iduser);
-
-//                     if (chercherGE === 0) {
-//                         return 'erreur_student'
-//                     } else {
-//                         let gex = chercherGE[0];
-
-//                         userInfos.entreprise = gex.entreprise;
-//                         userInfos.metier = gex.metier;
-//                     }
-//                 }
-
-//                 if (userCourant.typeuser === 'gestionnaireIA') {
-
-//                     let chercherGIA = await gestionnaireIAModel.chercherGestionnaireIapau(userCourant.iduser);
-
-//                     if (chercherGIA === 0) {
-//                         return 'erreur_student'
-//                     } else {
-//                         let gia = chercherGIA[0];
-
-//                         userInfos.role_asso = gia.role_asso;
-//                     }
-//                 }
-//                 jsonRetour.utilisateurs.push(userInfos);
-//             }
-//             return jsonRetour;
-//         }
-//     } catch (error) {
-//         throw error;
-//     }
-// }
 
 
 module.exports = {
     chercherListeUtilisateurs,
     chercherUserID,
     chercherUserPseudo,
-    // envoyer_json_liste_user,
     supprimerUser,
     modifierUser,
     insererUser,

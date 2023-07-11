@@ -1,5 +1,4 @@
 const pool = require('../database/configDB');
-const fi = require('../public/javascripts/index/fonctions_inscription');
 const userModel = require('./userModel');
 
 
@@ -77,33 +76,7 @@ async function creerGestionnaireExterne(id, entreprise, metier) {
 /**Modifier */
 async function modifierExterne(idUser, valeurs, metier, entreprise, password) {
 
-    try {
-        userModel.modifierUser(idUser, valeurs, password)
-            .then(() => {
 
-                const student = `UPDATE Gestionnaire_externe
-            SET entreprise = '${entreprise}',
-            metier = '${metier}' 
-            WHERE id_g_externe = ${idUser}`;
-
-                console.log()
-                try {
-                    pool.query(student);
-                    console.log("reussi");
-                }
-                catch (error) {
-                    console.error("Erreur lors de la mise à jour du gestionnaire externe", error);
-                }
-
-            })
-            .catch((error) => {
-                console.error("Erreur lors de la mise à jour u gestionnaire externe", error);
-            });
-
-    } catch (error) {
-        console.error("Erreur lors de la mise à jour du gestionnaire externe", error);
-        throw error;
-    }
 }
 
 
