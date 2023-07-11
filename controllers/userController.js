@@ -387,26 +387,37 @@ async function modifierUser(req, res) {
 }
 
 /**Suppression */
-function supprimerUser(req, res) {
-  if (req.method == "OPTIONS") {
+async function supprimerUser(req, res) {
+  if (req.method === "OPTIONS") {
     res.status(200).json({ success: 'Access granted' });
   } else if (req.method === 'GET') {
-    if (req.userProfile != 'admin') {
+    if (req.userProfile !== 'admin') {
       res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur" });
     }
   } else if (req.method === 'DELETE') {
     const userId = res.locals.userId;
 
-    userModel.supprimerUser(userId, 'admini')
-      .then((result) => {
-        if (result === 'ok')
-          res.status(200).json({ message: "Suppression réussie" });
-      })
-      .catch(() => {
-        res.status(400).json({ erreur: 'Echec de la suppression' });
-      });
+    try {
+      // Vérifier que l'id existe dans la bdd, sinon 404 error
+      const user = await userModel.chercherUserID(userId);
+      if (user.length === 0) {
+        return res.status(404).json({ erreur: 'L\'id n\'existe pas' });
+      }
+
+      // Supprimer l'utilisateur
+      const result = await userModel.supprimerUser(userId, 'admini');
+      if (result === 'ok') {
+        return res.status(200).json({ message: "Suppression réussie" });
+      } else {
+        return res.status(400).json({ erreur: 'Echec de la suppression' });
+      }
+    } catch (error) {
+      console.error("Erreur lors de la suppression de l'utilisateur", error);
+      return res.status(500).json({ erreur: 'Erreur lors de la suppression de l\'utilisateur' });
+    }
   }
 }
+
 
 module.exports = {
   createUser,
