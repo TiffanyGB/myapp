@@ -42,25 +42,23 @@ function recuperer_projets(idEvent) {
 
 /**Créer un projet */
 async function creerProjet(valeur_projet) {
-
     const inserer = `INSERT INTO Projet (nom, description_projet, recompense, sujet)
-    VALUES ($1, $2, $3, $4) RETURNING idProjet`;
-
-    try {
-        pool.query(inserer, valeur_projet)
+      VALUES ($1, $2, $3, $4) RETURNING idProjet`;
+  
+    return new Promise((resolve, reject) => {
+      pool.query(inserer, valeur_projet)
         .then((result) => {
-            let id = result.rows[0].idprojet;
-            console.log(id);
-
-            return id;
+          const idProjet = result.rows[0].idprojet;
+          console.log(idProjet);
+          resolve(idProjet);
         })
-        
-    }
-    catch (error) {
-        console.error('Erreur lors de l\'insertion des données côté etudiant :', error);
-        throw error;
-    }
-}
+        .catch((error) => {
+          console.error('Erreur lors de l\'insertion des données côté étudiant :', error);
+          reject(error);
+        });
+    });
+  }
+  
 
 /**Modifier un projet */
 

@@ -38,7 +38,7 @@ function voirListeProjets(req, res) {
 /**Créer */
 async function creerProjet(req, res) {
 
-    if (req.userProfile === 'admin') {
+    // if (req.userProfile === 'admin') {
         if (req.method === 'OPTION') {
             res.status(200).json({ sucess: 'Agress granted' });
         }
@@ -66,37 +66,43 @@ async function creerProjet(req, res) {
 
             try{
                 projetModel.creerProjet(valeurs_projets)
-                // .then((projetInsertion) => {
+                .then((projetInsertion) => {
 
-                //     console.log(projetInsertion)
-                //     if(typeof projetInsertion === 'number'){
-                //         // for(i = 0; i < motClefs.length; i++){
-                //         //     let motValeurs = [motClefs[i], projetInsertion];
-                //         //     motModel.insererMot(motValeurs);
-                //         //     console.log(motValeurs);
-                //         // }
-                //         res.status(200).json({message: "ok"});
-                //     }else{
-                //         res.status(400).json({message: "non"});
+
+                    if(typeof projetInsertion === 'number'){
+
+                        for(i = 0; i < motClefs.length; i++){
+                            let motValeurs = [motClefs[i], projetInsertion];
+                            motModel.insererMot(motValeurs);
+                        }
+
+                        console.log(gestionnaireExterne.length);
+                        for(i = 0; i < gestionnaireExterne.length; i++){
+
+                        }
+
+                        res.status(200).json({message: "ok"});
+                    }else{
+                        res.status(400).json({message: "non"});
     
-                //     }
-                // })
+                    }
+                })
 
             }catch{
                 res.status(400).json({erreur: "erreur"});
             }
 
         }
-    } else if (req.userProfile === 'etudiant') {
+    // } else if (req.userProfile === 'etudiant') {
 
-        res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "etudiant" });
-    } else if (req.userProfile === 'gestionnaire') {
+    //     res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "etudiant" });
+    // } else if (req.userProfile === 'gestionnaire') {
 
-        res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "gestionnaire" });
-    } else if (req.userProfile === 'aucun') {
+    //     res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "gestionnaire" });
+    // } else if (req.userProfile === 'aucun') {
 
-        res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "Aucun" });
-    }
+    //     res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "Aucun" });
+    // }
 }
 
 /**Modifier */

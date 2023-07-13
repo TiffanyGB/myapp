@@ -26,6 +26,9 @@ DROP TABLE IF EXISTS Regle CASCADE;
 DROP TABLE IF EXISTS Classement CASCADE;
 DROP TABLE IF EXISTS Resultat CASCADE;
 DROP TABLE IF EXISTS Interested CASCADE;
+DROP TABLE IF EXISTS Gerer_externe CASCADE;
+DROP TABLE IF EXISTS Gerer_ia_pau CASCADE;
+
 
 
 CREATE TABLE Utilisateur(
@@ -179,6 +182,15 @@ CREATE TABLE Resultat(
     classement INT REFERENCES Classement(idClassement) ON DELETE CASCADE
 );
 
+CREATE TABLE Gerer_ia_pau(
+    id_g_iapau INT REFERENCES Gestionnaire_iapau(id_g_iapau) ON DELETE CASCADE,
+    idProjet INT REFERENCES Projet(idProjet) ON DELETE CASCADE
+);
+
+CREATE TABLE Gerer_externe(
+    id_g_externe INT REFERENCES Gestionnaire_externe(id_g_externe) ON DELETE CASCADE,
+    idProjet INT REFERENCES Projet(idProjet) ON DELETE CASCADE
+);
 
 
 INSERT INTO Evenement (nom,description_event, debut_inscription, date_debut, date_fin, nombre_min_equipe, nombre_max_equipe, type_event)

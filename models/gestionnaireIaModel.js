@@ -104,6 +104,8 @@ async function creerGestionnaireIA(id, role_asso) {
 
 }
 
+
+
 /**Modifier un gestionnaire ia pau */
 async function modifierIapau(idUser, valeurs, role_asso, password) {
     // try {
@@ -145,5 +147,5 @@ module.exports = {
     chercherListeGestionnaireIapau,
     creerGestionnaireIA,
     modifierIapau,
-    validateUser
+    validateUser,
 }
