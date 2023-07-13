@@ -38,7 +38,14 @@ const validateUser = [
 
     body('pseudo')
         .notEmpty().withMessage('Le pseudo ne doit pas être vide.')
-        .isLength({ min: 2, max: 30 }).withMessage('Le pseudo doit avoir une longueur comprise entre 2 et 30 caractères.'),
+        .isLength({ min: 2, max: 30 }).withMessage('Le pseudo doit avoir une longueur comprise entre 2 et 30 caractères.')
+        .matches(/^[\w\d\s\S]+$/).withMessage('Le pseudo ne doit contenir que des lettres, des chiffres et des caractères spéciaux.')
+        .custom((value, { req }) => {
+            if (/<|>/.test(value)) {
+                throw new Error("Le role ne doit pas contenir les caractères '<' ou '>'");
+            }
+            return true;
+        }),
 
     body('email')
         .notEmpty().withMessage('L\'email ne doit pas être vide.')
@@ -68,7 +75,7 @@ const validateUser = [
         .isLength({ min: 8, max: 100 }).withMessage('Le mot de passe doit avoir une longueur comprise entre 8 et 100 caractères.')
         .matches(/[A-Z]/).withMessage('Le mot de passe doit contenir au moins une lettre majuscule.')
         .matches(/[0-9]/).withMessage('Le mot de passe doit contenir au moins un chiffre.')
-        .matches(/[!@#$%^&*]/).withMessage('Le mot de passe doit contenir au moins un caractère spécial (!, @, #, $, %, ^, & ou *).'),
+        .matches(/[!?.@#$%^&*]/).withMessage('Le mot de passe doit contenir au moins un caractère spécial (!, @, #, $, %, ^, & ou *).'),
 
     /**Appel du validateur */
     validateUserData,
@@ -88,7 +95,14 @@ const validateUserModif = [
 
     body('pseudo')
         .notEmpty().withMessage('Le pseudo ne doit pas être vide.')
-        .isLength({ min: 2, max: 30 }).withMessage('Le pseudo doit avoir une longueur comprise entre 2 et 30 caractères.'),
+        .isLength({ min: 2, max: 30 }).withMessage('Le pseudo doit avoir une longueur comprise entre 2 et 30 caractères.')
+        .custom((value, { req }) => {
+            if (/<|>/.test(value)) {
+                throw new Error("Le role ne doit pas contenir les caractères '<' ou '>'");
+            }
+            return true;
+        }),
+
 
     body('email')
         .notEmpty().withMessage('L\'email ne doit pas être vide.')
@@ -118,7 +132,7 @@ const validateUserModif = [
         .isLength({ min: 8, max: 100 }).withMessage('Le mot de passe doit avoir une longueur comprise entre 8 et 100 caractères.')
         .matches(/[A-Z]/).withMessage('Le mot de passe doit contenir au moins une lettre majuscule.')
         .matches(/[0-9]/).withMessage('Le mot de passe doit contenir au moins un chiffre.')
-        .matches(/[!@#$%^&*]/).withMessage('Le mot de passe doit contenir au moins un caractère spécial (!, @, #, $, %, ^, & ou *).'),
+        .matches(/[!?.@#$%^&*]/).withMessage('Le mot de passe doit contenir au moins un caractère spécial.'),
 
     /**Appel du validateur */
     validateUserData,
@@ -239,13 +253,13 @@ async function modifierUser(idUser, valeurs, password) {
     if (id[0] != infoUser.pseudo) {
         existeP = await verif.existePseudo(id[0]);
 
-    }else{
+    } else {
         existeP = false;
     }
     if (id[1] != infoUser.email) {
         existeM = await verif.existeMail(id[1]);
 
-    }else{
+    } else {
         existeM = false;
     }
 
@@ -254,7 +268,7 @@ async function modifierUser(idUser, valeurs, password) {
     }
     else if (existeP) {
         return "pseudo";
-    } 
+    }
     if (existeM) {
         return "mail";
     }
