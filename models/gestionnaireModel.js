@@ -11,7 +11,9 @@ async function envoyer_json_liste_gestionnaires() {
     try {
 
         let jsonRetour = {};
-        jsonRetour.gestionnaires = [];
+        jsonRetour.gestionnairesExternes = [];
+        jsonRetour.gestionnairesIa = [];
+
 
         const listeGExt = await gestionnaireExterneModel.chercherListeGestionnairesExt();
         const listeGIa = await gestionnaireIaModel.chercherListeGestionnaireIapau();
@@ -49,7 +51,7 @@ async function envoyer_json_liste_gestionnaires() {
                 tempInfo.Entreprise = gestionnaireCourant.entreprise;
                 tempInfo.Metier = gestionnaireCourant.metier;
 
-                jsonRetour.gestionnaires.push(tempInfo);
+                jsonRetour.gestionnairesExternes.push(tempInfo);
             }
         }
 
@@ -82,11 +84,10 @@ async function envoyer_json_liste_gestionnaires() {
                 tempInfo.Entreprise = 'IA-Pau';
                 tempInfo.Metier = gestionnaireCourant.role_asso;
 
-                jsonRetour.gestionnaires.push(tempInfo);
+                jsonRetour.gestionnairesIa.push(tempInfo);
             }
         }
 
-        console.log(jsonRetour);
         return jsonRetour;
 
     } catch (error) {

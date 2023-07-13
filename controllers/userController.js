@@ -61,9 +61,11 @@ async function createUser(req, res) {
   } else if (req.method === 'POST') {
 
     if (req.userProfile != 'admin') {
-      res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur" });
+      return res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur" });
+    }else{
+
     }
-    
+
     const {
       type: type,
       nom: userNom,
@@ -267,7 +269,7 @@ async function modifierUser(req, res) {
 
   else if (req.method === 'PATCH') {
     if (req.userProfile != 'admin') {
-      res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur" });
+      return res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur" });
     }
 
     const idUser = res.locals.userId;
@@ -513,6 +515,9 @@ async function supprimerUser(req, res) {
   } else if (req.method === 'DELETE') {
     const userId = res.locals.userId;
 
+    if (req.userProfile !== 'admin') {
+      return res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur" });
+    }
     try {
       // Vérifier que l'id existe dans la bdd, sinon 404 error
       const user = await userModel.chercherUserID(userId);

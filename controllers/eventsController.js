@@ -36,7 +36,7 @@ function voirListeEvents(req, res) {
 }
 
 async function createEvent(req, res) {
-  // if (req.userProfile === 'admin') {
+  if (req.userProfile === 'admin') {
   if (req.method === 'OPTION') {
     res.status(200).json({ success: 'Access granted' });
   } else if (req.method === 'POST') {
@@ -79,15 +79,15 @@ async function createEvent(req, res) {
       res.status(400).json({ error: 'Failed to insert' });
     }
   }
-  // } else {
-  //   res
-  //     .status(400)
-  //     .json({
-  //       error:
-  //         'Mauvais profil, il faut être administrateur',
-  //       profil: req.userProfile
-  //     });
-  // }
+  } else {
+    res
+      .status(400)
+      .json({
+        error:
+          'Mauvais profil, il faut être administrateur',
+        profil: req.userProfile
+      });
+  }
 }
 
 //Modifier
