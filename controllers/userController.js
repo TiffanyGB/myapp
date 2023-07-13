@@ -53,12 +53,17 @@ async function createUser(req, res) {
     res.status(200).json({ sucess: 'Agress granted' });
   }
   else if (req.method === 'GET') {
+    
     if (req.userProfile != 'admin') {
       res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur" });
     }
 
   } else if (req.method === 'POST') {
 
+    if (req.userProfile != 'admin') {
+      res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur" });
+    }
+    
     const {
       type: type,
       nom: userNom,
