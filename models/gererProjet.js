@@ -37,7 +37,36 @@ async function attribuerProjetExterne(idProjet, idGestionnaire) {
     }
 }
 
+async function destituerProjetExterne(idProjet) {
+
+    try {
+
+        const destituer = `DELETE FROM Gerer_externe 
+        WHERE idProjet = $1`;
+
+        pool.query(destituer, [idProjet]);
+
+    } catch (error) {
+        throw error;
+    }
+}
+async function destituerProjetIa(idProjet) {
+
+    try {
+
+        const destituer = `DELETE FROM Gerer_ia_pau 
+        WHERE idProjet = $1`;
+
+        pool.query(destituer, [idProjet]);
+
+    } catch (error) {
+        throw error;
+    }
+}
+
 module.exports = {
     attribuerProjetIA,
-    attribuerProjetExterne
+    attribuerProjetExterne,
+    destituerProjetExterne,
+    destituerProjetIa
 }

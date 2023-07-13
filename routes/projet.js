@@ -12,7 +12,10 @@ router.all('/', indexController.verifyToken, projetController.voirListeProjets);
 router.all('/creerProjet', indexController.verifyToken, projetModel.validateProjet, projetController.creerProjet);
 
 /**Modifier projet */
-
+router.all('/edit/:id', (req, res, next) => {
+    res.locals.projetId = req.params.id;
+    next();
+}, indexController.verifyToken, projetController.modifierProjet);
 
 /**Supprimer un projet */
 router.all('/delete/:id', (req, res, next) => {
@@ -20,9 +23,6 @@ router.all('/delete/:id', (req, res, next) => {
     next();
 }, indexController.verifyToken, projetController.supprimerProjet);
 
-// router.all('/edit/:id', (req, res, next) => {
-//     res.locals.projetId = req.params.id;
-//     next();
-// }, indexController.verifyToken, projetController.modifierProjet);
+
 
 module.exports = router;

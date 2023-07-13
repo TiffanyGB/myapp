@@ -272,7 +272,6 @@ async function voirEvent(req, res) {
     }
     /**Si non connecté ne pas envoyer les infos des ressources privées */
     else if (req.userProfile === 'aucun') {
-      console.log('non connecté');
       eventModel.jsonEventChoisi(eventID, 'aucun')
         .then((result) => {
           res.status(200).json(result);

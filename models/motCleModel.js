@@ -18,7 +18,7 @@ function recupererMot(idProjet) {
 
 
 /**Insérer mot clé */
-async function insererMot(valeurs){
+async function insererMot(valeurs) {
     const inserer = `INSERT INTO Mot_cle (mot, idProjet)
     VALUES ($1, $2)`;
 
@@ -30,11 +30,23 @@ async function insererMot(valeurs){
         console.error('Erreur lors de l\'insertion des données côté etudiant :', error);
         throw error;
     }
+}
 
+async function supprimerMot(idProjet) {
+
+    const supprimer = `DELETE FROM Mot_cle 
+    WHERE idProjet = $1`;
+
+    try {
+        pool.query(supprimer, [idProjet]);
+    } catch (error) {
+        throw error;
+    }
 }
 
 
 module.exports = {
     recupererMot,
-    insererMot
+    insererMot,
+    supprimerMot
 }

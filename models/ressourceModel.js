@@ -1,10 +1,12 @@
+const { func } = require('joi');
 const pool = require('../database/configDB');
 
 
 function ajouterRessources(valeurs) {
 
     const ajouter = `INSERT INTO Ressource (titre, type_ressource, lien, date_apparition, statut, description_ressource, idProjet)
-    VALUES ($1,$2,$3,$4,$5,$6, $7) `;
+    VALUES ($1,$2,$3,$4,$5,$6, $7
+        ) `;
 
     try {
         pool.query(ajouter, valeurs);
@@ -62,9 +64,22 @@ function recuperer_toutes_ressources(idProjet) {
     });
 }
 
+function supprimerRessources(idProjet){
+    const supprimer = `DELETE FROM Ressource
+    WHERE idProjet = $1`;
+
+    try{
+        pool.query(supprimer, [idProjet]);
+
+    }catch(error){
+        throw error;
+    }
+}
+
 module.exports = {
     recuperer_ressourcesPubliques,
     recuperer_toutes_ressources,
     recuperer_ressourcesPrivees,
-    ajouterRessources
+    ajouterRessources,
+    supprimerRessources
 }

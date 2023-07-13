@@ -19,7 +19,6 @@ const configurerMiddleware = () => {
     'image/jpeg': 'jpg',
     'image/png': 'png'
   };
-  console.log('const');
   const storage = multer.diskStorage({
     destination: function(req, file, callback) {
       callback(null, path.join(__dirname, 'images'));

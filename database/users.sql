@@ -90,7 +90,7 @@ CREATE TABLE Projet(
     description_projet TEXT NOT NULL,
     recompense INTEGER,   
     imgProjet VARCHAR(100), -- NOT NULL,
-    sujet VARCHAR(100),
+    sujet VARCHAR(500),
     derniereModif TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     idEvent INT REFERENCES Evenement(idEvent) ON DELETE CASCADE
 );

@@ -47,7 +47,6 @@ async function creerProjet(req, res) {
         }
         else if (req.method === 'POST') {
 
-            /**Vérifier ces valeurs */
             const {
                 nom,
                 lienSujet,
@@ -65,7 +64,6 @@ async function creerProjet(req, res) {
                 recompense,
                 lienSujet
             ];
-
 
             try {
                 projetModel.creerProjet(valeurs_projets)
@@ -111,9 +109,9 @@ async function creerProjet(req, res) {
 
                             }
 
-                            res.status(200).json({ message: "ok" });
+                            res.status(200).json({ message: "Projet créé" });
                         } else {
-                            res.status(400).json({ message: "non" });
+                            res.status(400).json({ message: "Problème lors de la récupération de l'id du projet" });
 
                         }
                     })
@@ -135,10 +133,113 @@ async function creerProjet(req, res) {
     }
 }
 
-// /**Modifier */
-// async function modifierProjet(req, res){
+/**Modifier */
+async function modifierProjet(req, res) {
+    //if (req.userProfile === 'admin') {
+    if (req.method === 'OPTION') {
+        res.status(200).json({ sucess: 'Agress granted' });
+    }
+    else if (req.method === 'PATCH') {
 
-// }
+        const projetId = res.locals.projetId;
+
+        try {
+            // Vérifier que l'id existe dans la bdd, sinon 404 error
+            const user = await projetModel.chercherProjetId(projetId);
+            if (user.length === 0) {
+                return res.status(404).json({ erreur: 'L\'id n\'existe pas' });
+            }
+
+            const {
+                nom,
+                lienSujet,
+                motClefs,
+                Ressources,
+                gestionnaireExterne,
+                gestionnaireIA,
+                recompense,
+                description
+            } = req.body;
+
+
+            const valeurs_projets = [
+                nom,
+                description,
+                recompense,
+                lienSujet,
+                projetId
+            ];
+
+
+            projetModel.modifierProjet(valeurs_projets)
+            .then(() => {
+
+                /**Supprimer anciennes données */
+                gererProjet.destituerProjetExterne(projetId);
+                gererProjet.destituerProjetIa(projetId);
+                motModel.supprimerMot(projetId);
+                ressourceModel.supprimerRessources(projetId);
+
+
+                for (i = 0; i < motClefs.length; i++) {
+                    let motValeurs = [motClefs[i], projetId];
+                    motModel.insererMot(motValeurs);
+                }
+
+                for (i = 0; i < gestionnaireExterne.length; i++) {
+
+                    let id = gestionnaireExterne[i].id;
+
+                    gererProjet.attribuerProjetExterne(projetId, id);
+                }
+
+                for (i = 0; i < gestionnaireIA.length; i++) {
+
+                    let id2 = gestionnaireIA[i].id;
+
+                    gererProjet.attribuerProjetIA(projetId, id2);
+                }
+
+                for (i = 0; i < Ressources.length; i++) {
+
+                    let courant = Ressources[i];
+
+                    let valeurs_ressources = [
+                        courant.nom,
+                        courant.type,
+                        courant.lien,
+                        courant.publication,
+                        courant.consultation,
+                        courant.description,
+                        projetId
+                    ]
+
+                    ressourceModel.ajouterRessources(valeurs_ressources);
+
+                }
+
+                return res.status(200).json({message: "Projet modifié"});
+            })
+            .catch(() => {
+                return res.status(400).json({erreur: "Le projet n'a pas pu être modifié"});
+            });
+
+        } catch {
+            return res.status(400).json({ erreur: "erreur", idErreur: "1" });
+        }
+
+        // } else if (req.userProfile === 'etudiant') {
+
+        //     res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "etudiant" });
+        // } else if (req.userProfile === 'gestionnaire') {
+
+        //     res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "gestionnaire" });
+        // } else if (req.userProfile === 'aucun') {
+
+        //     res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "Aucun" });
+        // }
+    }
+}
 
 /**Supprimer */
 async function supprimerProjet(req, res) {
@@ -182,9 +283,11 @@ async function supprimerProjet(req, res) {
     }
 }
 
+
 module.exports = {
     voirListeProjets,
     creerProjet,
     supprimerProjet,
-    
+    modifierProjet
+
 }

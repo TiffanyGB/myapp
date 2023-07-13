@@ -1,7 +1,4 @@
 const jwt = require('jsonwebtoken');
-const tk = require('../public/javascripts/token/token')
-
-
 
 
 function verifyToken(req, res, next, secretKey) {
@@ -20,16 +17,13 @@ function verifyToken(req, res, next, secretKey) {
 
         if (decoded.utilisateurType === 'administrateur') {
 
-            console.log("admin");
             req.userProfile = 'admin';
 
         } else if (decoded.utilisateurType === 'etudiant') {
 
-            console.log("etudiant");
             req.userProfile = 'etudiant';
 
         } else if ((decoded.utilisateurType === 'gestionnaireIA') || (decoded.utilisateurType === 'gestionnaireExterne')) {
-            console.log(decoded.utilisateurType);
             req.userProfile = 'gestionnaire';
         }
         req.decodedToken = decoded;
@@ -39,8 +33,7 @@ function verifyToken(req, res, next, secretKey) {
 }
 
 
-
 module.exports = {
     verifyToken,
-    
+
 };

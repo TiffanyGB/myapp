@@ -113,13 +113,23 @@ async function creerProjet(valeur_projet) {
 
 
 /**Modifier un projet */
-// async function modifierProjet(idProjet, valeur_projet) {
-//     if (req.userProfile === 'admin') {
-//         if (req.method === 'OPTION') {
-//             res.status(200).json({ sucess: 'Agress granted' });
-//         }
-//         else if (req.method === 'POST') {
-// }
+async function modifierProjet(valeur_projet) {
+
+    const modifier = `UPDATE Projet 
+    SET nom = $1,
+    description_projet = $2,
+    recompense = $3,
+    sujet = $4
+    WHERE idProjet = $5`;
+
+    try{
+        pool.query(modifier, valeur_projet)
+
+    }
+    catch(error){
+        throw error;
+    }
+}
 
 /**Supprimer un projet */
 async function supprimerProjet(idProjet) {
@@ -218,5 +228,6 @@ module.exports = {
     creerProjet,
     validateProjet,
     supprimerProjet,
-    chercherProjetId
+    chercherProjetId,
+    modifierProjet
 }
