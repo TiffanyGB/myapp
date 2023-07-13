@@ -6,27 +6,123 @@ const passwordModel = require('../models/passwordModel');
 const gestionnaireExterneModel = require('./gestionnaireExterneModel');
 const gestionnaireIAModel = require('./gestionnaireIaModel');
 const verif = require('../controllers/Auth/verificationExistenceController');
-const Joi = require('joi');
+const { body, validationResult } = require('express-validator');
 
 
-/**Valider les données */
-const schemaInscription = Joi.object({
-    nom: Joi.string().regex(/^[A-Za-z]+$/).min(3).max(40).required().messages({
-        'string.base': 'Le champ {#label} doit être une chaîne de caractères.',
-        'string.empty': 'Le champ {#label} ne doit pas être vide.',
-        'string.pattern.base': 'Le champ {#label} ne doit contenir que des lettres.',
-        'string.min': 'Le champ {#label} doit contenir au moins {#limit} caractères.',
-        'string.max': 'Le champ {#label} doit contenir au maximum {#limit} caractères.',
-        'any.required': 'Le champ {#label} est requis.',
-    }),
-    prenom: Joi.string().regex(/^[A-Za-z]+$/).min(3).max(40).required(),
-    pseudo: Joi.string().regex(/^[a-zA-Z0-9!&#(~)_^%?]+$/).min(3).max(25).required(),
-    email: Joi.string().email().regex(/^[a-zA-Z0-9!&#(~)_^%?]+$/).max(100).required(),
-    linkedin: Joi.string().uri().regex(/^[^<>]+$/).max(150).optional(),
-    github: Joi.string().uri().regex(/^[^<>]+$/).max(150).optional(),
-    ville: Joi.string().regex(/^[A-Za-z]+$/).min(3).max(45),
-    password: Joi.string().min(8).max(100).required()
-});
+function validateUserData(req, res, next) {
+    // Exécuter les validateurs Express Validator
+    const errors = validationResult(req);
+
+    // Vérifier s'il y a des erreurs de validation
+    if (!errors.isEmpty()) {
+        // Renvoyer les erreurs de validation au client
+        return res.status(400).json({ errors: errors.array() });
+    }
+
+    // Si les données sont valides, passer à l'étape suivante
+    next();
+}
+
+
+const validateUser = [
+    body('prenom')
+        .notEmpty().withMessage('Le prénom ne doit pas être vide.')
+        .isAlpha().withMessage('Le prénom doit contenir uniquement des lettres.')
+        .isLength({ min: 2, max: 30 }).withMessage('Le prénom doit avoir une longueur comprise entre 3 et 30 caractères.'),
+
+
+    body('nom')
+        .notEmpty().withMessage('Le prénom ne doit pas être vide.')
+        .isAlpha().withMessage('Le prénom doit contenir uniquement des lettres.')
+        .isLength({ min: 2, max: 30 }).withMessage('Le prénom doit avoir une longueur comprise entre 3 et 30 caractères.'),
+
+    body('pseudo')
+        .notEmpty().withMessage('Le pseudo ne doit pas être vide.')
+        .isLength({ min: 2, max: 30 }).withMessage('Le pseudo doit avoir une longueur comprise entre 2 et 30 caractères.'),
+
+    body('email')
+        .notEmpty().withMessage('L\'email ne doit pas être vide.')
+        .isEmail().withMessage('L\'email doit être une adresse email valide.')
+        .isLength({ min: 2, max: 30 }).withMessage('L\'email doit avoir une longueur comprise entre 2 et 120 caractères.'),
+
+    body('linkedin')
+        .optional({ nullable: true, checkFalsy: true }) // Rend la validation facultative si la valeur est vide ou nulle
+        .isURL().withMessage('Le lien LinkedIn doit être une URL valide.')
+        .isLength({ min: 0, max: 300 }).withMessage('Le lien LinkedIn doit avoir une longueur comprise entre 2 et 200 caractères.'),
+
+
+    body('github')
+        .optional({ nullable: true, checkFalsy: true }) // Rend la validation facultative si la valeur est vide ou nulle
+        .isURL().withMessage('Le lien GitHub doit être une URL valide.')
+        .isLength({ min: 0, max: 300 }).withMessage('Le lien GitHub doit avoir une longueur comprise entre 2 et 200 caractères.'),
+
+
+    body('ville')
+        .optional({ nullable: true, checkFalsy: true }) // Rend la validation facultative si la valeur est vide ou nulle
+        .isAlpha().withMessage('La ville doit contenir uniquement des lettres.')
+        .isLength({ min: 1, max: 50 }).withMessage('La ville doit avoir une longueur comprise entre 1 et 50 caractères.'),
+
+
+    body('password')
+        .notEmpty().withMessage('Le mot de passe ne doit pas être vide.')
+        .isLength({ min: 8, max: 100 }).withMessage('Le mot de passe doit avoir une longueur comprise entre 8 et 100 caractères.')
+        .matches(/[A-Z]/).withMessage('Le mot de passe doit contenir au moins une lettre majuscule.')
+        .matches(/[0-9]/).withMessage('Le mot de passe doit contenir au moins un chiffre.')
+        .matches(/[!@#$%^&*]/).withMessage('Le mot de passe doit contenir au moins un caractère spécial (!, @, #, $, %, ^, & ou *).'),
+
+    /**Appel du validateur */
+    validateUserData,
+];
+
+const validateUserModif = [
+    body('prenom')
+        .notEmpty().withMessage('Le prénom ne doit pas être vide.')
+        .isAlpha().withMessage('Le prénom doit contenir uniquement des lettres.')
+        .isLength({ min: 2, max: 30 }).withMessage('Le prénom doit avoir une longueur comprise entre 3 et 30 caractères.'),
+
+
+    body('nom')
+        .notEmpty().withMessage('Le prénom ne doit pas être vide.')
+        .isAlpha().withMessage('Le prénom doit contenir uniquement des lettres.')
+        .isLength({ min: 2, max: 30 }).withMessage('Le prénom doit avoir une longueur comprise entre 3 et 30 caractères.'),
+
+    body('pseudo')
+        .notEmpty().withMessage('Le pseudo ne doit pas être vide.')
+        .isLength({ min: 2, max: 30 }).withMessage('Le pseudo doit avoir une longueur comprise entre 2 et 30 caractères.'),
+
+    body('email')
+        .notEmpty().withMessage('L\'email ne doit pas être vide.')
+        .isEmail().withMessage('L\'email doit être une adresse email valide.')
+        .isLength({ min: 2, max: 30 }).withMessage('L\'email doit avoir une longueur comprise entre 2 et 120 caractères.'),
+
+    body('linkedin')
+        .optional({ nullable: true, checkFalsy: true }) // Rend la validation facultative si la valeur est vide ou nulle
+        .isURL().withMessage('Le lien LinkedIn doit être une URL valide.')
+        .isLength({ min: 0, max: 300 }).withMessage('Le lien LinkedIn doit avoir une longueur comprise entre 2 et 200 caractères.'),
+
+
+    body('github')
+        .optional({ nullable: true, checkFalsy: true }) // Rend la validation facultative si la valeur est vide ou nulle
+        .isURL().withMessage('Le lien GitHub doit être une URL valide.')
+        .isLength({ min: 0, max: 300 }).withMessage('Le lien GitHub doit avoir une longueur comprise entre 2 et 200 caractères.'),
+
+
+    body('ville')
+        .optional({ nullable: true, checkFalsy: true }) // Rend la validation facultative si la valeur est vide ou nulle
+        .isAlpha().withMessage('La ville doit contenir uniquement des lettres.')
+        .isLength({ min: 1, max: 50 }).withMessage('La ville doit avoir une longueur comprise entre 1 et 50 caractères.'),
+
+
+    body('password')
+        .optional({ nullable: true, checkFalsy: true }) // Rend la validation facultative si la valeur est vide ou nulle
+        .isLength({ min: 8, max: 100 }).withMessage('Le mot de passe doit avoir une longueur comprise entre 8 et 100 caractères.')
+        .matches(/[A-Z]/).withMessage('Le mot de passe doit contenir au moins une lettre majuscule.')
+        .matches(/[0-9]/).withMessage('Le mot de passe doit contenir au moins un chiffre.')
+        .matches(/[!@#$%^&*]/).withMessage('Le mot de passe doit contenir au moins un caractère spécial (!, @, #, $, %, ^, & ou *).'),
+
+    /**Appel du validateur */
+    validateUserData,
+];
 
 /**Liste des utilisateurs  */
 function chercherListeUtilisateurs() {
@@ -131,39 +227,52 @@ async function modifierUser(idUser, valeurs, password) {
 
     const temp = await chercherUserID(idUser);
 
+    /**Vérifier que le nouveau pseudo et email n'existent pas */
+
     infoUser = temp[0];
 
     const id = [valeurs[2], valeurs[3]];
 
-    /**Vérifier que le nouveau pseudo et email n'existent pas */
-    const pseudo = await verif.existePseudo(id[0]);
-    const mail = await verif.existeMail(id[1]);
+    let existeP;
+    let existeM;
 
-    if ((infoUser.pseudo != id[0]) && (infoUser.email != id[1])) {
+    if (id[0] != infoUser.pseudo) {
+        existeP = await verif.existePseudo(id[0]);
 
-        if (pseudo === true && mail === true) {
-            return 'les2';
-        }
+    }else{
+        existeP = false;
     }
-    if (infoUser.pseudo != id[0]) {
+    if (id[1] != infoUser.email) {
+        existeM = await verif.existeMail(id[1]);
 
-        if (pseudo === false) {
-            return 'mail';
-        } else {
-            return 'pseudo';
-        }
+    }else{
+        existeM = false;
     }
+
+    if (existeM && existeP) {
+        return "les2";
+    }
+    else if (existeP) {
+        return "pseudo";
+    } 
+    if (existeM) {
+        return "mail";
+    }
+
 
     const modif = `
-  UPDATE Utilisateur 
-  SET
-    nom = ${valeurs[0] ? `'${valeurs[0]}'` : 'nom'},
-    prenom = ${valeurs[1] ? `'${valeurs[1]}'` : 'prenom'},
-    pseudo = ${valeurs[2] ? `'${valeurs[2]}'` : 'pseudo'},
-    email = ${valeurs[3] ? `'${valeurs[3]}'` : 'email'},
-    lien_linkedin = ${valeurs[4] ? `'${valeurs[4]}'` : 'lien_linkedin'},
-    lien_github = ${valeurs[5] ? `'${valeurs[5]}'` : 'lien_github'}
-  WHERE idUser = '${idUser}'`;
+    UPDATE Utilisateur 
+    SET
+      nom = ${valeurs[0] ? `'${valeurs[0]}'` : 'nom'},
+      prenom = ${valeurs[1] ? `'${valeurs[1]}'` : 'prenom'},
+      pseudo = ${valeurs[2] ? `'${valeurs[2]}'` : 'pseudo'},
+      email = ${valeurs[3] ? `'${valeurs[3]}'` : 'email'},
+      lien_linkedin = '${valeurs[4]}',
+      lien_github = '${valeurs[5]}',
+      ville = '${valeurs[6]}',
+      derniereModif = CURRENT_TIMESTAMP
+    WHERE idUser = '${idUser}'`;
+
 
 
 
@@ -254,5 +363,7 @@ module.exports = {
     modifierUser,
     insererUser,
     supprimerUserID,
-    schemaInscription
+    validateUser,
+    validateUserModif
+
 }

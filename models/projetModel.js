@@ -44,11 +44,17 @@ function recuperer_projets(idEvent) {
 async function creerProjet(valeur_projet) {
 
     const inserer = `INSERT INTO Projet (nom, description_projet, recompense, sujet)
-    VALUES ($1, $2, $3, $4)`;
+    VALUES ($1, $2, $3, $4) RETURNING idProjet`;
 
     try {
-        await pool.query(inserer, valeur_projet);
-        return 'ok';
+        pool.query(inserer, valeur_projet)
+        .then((result) => {
+            let id = result.rows[0].idprojet;
+            console.log(id);
+
+            return id;
+        })
+        
     }
     catch (error) {
         console.error('Erreur lors de l\'insertion des données côté etudiant :', error);

@@ -7,6 +7,7 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 const cors = require('cors');
+const multerMiddleware = require('./middleware/multer-config');
 
 /**Routes */
 var adminRouter = require('./routes/admin');
@@ -19,9 +20,11 @@ var projetRouter = require('./routes/projet');
 var ressourceRouteur = require('./routes/ressource');
 var usersRouter = require('./routes/users');
 var gestionnaireRouter = require('./routes/gestionnaire');
+var imagesRouter = require('./routes/image');
 
 /**crée une instance de l'application Express */
 var app = express();
+app.use(multerMiddleware.configurerMiddleware());
 
 /** configure le moteur de rendu de vues en spécifiant le répertoire views où se trouvent les fichiers de vue et le moteur de rendu pug */
 // view engine setup
@@ -46,6 +49,7 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 /** définit les routes en utilisant les routeurs pour gérer les requêtes correspondantes. */
+app.use('/upload', imagesRouter);
 app.use('/admin', adminRouter);
 app.use('/etudiant', etudiantRouter);
 app.use('/events', eventsRouter);
@@ -57,8 +61,6 @@ app.use('/ressource', ressourceRouteur);
 app.use('/users', usersRouter);
 app.use('/gestionnaire', gestionnaireRouter);
 
-// Exécution du script pour créer l'utilisateur par défaut
-// createDefaultUser();
 
 // Configuration du middleware body-parser
 app.use(bodyParser.urlencoded({ extended: false }));

@@ -236,10 +236,17 @@ async function connexion(req, res) {
  * Informations en plus pour un étudiant: Numéro équipe (si existe).
  * Informations en moins pour un non connecté: Ressources privées d'un projet.
  */
-function voirEvent(req, res) {
+async function voirEvent(req, res) {
   if (req.method === 'GET') {
 
     const eventID = res.locals.eventID;
+
+    // Vérifier que l'id existe dans la bdd, sinon 404 error
+    const user = await eventModel.chercherEvenement(eventID);
+    if (user.length === 0) {
+      return res.status(404).json({ erreur: 'L\'id n\'existe pas' });
+    }
+
     /**Si c'est un admin, afficher les infos de l'admin */
     if (req.userProfile === 'admin' || req.userProfile === 'gestionnaire') {
 

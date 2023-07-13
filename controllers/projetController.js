@@ -1,4 +1,5 @@
 const projetModel = require('../models/projetModel');
+const motModel = require('../models/motCleModel');
 
 /**Liste des projets */
 function voirListeProjets(req, res) {
@@ -64,10 +65,23 @@ async function creerProjet(req, res) {
 
 
             try{
-                const projetInsertion = await projetModel.creerProjet(valeurs_projets);
-                if(projetInsertion === 'ok'){
-                    res.status(200).json({message: "ok"});
-                }
+                projetModel.creerProjet(valeurs_projets)
+                // .then((projetInsertion) => {
+
+                //     console.log(projetInsertion)
+                //     if(typeof projetInsertion === 'number'){
+                //         // for(i = 0; i < motClefs.length; i++){
+                //         //     let motValeurs = [motClefs[i], projetInsertion];
+                //         //     motModel.insererMot(motValeurs);
+                //         //     console.log(motValeurs);
+                //         // }
+                //         res.status(200).json({message: "ok"});
+                //     }else{
+                //         res.status(400).json({message: "non"});
+    
+                //     }
+                // })
+
             }catch{
                 res.status(400).json({erreur: "erreur"});
             }

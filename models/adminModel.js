@@ -1,10 +1,6 @@
 const pool = require('../database/configDB');
 const userModel = require('./userModel');
 
-
-/**Valider les données */
-
-
 /**Liste des admins */
 function chercherListeAdmins() {
     const users = 'SELECT * FROM Admini';

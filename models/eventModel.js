@@ -41,14 +41,21 @@ function chercherEvenement(idEvent) {
     });
 }
 
-async function creerEvent(valeurs_event) {
+async function creerEvent(valeurs_event, regles) {
     const inserer = `
         INSERT INTO Evenement (type_event, nom, debut_inscription, date_debut, date_fin, description_event, img, nombre_min_equipe, nombre_max_equipe)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)  RETURNING idevent
       `;
 
     try {
-        await pool.query(inserer, valeurs_event);
+        pool.query(inserer, valeurs_event)
+            .then((result) => {
+                let id = result.rows[0].idevent;
+                for (i = 0; i < regles.length; i++) {
+                    regleModel.ajouterRegle(id, regles[i].titre, regles[i].contenu);
+                }
+            })
+
         return 'true';
     }
     catch (error) {
@@ -56,6 +63,45 @@ async function creerEvent(valeurs_event) {
         throw error;
     }
 }
+
+/**Modifier */
+async function modifierEvent(valeurs) {
+
+    try {
+        const modifier = `
+        UPDATE Evenement 
+        SET
+          nom = ${valeurs[0] ? `'${valeurs[0]}'` : 'nom'},
+          debut_inscription = ${valeurs[1] ? `'${valeurs[1]}'` : 'debut_inscription'},
+          date_debut = ${valeurs[2] ? `'${valeurs[2]}'` : 'date_debut'},
+          date_fin = ${valeurs[3] ? `'${valeurs[3]}'` : 'date_fin'},
+          description_event = ${valeurs[4] ? `'${valeurs[4]}'` : 'description_event'},
+          img = ${valeurs[5] ? `'${valeurs[5]}'` : 'img'},
+          nombre_min_equipe = ${valeurs[6] ? `'${valeurs[6]}'` : 'nombre_min_equipe'},
+          nombre_max_equipe = ${valeurs[7] ? `'${valeurs[7]}'` : 'nombre_max_equipe'},
+          message_fin = ${valeurs[8] ? `'${valeurs[8]}'` : 'message_fin'},
+          derniereModif = CURRENT_TIMESTAMP
+        WHERE idEvent = '${idEvent}'`;
+
+        try {
+            pool.query(modifier);
+            console.log("reussi");
+        }
+        catch (error) {
+            console.error("Erreur lors de la mise à jour de l'événement", error);
+        }
+
+
+
+
+    } catch (error) {
+        console.error("Erreur lors de la mise à jour de l'étudiant", error);
+        throw error;
+    }
+}
+
+
+/**Supprimer */
 
 
 /**
@@ -382,5 +428,6 @@ module.exports = {
     recuperer_message_fin,
     jsonEventChoisi,
     creerJsonTousEvents,
+    modifierEvent,
     creerEvent
 }

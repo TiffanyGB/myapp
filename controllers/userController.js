@@ -10,7 +10,6 @@ const adminModel = require('../models/adminModel');
 const etudiantModel = require('../models/etudiantModel');
 const gestionnaireIaModel = require('../models/gestionnaireIaModel');
 const gestionnaireExterneModel = require('../models/gestionnaireExterneModel');
-
 const { body, validationResult } = require('express-validator');
 
 
@@ -70,39 +69,12 @@ async function createUser(req, res) {
       github: userGitHub,
       ville: userVille,
       ecole: userEcole,
-      codeEcole: userCodeEcole,
       niveau_etude: userNiveauEtude,
       password,
       entreprise: userEntreprise,
       metier: userMetier,
       role_asso: userRole
     } = req.body;
-
-    await body('password')
-      .isLength({ min: 8 })
-      .withMessage('Le mot de passe doit contenir au moins 8 caractères')
-      .matches(/[A-Z]/)
-      .withMessage('Le mot de passe doit contenir au moins une lettre majuscule')
-      .matches(/[0-9]/)
-      .withMessage('Le mot de passe doit contenir au moins un chiffre')
-      .matches(/[!@#$%^&*]/)
-      .withMessage('Le mot de passe doit contenir au moins un caractère spécial')
-      .run(req);
-
-    await body('email')
-      .isEmail()
-      .withMessage('L\'adresse email n\'est pas valide')
-      .run(req);
-
-    await body('niveau_etude')
-      .isIn(['L1', 'L2', 'L3', 'M1', 'M2', 'Doctorat'])
-      .withMessage('Le niveau d\'études n\'est pas valide')
-      .run(req);
-
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
 
     const valeurs_communes = [
       userNom,
@@ -119,6 +91,73 @@ async function createUser(req, res) {
       userMail
     ]
 
+    switch (type) {
+
+      case 'etudiant':
+        await body('ecole')
+          .isLength({ min: 2, max: 50 })
+          .withMessage('L\'école doit contenir entre 2 et 50 caractères')
+          .matches(/^[A-Za-z0-9]+$/)
+          .withMessage('L\'école doit contenir que des lettres et des chiffres')
+          .run(req);
+
+        await body('niveau_etude')
+          .isIn(['L1', 'L2', 'L3', 'M1', 'M2', 'Doctorat'])
+          .withMessage('Le niveau d\'études n\'est pas valide')
+          .run(req);
+
+        break;
+      case 'gestionnaireExterne':
+        await body('entreprise')
+          .notEmpty().withMessage("Le nom de l'entreprise ne doit pas être vide.")
+          .matches(/^[A-Za-z0-9]+$/).withMessage("Le nom de l'entreprise doit contenir uniquement des lettres et des chiffres.")
+          .isLength({ min: 2, max: 40 }).withMessage("Le nom de l'entreprise doit avoir une longueur comprise entre 2 et 40 caractères.")
+          .custom((value, { req }) => {
+            if (/<|>/.test(value)) {
+              throw new Error("Le nom de l'entreprise ne doit pas contenir les caractères '<' ou '>'");
+            }
+            return true;
+          })
+          .run(req);
+
+        await body('metier')
+          .notEmpty().withMessage("Le métier ne doit pas être vide.")
+          .matches(/^[A-Za-z0-9]+$/).withMessage("Le métier doit contenir uniquement des lettres et des chiffres.")
+          .isLength({ min: 2, max: 40 }).withMessage("Le métier doit avoir une longueur comprise entre 2 et 40 caractères.")
+          .custom((value, { req }) => {
+            if (/<|>/.test(value)) {
+              throw new Error("Le métier ne doit pas contenir les caractères '<' ou '>'");
+            }
+            return true;
+          })
+          .run(req);
+
+        break;
+      case 'gestionnaireIA':
+        await body('role_asso')
+          .notEmpty().withMessage("Le role ne doit pas être vide.")
+          .matches(/^[A-Za-z0-9]+$/).withMessage("Le role doit contenir uniquement des lettres et des chiffres.")
+          .isLength({ min: 2, max: 40 }).withMessage("Le role doit avoir une longueur comprise entre 2 et 40 caractères.")
+          .custom((value, { req }) => {
+            if (/<|>/.test(value)) {
+              throw new Error("Le role ne doit pas contenir les caractères '<' ou '>'");
+            }
+            return true;
+          })
+          .run(req);
+
+        break;
+      case 'administrateur':
+        break;
+      default:
+        res.status(400).json({ message: 'Le type est incorrect.' });
+
+    }
+
+    let errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
     userModel.insererUser(valeurs_communes, password, valeurs_id, type)
       .then((insertion) => {
         if (typeof insertion === 'number') {
@@ -126,6 +165,7 @@ async function createUser(req, res) {
           switch (type) {
 
             case 'etudiant':
+
               etudiantModel.creerEtudiant(userEcole, userNiveauEtude, insertion)
                 .then(() => {
 
@@ -198,12 +238,14 @@ async function createUser(req, res) {
         }
 
       }).catch(() => {
-
-        userModel.supprimerUserID(insertion);
+        /**Supprimer ssi il existe */
+        // userModel.supprimerUserID(insertion);
         res.status(400).json({ message: 'Erreur lors de l\'insertion de l\'utilisateur.' });
       });
   }
 }
+
+
 
 /**Modification users */
 async function modifierUser(req, res) {
@@ -242,6 +284,7 @@ async function modifierUser(req, res) {
       ecole: userEcole,
       linkedin,
       github,
+      ville,
       codeEcole: userCodeEcole,
       niveau_etude: userNiveauEtude,
       entreprise: userEntreprise,
@@ -256,7 +299,8 @@ async function modifierUser(req, res) {
       userPseudo,
       userMail,
       linkedin,
-      github
+      github,
+      ville
     ]
 
     const valeurs_etudiant = [
@@ -299,6 +343,73 @@ async function modifierUser(req, res) {
           type = 'admin';
         }
       });
+
+    switch (type) {
+
+      case 'etudiant':
+        await body('ecole')
+          .isLength({ min: 2, max: 50 })
+          .withMessage('L\'école doit contenir entre 2 et 50 caractères')
+          .matches(/^[A-Za-z0-9]+$/)
+          .withMessage('L\'école doit contenir que des lettres et des chiffres')
+          .run(req);
+
+        await body('niveau_etude')
+          .isIn(['L1', 'L2', 'L3', 'M1', 'M2', 'Doctorat'])
+          .withMessage('Le niveau d\'études n\'est pas valide')
+          .run(req);
+
+        break;
+      case 'gestionnaireExterne':
+        await body('entreprise')
+          .notEmpty().withMessage("Le nom de l'entreprise ne doit pas être vide.")
+          .matches(/^[A-Za-z0-9]+$/).withMessage("Le nom de l'entreprise doit contenir uniquement des lettres et des chiffres.")
+          .isLength({ min: 2, max: 40 }).withMessage("Le nom de l'entreprise doit avoir une longueur comprise entre 2 et 40 caractères.")
+          .custom((value, { req }) => {
+            if (/<|>/.test(value)) {
+              throw new Error("Le nom de l'entreprise ne doit pas contenir les caractères '<' ou '>'");
+            }
+            return true;
+          })
+          .run(req);
+
+        await body('metier')
+          .matches(/^[A-Za-z0-9]+$/).withMessage("Le métier doit contenir uniquement des lettres et des chiffres.")
+          .isLength({ min: 2, max: 40 }).withMessage("Le métier doit avoir une longueur comprise entre 2 et 40 caractères.")
+          .custom((value, { req }) => {
+            if (/<|>/.test(value)) {
+              throw new Error("Le métier ne doit pas contenir les caractères '<' ou '>'");
+            }
+            return true;
+          })
+          .run(req);
+
+        break;
+      case 'gestionnaireIA':
+        await body('role_asso')
+          .notEmpty().withMessage("Le role ne doit pas être vide.")
+          .matches(/^[A-Za-z0-9]+$/).withMessage("Le role doit contenir uniquement des lettres et des chiffres.")
+          .isLength({ min: 2, max: 40 }).withMessage("Le role doit avoir une longueur comprise entre 2 et 40 caractères.")
+          .custom((value, { req }) => {
+            if (/<|>/.test(value)) {
+              throw new Error("Le role ne doit pas contenir les caractères '<' ou '>'");
+            }
+            return true;
+          })
+          .run(req);
+
+        break;
+      case 'admin':
+        break;
+      default:
+        res.status(400).json({ message: 'Le type est incorrect.' });
+
+    }
+
+    let errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
 
     switch (type) {
       case 'etudiant':

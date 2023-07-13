@@ -1,8 +1,8 @@
 var express = require('express');
 var router = express.Router();
 // const cors = require('cors');
-const adminRouter = require('./admin');
-router.use('/users', adminRouter);
+
+
 
 
 const bodyParser = require('body-parser');
@@ -17,6 +17,7 @@ router.use(express.urlencoded({ extended: false }));
 router.all('/inscription', indexController.inscriptionEleve);
 
 router.all('/connexion', indexController.connexion);
+
 
 router.all('/voir_tous_events', indexController.voirTousEvents);
 

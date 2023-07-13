@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <form action='/upload' enctype='multipart/form-data'>
+        <input id="fileSelector" type="file"/>
+      </form>
+      
+
+    <button id="img" onclick="test()" type="submit">Valider</button>
+
+</body>
+
+<script>
+
+    async function test() {
+        var input = document.getElementById("fileSelector");
+
+        var data = new FormData()
+        data.append('file', input.files[0])
+
+        const response = await fetch('http://localhost:3000/upload/upload', {
+            method: 'POST',
+            body: data,
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        })
+
+        //const json = await response.json();
+
+        if (response.ok) {
+            console.log(json.LECHAMPOUTUVEUXMETTRELENOMDUFICHIER)
+        }
+
+    }
+
+
+</script>
+
+</html>

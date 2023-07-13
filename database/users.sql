@@ -34,11 +34,12 @@ CREATE TABLE Utilisateur(
     prenom VARCHAR (30) NOT NULL,
     pseudo VARCHAR (30) UNIQUE NOT NULL,
     email VARCHAR (100) UNIQUE NOT NULL,
-    lien_linkedin VARCHAR (100) DEFAULT NULL,
-    lien_github VARCHAR (100) DEFAULT NULL,
+    lien_linkedin VARCHAR (300) DEFAULT NULL,
+    lien_github VARCHAR (300) DEFAULT NULL,
     ville VARCHAR (100),
     lastCheckedNotif TIMESTAMP DEFAULT NULL,
     date_inscription TIMESTAMP NOT NULL,
+    derniereModif TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     hashMdp VARCHAR(255),
     typeUser VARCHAR(30) CHECK (typeUser IN ('etudiant', 'gestionnaireIA', 'gestionnaireExterne', 'administrateur'))
 );
@@ -178,8 +179,6 @@ CREATE TABLE Resultat(
     classement INT REFERENCES Classement(idClassement) ON DELETE CASCADE
 );
 
-
-DELETE FROM Utilisateur WHERE email = 'admin@admin.fr';
 
 
 INSERT INTO Evenement (nom,description_event, debut_inscription, date_debut, date_fin, nombre_min_equipe, nombre_max_equipe, type_event)

@@ -23,7 +23,7 @@ async function insererMot(valeurs){
     VALUES ($1, $2)`;
 
     try {
-        await pool.query(inserer, valeur_projet);
+        await pool.query(inserer, valeurs);
         return 'ok';
     }
     catch (error) {

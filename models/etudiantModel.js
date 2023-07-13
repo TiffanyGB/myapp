@@ -1,15 +1,36 @@
 const pool = require('../database/configDB');
 const userModel = require('./userModel');
-const Joi = require('joi');
-
-
+const { body, validationResult } = require('express-validator');
 
 /**Valider les données */
-const schemaInscription = Joi.object({
-    ecole: Joi.string().min(2).max(100).required(),
-    niveauEtude: Joi.string().required()
+function validateUserData(req, res, next) {
+    const errors = validationResult(req);
 
-});
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
+    next();
+}
+
+const validateEtudiantData = (req, res, next) => {
+    const regleStudent = [
+        body('ecole')
+            .notEmpty().withMessage("Le nom de l'école ne doit pas être vide.")
+            .matches(/^[A-Za-z0-9]+$/).withMessage("Le nom de l'école doit contenir uniquement des lettres et des chiffres.")
+            .isLength({ min: 2, max: 40 }).withMessage("Le nom de l'école doit avoir une longueur comprise entre 2 et 40 caractères."),
+
+        body('niveau_etude')
+            .notEmpty().withMessage("Le niveau d'étude ne doit pas être vide.")
+            .isIn(['L1', 'L2', 'L3', 'Doctorat', 'M1', 'M2']).withMessage("Le niveau d'étude doit être parmi les suivants : L1, L2, L3, Doctorat, M1, M2"),
+
+
+    ];
+    validateUserData(req, res, () => {
+        // Les données sont valides, passer à l'étape suivante
+        next();
+    })(regleStudent);
+};
 
 /**Liste des étudiants */
 function chercherListeStudents() {
@@ -103,7 +124,6 @@ async function modifierEtudiant(idUser, valeurs, valeurs_etudiant, password) {
                     niveau_etude = '${valeurs_etudiant[2]}' 
                     WHERE idEtudiant = ${idUser}`;
 
-        console.log()
         try {
             pool.query(student);
             console.log("reussi");
@@ -130,5 +150,5 @@ module.exports = {
     creerEtudiant,
     chercherListeStudents,
     modifierEtudiant,
-    schemaInscription
+    validateEtudiantData
 }
