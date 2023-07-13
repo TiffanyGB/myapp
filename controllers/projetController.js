@@ -1,5 +1,8 @@
 const projetModel = require('../models/projetModel');
 const motModel = require('../models/motCleModel');
+const gererProjet = require('../models/gererProjet');
+const ressourceModel = require('../models/ressourceModel');
+
 
 /**Liste des projets */
 function voirListeProjets(req, res) {
@@ -38,7 +41,7 @@ function voirListeProjets(req, res) {
 /**Créer */
 async function creerProjet(req, res) {
 
-    // if (req.userProfile === 'admin') {
+    if (req.userProfile === 'admin') {
         if (req.method === 'OPTION') {
             res.status(200).json({ sucess: 'Agress granted' });
         }
@@ -57,59 +60,131 @@ async function creerProjet(req, res) {
             } = req.body;
 
             const valeurs_projets = [
-                nom, 
+                nom,
                 description,
                 recompense,
                 lienSujet
             ];
 
 
-            try{
+            try {
                 projetModel.creerProjet(valeurs_projets)
-                .then((projetInsertion) => {
+                    .then((projetInsertion) => {
 
 
-                    if(typeof projetInsertion === 'number'){
+                        if (typeof projetInsertion === 'number') {
 
-                        for(i = 0; i < motClefs.length; i++){
-                            let motValeurs = [motClefs[i], projetInsertion];
-                            motModel.insererMot(motValeurs);
+                            for (i = 0; i < motClefs.length; i++) {
+                                let motValeurs = [motClefs[i], projetInsertion];
+                                motModel.insererMot(motValeurs);
+                            }
+
+                            for (i = 0; i < gestionnaireExterne.length; i++) {
+
+                                let id = gestionnaireExterne[i].id;
+
+                                gererProjet.attribuerProjetExterne(projetInsertion, id);
+                            }
+
+                            for (i = 0; i < gestionnaireIA.length; i++) {
+
+                                let id2 = gestionnaireIA[i].id;
+
+                                gererProjet.attribuerProjetIA(projetInsertion, id2);
+                            }
+
+                            for (i = 0; i < Ressources.length; i++) {
+
+                                let courant = Ressources[i];
+
+                                let valeurs_ressources = [
+                                    courant.nom,
+                                    courant.type,
+                                    courant.lien,
+                                    courant.publication,
+                                    courant.consultation,
+                                    courant.description,
+                                    projetInsertion
+                                ]
+
+                                ressourceModel.ajouterRessources(valeurs_ressources);
+
+                            }
+
+                            res.status(200).json({ message: "ok" });
+                        } else {
+                            res.status(400).json({ message: "non" });
+
                         }
+                    })
 
-                        console.log(gestionnaireExterne.length);
-                        for(i = 0; i < gestionnaireExterne.length; i++){
-
-                        }
-
-                        res.status(200).json({message: "ok"});
-                    }else{
-                        res.status(400).json({message: "non"});
-    
-                    }
-                })
-
-            }catch{
-                res.status(400).json({erreur: "erreur"});
+            } catch {
+                res.status(400).json({ erreur: "erreur" });
             }
 
         }
-    // } else if (req.userProfile === 'etudiant') {
+    } else if (req.userProfile === 'etudiant') {
 
-    //     res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "etudiant" });
-    // } else if (req.userProfile === 'gestionnaire') {
+        res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "etudiant" });
+    } else if (req.userProfile === 'gestionnaire') {
 
-    //     res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "gestionnaire" });
-    // } else if (req.userProfile === 'aucun') {
+        res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "gestionnaire" });
+    } else if (req.userProfile === 'aucun') {
 
-    //     res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "Aucun" });
-    // }
+        res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "Aucun" });
+    }
 }
 
-/**Modifier */
+// /**Modifier */
+// async function modifierProjet(req, res){
+
+// }
 
 /**Supprimer */
+async function supprimerProjet(req, res) {
+    if (req.userProfile === 'admin') {
+        if (req.method === 'OPTION') {
+            res.status(200).json({ sucess: 'Agress granted' });
+        }
+        else if (req.method === 'DELETE') {
+
+            const projetId = res.locals.projetId;
+
+            try {
+                // Vérifier que l'id existe dans la bdd, sinon 404 error
+                const user = await projetModel.chercherProjetId(projetId);
+                if (user.length === 0) {
+                    return res.status(404).json({ erreur: 'L\'id n\'existe pas' });
+                }
+
+                // Supprimer l'utilisateur
+                const result = await projetModel.supprimerProjet(projetId);
+                if (result === 'ok') {
+                    return res.status(200).json({ message: "Suppression réussie" });
+                } else {
+                    return res.status(400).json({ erreur: 'Echec de la suppression' });
+                }
+            } catch (error) {
+                console.error("Erreur lors de la suppression de l'utilisateur", error);
+                return res.status(500).json({ erreur: 'Erreur lors de la suppression de l\'utilisateur' });
+            }
+
+        }
+    } else if (req.userProfile === 'etudiant') {
+
+        res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "etudiant" });
+    } else if (req.userProfile === 'gestionnaire') {
+
+        res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "gestionnaire" });
+    } else if (req.userProfile === 'aucun') {
+
+        res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "Aucun" });
+    }
+}
 
 module.exports = {
     voirListeProjets,
-    creerProjet
+    creerProjet,
+    supprimerProjet,
+    
 }

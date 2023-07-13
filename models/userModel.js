@@ -9,6 +9,7 @@ const verif = require('../controllers/Auth/verificationExistenceController');
 const { body, validationResult } = require('express-validator');
 
 
+/**Mettre dans un fichier à part car est répété plein de fois */
 function validateUserData(req, res, next) {
     // Exécuter les validateurs Express Validator
     const errors = validationResult(req);
@@ -107,7 +108,7 @@ const validateUserModif = [
     body('email')
         .notEmpty().withMessage('L\'email ne doit pas être vide.')
         .isEmail().withMessage('L\'email doit être une adresse email valide.')
-        .isLength({ min: 2, max: 30 }).withMessage('L\'email doit avoir une longueur comprise entre 2 et 120 caractères.'),
+        .isLength({ min: 2, max: 120 }).withMessage('L\'email doit avoir une longueur comprise entre 2 et 120 caractères.'),
 
     body('linkedin')
         .optional({ nullable: true, checkFalsy: true }) // Rend la validation facultative si la valeur est vide ou nulle

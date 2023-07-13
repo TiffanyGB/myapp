@@ -1,9 +1,48 @@
 const pool = require('../database/configDB');
 const motcleModel = require('./motCleModel');
 const ressourceModel = require('./ressourceModel');
+const { body, validationResult } = require('express-validator');
+
 
 /**Valider les données */
+function validateUserData(req, res, next) {
+    // Exécuter les validateurs Express Validator
+    const errors = validationResult(req);
 
+    // Vérifier s'il y a des erreurs de validation
+    if (!errors.isEmpty()) {
+        // Renvoyer les erreurs de validation au client
+        return res.status(400).json({ errors: errors.array() });
+    }
+
+    // Si les données sont valides, passer à l'étape suivante
+    next();
+}
+
+
+const validateProjet = [
+    body('nom')
+        .notEmpty().withMessage('Le nom ne doit pas être vide.')
+        .isLength({ min: 2, max: 40 }).withMessage('Le prénom doit avoir une longueur comprise entre 3 et 30 caractères.'),
+
+
+    body('lienSujet')
+        .notEmpty().withMessage('Le lien ne doit pas être vide.')
+        .isURL().withMessage('Le lien doit être une url')
+        .isLength({ min: 2, max: 1000 }).withMessage('Le lien doit avoir une longueur comprise entre 3 et 1000 caractères.'),
+
+    body('recompense')
+        .notEmpty().withMessage('La récompense ne doit pas être vide.')
+        .isInt({ min: 0, max: 100000 }).withMessage('La récompense doit être un nombre entre 0 et 100 000.'),
+
+
+    body('description')
+        .notEmpty().withMessage('La description est obligatoire.')
+        .isLength({ min: 10, max: 1000000 }).withMessage('La description doit avoir une longueur comprise entre 10 et 120 caractères.'),
+
+    /**Appel du validateur */
+    validateUserData,
+];
 
 /**Liste des projets */
 function tousLesProjets() {
@@ -38,32 +77,69 @@ function recuperer_projets(idEvent) {
 }
 
 /**Chercher un projet par son id*/
+function chercherProjetId(idProjet) {
+    const users = 'SELECT * FROM Projet WHERE idProjet = $1';
+
+    return new Promise((resolve, reject) => {
+        pool.query(users, [idProjet])
+            .then((res) => {
+                resolve(res.rows);
+            })
+            .catch((error) => {
+                reject(error);
+            });
+    });
+}
 
 
 /**Créer un projet */
 async function creerProjet(valeur_projet) {
     const inserer = `INSERT INTO Projet (nom, description_projet, recompense, sujet)
       VALUES ($1, $2, $3, $4) RETURNING idProjet`;
-  
+
     return new Promise((resolve, reject) => {
-      pool.query(inserer, valeur_projet)
-        .then((result) => {
-          const idProjet = result.rows[0].idprojet;
-          console.log(idProjet);
-          resolve(idProjet);
-        })
-        .catch((error) => {
-          console.error('Erreur lors de l\'insertion des données côté étudiant :', error);
-          reject(error);
-        });
+        pool.query(inserer, valeur_projet)
+            .then((result) => {
+                const idProjet = result.rows[0].idprojet;
+                console.log(idProjet);
+                resolve(idProjet);
+            })
+            .catch((error) => {
+                console.error('Erreur lors de l\'insertion des données côté étudiant :', error);
+                reject(error);
+            });
     });
-  }
-  
+}
+
 
 /**Modifier un projet */
+// async function modifierProjet(idProjet, valeur_projet) {
+//     if (req.userProfile === 'admin') {
+//         if (req.method === 'OPTION') {
+//             res.status(200).json({ sucess: 'Agress granted' });
+//         }
+//         else if (req.method === 'POST') {
+// }
 
 /**Supprimer un projet */
+async function supprimerProjet(idProjet) {
 
+
+    const supprimer = `DELETE FROM Projet WHERE idProjet = $1`;
+
+    return new Promise((resolve, reject) => {
+
+        pool.query(supprimer, [idProjet])
+            .then(() => {
+                resolve('ok');
+            })
+            .catch((error) => {
+                reject(error);
+            });
+
+    });
+
+}
 
 
 /**JSON avec tous les projets */
@@ -138,6 +214,9 @@ async function listeProjetsJson() {
 module.exports = {
     tousLesProjets,
     listeProjetsJson,
-    recuperer_projets, 
-    creerProjet
+    recuperer_projets,
+    creerProjet,
+    validateProjet,
+    supprimerProjet,
+    chercherProjetId
 }

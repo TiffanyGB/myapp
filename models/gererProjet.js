@@ -24,7 +24,7 @@ async function attribuerProjetExterne(idProjet, idGestionnaire) {
     try {
         const valeurs = [idGestionnaire, idProjet];
 
-        const attribuer = `INSERT INTO Gestionnaire_externe (id_g_externe, idProjet)
+        const attribuer = `INSERT INTO Gerer_externe (id_g_externe, idProjet)
         VALUES ($1, $2)`;
 
         pool.query(attribuer, valeurs)
