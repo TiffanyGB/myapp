@@ -12,6 +12,10 @@ router.all('/creerEvent', indexController.verifyToken, eventsController.createEv
 router.all('/edit/:id', indexController.verifyToken, eventsController.modifierEvent);
 
 /**supprimer */
-router.all('/delete/:id', indexController.verifyToken, eventsController.supprimerEvent);
+router.all('/delete/:id', (req, res, next) => {
+    res.locals.idevent = req.params.id;
+    next();
+}, indexController.verifyToken, eventsController.supprimerEvent);
+
 
 module.exports = router;

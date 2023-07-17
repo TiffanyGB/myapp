@@ -101,6 +101,21 @@ async function modifierEvent(valeurs) {
 
 
 /**Supprimer */
+async function supprimerEvent(idEvent) {
+
+    const supprimer = `DELETE FROM Evenement WHERE idEvent = $1`;
+
+    return new Promise((resolve, reject) => {
+
+        pool.query(supprimer, [idEvent])
+            .then(() => {
+                resolve('ok');
+            })
+            .catch((error) => {
+                reject(error);
+           });
+    });
+}
 
 
 /**
@@ -428,5 +443,6 @@ module.exports = {
     jsonEventChoisi,
     creerJsonTousEvents,
     modifierEvent,
-    creerEvent
+    creerEvent,
+    supprimerEvent
 }

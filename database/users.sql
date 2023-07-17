@@ -92,7 +92,7 @@ CREATE TABLE Projet(
     imgProjet VARCHAR(100), -- NOT NULL,
     sujet VARCHAR(500),
     derniereModif TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    idEvent INT REFERENCES Evenement(idEvent) ON DELETE CASCADE
+    idEvent INT REFERENCES Evenement(idEvent) ON DELETE SET NULL
 );
 
 CREATE TABLE Equipe(
@@ -191,32 +191,3 @@ CREATE TABLE Gerer_externe(
     id_g_externe INT REFERENCES Gestionnaire_externe(id_g_externe) ON DELETE CASCADE,
     idProjet INT REFERENCES Projet(idProjet) ON DELETE CASCADE
 );
-
-
-INSERT INTO Evenement (nom,description_event, debut_inscription, date_debut, date_fin, nombre_min_equipe, nombre_max_equipe, type_event)
-VALUES ('Nom','tgrggg' ,CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 2, 5, 'challenge'),
-       ('Event2','ghh' ,CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, '2028-07-30 12:18:47.564106', 3, 8, 'battle');
-
-
-INSERT INTO Projet (nom, description_projet, recompense, imgProjet, sujet,idEvent)
-VALUES 
-    ('p1', 'Description du projet P1', 10000, '../valeur_du_bytea', 'Sujet 1' ,1),
-    ('p2', 'Description du projet p2', 20000, './x0123456789ABCDEF','Sujet principal' ,1);
-
-INSERT INTO Ressource (titre, type_ressource, lien, date_apparition, statut, description_ressource, idProjet)
-VALUES
-    ('Ressource 1', 'lien', 'https://example.com/ressource1', '2023-06-28 12:00:00', 'public', 'Description de la ressource 1', 1),
-    ('Ressource 2', 'drive', 'https://example.com/ressource2', '2023-06-28 13:00:00', 'privé', 'Description de la ressource 2', 2),
-    ('Ressource 3', 'téléchargement', 'https://example.com/ressource2', '2023-06-28 13:00:00', 'privé', 'Description de la ressource ', 2);
-
-
-INSERT INTO Regle (titre, contenu, idEvent)
-VALUES
-    ('Titre règle 1', 'Contenu règle 1', 1),
-    ('Titre règle 2', 'Contenu règle 2', 1);
-
-INSERT INTO Mot_cle (mot, idProjet) VALUES
-  ('Environnement', 1),
-  ('Code', 1),
-  ('ODD', 2),
-  ('Education', 2);

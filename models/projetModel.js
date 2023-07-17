@@ -136,7 +136,6 @@ async function modifierProjet(valeur_projet) {
 /**Supprimer un projet */
 async function supprimerProjet(idProjet) {
 
-
     const supprimer = `DELETE FROM Projet WHERE idProjet = $1`;
 
     return new Promise((resolve, reject) => {
@@ -147,10 +146,8 @@ async function supprimerProjet(idProjet) {
             })
             .catch((error) => {
                 reject(error);
-            });
-
+           });
     });
-
 }
 
 

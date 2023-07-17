@@ -37,60 +37,60 @@ function voirListeEvents(req, res) {
 
 async function createEvent(req, res) {
   // if (req.userProfile === 'admin') {
-  if (req.method === 'OPTION') {
-    res.status(200).json({ success: 'Access granted' });
-  } else if (req.method === 'POST') {
-    const {
-      typeEvent,
-      nom,
-      inscription,
-      debut,
-      fin,
-      description,
-      nombreMinEquipe,
-      nombreMaxEquipe,
-      regles,
-      projets
-    } = req.body;
+    if (req.method === 'OPTION') {
+      res.status(200).json({ success: 'Access granted' });
+    } else if (req.method === 'POST') {
+      const {
+        typeEvent,
+        nom,
+        inscription,
+        debut,
+        fin,
+        description,
+        nombreMinEquipe,
+        nombreMaxEquipe,
+        regles,
+        projets
+      } = req.body;
 
-    const valeurs_event = [
-      typeEvent,
-      nom,
-      inscription,
-      debut,
-      fin,
-      description,
-      nombreMinEquipe,
-      nombreMaxEquipe
-    ];
+      const valeurs_event = [
+        typeEvent,
+        nom,
+        inscription,
+        debut,
+        fin,
+        description,
+        nombreMinEquipe,
+        nombreMaxEquipe
+      ];
 
 
-    try {
-      const idevent = await eventModel.creerEvent(valeurs_event, regles);
+      try {
+        const idevent = await eventModel.creerEvent(valeurs_event, regles);
 
-      if (typeof idevent === 'number') {
+        if (typeof idevent === 'number') {
 
-        for (i = 0; i < projets.length; i++) {
+          for (i = 0; i < projets.length; i++) {
 
-          const user = await projetModel.chercherProjetId(projets[i].idProjet);
-          if (user.length === 0) {
-            return res.status(404).json({ erreur: 'L\'id ' + projets[i].idProjet +' n\'existe pas dans les projets' });
+            const user = await projetModel.chercherProjetId(projets[i].idProjet);
+            if (user.length === 0) {
+              return res.status(404).json({ erreur: 'L\'id ' + projets[i].idProjet + ' n\'existe pas dans les projets' });
+            }
+
+            await projetModel.rattacherProjetEvent(idevent, projets[i].idProjet);
           }
 
-          await projetModel.rattacherProjetEvent(idevent, projets[i].idProjet);
+          res.status(200).json({ message: 'ok' });
+        } else {
+
+          res.status(400).json({ error: 'Failed to insert' });
         }
 
-        res.status(200).json({ message: 'ok' });
-      } else {
-
+      } catch (error) {
+        console.error(error);
         res.status(400).json({ error: 'Failed to insert' });
       }
-
-    } catch (error) {
-      console.error(error);
-      res.status(400).json({ error: 'Failed to insert' });
     }
-  }
   // } else {
   //   res
   //     .status(400)
@@ -156,8 +156,44 @@ async function modifierEvent(req, res) {
 
 
 //Supprimer
-function supprimerEvent(req, res) {
+async function supprimerEvent(req, res) {
+  // if (req.userProfile === 'admin') {
+  if (req.method === 'OPTION') {
+    res.status(200).json({ sucess: 'Agress granted' });
+  }
+  else if (req.method === 'DELETE') {
 
+    const idevent = res.locals.idevent;
+
+    try {
+      // Vérifier que l'id existe dans la bdd, sinon 404 error
+      const user = await eventModel.chercherEvenement(idevent);
+      if (user.length === 0) {
+        return res.status(404).json({ erreur: 'L\'id n\'existe pas' });
+      }
+
+      const result = await eventModel.supprimerEvent(idevent);
+      if (result === 'ok') {
+        return res.status(200).json({ message: "Suppression réussie" });
+      } else {
+        return res.status(400).json({ erreur: 'Echec de la suppression' });
+      }
+    } catch (error) {
+      console.error("Erreur lors de la suppression de l'utilisateur", error);
+      return res.status(500).json({ erreur: 'Erreur lors de la suppression de l\'utilisateur' });
+    }
+
+  }
+  // } else if (req.userProfile === 'etudiant') {
+
+  //     res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "etudiant" });
+  // } else if (req.userProfile === 'gestionnaire') {
+
+  //     res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "gestionnaire" });
+  // } else if (req.userProfile === 'aucun') {
+
+  //     res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "Aucun" });
+  // }
 }
 
 module.exports = {
