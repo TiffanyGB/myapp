@@ -36,7 +36,7 @@ function voirListeEvents(req, res) {
 }
 
 async function createEvent(req, res) {
-  if (req.userProfile === 'admin') {
+  // if (req.userProfile === 'admin') {
   if (req.method === 'OPTION') {
     res.status(200).json({ success: 'Access granted' });
   } else if (req.method === 'POST') {
@@ -49,7 +49,8 @@ async function createEvent(req, res) {
       description,
       nombreMinEquipe,
       nombreMaxEquipe,
-      regles
+      regles,
+      projets
     } = req.body;
 
     const valeurs_event = [
@@ -65,13 +66,24 @@ async function createEvent(req, res) {
 
 
     try {
-      const a = await eventModel.creerEvent(valeurs_event, regles);
-      if (a === 'true') {
+      const idevent = await eventModel.creerEvent(valeurs_event, regles);
+
+      if (typeof idevent === 'number') {
+
+        for (i = 0; i < projets.length; i++) {
+
+          const user = await projetModel.chercherProjetId(projets[i].idProjet);
+          if (user.length === 0) {
+            return res.status(404).json({ erreur: 'L\'id ' + projets[i].idProjet +' n\'existe pas dans les projets' });
+          }
+
+          await projetModel.rattacherProjetEvent(idevent, projets[i].idProjet);
+        }
+
         res.status(200).json({ message: 'ok' });
-
       } else {
-        res.status(400).json({ error: 'Failed to insert' });
 
+        res.status(400).json({ error: 'Failed to insert' });
       }
 
     } catch (error) {
@@ -79,15 +91,15 @@ async function createEvent(req, res) {
       res.status(400).json({ error: 'Failed to insert' });
     }
   }
-  } else {
-    res
-      .status(400)
-      .json({
-        error:
-          'Mauvais profil, il faut être administrateur',
-        profil: req.userProfile
-      });
-  }
+  // } else {
+  //   res
+  //     .status(400)
+  //     .json({
+  //       error:
+  //         'Mauvais profil, il faut être administrateur',
+  //       profil: req.userProfile
+  //     });
+  // }
 }
 
 //Modifier

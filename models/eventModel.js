@@ -43,26 +43,25 @@ function chercherEvenement(idEvent) {
 
 async function creerEvent(valeurs_event, regles) {
     const inserer = `
-        INSERT INTO Evenement (type_event, nom, debut_inscription, date_debut, date_fin, description_event, img, nombre_min_equipe, nombre_max_equipe)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)  RETURNING idevent
-      `;
-
+      INSERT INTO Evenement (type_event, nom, debut_inscription, date_debut, date_fin, description_event, nombre_min_equipe, nombre_max_equipe)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING idevent
+    `;
+  
     try {
-        pool.query(inserer, valeurs_event)
-            .then((result) => {
-                let id = result.rows[0].idevent;
-                for (i = 0; i < regles.length; i++) {
-                    regleModel.ajouterRegle(id, regles[i].titre, regles[i].contenu);
-                }
-            })
-
-        return 'true';
+      const result = await pool.query(inserer, valeurs_event);
+      const id = result.rows[0].idevent;
+  
+      for (let i = 0; i < regles.length; i++) {
+        await regleModel.ajouterRegle(id, regles[i].titre, regles[i].contenu);
+      }
+  
+      return id;
+    } catch (error) {
+      console.error('Erreur lors de l\'insertion des données côté étudiant :', error);
+      throw error;
     }
-    catch (error) {
-        console.error('Erreur lors de l\'insertion des données côté etudiant :', error);
-        throw error;
-    }
-}
+  }
+  
 
 /**Modifier */
 async function modifierEvent(valeurs) {

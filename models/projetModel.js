@@ -94,6 +94,7 @@ function chercherProjetId(idProjet) {
 
 /**Créer un projet */
 async function creerProjet(valeur_projet) {
+    
     const inserer = `INSERT INTO Projet (nom, description_projet, recompense, sujet)
       VALUES ($1, $2, $3, $4) RETURNING idProjet`;
 
@@ -222,6 +223,22 @@ async function listeProjetsJson() {
 }
 
 
+async function rattacherProjetEvent(idEvent, idProjet) {
+    const rattacher = `
+      UPDATE Projet 
+      SET idevent = $1
+      WHERE idprojet = $2
+    `;
+  
+    try {
+      await pool.query(rattacher, [idEvent, idProjet]);
+    } catch (error) {
+      console.error('Erreur lors de la mise à jour du projet :', error);
+      throw error;
+    }
+  }
+  
+
 module.exports = {
     tousLesProjets,
     listeProjetsJson,
@@ -230,5 +247,6 @@ module.exports = {
     validateProjet,
     supprimerProjet,
     chercherProjetId,
-    modifierProjet
+    modifierProjet,
+    rattacherProjetEvent
 }
