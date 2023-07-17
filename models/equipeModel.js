@@ -1,4 +1,17 @@
+const { func } = require('joi');
 const pool = require('../database/configDB');
+
+
+
+function creerEquipe(){
+
+}
+function supprimerEquipe(){}
+
+/**Permet de voir les équipes associées à un projet */
+function jsonListeEquipe(){
+
+}
 
 function aUneEquipe(idEtudiant) {
 
@@ -16,6 +29,15 @@ function aUneEquipe(idEtudiant) {
 }
 
 
+
+
+
+function trouverEquipe() { }
+
+
+
 module.exports = {
-    aUneEquipe
+    aUneEquipe,
+    trouverEquipe,
+    jsonListeEquipe
 }
