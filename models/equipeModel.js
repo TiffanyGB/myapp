@@ -1,4 +1,3 @@
-const { func } = require('joi');
 const pool = require('../database/configDB');
 
 async function listeEquipeProjet(idProjet) {
@@ -7,6 +6,21 @@ async function listeEquipeProjet(idProjet) {
 
     return new Promise((resolve, reject) => {
         pool.query(chercher, [idProjet])
+            .then((res) => {
+                resolve(res.rows);
+            })
+            .catch((error) => {
+                reject(error);
+            });
+    });
+}
+
+async function chercherEquipeID(id){
+
+    const chercher = `SELECT * FROM Equipe WHERE idEquipe = $1`;
+
+    return new Promise((resolve, reject) => {
+        pool.query(chercher, [id])
             .then((res) => {
                 resolve(res.rows);
             })
@@ -39,9 +53,21 @@ function aUneEquipe(idEtudiant) {
     });
 }
 
+async function jsonInfosEquipe(idEquipe){
+
+    try{
+
+        const chercher = await chercherEquipeID(idEquipe);
+
+    }catch{
+
+    }
+}
+
 
 /**Permet de voir les équipes associées à un projet */
 async function jsonListeEquipeProjet(idProjet) {
+
     try {
         const equipeList = await listeEquipeProjet(idProjet);
 
@@ -85,6 +111,7 @@ async function jsonListeEquipeProjet(idProjet) {
     }
 }
 
+
 function jsonListeEquipeEvent() {
 
 }
@@ -101,5 +128,7 @@ module.exports = {
     supprimerEquipe,
     creerEquipe,
     jsonListeEquipeEvent,
-    listeEquipeProjet
+    listeEquipeProjet,
+    jsonInfosEquipe,
+    chercherEquipeID
 }

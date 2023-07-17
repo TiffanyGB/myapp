@@ -298,7 +298,7 @@ function voirTousEvents(req, res) {
     eventModel.creerJsonTousEvents()
       .then((result) => {
         if (result === false) {
-          res.status(400).json({ message: 'Aucun événement' });
+          res.status(200).json([]);
         } else {
           res.status(200).json(result);
         }
