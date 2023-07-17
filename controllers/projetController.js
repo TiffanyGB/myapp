@@ -40,7 +40,7 @@ function voirListeProjets(req, res) {
 
 /**Informations d'un projet */
 async function infosProjet(req, res) {
-    // if (req.userProfile === 'admin') {
+    if (req.userProfile === 'admin') {
         if (req.method === 'OPTION') {
             res.status(200).json({ sucess: 'Agress granted' });
         }
@@ -62,16 +62,16 @@ async function infosProjet(req, res) {
                 res.status(400).json({ erreur: "Erreur lors de la récupération des équipes" });
             }
         }
-    // } else if (req.userProfile === 'etudiant') {
+    } else if (req.userProfile === 'etudiant') {
 
-    //     res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "etudiant" });
-    // } else if (req.userProfile === 'gestionnaire') {
+        res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "etudiant" });
+    } else if (req.userProfile === 'gestionnaire') {
 
-    //     res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "gestionnaire" });
-    // } else if (req.userProfile === 'aucun') {
+        res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "gestionnaire" });
+    } else if (req.userProfile === 'aucun') {
 
-    //     res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "Aucun" });
-    // }
+        res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "Aucun" });
+    }
 }
 
 /**Créer */

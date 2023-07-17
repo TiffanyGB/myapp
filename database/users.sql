@@ -104,7 +104,7 @@ CREATE TABLE Equipe(
     statut_recrutement VARCHAR(30) CHECK (statut_recrutement IN ('ouvert', 'fermé')),
     lien_github TEXT DEFAULT NULL,
     idProjet INT REFERENCES Projet(idProjet) ON DELETE CASCADE,
-    idCapitaine INT REFERENCES Etudiant(idEtudiant) ON DELETE CASCADE   ,
+    idCapitaine INT REFERENCES Etudiant(idEtudiant) ON DELETE CASCADE,
     finaliste INT REFERENCES Evenement(idEvent) ON DELETE CASCADE
 );
 
@@ -194,5 +194,5 @@ CREATE TABLE Gerer_externe(
 );
 
 INSERT INTO Equipe (nom, description_equipe, statut_recrutement, lien_github, idProjet, idCapitaine)
-VALUES ('Nom de l\'équipe', 'Description de l\'équipe', 'ouvert', 'lien-vers-github', 1, 2),
-('Nom de l\'équipe 2', 'Description de l\'équipe 2', 'fermé', 2, 3);
+VALUES ('Nom de l''équipe', 'Description de l''équipe', 'ouvert', 'lien-vers-github', 1, 2),
+       ('Nom de l''équipe 2', 'Description de l''équipe 2', 'fermé', 'lien-github-2', 2, 3);
