@@ -1,3 +1,4 @@
+const { func } = require('joi');
 const pool = require('../database/configDB');
 const motcleModel = require('./motCleModel');
 const ressourceModel = require('./ressourceModel');
@@ -38,7 +39,7 @@ const validateProjet = [
 
     body('description')
         .notEmpty().withMessage('La description est obligatoire.')
-        .isLength({ min: 10, max: 1000000 }).withMessage('La description doit avoir une longueur comprise entre 10 et 120 caractères.'),
+        .isLength({ min: 10, max: 10000 }).withMessage('La description doit avoir une longueur comprise entre 10 et 10000 caractères.'),
 
     /**Appel du validateur */
     validateUserData,
@@ -219,6 +220,11 @@ async function listeProjetsJson() {
     }
 }
 
+
+/**Informations d'un projet */
+async function infosProjet(idProjet){
+    
+}
 
 async function rattacherProjetEvent(idEvent, idProjet) {
     const rattacher = `

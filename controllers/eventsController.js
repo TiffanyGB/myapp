@@ -11,7 +11,6 @@ function voirListeEvents(req, res) {
     }
     else if (req.method === 'GET') {
 
-
       projetModel.listeProjetsJson()
         .then((result) => {
           if (result === 'aucun') {

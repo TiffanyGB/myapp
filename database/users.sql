@@ -191,3 +191,7 @@ CREATE TABLE Gerer_externe(
     id_g_externe INT REFERENCES Gestionnaire_externe(id_g_externe) ON DELETE CASCADE,
     idProjet INT REFERENCES Projet(idProjet) ON DELETE CASCADE
 );
+
+INSERT INTO Equipe (nom, description_equipe, statut_recrutement, lien_github, idProjet, idCapitaine)
+VALUES ('Nom de l\'équipe', 'Description de l\'équipe', 'ouvert', 'lien-vers-github', 1, 2),
+('Nom de l\'équipe 2', 'Description de l\'équipe 2', 'fermé', 2, 3);

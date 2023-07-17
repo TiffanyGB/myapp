@@ -1,4 +1,3 @@
-const pool = require('../database/configDB');
 const gestionnaireModel = require('../models/gestionnaireModel');
 
 

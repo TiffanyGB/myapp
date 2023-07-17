@@ -2,6 +2,7 @@ const projetModel = require('../models/projetModel');
 const motModel = require('../models/motCleModel');
 const gererProjet = require('../models/gererProjet');
 const ressourceModel = require('../models/ressourceModel');
+const { func } = require('joi');
 
 
 /**Liste des projets */
@@ -36,6 +37,11 @@ function voirListeProjets(req, res) {
 
         res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "Aucun" });
     }
+}
+
+/**Informations d'un projet */
+async function infosProjet(req, res){
+
 }
 
 /**Créer */
