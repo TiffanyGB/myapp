@@ -13,7 +13,7 @@ router.all('/', indexController.verifyToken, projetController.voirListeProjets);
 router.all('/:id', (req, res, next) => {
     res.locals.projetId = req.params.id;
     next();
-}, indexController.verifyToken, projetController.supprimerProjet);
+}, indexController.verifyToken, projetController.infosProjet);
 
 /**créer un projet */
 router.all('/creerProjet', indexController.verifyToken, projetModel.validateProjet, projetController.creerProjet);

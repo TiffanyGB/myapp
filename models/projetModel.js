@@ -3,6 +3,7 @@ const pool = require('../database/configDB');
 const motcleModel = require('./motCleModel');
 const ressourceModel = require('./ressourceModel');
 const { body, validationResult } = require('express-validator');
+const { json } = require('body-parser');
 
 
 /**Valider les données */
@@ -222,8 +223,46 @@ async function listeProjetsJson() {
 
 
 /**Informations d'un projet */
-async function infosProjet(idProjet){
-    
+async function infosProjet(idProjet) {
+
+    try {
+        let projet = await chercherProjetId(idProjet);
+
+        jsonRetour = {};
+
+        if (projet === 0) {
+            json.message = "Aucun projet";
+            return 'aucun';
+        } else {
+
+            projet = projet[0];
+
+            jsonRetour.id = projet.idprojet;
+            jsonRetour.nom = projet.nom;
+            jsonRetour.description = projet.description_projet;
+            jsonRetour.recompense = projet.recompense;
+            jsonRetour.sujet = projet.sujet;
+            jsonRetour.derniereModif = projet.dernieremodif;
+
+            if(jsonRetour.idevent == null){
+                jsonRetour.idevent = '';
+            }else{
+                jsonRetour.idevent = projet.idevent;
+            }
+            
+            if(jsonRetour.idequipegagnante == null){
+                jsonRetour.idEquipeGagnante = '';
+            }else{
+                jsonRetour.idEquipeGagnante = projet.idequipegagnante;
+            }
+
+            return jsonRetour;
+
+
+        }
+    } catch (error) {
+        throw error;
+    }
 }
 
 async function rattacherProjetEvent(idEvent, idProjet) {
@@ -268,5 +307,6 @@ module.exports = {
     chercherProjetId,
     modifierProjet,
     rattacherProjetEvent,
-    detacherProjetEvent
+    detacherProjetEvent,
+    infosProjet
 }

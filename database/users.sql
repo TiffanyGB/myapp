@@ -88,11 +88,12 @@ CREATE TABLE Projet(
     idProjet SERIAL PRIMARY KEY,
     nom VARCHAR (30) NOT NULL,
     description_projet TEXT NOT NULL,
-    recompense INTEGER,   
+    recompense INTEGER NOT NULL,   
     imgProjet VARCHAR(100), -- NOT NULL,
-    sujet VARCHAR(500),
+    sujet VARCHAR(500) NOT NULL,
     derniereModif TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    idEvent INT REFERENCES Evenement(idEvent) ON DELETE SET NULL
+    idEvent INT REFERENCES Evenement(idEvent) ON DELETE SET NULL,
+    idEquipeGagnante INT REFERENCES Equipe(idEquipe) ON DELETE NULL
 );
 
 CREATE TABLE Equipe(
