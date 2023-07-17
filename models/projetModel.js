@@ -119,7 +119,8 @@ async function modifierProjet(valeur_projet) {
     SET nom = $1,
     description_projet = $2,
     recompense = $3,
-    sujet = $4
+    sujet = $4,
+    derniereModif = CURRENT_TIMESTAMP
     WHERE idProjet = $5`;
 
     try{

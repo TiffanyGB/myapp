@@ -1,10 +1,37 @@
-/**
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: controllers/userController.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: controllers/userController.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
  * Contrôleur pour la gestion des utilisateurs.
  * 
- * Ce fichier contient les controllers servant à la manipulation des
- * utilisateurs.
+ * Description détaillée du contenu du contrôleur.
  * 
- * @module Controller/Utilisateur
+ * @module Contrôleur/Utilisateur
  * @version 1.0.0
  * @since 2023-06-20
  * 
@@ -31,17 +58,7 @@ const gestionnaireExterneModel = require('../models/gestionnaireExterneModel');
 const { body, validationResult } = require('express-validator');
 
 
-/**
- * Récupère la liste des utilisateurs et renvoie un JSON contenant les informations des utilisateurs,
- * si le profil est 'administrateur'.
- * 
- * @param {Object} req - L'objet de requête HTTP.
- * @param {Object} res - L'objet de réponse HTTP.
- * @returns {Promise} Une promesse résolue avec les informations des utilisateurs au format JSON.
- * @throws {Error} Une erreur si la récupération des utilisateurs échoue ou si le profil de l'utilisateur n'est pas valide.
- * 
- * @memberof module:Contrôleur/Admin
- */
+/**Voir les users */
 function voirUtilisateurs(req, res) {
 
   if (req.userProfile === 'admin') {
@@ -81,7 +98,7 @@ async function createUser(req, res) {
     res.status(200).json({ sucess: 'Agress granted' });
   }
   else if (req.method === 'GET') {
-
+    
     if (req.userProfile != 'admin') {
       res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur" });
     }
@@ -90,7 +107,7 @@ async function createUser(req, res) {
 
     if (req.userProfile != 'admin') {
       return res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur" });
-    } else {
+    }else{
 
     }
 
@@ -148,8 +165,8 @@ async function createUser(req, res) {
           .matches(/^[A-Za-z0-9]+$/).withMessage("Le nom de l'entreprise doit contenir uniquement des lettres et des chiffres.")
           .isLength({ min: 2, max: 40 }).withMessage("Le nom de l'entreprise doit avoir une longueur comprise entre 2 et 40 caractères.")
           .custom((value, { req }) => {
-            if (/<|>/.test(value)) {
-              throw new Error("Le nom de l'entreprise ne doit pas contenir les caractères '<' ou '>'");
+            if (/&lt;|>/.test(value)) {
+              throw new Error("Le nom de l'entreprise ne doit pas contenir les caractères '&lt;' ou '>'");
             }
             return true;
           })
@@ -160,8 +177,8 @@ async function createUser(req, res) {
           .matches(/^[A-Za-z0-9]+$/).withMessage("Le métier doit contenir uniquement des lettres et des chiffres.")
           .isLength({ min: 2, max: 40 }).withMessage("Le métier doit avoir une longueur comprise entre 2 et 40 caractères.")
           .custom((value, { req }) => {
-            if (/<|>/.test(value)) {
-              throw new Error("Le métier ne doit pas contenir les caractères '<' ou '>'");
+            if (/&lt;|>/.test(value)) {
+              throw new Error("Le métier ne doit pas contenir les caractères '&lt;' ou '>'");
             }
             return true;
           })
@@ -174,8 +191,8 @@ async function createUser(req, res) {
           .matches(/^[A-Za-z0-9]+$/).withMessage("Le role doit contenir uniquement des lettres et des chiffres.")
           .isLength({ min: 2, max: 40 }).withMessage("Le role doit avoir une longueur comprise entre 2 et 40 caractères.")
           .custom((value, { req }) => {
-            if (/<|>/.test(value)) {
-              throw new Error("Le role ne doit pas contenir les caractères '<' ou '>'");
+            if (/&lt;|>/.test(value)) {
+              throw new Error("Le role ne doit pas contenir les caractères '&lt;' ou '>'");
             }
             return true;
           })
@@ -401,8 +418,8 @@ async function modifierUser(req, res) {
           .matches(/^[A-Za-z0-9]+$/).withMessage("Le nom de l'entreprise doit contenir uniquement des lettres et des chiffres.")
           .isLength({ min: 2, max: 40 }).withMessage("Le nom de l'entreprise doit avoir une longueur comprise entre 2 et 40 caractères.")
           .custom((value, { req }) => {
-            if (/<|>/.test(value)) {
-              throw new Error("Le nom de l'entreprise ne doit pas contenir les caractères '<' ou '>'");
+            if (/&lt;|>/.test(value)) {
+              throw new Error("Le nom de l'entreprise ne doit pas contenir les caractères '&lt;' ou '>'");
             }
             return true;
           })
@@ -412,8 +429,8 @@ async function modifierUser(req, res) {
           .matches(/^[A-Za-z0-9]+$/).withMessage("Le métier doit contenir uniquement des lettres et des chiffres.")
           .isLength({ min: 2, max: 40 }).withMessage("Le métier doit avoir une longueur comprise entre 2 et 40 caractères.")
           .custom((value, { req }) => {
-            if (/<|>/.test(value)) {
-              throw new Error("Le métier ne doit pas contenir les caractères '<' ou '>'");
+            if (/&lt;|>/.test(value)) {
+              throw new Error("Le métier ne doit pas contenir les caractères '&lt;' ou '>'");
             }
             return true;
           })
@@ -426,8 +443,8 @@ async function modifierUser(req, res) {
           .matches(/^[A-Za-z0-9]+$/).withMessage("Le role doit contenir uniquement des lettres et des chiffres.")
           .isLength({ min: 2, max: 40 }).withMessage("Le role doit avoir une longueur comprise entre 2 et 40 caractères.")
           .custom((value, { req }) => {
-            if (/<|>/.test(value)) {
-              throw new Error("Le role ne doit pas contenir les caractères '<' ou '>'");
+            if (/&lt;|>/.test(value)) {
+              throw new Error("Le role ne doit pas contenir les caractères '&lt;' ou '>'");
             }
             return true;
           })
@@ -574,3 +591,26 @@ module.exports = {
   modifierUser,
   supprimerUser
 };
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Contr%25C3%25B4leur_Utilisateur.html">Contrôleur/Utilisateur</a></li></ul><h3>Global</h3><ul><li><a href="global.html#connexion">connexion</a></li><li><a href="global.html#creerProjet">creerProjet</a></li><li><a href="global.html#express">express</a></li><li><a href="global.html#inscriptionEleve">inscriptionEleve</a></li><li><a href="global.html#modifierProjet">modifierProjet</a></li><li><a href="global.html#supprimerProjet">supprimerProjet</a></li><li><a href="global.html#voirEvent">voirEvent</a></li><li><a href="global.html#voirListeGestionnaires">voirListeGestionnaires</a></li><li><a href="global.html#voirListeProjets">voirListeProjets</a></li><li><a href="global.html#voirTousEvents">voirTousEvents</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.2</a> on Thu Jul 13 2023 20:06:18 GMT+0200 (Central European Summer Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
