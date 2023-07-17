@@ -59,6 +59,10 @@ async function jsonInfosEquipe(idEquipe){
 
         const chercher = await chercherEquipeID(idEquipe);
 
+        jsonRetour = {}
+
+        
+
     }catch{
 
     }

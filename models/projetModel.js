@@ -108,7 +108,7 @@ async function creerProjet(valeur_projet) {
                 resolve(idProjet);
             })
             .catch((error) => {
-                console.error('Erreur lors de l\'insertion des données côté étudiant :', error);
+                console.error('Erreur lors de l\'insertion des données :', error);
                 reject(error);
             });
     });

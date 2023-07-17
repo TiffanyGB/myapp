@@ -9,14 +9,15 @@ const equipeController = require('../controllers/equipeController');
 /**Voir la liste des projets*/
 router.all('/', indexController.verifyToken, projetController.voirListeProjets);
 
+router.all('/creerProjets',indexController.verifyToken, projetController.creationProjet);
+
+
 /**voir informations d'un projet */
 router.all('/:id', (req, res, next) => {
     res.locals.projetId = req.params.id;
     next();
 }, indexController.verifyToken, projetController.infosProjet);
 
-/**créer un projet */
-router.all('/creerProjet', indexController.verifyToken, projetModel.validateProjet, projetController.creerProjet);
 
 /**Modifier projet */
 router.all('/edit/:id', (req, res, next) => {
