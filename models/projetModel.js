@@ -94,7 +94,7 @@ function chercherProjetId(idProjet) {
 
 /**Créer un projet */
 async function creerProjet(valeur_projet) {
-    
+
     const inserer = `INSERT INTO Projet (nom, description_projet, recompense, sujet)
       VALUES ($1, $2, $3, $4) RETURNING idProjet`;
 
@@ -124,11 +124,11 @@ async function modifierProjet(valeur_projet) {
     derniereModif = CURRENT_TIMESTAMP
     WHERE idProjet = $5`;
 
-    try{
+    try {
         pool.query(modifier, valeur_projet)
 
     }
-    catch(error){
+    catch (error) {
         throw error;
     }
 }
@@ -146,7 +146,7 @@ async function supprimerProjet(idProjet) {
             })
             .catch((error) => {
                 reject(error);
-           });
+            });
     });
 }
 
@@ -226,15 +226,31 @@ async function rattacherProjetEvent(idEvent, idProjet) {
       SET idevent = $1
       WHERE idprojet = $2
     `;
-  
+
     try {
-      await pool.query(rattacher, [idEvent, idProjet]);
+        await pool.query(rattacher, [idEvent, idProjet]);
     } catch (error) {
-      console.error('Erreur lors de la mise à jour du projet :', error);
-      throw error;
+        console.error('Erreur lors de la mise à jour du projet :', error);
+        throw error;
     }
-  }
-  
+}
+
+async function detacherProjetEvent(idEvent) {
+    const rattacher = `
+      UPDATE Projet 
+      SET idevent = null
+      WHERE idevent = $1
+    `;
+
+    try {
+        await pool.query(rattacher, [idEvent]);
+    } catch (error) {
+        console.error('Erreur lors de la mise à jour du projet :', error);
+        throw error;
+    }
+}
+
+
 
 module.exports = {
     tousLesProjets,
@@ -245,5 +261,6 @@ module.exports = {
     supprimerProjet,
     chercherProjetId,
     modifierProjet,
-    rattacherProjetEvent
+    rattacherProjetEvent,
+    detacherProjetEvent
 }

@@ -46,59 +46,53 @@ async function creerEvent(valeurs_event, regles) {
       INSERT INTO Evenement (type_event, nom, debut_inscription, date_debut, date_fin, description_event, nombre_min_equipe, nombre_max_equipe)
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING idevent
     `;
-  
-    try {
-      const result = await pool.query(inserer, valeurs_event);
-      const id = result.rows[0].idevent;
-  
-      for (let i = 0; i < regles.length; i++) {
-        await regleModel.ajouterRegle(id, regles[i].titre, regles[i].contenu);
-      }
-  
-      return id;
-    } catch (error) {
-      console.error('Erreur lors de l\'insertion des données côté étudiant :', error);
-      throw error;
-    }
-  }
-  
-
-/**Modifier */
-async function modifierEvent(valeurs) {
 
     try {
-        const modifier = `
-        UPDATE Evenement 
-        SET
-          nom = ${valeurs[0] ? `'${valeurs[0]}'` : 'nom'},
-          debut_inscription = ${valeurs[1] ? `'${valeurs[1]}'` : 'debut_inscription'},
-          date_debut = ${valeurs[2] ? `'${valeurs[2]}'` : 'date_debut'},
-          date_fin = ${valeurs[3] ? `'${valeurs[3]}'` : 'date_fin'},
-          description_event = ${valeurs[4] ? `'${valeurs[4]}'` : 'description_event'},
-          img = ${valeurs[5] ? `'${valeurs[5]}'` : 'img'},
-          nombre_min_equipe = ${valeurs[6] ? `'${valeurs[6]}'` : 'nombre_min_equipe'},
-          nombre_max_equipe = ${valeurs[7] ? `'${valeurs[7]}'` : 'nombre_max_equipe'},
-          message_fin = ${valeurs[8] ? `'${valeurs[8]}'` : 'message_fin'},
-          derniereModif = CURRENT_TIMESTAMP
-        WHERE idEvent = '${idEvent}'`;
+        const result = await pool.query(inserer, valeurs_event);
+        const id = result.rows[0].idevent;
 
-        try {
-            pool.query(modifier);
-            console.log("reussi");
-        }
-        catch (error) {
-            console.error("Erreur lors de la mise à jour de l'événement", error);
+        for (let i = 0; i < regles.length; i++) {
+            await regleModel.ajouterRegle(id, regles[i].titre, regles[i].contenu);
         }
 
-
-
-
+        return id;
     } catch (error) {
-        console.error("Erreur lors de la mise à jour de l'étudiant", error);
+        console.error('Erreur lors de l\'insertion des données côté étudiant :', error);
         throw error;
     }
 }
 
+
+/**Modifier */
+async function modifierEvent(valeurs) {
+    try {
+
+      const modifier = `
+        UPDATE Evenement 
+        SET
+          nom = '${valeurs[0]}',
+          debut_inscription = '${valeurs[1]}',
+          date_debut = '${valeurs[2]}',
+          date_fin = '${valeurs[3]}',
+          description_event = '${valeurs[4]}',
+          nombre_min_equipe = '${valeurs[5]}',
+          nombre_max_equipe = '${valeurs[6]}',
+          message_fin = ${valeurs[7] ? `'${valeurs[7]}'` : 'message_fin'},
+          derniereModif = CURRENT_TIMESTAMP
+        WHERE idEvent = '${valeurs[8]}'`;
+  
+      try {
+        await pool.query(modifier);
+      } catch (error) {
+        console.error("Erreur lors de la mise à jour de l'événement", error);
+        throw error;
+      }
+    } catch (error) {
+      console.error("Erreur lors de la mise à jour de l'événement", error);
+      throw error;
+    }
+  }
+  
 
 /**Supprimer */
 async function supprimerEvent(idEvent) {
@@ -113,7 +107,7 @@ async function supprimerEvent(idEvent) {
             })
             .catch((error) => {
                 reject(error);
-           });
+            });
     });
 }
 

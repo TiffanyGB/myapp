@@ -17,7 +17,7 @@ function recuperer_regles(idEvent) {
 }
 
 /**Ajouter une regle à un event */
-function ajouterRegle(idEvent, titre, contenu){
+function ajouterRegle(idEvent, titre, contenu) {
 
     const valeur = [titre, contenu, idEvent];
 
@@ -35,7 +35,20 @@ function ajouterRegle(idEvent, titre, contenu){
     });
 }
 
+async function supprimerRegles(idEvent) {
+
+    const supprimer = `DELETE FROM Regle 
+    WHERE idEvent = $1`;
+
+    try {
+        pool.query(supprimer, [idEvent]);
+    } catch (error) {
+        throw error;
+    }
+}
+
 module.exports = {
     recuperer_regles,
-    ajouterRegle
+    ajouterRegle,
+    supprimerRegles
 }
