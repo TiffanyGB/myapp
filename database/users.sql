@@ -92,8 +92,7 @@ CREATE TABLE Projet(
     imgProjet VARCHAR(100), -- NOT NULL,
     sujet VARCHAR(500) NOT NULL,
     derniereModif TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    idEvent INT REFERENCES Evenement(idEvent) ON DELETE SET NULL,
-    idEquipeGagnante INT REFERENCES Equipe(idEquipe) ON DELETE NULL
+    idEvent INT REFERENCES Evenement(idEvent) ON DELETE SET NULL
 );
 
 CREATE TABLE Equipe(
@@ -107,6 +106,7 @@ CREATE TABLE Equipe(
     idCapitaine INT REFERENCES Etudiant(idEtudiant) ON DELETE CASCADE,
     finaliste INT REFERENCES Evenement(idEvent) ON DELETE CASCADE
 );
+
 
 CREATE TABLE Regle(
     idRegles SERIAL PRIMARY KEY,
@@ -193,6 +193,3 @@ CREATE TABLE Gerer_externe(
     idProjet INT REFERENCES Projet(idProjet) ON DELETE CASCADE
 );
 
-INSERT INTO Equipe (nom, description_equipe, statut_recrutement, lien_github, idProjet, idCapitaine)
-VALUES ('Nom de l''équipe', 'Description de l''équipe', 'ouvert', 'lien-vers-github', 1, 2),
-       ('Nom de l''équipe 2', 'Description de l''équipe 2', 'fermé', 'lien-github-2', 2, 3);
