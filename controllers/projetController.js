@@ -76,7 +76,7 @@ async function infosProjet(req, res) {
 
 /**Créer */
 async function creationProjet(req, res) {
-    // if (req.userProfile === 'admin') {
+    if (req.userProfile === 'admin') {
     if (req.method === 'OPTION') {
         res.status(200).json({ sucess: 'Agress granted' });
 
@@ -140,13 +140,13 @@ async function creationProjet(req, res) {
         }
 
     }
-    // } else if (req.userProfile === 'etudiant') {
-    //     res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "etudiant" });
-    // } else if (req.userProfile === 'gestionnaire') {
-    //     res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "gestionnaire" });
-    // } else if (req.userProfile === 'aucun') {
-    //     res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "Aucun" });
-    // }
+    } else if (req.userProfile === 'etudiant') {
+        res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "etudiant" });
+    } else if (req.userProfile === 'gestionnaire') {
+        res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "gestionnaire" });
+    } else if (req.userProfile === 'aucun') {
+        res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "Aucun" });
+    }
 }
 /**Modifier */
 async function modifierProjet(req, res) {

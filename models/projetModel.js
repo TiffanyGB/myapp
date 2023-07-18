@@ -176,6 +176,12 @@ async function listeProjetsJson() {
 
                 temp.idProjet = projetCourant.idprojet;
                 temp.nom = projetCourant.nom;
+
+                if(projetCourant.idevent == null){
+                    temp.idevent = '';
+                }else{
+                    temp.idevent = projetCourant.idevent;
+                }
                 temp.description = projetCourant.description_projet;
                 temp.recompense = projetCourant.recompense;
                 temp.image = projetCourant.imgprojet;

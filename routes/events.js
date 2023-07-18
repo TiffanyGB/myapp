@@ -18,5 +18,11 @@ router.all('/delete/:id', (req, res, next) => {
     next();
 }, indexController.verifyToken, eventsController.supprimerEvent);
 
+/**Voir les équipes d'un event */
+router.all('/:id/teams', (req, res, next) => {
+    res.locals.idevent = req.params.id;
+    next();
+}, indexController.verifyToken, eventsController.listeEquipes);
+
 
 module.exports = router;

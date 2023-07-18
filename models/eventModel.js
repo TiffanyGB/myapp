@@ -67,7 +67,7 @@ async function creerEvent(valeurs_event, regles) {
 async function modifierEvent(valeurs) {
     try {
 
-      const modifier = `
+        const modifier = `
         UPDATE Evenement 
         SET
           nom = '${valeurs[0]}',
@@ -80,19 +80,19 @@ async function modifierEvent(valeurs) {
           message_fin = ${valeurs[7] ? `'${valeurs[7]}'` : 'message_fin'},
           derniereModif = CURRENT_TIMESTAMP
         WHERE idEvent = '${valeurs[8]}'`;
-  
-      try {
-        await pool.query(modifier);
-      } catch (error) {
+
+        try {
+            await pool.query(modifier);
+        } catch (error) {
+            console.error("Erreur lors de la mise à jour de l'événement", error);
+            throw error;
+        }
+    } catch (error) {
         console.error("Erreur lors de la mise à jour de l'événement", error);
         throw error;
-      }
-    } catch (error) {
-      console.error("Erreur lors de la mise à jour de l'événement", error);
-      throw error;
     }
-  }
-  
+}
+
 
 /**Supprimer */
 async function supprimerEvent(idEvent) {
@@ -331,12 +331,15 @@ async function jsonEventChoisi(idEvent, typeUser) {
     }
 }
 
+/*Très bizarre la recup des event*/
 async function creerJsonTousEvents() {
 
     try {
 
         let listesAnciens = await recupererAncienEvents();
         let listeActuels = await recupererEventActuel();
+
+        console.log(listesAnciens.rows)
 
         if (listesAnciens.rows.length === 0) {
             return false;
@@ -430,6 +433,33 @@ async function creerJsonTousEvents() {
 }
 
 
+
+async function jsonlisteEquipeEvent(idEvent) {
+
+    try {
+        const listeProjets = await projetModel.recuperer_projets(idEvent);
+
+        const jsonRetour = {}; // Assurez-vous d'initialiser jsonRetour comme un objet vide ici
+        jsonRetour.equipes = [];
+
+        for (let i = 0; i < listeProjets.length; i++) {
+            let equipeList = await equipeModel.jsonListeEquipeProjet(listeProjets[i].idprojet);
+
+
+            for (j = 0; j < equipeList.equipe.length; j++) {
+                jsonRetour.equipes.push(equipeList.equipe[j]);
+            }
+        }
+        return (jsonRetour);
+        
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+
+
+
 module.exports = {
     chercherEvenement,
     chercherListeEvenement,
@@ -438,5 +468,6 @@ module.exports = {
     creerJsonTousEvents,
     modifierEvent,
     creerEvent,
-    supprimerEvent
+    supprimerEvent,
+    jsonlisteEquipeEvent
 }

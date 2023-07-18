@@ -36,6 +36,43 @@ async function retournerEquipeProjet(req, res) {
   }
 }
 
+async function informationsEquipe(req, res) {
+  if (req.userProfile === 'admin') {
+    if (req.method === 'OPTION') {
+      res.status(200).json({ sucess: 'Agress granted' });
+    } else if (req.method === 'GET') {
+      const idEquipe = res.locals.idEquipe;
+
+      try {
+
+        const equipeInfos = await equipeModel.chercherEquipeID(idEquipe);
+        console.log(equipeInfos);
+
+        if (equipeInfos === 'aucun') {
+          return res.status(404).json({ erreur: "L'id de l'équipe n'existe pas" });
+        } else {
+
+          const equipeList = await equipeModel.jsonInfosEquipe(idEquipe);
+          res.status(200).json(equipeList);
+        }
+      } catch (error) {
+
+        res.status(500).json({ erreur: "Erreur lors de la récupération de l'équipe" });
+      }
+    }
+  } else if (req.userProfile === 'etudiant') {
+    res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "etudiant" });
+  } else if (req.userProfile === 'gestionnaire') {
+    res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "gestionnaire" });
+  } else if (req.userProfile === 'aucun') {
+    res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "Aucun" });
+  }
+}
+
+
+
+
 module.exports = {
-  retournerEquipeProjet
+  retournerEquipeProjet,
+  informationsEquipe
 }
