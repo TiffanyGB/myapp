@@ -1,6 +1,6 @@
 const pool = require('../database/configDB');
 const passwordModel = require('../models/passwordModel');
-const validationDonnees = require('../middleware/validationDonnées');
+const validationDonnees = require('../middleware/validationDonnees');
 const verif = require('../controllers/Auth/verificationExistenceController');
 const { body } = require('express-validator');
 
@@ -44,71 +44,6 @@ const validateUser = [
         .optional({ nullable: true, checkFalsy: true })
         .matches(/^[a-zA-ZÀ-ÿ \-']*$/).withMessage("La ville doit contenir uniquement des lettres, des espaces, des tirets '-', des apostrophes ''', ou des lettres avec accents.")
         .isLength({ min: 1, max: 50 }).withMessage('La ville doit avoir une longueur comprise entre 1 et 50 caractères.'),
-
-
-    body('password')
-        .notEmpty().withMessage('Le mot de passe ne doit pas être vide.')
-        .isLength({ min: 8, max: 100 }).withMessage('Le mot de passe doit avoir une longueur comprise entre 8 et 100 caractères.')
-        .matches(/[A-Za-zÀ-ÿ]/).withMessage('Le mot de passe doit contenir au moins une lettre majuscule.')
-        .matches(/[0-9]/).withMessage('Le mot de passe doit contenir au moins un chiffre.')
-        .matches(/\W/).withMessage('Le mot de passe doit contenir au moins un caractère spécial.')
-        .custom((value, { req }) => {
-            if (/<|>|"|\\/.test(value)) {
-                throw new Error("Le mdp ne doit pas contenir les caractères '<' ou '>'");
-            }
-            return true;
-        }),
-        
-    /**Appel du validateur */
-    validationDonnees.validateUserData,
-];
-
-const validateUserModif = [
-    body('prenom')
-        .notEmpty().withMessage('Le prénom ne doit pas être vide.')
-        .matches(/^[a-zA-ZÀ-ÿ \-']*$/).withMessage("Le prénom doit contenir uniquement des lettres, des espaces, des tirets '-', des apostrophes ''', ou des lettres avec accents.")
-        .isLength({ min: 2, max: 30 }).withMessage('Le prénom doit avoir une longueur comprise entre 2 et 30 caractères.'),
-
-    body('nom')
-        .notEmpty().withMessage('Le prénom ne doit pas être vide.')
-        .matches(/^[a-zA-ZÀ-ÿ \-']*$/).withMessage("Le prénom doit contenir uniquement des lettres, des espaces, des tirets '-', des apostrophes ''', ou des lettres avec accents.")
-        .isLength({ min: 2, max: 50 }).withMessage('Le prénom doit avoir une longueur comprise entre 3 et 50 caractères.'),
-
-    body('pseudo')
-        .notEmpty().withMessage('Le pseudo ne doit pas être vide.')
-        .isLength({ min: 2, max: 30 }).withMessage('Le pseudo doit avoir une longueur comprise entre 3 et 30 caractères.')
-        .matches(/^[^\s<>]+$/).withMessage('Le pseudo ne doit contenir que des lettres, des chiffres et des caractères spéciaux, sauf les espaces et les symboles "<>".'),
-
-    body('email')
-        .notEmpty().withMessage('L\'email ne doit pas être vide.')
-        .isEmail().withMessage('L\'email doit être une adresse email valide.')
-        .isLength({ min: 2, max: 30 }).withMessage('L\'email doit avoir une longueur comprise entre 2 et 120 caractères.'),
-
-    body('linkedin')
-        /* Rend la validation facultative si la valeur est vide ou nulle*/
-        .optional({ nullable: true, checkFalsy: true })
-        .isURL().withMessage('Le lien LinkedIn doit être une URL valide.')
-        .isLength({ min: 0, max: 300 }).withMessage('Le lien LinkedIn doit avoir une longueur comprise entre 2 et 200 caractères.'),
-
-    body('github')
-        /* Rend la validation facultative si la valeur est vide ou nulle*/
-        .optional({ nullable: true, checkFalsy: true })
-        .isURL().withMessage('Le lien GitHub doit être une URL valide.')
-        .isLength({ min: 0, max: 300 }).withMessage('Le lien GitHub doit avoir une longueur comprise entre 2 et 200 caractères.'),
-
-
-    body('ville')
-        /* Rend la validation facultative si la valeur est vide ou nulle*/
-        .optional({ nullable: true, checkFalsy: true })
-        .matches(/^[a-zA-ZÀ-ÿ \-']*$/).withMessage("La ville doit contenir uniquement des lettres, des espaces, des tirets '-', des apostrophes ''', ou des lettres avec accents.")
-        .isLength({ min: 1, max: 50 }).withMessage('La ville doit avoir une longueur comprise entre 1 et 50 caractères.'),
-
-    body('password')
-        .optional({ nullable: true, checkFalsy: true }) // Rend la validation facultative si la valeur est vide ou nulle
-        .isLength({ min: 8, max: 100 }).withMessage('Le mot de passe doit avoir une longueur comprise entre 8 et 100 caractères.')
-        .matches(/[A-Z]/).withMessage('Le mot de passe doit contenir au moins une lettre majuscule.')
-        .matches(/[0-9]/).withMessage('Le mot de passe doit contenir au moins un chiffre.')
-        .matches(/[!?.@#$%^&*]/).withMessage('Le mot de passe doit contenir au moins un caractère spécial.'),
 
     /**Appel du validateur */
     validationDonnees.validateUserData,
@@ -353,5 +288,4 @@ module.exports = {
     insererUser,
     supprimerUserID,
     validateUser,
-    validateUserModif
 }

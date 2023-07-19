@@ -41,38 +41,28 @@ function voirListeProjets(req, res) {
 /**Informations d'un projet */
 async function infosProjet(req, res) {
     if (req.userProfile === 'admin') {
-        if (req.method === 'OPTION') {
-            res.status(200).json({ sucess: 'Agress granted' });
+      if (req.method === 'OPTION') {
+        return res.status(200).json({ success: 'Access granted' });
+      } else if (req.method === 'GET') {
+        const idProjet = res.locals.projetId;
+  
+        try {
+          const result = await projetModel.chercherProjetId(idProjet);
+          if (result.length === 0) {
+            return res.status(404).json({ erreur: "L'id n'existe pas" });
+          }
+  
+          const projetInfos = await projetModel.infosProjet(idProjet);
+          return res.status(200).json(projetInfos);
+        } catch (error) {
+          return res.status(400).json({ erreur: "Erreur lors de la récupération des équipes" });
         }
-        else if (req.method === 'GET') {
-            const idProjet = res.locals.projetId;
-
-            /**Vérifier que l'id existe dans la bdd, sinon 404 error */
-            projetModel.chercherProjetId(idProjet)
-                .then((result) => {
-                    if (result.length === 0) {
-                        return res.status(404).json({ erreur: "L'id n'existe pas" });
-                    }
-                });
-
-            try {
-                const projetInfos = await projetModel.infosProjet(idProjet);
-                res.status(200).json(projetInfos);
-            } catch (error) {
-                res.status(400).json({ erreur: "Erreur lors de la récupération des équipes" });
-            }
-        }
-    } else if (req.userProfile === 'etudiant') {
-
-        res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "etudiant" });
-    } else if (req.userProfile === 'gestionnaire') {
-
-        res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "gestionnaire" });
-    } else if (req.userProfile === 'aucun') {
-
-        res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "Aucun" });
+      }
+    } else if (req.userProfile === 'etudiant' || req.userProfile === 'gestionnaire' || req.userProfile === 'aucun') {
+      return res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: req.userProfile });
     }
-}
+  }
+  
 
 /**Créer */
 async function creationProjet(req, res) {

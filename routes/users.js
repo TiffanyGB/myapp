@@ -26,6 +26,7 @@ const userController = require('../controllers/userController');
 const indexController = require('../controllers/indexController');
 const userModel = require('../models/userModel');
 const adminProfile = require('../middleware/adminProfile');
+const validationDonnees = require('../middleware/validationDonnees');
 
 /**
  * @route GET /users
@@ -47,8 +48,9 @@ router.get('/',
 router.all(
   '/create',
   userModel.validateUser,
-  // adminProfile.checkAdminProfile,
+  adminProfile.checkAdminProfile,
   indexController.verifyToken,
+  validationDonnees.validatePasswordCreation,
   userController.createUser
 );
 
@@ -61,7 +63,9 @@ router.all(
 router.all('/edit/:id', (req, res, next) => {
   res.locals.userId = req.params.id;
   next();
-}, indexController.verifyToken, userModel.validateUserModif, userController.modifierUser);
+}, indexController.verifyToken,
+  validationDonnees.validatePasswordModif,
+  userController.modifierUser);
 
 
 /**

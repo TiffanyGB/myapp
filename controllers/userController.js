@@ -122,8 +122,8 @@ async function createUser(req, res) {
       case 'administrateur':
         break;
       default:
-        return res.status(400).json({ erreur: "Le type est incorrect"});
-      }
+        return res.status(400).json({ erreur: "Le type est incorrect" });
+    }
 
     /**Exécute la requete de validation adapté */
     let errors = validationResult(req);
@@ -226,9 +226,6 @@ async function modifierUser(req, res) {
     res.status(200).json({ sucess: 'Agress granted' });
   }
   else if (req.method === 'PATCH') {
-    if (req.userProfile != 'admin') {
-      return res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur" });
-    }
     const idUser = res.locals.userId;
 
     /**Vérifier que l'id existe dans la bdd, sinon 404 error */
@@ -240,6 +237,7 @@ async function modifierUser(req, res) {
         }
       });
 
+      /**Récupération des données */
     const {
       nom: userNom,
       prenom: userPrenom,
@@ -308,21 +306,22 @@ async function modifierUser(req, res) {
         }
       });
 
-      switch (type) {
-        case 'etudiant':
-          await etudiantModel.validerEtudiant(req);
-          break;
-        case 'gestionnaireExterne':
-          await gestionnaireExterneModel.validerGestionnaireExterne(req);
-          break;
-        case 'gestionnaireIA':
-          await gestionnaireIaModel.validerGestionnaireIA(req);
-          break;
-        case 'administrateur':
-          break;
-        default:
-          throw new Error('Le type est incorrect.');
-      }
+      /* Vérification des données selon le type */
+    switch (type) {
+      case 'etudiant':
+        await etudiantModel.validerEtudiant(req);
+        break;
+      case 'gestionnaireExterne':
+        await gestionnaireExterneModel.validerGestionnaireExterne(req);
+        break;
+      case 'gestionnaireIA':
+        await gestionnaireIaModel.validerGestionnaireIA(req);
+        break;
+      case 'administrateur':
+        break;
+      default:
+        return res.status(400).json({ erreur: "Le type est incorrect" });
+    }
 
     let errors = validationResult(req);
     if (!errors.isEmpty()) {
