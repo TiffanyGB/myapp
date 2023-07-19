@@ -1,13 +1,13 @@
 const pool = require('../database/configDB');
 const userModel = require('./userModel');
-const { body, validationResult } = require('express-validator');
+const { body } = require('express-validator');
 
 
 async function validerGestionnaireExterne(req) {
     await body('entreprise')
       .notEmpty().withMessage("Le nom de l'entreprise ne doit pas être vide.")
-      .matches(/^[A-Za-z0-9]+$/).withMessage("Le nom de l'entreprise doit contenir uniquement des lettres et des chiffres.")
-      .isLength({ min: 2, max: 40 }).withMessage("Le nom de l'entreprise doit avoir une longueur comprise entre 2 et 40 caractères.")
+      .matches(/^[A-Za-z0-9\W]+$/).withMessage("Le nom de l'entreprise doit contenir uniquement des lettres et des chiffres.")
+      .isLength({ min: 2, max: 100 }).withMessage("Le nom de l'entreprise doit avoir une longueur comprise entre 2 et 100 caractères.")
       .custom((value, { req }) => {
         if (/<|>/.test(value)) {
           throw new Error("Le nom de l'entreprise ne doit pas contenir les caractères '<' ou '>'");
@@ -18,8 +18,8 @@ async function validerGestionnaireExterne(req) {
   
     await body('metier')
       .notEmpty().withMessage("Le métier ne doit pas être vide.")
-      .matches(/^[A-Za-z0-9]+$/).withMessage("Le métier doit contenir uniquement des lettres et des chiffres.")
-      .isLength({ min: 2, max: 40 }).withMessage("Le métier doit avoir une longueur comprise entre 2 et 40 caractères.")
+      .matches(/^[A-Za-z0-9\W]+$/).withMessage("Le métier doit contenir uniquement des lettres et des chiffres.")
+      .isLength({ min: 2, max: 100 }).withMessage("Le métier doit avoir une longueur comprise entre 2 et 100 caractères.")
       .custom((value, { req }) => {
         if (/<|>/.test(value)) {
           throw new Error("Le métier ne doit pas contenir les caractères '<' ou '>'");
@@ -29,31 +29,6 @@ async function validerGestionnaireExterne(req) {
       .run(req);
   }
 
-// const validateUser = [
-//     body('entreprise')
-//     .notEmpty().withMessage("Le nom de l'entreprise ne doit pas être vide.")
-//     .matches(/^[A-Za-z0-9]+$/).withMessage("Le nom de l'entreprise doit contenir uniquement des lettres et des chiffres.")
-//     .isLength({ min: 2, max: 40 }).withMessage("Le nom de l'entreprise doit avoir une longueur comprise entre 2 et 40 caractères.")
-//     .custom((value, { req }) => {
-//       if (/<|>/.test(value)) {
-//         throw new Error("Le nom de l'entreprise ne doit pas contenir les caractères '<' ou '>'");
-//       }
-//       return true;
-//     }),
-//     body('metier')
-//     .notEmpty().withMessage("Le métier ne doit pas être vide.")
-//     .matches(/^[A-Za-z0-9]+$/).withMessage("Le métier doit contenir uniquement des lettres et des chiffres.")
-//     .isLength({ min: 2, max: 40 }).withMessage("Le métier doit avoir une longueur comprise entre 2 et 40 caractères.")
-//     .custom((value, { req }) => {
-//       if (/<|>/.test(value)) {
-//         throw new Error("Le métier ne doit pas contenir les caractères '<' ou '>'");
-//       }
-//       return true;
-//     }),
-
-//     /**Appel du validateur */
-//     validateUserData,
-// ];
 
 /**Liste des étudiants */
 function chercherListeGestionnairesExt() {

@@ -4,7 +4,6 @@ const validationDonnees = require('../middleware/validationDonnees');
 const verif = require('../controllers/Auth/verificationExistenceController');
 const { body } = require('express-validator');
 
-
 const validateUser = [
     body('prenom')
         .notEmpty().withMessage('Le prénom ne doit pas être vide.')
@@ -19,24 +18,24 @@ const validateUser = [
     body('pseudo')
         .notEmpty().withMessage('Le pseudo ne doit pas être vide.')
         .isLength({ min: 2, max: 30 }).withMessage('Le pseudo doit avoir une longueur comprise entre 3 et 30 caractères.')
-        .matches(/^[^<>]+$/).withMessage('Le pseudo ne doit contenir que des lettres, des chiffres et des caractères spéciaux, sauf les espaces et les symboles "<>".')
+        .matches(/^[^\s<>]+$/).withMessage('Le pseudo ne doit contenir que des lettres, des chiffres et des caractères spéciaux, sauf les espaces et les symboles "<>".')
 ,
     body('email')
         .notEmpty().withMessage('L\'email ne doit pas être vide.')
         .isEmail().withMessage('L\'email doit être une adresse email valide.')
-        .isLength({ min: 2, max: 30 }).withMessage('L\'email doit avoir une longueur comprise entre 2 et 120 caractères.'),
+        .isLength({ min: 2, max: 100 }).withMessage('L\'email doit avoir une longueur comprise entre 2 et 100 caractères.'),
 
     body('linkedin')
         /* Rend la validation facultative si la valeur est vide ou nulle*/
         .optional({ nullable: true, checkFalsy: true })
         .isURL().withMessage('Le lien LinkedIn doit être une URL valide.')
-        .isLength({ min: 0, max: 300 }).withMessage('Le lien LinkedIn doit avoir une longueur comprise entre 2 et 200 caractères.'),
+        .isLength({ min: 0, max: 300 }).withMessage('Le lien LinkedIn doit avoir une longueur comprise entre 2 et 300 caractères.'),
 
     body('github')
         /* Rend la validation facultative si la valeur est vide ou nulle*/
         .optional({ nullable: true, checkFalsy: true })
         .isURL().withMessage('Le lien GitHub doit être une URL valide.')
-        .isLength({ min: 0, max: 300 }).withMessage('Le lien GitHub doit avoir une longueur comprise entre 2 et 200 caractères.'),
+        .isLength({ min: 0, max: 300 }).withMessage('Le lien GitHub doit avoir une longueur comprise entre 2 et 300 caractères.'),
 
 
     body('ville')

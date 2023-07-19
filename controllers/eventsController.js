@@ -4,7 +4,7 @@ const regleModel = require('../models/reglesModel');
 
 async function createEvent(req, res) {
   if (req.userProfile === 'admin') {
-    if (req.method === 'OPTION') {
+    if (req.method === 'OPTIONS') {
       res.status(200).json({ success: 'Access granted' });
     } else if (req.method === 'POST') {
       const {
@@ -75,7 +75,7 @@ async function modifierEvent(req, res) {
 
   if (req.userProfile === 'admin') {
 
-    if (req.method === 'OPTION') {
+    if (req.method === 'OPTIONS') {
 
       res.status(200).json({ success: 'Access granted' });
     }
@@ -162,7 +162,7 @@ async function modifierEvent(req, res) {
 
 async function supprimerEvent(req, res) {
   if (req.userProfile === 'admin') {
-    if (req.method === 'OPTION') {
+    if (req.method === 'OPTIONS') {
       res.status(200).json({ sucess: 'Agress granted' });
     }
     else if (req.method === 'DELETE') {
@@ -203,7 +203,7 @@ async function supprimerEvent(req, res) {
 async function listeEquipes(req, res) {
 
   if (req.userProfile === 'admin') {
-  if (req.method === 'OPTION') {
+  if (req.method === 'OPTIONS') {
     res.status(200).json({ sucess: 'Agress granted' });
   }
   else if (req.method === 'GET') {

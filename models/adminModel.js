@@ -16,7 +16,6 @@ function chercherListeAdmins() {
     });
 }
 
-
 /**Chercher un admin par son id*/
 function chercherAdminID(idUser) {
     const users = 'SELECT * FROM Admini WHERE idAdmin = $1';

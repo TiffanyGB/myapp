@@ -25,7 +25,7 @@ var router = express.Router();
 const userController = require('../controllers/userController');
 const indexController = require('../controllers/indexController');
 const userModel = require('../models/userModel');
-const adminProfile = require('../middleware/adminProfile');
+const adminProfile = require('../middleware/verifProfil');
 const validationDonnees = require('../middleware/validationDonnees');
 
 /**
@@ -64,6 +64,7 @@ router.all('/edit/:id', (req, res, next) => {
   res.locals.userId = req.params.id;
   next();
 }, indexController.verifyToken,
+  adminProfile.checkAdminProfile,
   validationDonnees.validatePasswordModif,
   userController.modifierUser);
 

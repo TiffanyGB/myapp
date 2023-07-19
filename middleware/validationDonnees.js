@@ -14,21 +14,6 @@ function validateUserData(req, res, next) {
     next();
 }
 
-// function validatePasswordCreation() {
-//     return body('password')
-//         .notEmpty().withMessage('Le mot de passe ne doit pas être vide.')
-//         .isLength({ min: 8, max: 100 }).withMessage('Le mot de passe doit avoir une longueur comprise entre 8 et 100 caractères.')
-//         .matches(/[A-Za-zÀ-ÿ]/).withMessage('Le mot de passe doit contenir au moins une lettre majuscule.')
-//         .matches(/[0-9]/).withMessage('Le mot de passe doit contenir au moins un chiffre.')
-//         .matches(/\W/).withMessage('Le mot de passe doit contenir au moins un caractère spécial.')
-//         .custom((value, { req }) => {
-//             if (/<|>|"|\\/.test(value)) {
-//                 throw new Error("Le mdp ne doit pas contenir les caractères '<' ou '>'");
-//             }
-//             return true;
-//         });
-// }
-
 const validatePasswordCreation = [
 
     body('password')

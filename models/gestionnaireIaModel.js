@@ -6,8 +6,8 @@ const { body, validationResult } = require('express-validator');
 async function validerGestionnaireIA(req) {
     await body('role_asso')
       .notEmpty().withMessage("Le rôle ne doit pas être vide.")
-      .matches(/^[A-Za-z0-9]+$/).withMessage("Le rôle doit contenir uniquement des lettres et des chiffres.")
-      .isLength({ min: 2, max: 40 }).withMessage("Le rôle doit avoir une longueur comprise entre 2 et 40 caractères.")
+      .matches(/^[A-Za-z0-9\W]+$/)
+      .isLength({ min: 2, max: 100 }).withMessage("Le rôle doit avoir une longueur comprise entre 2 et 100 caractères.")
       .custom((value, { req }) => {
         if (/<|>/.test(value)) {
           throw new Error("Le rôle ne doit pas contenir les caractères '<' ou '>'");

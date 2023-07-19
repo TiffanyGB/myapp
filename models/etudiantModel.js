@@ -5,35 +5,17 @@ const { body, validationResult } = require('express-validator');
 /**Valider les données */
 async function validerEtudiant(req) {
     await body('ecole')
-        .isLength({ min: 2, max: 50 })
-        .withMessage("L'école doit contenir entre 2 et 50 caractères")
+        .isLength({ min: 2, max: 100 })
+        .withMessage("L'école doit contenir entre 2 et 100 caractères")
         .matches(/^[^<>]+$/).withMessage('Le pseudo ne doit contenir que des lettres, des chiffres et des caractères spéciaux, sauf les espaces et les symboles "<>".')
         .run(req);
 
     await body('niveau_etude')
         .isIn(['L1', 'L2', 'L3', 'M1', 'M2', 'Doctorat'])
+        .isLength({ min: 2, max: 15 })
         .withMessage("Le niveau d'études n'est pas valide")
         .run(req);
 }
-
-// const validateEtudiantData = (req, res, next) => {
-//     const regleStudent = [
-//         body('ecole')
-//             .notEmpty().withMessage("Le nom de l'école ne doit pas être vide.")
-//             .matches(/^[A-Za-z0-9]+$/).withMessage("Le nom de l'école doit contenir uniquement des lettres et des chiffres.")
-//             .isLength({ min: 2, max: 40 }).withMessage("Le nom de l'école doit avoir une longueur comprise entre 2 et 40 caractères."),
-
-//         body('niveau_etude')
-//             .notEmpty().withMessage("Le niveau d'étude ne doit pas être vide.")
-//             .isIn(['L1', 'L2', 'L3', 'Doctorat', 'M1', 'M2']).withMessage("Le niveau d'étude doit être parmi les suivants : L1, L2, L3, Doctorat, M1, M2"),
-
-
-//     ];
-//     validateUserData(req, res, () => {
-//         // Les données sont valides, passer à l'étape suivante
-//         next();
-//     })(regleStudent);
-// };
 
 /**Liste des étudiants */
 function chercherListeStudents() {

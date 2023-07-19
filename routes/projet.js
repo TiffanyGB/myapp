@@ -37,4 +37,6 @@ router.all('/:id/teams', (req, res, next) => {
     next();
 }, indexController.verifyToken, equipeController.retournerEquipeProjet);
 
+
+
 module.exports = router;

@@ -3,7 +3,7 @@ const projetModel = require('../models/projetModel');
 
 async function retournerEquipeProjet(req, res) {
   if (req.userProfile === 'admin') {
-    if (req.method === 'OPTION') {
+    if (req.method === 'OPTIONS') {
       res.status(200).json({ sucess: 'Agress granted' });
     }
     else if (req.method === 'GET') {
@@ -38,7 +38,7 @@ async function retournerEquipeProjet(req, res) {
 
 async function informationsEquipe(req, res) {
   if (req.userProfile === 'admin') {
-    if (req.method === 'OPTION') {
+    if (req.method === 'OPTIONS') {
       res.status(200).json({ sucess: 'Agress granted' });
     } else if (req.method === 'GET') {
       const idEquipe = res.locals.idEquipe;
@@ -69,10 +69,43 @@ async function informationsEquipe(req, res) {
   }
 }
 
+async function creerEquipe(req, res) {
+  if (req.method === 'OPTIONS') {
+    res.status(200).json({ sucess: 'Agress granted' });
+  }
+  else if (req.method === 'POST') {
+
+    const {
+      nom,
+      idCapitaine,
+      statut,
+      description,
+      idProjet
+    } = req.body;
+
+
+    const infos = [
+      idCapitaine,
+      nom,
+      description,
+      statut,
+      idProjet
+    ]
+
+    try {
+      await equipeModel.creerEquipe(infos); 
+      res.status(200).json({ message: 'Équipe créée avec succès' });
+    } catch (error) {
+      res.status(400).json({ erreur: 'Erreur création équipe.' });
+    }
+  }
+}
 
 
 
 module.exports = {
   retournerEquipeProjet,
-  informationsEquipe
+  informationsEquipe,
+  creerEquipe
+
 }

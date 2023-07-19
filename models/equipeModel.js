@@ -1,4 +1,34 @@
 const pool = require('../database/configDB');
+const validationDonnees = require('../middleware/validationDonnees');
+const { body } = require('express-validator');
+
+const validerEquipe = [
+    body('nom')
+        .notEmpty().withMessage('Le nom ne doit pas être vide.')
+        .matches(/^[\Wa-zA-ZÀ-ÿ \-']*$/)
+        .isLength({ min: 2, max: 30 }).withMessage('Le prénom doit avoir une longueur comprise entre 2 et 30 caractères.'),
+
+        body('statut')
+        .notEmpty().withMessage('Le statut ne doit pas être vide.')
+        .matches(/^(ouvert|fermé)$/).withMessage('Le statut doit être soit "ouvert" soit "fermé".')
+        .isLength({ min: 5, max: 6 }).withMessage('Le statut doit avoir une longueur de 6 caractères.'),
+    
+
+    body('description')
+    .optional({ nullable: true, checkFalsy: true })
+        .isLength({ min: 10, max: 2000 }).withMessage('Le pseudo doit avoir une longueur comprise entre 3 et 2000 caractères.'),
+
+    body('idCapitaine')
+        .notEmpty().withMessage('L\'id ne doit pas être vide.')
+        .isLength({ min: 1, max: 10000 }),
+
+    body('idProjet')
+        .notEmpty().withMessage('Le prénom ne doit pas être vide.')
+        .isLength({ min: 1, max: 10000 }),
+
+    /**Appel du validateur */
+    validationDonnees.validateUserData,
+];
 
 async function listeEquipeProjet(idProjet) {
 
@@ -15,7 +45,6 @@ async function listeEquipeProjet(idProjet) {
     });
 }
 
-
 async function chercherEquipeID(id) {
 
     const chercher = `SELECT * FROM Equipe WHERE idEquipe = $1`;
@@ -31,8 +60,16 @@ async function chercherEquipeID(id) {
     });
 }
 
-function creerEquipe() {
+function creerEquipe(valeurs) {
 
+    const inserer = `INSERT INTO Equipe (idCapitaine, nom, description_equipe, statut_recrutement, idProjet)
+    VALUES ($1, $2, $3, $4, $5)`;
+    
+    try {
+        pool.query(inserer, valeurs);
+    }catch(error){
+        throw error
+    }
 }
 
 function supprimerEquipe() {
@@ -94,7 +131,7 @@ async function jsonInfosEquipe(idEquipe) {
 
 
 
-    } catch(error) {
+    } catch (error) {
         throw error;
     }
 }
@@ -173,4 +210,5 @@ module.exports = {
     listeEquipeProjet,
     jsonInfosEquipe,
     chercherEquipeID,
+    validerEquipe
 }
