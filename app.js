@@ -20,7 +20,7 @@ var projetRouter = require('./routes/projet');
 var ressourceRouteur = require('./routes/ressource');
 var usersRouter = require('./routes/users');
 var gestionnaireRouter = require('./routes/gestionnaire');
-var teamRouter = require('./routes/teams');
+var teamsRouter = require('./routes/teams');
 var imagesRouter = require('./routes/image');
 
 /**crée une instance de l'application Express */
@@ -61,7 +61,7 @@ app.use('/projet', projetRouter);
 app.use('/ressource', ressourceRouteur);
 app.use('/users', usersRouter);
 app.use('/gestionnaire', gestionnaireRouter);
-app.use('/teams', teamRouter);
+app.use('/teams', teamsRouter);
 
 
 

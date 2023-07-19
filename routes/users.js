@@ -48,10 +48,11 @@ router.get('/',
 router.all(
   '/create',
   userModel.validateUser,
-  adminProfile.checkAdminProfile,
   indexController.verifyToken,
+  adminProfile.checkAdminProfile,
   validationDonnees.validatePasswordCreation,
-  userController.createUser
+  userController.createUser,
+
 );
 
 /**

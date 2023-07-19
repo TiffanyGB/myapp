@@ -20,10 +20,12 @@ const validerEquipe = [
 
     body('idCapitaine')
         .notEmpty().withMessage('L\'id ne doit pas être vide.')
+        .matches(/^[0-9]*$/).withMessage("L\'id ne doit avoir que des chiffres.")
         .isLength({ min: 1, max: 10000 }),
 
     body('idProjet')
         .notEmpty().withMessage('Le prénom ne doit pas être vide.')
+        .matches(/^[0-9]*$/).withMessage("L\'id ne doit avoir que des chiffres.")
         .isLength({ min: 1, max: 10000 }),
 
     /**Appel du validateur */

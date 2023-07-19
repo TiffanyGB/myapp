@@ -4,6 +4,8 @@ function checkAdminProfile(req, res, next) {
       next();
     } else {
       // Sinon, renvoyez une réponse JSON indiquant l'erreur
+      console.log(req.userProfile);
+
       res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur" });
     }
   }
