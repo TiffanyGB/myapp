@@ -183,6 +183,8 @@ async function listeProjetsJson() {
                     temp.idevent = projetCourant.idevent;
                 }
                 temp.description = projetCourant.description_projet;
+                temp.derniereModif = projetCourant.dernieremodif;
+                console.log(projetCourant.dernieremodif)
                 temp.recompense = projetCourant.recompense;
                 temp.image = projetCourant.imgprojet;
                 temp.sujet = projetCourant.sujet;

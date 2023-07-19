@@ -29,12 +29,11 @@
             <pre class="prettyprint source linenums"><code>/**
  * Contrôleur pour la gestion des utilisateurs.
  * 
- * Description détaillée du contenu du contrôleur.
+ * Ce fichier contient les controllers servant à la manipulation des
+ * utilisateurs.
  * 
- * @module Contrôleur/Utilisateur
- * @version 1.0.0
- * @since 2023-06-20
- * 
+ * @module UserController
+ * @version 1.0.0 
  * @author Tiffany GAY-BELLILE
  * 
  * @requires ../public/javascripts/json_liste/liste_utilisateurs
@@ -58,11 +57,20 @@ const gestionnaireExterneModel = require('../models/gestionnaireExterneModel');
 const { body, validationResult } = require('express-validator');
 
 
-/**Voir les users */
+/**
+ * Récupère la liste des utilisateurs et renvoie un JSON contenant les informations des utilisateurs,
+ * si le profil est 'administrateur'.
+ * 
+ * @param {Object} req - L'objet de requête HTTP.
+ * @param {Object} res - L'objet de réponse HTTP.
+ * @returns {Promise} Une promesse résolue avec les informations des utilisateurs au format JSON.
+ * @throws {Error} Une erreur si la récupération des utilisateurs échoue ou si le profil de l'utilisateur n'est pas valide.
+ * 
+ * @memberof module:Contrôleur/Admin
+ */
 function voirUtilisateurs(req, res) {
 
   if (req.userProfile === 'admin') {
-    if (req.method === 'GET') {
 
       listeUser.envoyer_json_liste_user()
         .then((result) => {
@@ -79,7 +87,6 @@ function voirUtilisateurs(req, res) {
           res.status(500).json({ message: 'Une erreur s\'est produite lors de la récupération des utilisateurs.' });
 
         });
-    }
   } else if (req.userProfile === 'etudiant') {
 
     res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "etudiant" });
@@ -92,22 +99,22 @@ function voirUtilisateurs(req, res) {
   }
 }
 
-/**Création users */
+/**
+ * Créer un utilisateur.
+ *
+ * @route POST /users
+ * @group Users - Opérations liées aux utilisateurs
+ * @returns {object} 200 - Un tableau contenant tous les utilisateurs.
+ * @returns {Error}  500 - Erreur serveur.
+ */
 async function createUser(req, res) {
   if (req.method == "OPTIONS") {
     res.status(200).json({ sucess: 'Agress granted' });
-  }
-  else if (req.method === 'GET') {
-    
-    if (req.userProfile != 'admin') {
-      res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur" });
-    }
-
   } else if (req.method === 'POST') {
 
     if (req.userProfile != 'admin') {
       return res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur" });
-    }else{
+    } else {
 
     }
 
@@ -306,11 +313,6 @@ async function modifierUser(req, res) {
     res.status(200).json({ sucess: 'Agress granted' });
   }
 
-  else if (req.method === 'GET') {
-    if (req.userProfile != 'admin') {
-      res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur" });
-    }
-  }
 
   else if (req.method === 'PATCH') {
     if (req.userProfile != 'admin') {
@@ -553,10 +555,7 @@ async function modifierUser(req, res) {
 async function supprimerUser(req, res) {
   if (req.method === "OPTIONS") {
     res.status(200).json({ success: 'Access granted' });
-  } else if (req.method === 'GET') {
-    if (req.userProfile !== 'admin') {
-      res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur" });
-    }
+
   } else if (req.method === 'DELETE') {
     const userId = res.locals.userId;
 
@@ -601,13 +600,13 @@ module.exports = {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Contr%25C3%25B4leur_Utilisateur.html">Contrôleur/Utilisateur</a></li></ul><h3>Global</h3><ul><li><a href="global.html#connexion">connexion</a></li><li><a href="global.html#creerProjet">creerProjet</a></li><li><a href="global.html#express">express</a></li><li><a href="global.html#inscriptionEleve">inscriptionEleve</a></li><li><a href="global.html#modifierProjet">modifierProjet</a></li><li><a href="global.html#supprimerProjet">supprimerProjet</a></li><li><a href="global.html#voirEvent">voirEvent</a></li><li><a href="global.html#voirListeGestionnaires">voirListeGestionnaires</a></li><li><a href="global.html#voirListeProjets">voirListeProjets</a></li><li><a href="global.html#voirTousEvents">voirTousEvents</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-UserController.html">UserController</a></li><li><a href="module-UserRouter.html">UserRouter</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-UserRouter-UserRouter.html">UserRouter</a></li></ul><h3>Global</h3><ul><li><a href="global.html#connexion">connexion</a></li><li><a href="global.html#creationProjet">creationProjet</a></li><li><a href="global.html#infosProjet">infosProjet</a></li><li><a href="global.html#inscriptionEleve">inscriptionEleve</a></li><li><a href="global.html#modifierProjet">modifierProjet</a></li><li><a href="global.html#supprimerProjet">supprimerProjet</a></li><li><a href="global.html#voirEvent">voirEvent</a></li><li><a href="global.html#voirListeGestionnaires">voirListeGestionnaires</a></li><li><a href="global.html#voirListeProjets">voirListeProjets</a></li><li><a href="global.html#voirTousEvents">voirTousEvents</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.2</a> on Thu Jul 13 2023 20:06:18 GMT+0200 (Central European Summer Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.2</a> on Tue Jul 18 2023 13:22:53 GMT+0200 (Central European Summer Time)
 </footer>
 
 <script> prettyPrint(); </script>

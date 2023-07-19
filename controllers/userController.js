@@ -4,10 +4,8 @@
  * Ce fichier contient les controllers servant à la manipulation des
  * utilisateurs.
  * 
- * @module Controller/Utilisateur
- * @version 1.0.0
- * @since 2023-06-20
- * 
+ * @module UserController
+ * @version 1.0.0 
  * @author Tiffany GAY-BELLILE
  * 
  * @requires ../public/javascripts/json_liste/liste_utilisateurs
@@ -44,56 +42,40 @@ const { body, validationResult } = require('express-validator');
  */
 function voirUtilisateurs(req, res) {
 
-  if (req.userProfile === 'admin') {
-    if (req.method === 'GET') {
+  /*Récupérer la liste des utilisateurs formatée au format json*/
+  listeUser.envoyer_json_liste_user()
+    .then((result) => {
 
-      listeUser.envoyer_json_liste_user()
-        .then((result) => {
-          if (result === 'aucun') {
-            res.status(400).json({ erreur: "Erreur lors de la récupération des utilisateurs" })
-          } else if (result === "erreur_student") {
-            res.status(400).json({ erreur: "Erreur lors de la récupération des données côté étudiant" })
-          } else {
-            res.status(200).json(result);
-          }
-        })
-        .catch((error) => {
-          console.log(error);
-          res.status(500).json({ message: 'Une erreur s\'est produite lors de la récupération des utilisateurs.' });
+      /**Erreur lors de la récupération d'un utilisateur */
+      if (result === "erreur_user") {
+        res.status(400).json({ erreur: "Erreur lors de la récupération des données côté étudiant" })
 
-        });
-    }
-  } else if (req.userProfile === 'etudiant') {
+      } else {
+        /**Renvoyer la liste au client */
+        res.status(200).json(result);
+      }
+    })
+    .catch((error) => {
+      res.status(500).json({ message: 'Une erreur s\'est produite lors de la récupération des utilisateurs.' });
 
-    res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "etudiant" });
-  } else if (req.userProfile === 'gestionnaire') {
-
-    res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "gestionnaire" });
-  } else if (req.userProfile === 'aucun') {
-
-    res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "Aucun" });
-  }
+    });
 }
 
-/**Création users */
+/**
+ * Créer un utilisateur.
+ *
+ * @route POST /users
+ * @group Users - Opérations liées aux utilisateurs
+ * @returns {object} 200 - Un tableau contenant tous les utilisateurs.
+ * @returns {Error}  500 - Erreur serveur.
+ */
 async function createUser(req, res) {
   if (req.method == "OPTIONS") {
     res.status(200).json({ sucess: 'Agress granted' });
-  }
-  else if (req.method === 'GET') {
-
-    if (req.userProfile != 'admin') {
-      res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur" });
-    }
-
   } else if (req.method === 'POST') {
 
-    if (req.userProfile != 'admin') {
-      return res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur" });
-    } else {
 
-    }
-
+    /* Récupération des données */
     const {
       type: type,
       nom: userNom,
@@ -126,79 +108,37 @@ async function createUser(req, res) {
       userMail
     ]
 
+    /* Validations des données selon le type d'utilisateur */
     switch (type) {
-
       case 'etudiant':
-        await body('ecole')
-          .isLength({ min: 2, max: 50 })
-          .withMessage('L\'école doit contenir entre 2 et 50 caractères')
-          .matches(/^[A-Za-z0-9]+$/)
-          .withMessage('L\'école doit contenir que des lettres et des chiffres')
-          .run(req);
-
-        await body('niveau_etude')
-          .isIn(['L1', 'L2', 'L3', 'M1', 'M2', 'Doctorat'])
-          .withMessage('Le niveau d\'études n\'est pas valide')
-          .run(req);
-
+        await etudiantModel.validerEtudiant(req);
         break;
       case 'gestionnaireExterne':
-        await body('entreprise')
-          .notEmpty().withMessage("Le nom de l'entreprise ne doit pas être vide.")
-          .matches(/^[A-Za-z0-9]+$/).withMessage("Le nom de l'entreprise doit contenir uniquement des lettres et des chiffres.")
-          .isLength({ min: 2, max: 40 }).withMessage("Le nom de l'entreprise doit avoir une longueur comprise entre 2 et 40 caractères.")
-          .custom((value, { req }) => {
-            if (/<|>/.test(value)) {
-              throw new Error("Le nom de l'entreprise ne doit pas contenir les caractères '<' ou '>'");
-            }
-            return true;
-          })
-          .run(req);
-
-        await body('metier')
-          .notEmpty().withMessage("Le métier ne doit pas être vide.")
-          .matches(/^[A-Za-z0-9]+$/).withMessage("Le métier doit contenir uniquement des lettres et des chiffres.")
-          .isLength({ min: 2, max: 40 }).withMessage("Le métier doit avoir une longueur comprise entre 2 et 40 caractères.")
-          .custom((value, { req }) => {
-            if (/<|>/.test(value)) {
-              throw new Error("Le métier ne doit pas contenir les caractères '<' ou '>'");
-            }
-            return true;
-          })
-          .run(req);
-
+        await gestionnaireExterneModel.validerGestionnaireExterne(req);
         break;
       case 'gestionnaireIA':
-        await body('role_asso')
-          .notEmpty().withMessage("Le role ne doit pas être vide.")
-          .matches(/^[A-Za-z0-9]+$/).withMessage("Le role doit contenir uniquement des lettres et des chiffres.")
-          .isLength({ min: 2, max: 40 }).withMessage("Le role doit avoir une longueur comprise entre 2 et 40 caractères.")
-          .custom((value, { req }) => {
-            if (/<|>/.test(value)) {
-              throw new Error("Le role ne doit pas contenir les caractères '<' ou '>'");
-            }
-            return true;
-          })
-          .run(req);
-
+        await gestionnaireIaModel.validerGestionnaireIA(req);
         break;
       case 'administrateur':
         break;
       default:
-        res.status(400).json({ message: 'Le type est incorrect.' });
+        return res.status(400).json({ erreur: "Le type est incorrect"});
+      }
 
-    }
-
+    /**Exécute la requete de validation adapté */
     let errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
+
+    /**Insertion dans la table user */
     userModel.insererUser(valeurs_communes, password, valeurs_id, type)
       .then((insertion) => {
+        /**Insertion doit contenir l'id de l'utilisateur */
         if (typeof insertion === 'number') {
 
+          /**On insère les infos supplémentaires dans la table appropriée au type*/
           switch (type) {
-
             case 'etudiant':
 
               etudiantModel.creerEtudiant(userEcole, userNiveauEtude, insertion)
@@ -207,11 +147,10 @@ async function createUser(req, res) {
                   res.status(200).json({ message: 'Inscription réussie' });
                 })
                 .catch(() => {
-                  /**Supprimer l'utilisateur */
+                  /**Supprimer l'utilisateur dans la table utilisateur s'il y a un souci */
                   userModel.supprimerUser(insertion, 'etudiant')
                   res.status(400).json({ erreur: "erreur", Détails: "Utilisateur supprimé de la table utilisateur" });
                 });
-
 
               break;
 
@@ -221,7 +160,7 @@ async function createUser(req, res) {
                   res.status(200).json({ message: 'Inscription Admin réussie' });
                 })
                 .catch(() => {
-                  /**Supprimer l'utilisateur */
+                  /**Supprimer l'utilisateur dans la table utilisateur s'il y a un souci */
                   userModel.supprimerUser(insertion, 'Admini')
                   res.status(400).json({ erreur: "erreur", Détails: "Utilisateur supprimé de la table utilisateur" });
                 });
@@ -234,7 +173,7 @@ async function createUser(req, res) {
                   res.status(200).json({ message: 'Inscription réussie' });
                 })
                 .catch(() => {
-                  /**Supprimer l'utilisateur */
+                  /**Supprimer l'utilisateur dans la table utilisateur s'il y a un souci */
                   userModel.supprimerUser(insertion, 'Gestionnaire_externe')
                   res.status(400).json({ erreur: "erreur", Détails: "Utilisateur supprimé de la table utilisateur" });
                 });
@@ -247,7 +186,7 @@ async function createUser(req, res) {
                   res.status(200).json({ message: 'Inscription réussie' });
                 })
                 .catch(() => {
-                  /**Supprimer l'utilisateur */
+                  /**Supprimer l'utilisateur dans la table utilisateur s'il y a un souci */
                   userModel.supprimerUser(insertion, 'Gestionnaire_iapau')
                   res.status(400).json({ erreur: "erreur", Détails: "Utilisateur supprimé de la table utilisateur" });
                 });
@@ -261,6 +200,8 @@ async function createUser(req, res) {
               break;
           }
         }
+
+        /**Pseudo et/ou email déjà pris */
         else if (insertion === 'les2') {
           res.status(400).json({ Existe: 'Mail et pseudo' });
 
@@ -273,14 +214,10 @@ async function createUser(req, res) {
         }
 
       }).catch(() => {
-        /**Supprimer ssi il existe */
-        // userModel.supprimerUserID(insertion);
         res.status(400).json({ message: 'Erreur lors de l\'insertion de l\'utilisateur.' });
       });
   }
 }
-
-
 
 /**Modification users */
 async function modifierUser(req, res) {
@@ -288,18 +225,10 @@ async function modifierUser(req, res) {
   if (req.method == "OPTIONS") {
     res.status(200).json({ sucess: 'Agress granted' });
   }
-
-  else if (req.method === 'GET') {
-    if (req.userProfile != 'admin') {
-      res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur" });
-    }
-  }
-
   else if (req.method === 'PATCH') {
     if (req.userProfile != 'admin') {
       return res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur" });
     }
-
     const idUser = res.locals.userId;
 
     /**Vérifier que l'id existe dans la bdd, sinon 404 error */
@@ -379,67 +308,21 @@ async function modifierUser(req, res) {
         }
       });
 
-    switch (type) {
-
-      case 'etudiant':
-        await body('ecole')
-          .isLength({ min: 2, max: 50 })
-          .withMessage('L\'école doit contenir entre 2 et 50 caractères')
-          .matches(/^[A-Za-z0-9]+$/)
-          .withMessage('L\'école doit contenir que des lettres et des chiffres')
-          .run(req);
-
-        await body('niveau_etude')
-          .isIn(['L1', 'L2', 'L3', 'M1', 'M2', 'Doctorat'])
-          .withMessage('Le niveau d\'études n\'est pas valide')
-          .run(req);
-
-        break;
-      case 'gestionnaireExterne':
-        await body('entreprise')
-          .notEmpty().withMessage("Le nom de l'entreprise ne doit pas être vide.")
-          .matches(/^[A-Za-z0-9]+$/).withMessage("Le nom de l'entreprise doit contenir uniquement des lettres et des chiffres.")
-          .isLength({ min: 2, max: 40 }).withMessage("Le nom de l'entreprise doit avoir une longueur comprise entre 2 et 40 caractères.")
-          .custom((value, { req }) => {
-            if (/<|>/.test(value)) {
-              throw new Error("Le nom de l'entreprise ne doit pas contenir les caractères '<' ou '>'");
-            }
-            return true;
-          })
-          .run(req);
-
-        await body('metier')
-          .matches(/^[A-Za-z0-9]+$/).withMessage("Le métier doit contenir uniquement des lettres et des chiffres.")
-          .isLength({ min: 2, max: 40 }).withMessage("Le métier doit avoir une longueur comprise entre 2 et 40 caractères.")
-          .custom((value, { req }) => {
-            if (/<|>/.test(value)) {
-              throw new Error("Le métier ne doit pas contenir les caractères '<' ou '>'");
-            }
-            return true;
-          })
-          .run(req);
-
-        break;
-      case 'gestionnaireIA':
-        await body('role_asso')
-          .notEmpty().withMessage("Le role ne doit pas être vide.")
-          .matches(/^[A-Za-z0-9]+$/).withMessage("Le role doit contenir uniquement des lettres et des chiffres.")
-          .isLength({ min: 2, max: 40 }).withMessage("Le role doit avoir une longueur comprise entre 2 et 40 caractères.")
-          .custom((value, { req }) => {
-            if (/<|>/.test(value)) {
-              throw new Error("Le role ne doit pas contenir les caractères '<' ou '>'");
-            }
-            return true;
-          })
-          .run(req);
-
-        break;
-      case 'admin':
-        break;
-      default:
-        res.status(400).json({ message: 'Le type est incorrect.' });
-
-    }
+      switch (type) {
+        case 'etudiant':
+          await etudiantModel.validerEtudiant(req);
+          break;
+        case 'gestionnaireExterne':
+          await gestionnaireExterneModel.validerGestionnaireExterne(req);
+          break;
+        case 'gestionnaireIA':
+          await gestionnaireIaModel.validerGestionnaireIA(req);
+          break;
+        case 'administrateur':
+          break;
+        default:
+          throw new Error('Le type est incorrect.');
+      }
 
     let errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -529,44 +412,39 @@ async function modifierUser(req, res) {
         break;
     }
   }
-
 }
 
 /**Suppression */
 async function supprimerUser(req, res) {
   if (req.method === "OPTIONS") {
     res.status(200).json({ success: 'Access granted' });
-  } else if (req.method === 'GET') {
-    if (req.userProfile !== 'admin') {
-      res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur" });
-    }
+
   } else if (req.method === 'DELETE') {
+
+    /**Récupérer l'id de l'utilisateur dans l'url */
     const userId = res.locals.userId;
 
-    if (req.userProfile !== 'admin') {
-      return res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur" });
-    }
     try {
-      // Vérifier que l'id existe dans la bdd, sinon 404 error
+      /*Vérifier que l'id existe dans la bdd*/
       const user = await userModel.chercherUserID(userId);
       if (user.length === 0) {
         return res.status(404).json({ erreur: 'L\'id n\'existe pas' });
       }
 
-      // Supprimer l'utilisateur
+      /*Supprimer l'utilisateur*/
       const result = await userModel.supprimerUser(userId, 'admini');
+
       if (result === 'ok') {
         return res.status(200).json({ message: "Suppression réussie" });
-      } else {
-        return res.status(400).json({ erreur: 'Echec de la suppression' });
       }
+
+      return res.status(400).json({ erreur: 'Echec de la suppression' });
+
     } catch (error) {
-      console.error("Erreur lors de la suppression de l'utilisateur", error);
       return res.status(500).json({ erreur: 'Erreur lors de la suppression de l\'utilisateur' });
     }
   }
 }
-
 
 module.exports = {
   createUser,

@@ -3,45 +3,57 @@ const userModel = require('./userModel');
 const { body, validationResult } = require('express-validator');
 
 
-function validateUserData(req, res, next) {
-    // Exécuter les validateurs Express Validator
-    const errors = validationResult(req);
+async function validerGestionnaireExterne(req) {
+    await body('entreprise')
+      .notEmpty().withMessage("Le nom de l'entreprise ne doit pas être vide.")
+      .matches(/^[A-Za-z0-9]+$/).withMessage("Le nom de l'entreprise doit contenir uniquement des lettres et des chiffres.")
+      .isLength({ min: 2, max: 40 }).withMessage("Le nom de l'entreprise doit avoir une longueur comprise entre 2 et 40 caractères.")
+      .custom((value, { req }) => {
+        if (/<|>/.test(value)) {
+          throw new Error("Le nom de l'entreprise ne doit pas contenir les caractères '<' ou '>'");
+        }
+        return true;
+      })
+      .run(req);
+  
+    await body('metier')
+      .notEmpty().withMessage("Le métier ne doit pas être vide.")
+      .matches(/^[A-Za-z0-9]+$/).withMessage("Le métier doit contenir uniquement des lettres et des chiffres.")
+      .isLength({ min: 2, max: 40 }).withMessage("Le métier doit avoir une longueur comprise entre 2 et 40 caractères.")
+      .custom((value, { req }) => {
+        if (/<|>/.test(value)) {
+          throw new Error("Le métier ne doit pas contenir les caractères '<' ou '>'");
+        }
+        return true;
+      })
+      .run(req);
+  }
 
-    // Vérifier s'il y a des erreurs de validation
-    if (!errors.isEmpty()) {
-        // Renvoyer les erreurs de validation au client
-        return res.status(400).json({ errors: errors.array() });
-    }
+// const validateUser = [
+//     body('entreprise')
+//     .notEmpty().withMessage("Le nom de l'entreprise ne doit pas être vide.")
+//     .matches(/^[A-Za-z0-9]+$/).withMessage("Le nom de l'entreprise doit contenir uniquement des lettres et des chiffres.")
+//     .isLength({ min: 2, max: 40 }).withMessage("Le nom de l'entreprise doit avoir une longueur comprise entre 2 et 40 caractères.")
+//     .custom((value, { req }) => {
+//       if (/<|>/.test(value)) {
+//         throw new Error("Le nom de l'entreprise ne doit pas contenir les caractères '<' ou '>'");
+//       }
+//       return true;
+//     }),
+//     body('metier')
+//     .notEmpty().withMessage("Le métier ne doit pas être vide.")
+//     .matches(/^[A-Za-z0-9]+$/).withMessage("Le métier doit contenir uniquement des lettres et des chiffres.")
+//     .isLength({ min: 2, max: 40 }).withMessage("Le métier doit avoir une longueur comprise entre 2 et 40 caractères.")
+//     .custom((value, { req }) => {
+//       if (/<|>/.test(value)) {
+//         throw new Error("Le métier ne doit pas contenir les caractères '<' ou '>'");
+//       }
+//       return true;
+//     }),
 
-    // Si les données sont valides, passer à l'étape suivante
-    next();
-}
-
-const validateUser = [
-    body('entreprise')
-    .notEmpty().withMessage("Le nom de l'entreprise ne doit pas être vide.")
-    .matches(/^[A-Za-z0-9]+$/).withMessage("Le nom de l'entreprise doit contenir uniquement des lettres et des chiffres.")
-    .isLength({ min: 2, max: 40 }).withMessage("Le nom de l'entreprise doit avoir une longueur comprise entre 2 et 40 caractères.")
-    .custom((value, { req }) => {
-      if (/<|>/.test(value)) {
-        throw new Error("Le nom de l'entreprise ne doit pas contenir les caractères '<' ou '>'");
-      }
-      return true;
-    }),
-    body('metier')
-    .notEmpty().withMessage("Le métier ne doit pas être vide.")
-    .matches(/^[A-Za-z0-9]+$/).withMessage("Le métier doit contenir uniquement des lettres et des chiffres.")
-    .isLength({ min: 2, max: 40 }).withMessage("Le métier doit avoir une longueur comprise entre 2 et 40 caractères.")
-    .custom((value, { req }) => {
-      if (/<|>/.test(value)) {
-        throw new Error("Le métier ne doit pas contenir les caractères '<' ou '>'");
-      }
-      return true;
-    }),
-
-    /**Appel du validateur */
-    validateUserData,
-];
+//     /**Appel du validateur */
+//     validateUserData,
+// ];
 
 /**Liste des étudiants */
 function chercherListeGestionnairesExt() {
@@ -128,5 +140,5 @@ module.exports = {
     chercherGestionnaireExtID,
     creerGestionnaireExterne,
     modifierExterne,
-    validateUser
+    validerGestionnaireExterne
 }

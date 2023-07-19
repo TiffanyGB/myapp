@@ -1,38 +1,80 @@
-/**Route pour les utilisateurs */
+/**
+ * @fileoverview Ce fichier contient le router pour la gestion des utilisateurs ie
+ * - Création,
+ * - Suppression
+ * - Modification,
+ * - Voir la liste des utilisateurs.
+ * Ces routes ne sont accesibles que par l'administrateur.
+ * 
+ * @module UserRouter
+
+ * @version 1.0.0
+ * @author	Tiffany GAY-BELLILE
+ */
+
+/**
+ * Router pour les utilisateurs.
+ * Gère les routes liées aux utilisateurs, telles que /users, /users/:id, etc.
+ * @namespace UserRouter
+ * @see {@link module:UserController}
+ * @see {@link module:UserModel}
+ */
 
 var express = require('express');
 var router = express.Router();
 const userController = require('../controllers/userController');
-const etudiantModel = require('../models/etudiantModel');
 const indexController = require('../controllers/indexController');
 const userModel = require('../models/userModel');
-const gestionnaireExterneModel = require('../models/gestionnaireExterneModel');
-const gestionnaireIAModel = require('../models/gestionnaireIaModel');
+const adminProfile = require('../middleware/adminProfile');
 
+/**
+ * @route GET /users
+ * @description Endpoint pour voir la liste des utilisateurs
+ * @access Seuls les administrateurs peuvent utiliser cette route.
+ * @authentication Requiert un token JWT valide dans l'en-tête Authorization.
+ */
+router.get('/',
+  indexController.verifyToken,
+  adminProfile.checkAdminProfile,
+  userController.voirUtilisateurs);
 
-/** Voir les utilisateurs */
-router.all('/', indexController.verifyToken,userController.voirUtilisateurs);
-
-/**Page de création d'un nouvel utilisateur */
+/**
+ * @route ALL /users/create
+ * @description Endpoint pour créer un nouvel utilisateur.
+ * @access Seuls les administrateurs peuvent utiliser cette route.
+ * @authentication Requiert un token JWT valide dans l'en-tête Authorization.
+ */
 router.all(
   '/create',
-  userModel.validateUser, 
+  userModel.validateUser,
+  // adminProfile.checkAdminProfile,
   indexController.verifyToken,
   userController.createUser
 );
 
-
-/**Modifier un utilisateur */
+/**
+ * @route ALL /users/edit/:id
+ * @description Endpoint pour modifier un utilisateur.
+ * @access Seuls les administrateurs peuvent utiliser cette route.
+ * @authentication Requiert un token JWT valide dans l'en-tête Authorization.
+ */
 router.all('/edit/:id', (req, res, next) => {
-    res.locals.userId = req.params.id;
-    next();
-  }, indexController.verifyToken, userModel.validateUserModif, userController.modifierUser);
+  res.locals.userId = req.params.id;
+  next();
+}, indexController.verifyToken, userModel.validateUserModif, userController.modifierUser);
 
-  
-/**Supprimer un utilisateur */
+
+/**
+ * @route GET /users/delete/:id
+ * @description Endpoint pour supprimer un utilisateur.
+ * @access Seuls les administrateurs peuvent utiliser cette route.
+ * @authentication Requiert un token JWT valide dans l'en-tête Authorization.
+ */
 router.all('/delete/:id', (req, res, next) => {
-    res.locals.userId = req.params.id;
-    next();
-  }, indexController.verifyToken, userController.supprimerUser);
-  
+  res.locals.userId = req.params.id;
+  next();
+}, indexController.verifyToken,
+  adminProfile.checkAdminProfile,
+  userController.supprimerUser);
+
 module.exports = router;

@@ -3,34 +3,34 @@ const userModel = require('./userModel');
 const { body, validationResult } = require('express-validator');
 
 
-function validateUserData(req, res, next) {
-    // Exécuter les validateurs Express Validator
-    const errors = validationResult(req);
+async function validerGestionnaireIA(req) {
+    await body('role_asso')
+      .notEmpty().withMessage("Le rôle ne doit pas être vide.")
+      .matches(/^[A-Za-z0-9]+$/).withMessage("Le rôle doit contenir uniquement des lettres et des chiffres.")
+      .isLength({ min: 2, max: 40 }).withMessage("Le rôle doit avoir une longueur comprise entre 2 et 40 caractères.")
+      .custom((value, { req }) => {
+        if (/<|>/.test(value)) {
+          throw new Error("Le rôle ne doit pas contenir les caractères '<' ou '>'");
+        }
+        return true;
+      })
+      .run(req);
+  }
 
-    // Vérifier s'il y a des erreurs de validation
-    if (!errors.isEmpty()) {
-        // Renvoyer les erreurs de validation au client
-        return res.status(400).json({ errors: errors.array() });
-    }
-
-    // Si les données sont valides, passer à l'étape suivante
-    next();
-}
-
-const validateUser = [
-    body('role_asso')
-    .notEmpty().withMessage("Le métier ne doit pas être vide.")
-    .matches(/^[A-Za-z0-9]+$/).withMessage("Le métier doit contenir uniquement des lettres et des chiffres.")
-    .isLength({ min: 2, max: 40 }).withMessage("Le métier doit avoir une longueur comprise entre 2 et 40 caractères.")
-    .custom((value, { req }) => {
-      if (/<|>/.test(value)) {
-        throw new Error("Le métier ne doit pas contenir les caractères '<' ou '>'");
-      }
-      return true;
-    }),
-    /**Appel du validateur */
-    validateUserData,
-];
+// const validateUser = [
+//     body('role_asso')
+//     .notEmpty().withMessage("Le métier ne doit pas être vide.")
+//     .matches(/^[A-Za-z0-9]+$/).withMessage("Le métier doit contenir uniquement des lettres et des chiffres.")
+//     .isLength({ min: 2, max: 40 }).withMessage("Le métier doit avoir une longueur comprise entre 2 et 40 caractères.")
+//     .custom((value, { req }) => {
+//       if (/<|>/.test(value)) {
+//         throw new Error("Le métier ne doit pas contenir les caractères '<' ou '>'");
+//       }
+//       return true;
+//     }),
+//     /**Appel du validateur */
+//     validateUserData,
+// ];
 
 /**Liste des gestionnaires ia pau */
 function chercherListeGestionnaireIapau() {
@@ -147,5 +147,5 @@ module.exports = {
     chercherListeGestionnaireIapau,
     creerGestionnaireIA,
     modifierIapau,
-    validateUser,
+    validerGestionnaireIA,
 }
