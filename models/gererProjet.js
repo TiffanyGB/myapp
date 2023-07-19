@@ -1,5 +1,49 @@
 const pool = require('../database/configDB');
 
+async function chercherGestionnaireIA(idProjet) {
+    try {
+        const valeurs = [idProjet];
+
+        const attribuer = `SELECT * FROM Gerer_ia_pau 
+        WHERE idProjet = $1`;
+
+        return new Promise((resolve, reject) => {
+            pool.query(attribuer, valeurs) 
+                .then((res) => {
+                    resolve(res.rows);
+                })
+                .catch((err) => {
+                    reject(err);
+                });
+        });
+
+    } catch (error) {
+        throw error;
+    }
+}
+
+async function chercherGestionnaireExt(idProjet) {
+    try {
+        const valeurs = [idProjet];
+
+        const attribuer = `SELECT * FROM Gerer_externe 
+        WHERE idProjet = $1`;
+
+        return new Promise((resolve, reject) => {
+            pool.query(attribuer, valeurs) 
+                .then((res) => {
+                    resolve(res.rows);
+                })
+                .catch((err) => {
+                    reject(err);
+                });
+        });
+
+    } catch (error) {
+        throw error;
+    }
+}
+
 
 async function attribuerProjetIA(idProjet, idGestionnaire) {
 
@@ -68,5 +112,7 @@ module.exports = {
     attribuerProjetIA,
     attribuerProjetExterne,
     destituerProjetExterne,
-    destituerProjetIa
+    destituerProjetIa,
+    chercherGestionnaireExt,
+    chercherGestionnaireIA
 }

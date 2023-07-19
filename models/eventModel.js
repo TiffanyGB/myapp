@@ -151,7 +151,6 @@ function recupererEventActuel() {
     });
 }
 
-
 function recuperer_message_fin(idEvent) {
 
     const message = `SELECT * FROM Evenement WHERE idEvent = '${idEvent}'`;
@@ -339,11 +338,9 @@ async function creerJsonTousEvents() {
         let listesAnciens = await recupererAncienEvents();
         let listeActuels = await recupererEventActuel();
 
-        console.log(listesAnciens.rows)
-
-        if (listesAnciens.rows.length === 0) {
-            return false;
-        } else {
+        // if (listesAnciens.rows.length === 0) {
+        //     return false;
+        // } else {
 
             tabRetour = {};
 
@@ -419,6 +416,7 @@ async function creerJsonTousEvents() {
 
                 }
 
+
                 courantInfos.mot = motCle;
                 courantInfos.gain = gainTotal;
 
@@ -426,7 +424,7 @@ async function creerJsonTousEvents() {
             }
             return tabRetour;
         }
-    }
+    // }
     catch (error) {
         throw error;
     }

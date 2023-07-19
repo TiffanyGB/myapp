@@ -2,6 +2,7 @@ const { func } = require('joi');
 const pool = require('../database/configDB');
 const motcleModel = require('./motCleModel');
 const ressourceModel = require('./ressourceModel');
+const gerer = require('./gererProjet');
 const { body, validationResult } = require('express-validator');
 const { json } = require('body-parser');
 
@@ -263,6 +264,34 @@ async function infosProjet(idProjet) {
             }else{
                 jsonRetour.idEquipeGagnante = projet.idequipegagnante;
             }
+
+            const mot = await motcleModel.recupererMot(idProjet);
+
+            jsonRetour.mot = [];
+
+            for(i = 0; i < mot.length; i++){
+                jsonRetour.mot.push(mot[i].mot);
+            }
+
+            const ressources = await ressourceModel.recuperer_toutes_ressources(idProjet);
+
+            jsonRetour.ressources = [];
+
+            for(i = 0; i < ressources.length; i++){
+                temp = {};
+                temp.nom = ressources[i].titre;
+                temp.type = ressources[i].type_ressource;
+                temp.lien = ressources[i].lien;
+                temp.description = ressources[i].description_ressource;
+                temp.statut = ressources[i].statut;
+                temp.publication = ressources[i].date_apparition;
+
+                jsonRetour.ressources.push(temp);
+            }
+
+            let gestionnaires = await gerer.chercherGestionnaireExt(idProjet);
+            console.log(gestionnaires)
+            
 
             return jsonRetour;
 

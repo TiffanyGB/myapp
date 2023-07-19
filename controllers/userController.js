@@ -237,7 +237,7 @@ async function modifierUser(req, res) {
         }
       });
 
-      /**Récupération des données */
+    /**Récupération des données */
     const {
       nom: userNom,
       prenom: userPrenom,
@@ -306,7 +306,7 @@ async function modifierUser(req, res) {
         }
       });
 
-      /* Vérification des données selon le type */
+    /* Vérification des données selon le type */
     switch (type) {
       case 'etudiant':
         await etudiantModel.validerEtudiant(req);
@@ -328,10 +328,12 @@ async function modifierUser(req, res) {
       return res.status(400).json({ errors: errors.array() });
     }
 
+    /* Modification etudiant */
     switch (type) {
       case 'etudiant':
         etudiantModel.modifierEtudiant(idUser, valeurs, valeurs_etudiant, password)
           .then((resultat) => {
+            /* Données existantes */
             if (resultat === 'les2') {
               res.status(400).json({ erreur: 'Pseudo et email déjà pris' });
 
@@ -351,6 +353,7 @@ async function modifierUser(req, res) {
       case 'gestionnaireExterne':
         modifier.modifierExterne(idUser, valeurs, userMetier, userEntreprise, password)
           .then((resultat) => {
+            /* Données existantes */
             if (resultat === 'les2') {
               res.status(400).json({ erreur: 'Pseudo et email déjà pris' });
 
@@ -372,6 +375,7 @@ async function modifierUser(req, res) {
       case 'gestionnaireIA':
         modifier.modifierIapau(idUser, valeurs, userRole, password)
           .then((resultat) => {
+            /* Données existantes */
             if (resultat === 'les2') {
               res.status(400).json({ erreur: 'Pseudo et email déjà pris' });
 
@@ -392,6 +396,7 @@ async function modifierUser(req, res) {
       case 'admin':
         userModel.modifierUser(idUser, valeurs, password)
           .then((result) => {
+            /* Données existantes */
             if (result === 'les2') {
               res.status(400).json({ erreur: 'Pseudo et email déjà pris' });
 
@@ -402,7 +407,6 @@ async function modifierUser(req, res) {
               res.status(400).json({ erreur: 'Email déjà pris' });
             } else {
               res.status(200).json({ message: "Administrateur modifié avec succès" });
-
             }
           })
           .catch(() => {
