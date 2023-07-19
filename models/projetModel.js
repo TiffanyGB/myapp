@@ -178,9 +178,9 @@ async function listeProjetsJson() {
                 temp.idProjet = projetCourant.idprojet;
                 temp.nom = projetCourant.nom;
 
-                if(projetCourant.idevent == null){
+                if (projetCourant.idevent == null) {
                     temp.idevent = '';
-                }else{
+                } else {
                     temp.idevent = projetCourant.idevent;
                 }
                 temp.description = projetCourant.description_projet;
@@ -253,15 +253,15 @@ async function infosProjet(idProjet) {
             jsonRetour.sujet = projet.sujet;
             jsonRetour.derniereModif = projet.dernieremodif;
 
-            if(jsonRetour.idevent == null){
+            if (jsonRetour.idevent == null) {
                 jsonRetour.idevent = '';
-            }else{
+            } else {
                 jsonRetour.idevent = projet.idevent;
             }
-            
-            if(jsonRetour.idequipegagnante == null){
+
+            if (jsonRetour.idequipegagnante == null) {
                 jsonRetour.idEquipeGagnante = '';
-            }else{
+            } else {
                 jsonRetour.idEquipeGagnante = projet.idequipegagnante;
             }
 
@@ -269,7 +269,7 @@ async function infosProjet(idProjet) {
 
             jsonRetour.mot = [];
 
-            for(i = 0; i < mot.length; i++){
+            for (i = 0; i < mot.length; i++) {
                 jsonRetour.mot.push(mot[i].mot);
             }
 
@@ -277,7 +277,7 @@ async function infosProjet(idProjet) {
 
             jsonRetour.ressources = [];
 
-            for(i = 0; i < ressources.length; i++){
+            for (i = 0; i < ressources.length; i++) {
                 temp = {};
                 temp.nom = ressources[i].titre;
                 temp.type = ressources[i].type_ressource;
@@ -290,8 +290,21 @@ async function infosProjet(idProjet) {
             }
 
             let gestionnaires = await gerer.chercherGestionnaireExt(idProjet);
-            console.log(gestionnaires)
-            
+
+            jsonRetour.gestionnairesExternes = [];
+
+            for (i = 0; i < gestionnaires.length; i++) {
+                jsonRetour.gestionnairesExternes.push(gestionnaires[i].id_g_externe);
+            }
+
+            gestionnaires = await gerer.chercherGestionnaireIA(idProjet);
+
+            jsonRetour.gestionnairesIA = [];
+
+            for (i = 0; i < gestionnaires.length; i++) {
+                jsonRetour.gestionnairesIA.push(gestionnaires[i].id_g_iapau);
+            }
+
 
             return jsonRetour;
 
