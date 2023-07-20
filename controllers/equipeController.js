@@ -66,9 +66,9 @@ async function creerEquipe(req, res) {
     try {
       let idEquipe = await equipeModel.creerEquipe(infos);
 
-      await equipeModel.ajouterMembre(membre, idEquipe);
+      equipeModel.ajouterMembre(membre, idEquipe);
 
-      res.status(200).json({ message: 'Équipe ' +idEquipe +' créée avec succès' });
+      res.status(200).json({ message: 'Équipe ' + idEquipe + ' créée avec succès' });
     } catch (error) {
       res.status(400).json({ erreur: 'Erreur création équipe.' });
     }
@@ -81,9 +81,72 @@ async function supprimerEquipe(req, res) {
   }
   else if (req.method === 'DELETE') {
 
-    res.status(200).json("ok");
+    try {
+
+      const idEquipe = res.locals.idEquipe;
+
+      // Vérifier que l'id existe dans la bdd
+      const user = await equipeModel.chercherEquipeID(idEquipe);
+      if (user.length === 0) {
+        return res.status(404).json({ erreur: 'L\'id n\'existe pas' });
+      }
+      equipeModel.supprimerEquipe(idEquipe);
+      res.status(200).json({ message: "Equipe supprimée" });
+
+    } catch {
+      res.status(400).json({ error: "Suppression de l'équipe" });
+    }
   }
 }
+
+async function modifierEquipe(req, res) {
+  if (req.method === 'OPTIONS') {
+    res.status(200).json({ sucess: 'Agress granted' });
+  }
+  else if (req.method === 'PATCH') {
+
+
+    const idEquipe = res.locals.idEquipe;
+
+    const {
+      nom,
+      idCapitaine,
+      statut,
+      description,
+      idProjet,
+      membre,
+      github
+    } = req.body;
+
+
+    const valeurs = [
+      nom,
+      description,
+      statut,
+      github,
+      idProjet,
+      idCapitaine,
+      idEquipe
+    ]
+
+    try {
+      // Vérifier que l'id existe dans la bdd
+      const user = await equipeModel.chercherEquipeID(idEquipe);
+      if (user.length === 0) {
+        return res.status(404).json({ erreur: 'L\'id n\'existe pas' });
+      }
+      equipeModel.suprimerTousMembres(idEquipe);
+      equipeModel.modifierEquipe(valeurs);
+      equipeModel.ajouterMembre(membre, idEquipe);
+      res.status(200).json({ message: "Equipe modifiée" });
+
+    } catch {
+      res.status(400).json({ error: "Modification de l'équipe" });
+    }
+  }
+}
+
+
 
 async function informationsEquipe(req, res) {
   if (req.userProfile === 'admin') {
@@ -121,6 +184,6 @@ module.exports = {
   retournerEquipeProjet,
   informationsEquipe,
   creerEquipe,
-  supprimerEquipe
-
+  supprimerEquipe,
+  modifierEquipe
 }

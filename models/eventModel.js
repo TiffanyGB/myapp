@@ -66,23 +66,22 @@ async function creerEvent(valeurs_event, regles) {
 /**Modifier */
 async function modifierEvent(valeurs) {
     try {
-
         const modifier = `
         UPDATE Evenement 
         SET
-          nom = '${valeurs[0]}',
-          debut_inscription = '${valeurs[1]}',
-          date_debut = '${valeurs[2]}',
-          date_fin = '${valeurs[3]}',
-          description_event = '${valeurs[4]}',
-          nombre_min_equipe = '${valeurs[5]}',
-          nombre_max_equipe = '${valeurs[6]}',
-          message_fin = ${valeurs[7] ? `'${valeurs[7]}'` : 'message_fin'},
+          nom = $1,
+          debut_inscription = $2,
+          date_debut = $3,
+          date_fin = $4,
+          description_event = $5,
+          nombre_min_equipe = $6,
+          nombre_max_equipe = $7,
+          message_fin = $8,
           derniereModif = CURRENT_TIMESTAMP
-        WHERE idEvent = '${valeurs[8]}'`;
+        WHERE idEvent = $9`;
 
         try {
-            await pool.query(modifier);
+            await pool.query(modifier, valeurs);
         } catch (error) {
             console.error("Erreur lors de la mise à jour de l'événement", error);
             throw error;
@@ -92,6 +91,7 @@ async function modifierEvent(valeurs) {
         throw error;
     }
 }
+
 
 
 /**Supprimer */
@@ -335,7 +335,6 @@ async function jsonEventChoisi(idEvent, typeUser) {
     }
 }
 
-/*Très bizarre la recup des event*/
 async function creerJsonTousEvents() {
 
     try {

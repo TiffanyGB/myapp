@@ -28,6 +28,8 @@ const userModel = require('../models/userModel');
 const adminProfile = require('../middleware/verifProfil');
 const validationDonnees = require('../middleware/validationDonnees');
 
+const checkAdminProfile = adminProfile.checkProfile('admin');
+
 /**
  * @route GET /users
  * @description Endpoint pour voir la liste des utilisateurs
@@ -36,7 +38,7 @@ const validationDonnees = require('../middleware/validationDonnees');
  */
 router.get('/',
   indexController.verifyToken,
-  adminProfile.checkAdminProfile,
+  checkAdminProfile,
   userController.voirUtilisateurs);
 
 /**
@@ -49,7 +51,7 @@ router.all(
   '/create',
   userModel.validateUser,
   indexController.verifyToken,
-  adminProfile.checkAdminProfile,
+  checkAdminProfile,
   validationDonnees.validatePasswordCreation,
   userController.createUser,
 
@@ -65,7 +67,7 @@ router.all('/edit/:id', (req, res, next) => {
   res.locals.userId = req.params.id;
   next();
 }, indexController.verifyToken,
-  adminProfile.checkAdminProfile,
+  checkAdminProfile,
   validationDonnees.validatePasswordModif,
   userController.modifierUser);
 
@@ -80,7 +82,7 @@ router.all('/delete/:id', (req, res, next) => {
   res.locals.userId = req.params.id;
   next();
 }, indexController.verifyToken,
-  adminProfile.checkAdminProfile,
+  checkAdminProfile,
   userController.supprimerUser);
 
 module.exports = router;

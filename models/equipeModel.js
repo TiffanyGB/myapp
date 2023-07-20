@@ -72,10 +72,28 @@ async function creerEquipe(valeurs) {
             pool.query(inserer, valeurs)
                 .then((result) => {
                     let id = result.rows[0].idequipe;
-                    console.log('oui',id)
+                    console.log('oui', id)
                     resolve(id);
                 })
         });
+    } catch (error) {
+        throw error;
+    }
+}
+
+function modifierEquipe(valeurs) {
+
+    const modifier = `UPDATE Equipe
+    SET nom = $1,
+    description_equipe = $2,
+    statut_recrutement = $3,
+    lien_github = $4,
+    idProjet = $5,
+    idCapitaine = $6
+    WHERE idEquipe = $7`;
+
+    try {
+        pool.query(modifier, valeurs);
     } catch (error) {
         throw error;
     }
@@ -98,8 +116,33 @@ function ajouterMembre(valeurs, idEquipe) {
 
 }
 
-function supprimerEquipe() {
+async function suprimerTousMembres(idEquipe){
 
+    const supprimer = `DELETE FROM Appartenir
+    WHERE idEquipe = $1`;
+
+    try {
+        pool.query(supprimer, [idEquipe]);
+    } catch (error) {
+        throw error;
+    }
+
+}
+
+function supprimerUnMembre(idEquipe, idMembre){
+
+}
+
+function supprimerEquipe(idEquipe) {
+
+    const supprimer = `DELETE FROM Equipe 
+    WHERE idEquipe = $1`;
+
+    try {
+        pool.query(supprimer, [idEquipe]);
+    } catch (error) {
+        throw error;
+    }
 }
 
 function aUneEquipe(idEtudiant) {
@@ -235,5 +278,7 @@ module.exports = {
     jsonInfosEquipe,
     chercherEquipeID,
     validerEquipe,
-    ajouterMembre
+    ajouterMembre,
+    modifierEquipe,
+    suprimerTousMembres
 }

@@ -4,6 +4,8 @@ const indexController = require('../controllers/indexController');
 const eventsController = require('../controllers/eventsController');
 const profil = require('../middleware/verifProfil');
 
+const checkAdminProfile = profil.checkProfile('admin');
+
 /**Créer events */
 router.all('/creerEvent',
     indexController.verifyToken,
@@ -34,7 +36,7 @@ router.all('/:id/infos', (req, res, next) => {
     res.locals.idevent = req.params.id;
     next();
 }, indexController.verifyToken,
-    profil.checkAdminProfile,
+    checkAdminProfile,
     eventsController.recupInfoEvent);
 
 

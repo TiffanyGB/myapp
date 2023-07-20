@@ -1,12 +1,3 @@
-function checkAdminProfile(req, res, next) {
-  if (req.userProfile === 'admin') {
-    // Si l'utilisateur est administrateur, passez à la prochaine fonction de middleware
-    next();
-  } else {
-    res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur" });
-  }
-}
-
 function checkStudentProfile(req, res, next) {
   if (req.userProfile === 'etudiant') {
     next();
@@ -14,4 +5,19 @@ function checkStudentProfile(req, res, next) {
     res.status(400).json({ erreur: "Mauvais profil, il faut être etudiant" });
   }
 }
-module.exports = { checkAdminProfile, checkStudentProfile };
+
+/*Un seul profil autorisé */
+function checkProfile(type) {
+  return function(req, res, next) {
+    /* admin, gestionnaire, etudiant, 'etudiant ou admin', 'etudiant ou admin ou gestionnaire', 'admin ou gestionnaire */
+    if (req.userProfile === type) {
+      next();
+    } else {
+      res.status(400).json({ erreur: `Mauvais profil, il faut être ${type}.` });
+    }
+  };
+}
+
+
+
+module.exports = {checkStudentProfile, checkProfile };

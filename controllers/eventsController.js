@@ -73,51 +73,52 @@ async function createEvent(req, res) {
 
 async function modifierEvent(req, res) {
 
-  if (req.userProfile === 'admin') {
+  // if (req.userProfile === 'admin') {
 
-    if (req.method === 'OPTIONS') {
+  if (req.method === 'OPTIONS') {
 
-      res.status(200).json({ success: 'Access granted' });
-    }
-    else if (req.method === 'PATCH') {
+    res.status(200).json({ success: 'Access granted' });
+  }
+  else if (req.method === 'PATCH') {
 
-      const idevent = res.locals.idevent;
+    const idevent = res.locals.idevent;
 
-      /**Vérifier que l'id existe dans la bdd, sinon 404 error */
-      eventModel.chercherEvenement(idevent)
-        .then((result) => {
+    /**Vérifier que l'id existe dans la bdd, sinon 404 error */
+    eventModel.chercherEvenement(idevent)
+      .then((result) => {
 
-          if (result.length === 0) {
-            res.status(404).json({ erreur: 'L\'id n\'existe pas' });
-          }
-        });
+        if (result.length === 0) {
+          res.status(404).json({ erreur: 'L\'id n\'existe pas' });
+        }
+      });
 
 
-      const {
-        nom,
-        inscription,
-        debut,
-        fin,
-        description,
-        nombreMinEquipe,
-        nombreMaxEquipe,
-        messageFin,
-        projets,
-        regles
-      } = req.body;
+    const {
+      nom,
+      inscription,
+      debut,
+      fin,
+      description,
+      nombreMinEquipe,
+      nombreMaxEquipe,
+      messageFin,
+      projets,
+      regles
+    } = req.body;
 
-      const valeurs_event = [
-        nom,
-        inscription,
-        debut,
-        fin,
-        description,
-        nombreMinEquipe,
-        nombreMaxEquipe,
-        messageFin,
-        idevent
+    const valeurs_event = [
+      nom,
+      inscription,
+      debut,
+      fin,
+      description,
+      nombreMinEquipe,
+      nombreMaxEquipe,
+      messageFin,
+      idevent
 
-      ];
+    ];
+
 
       try {
 
@@ -137,6 +138,7 @@ async function modifierEvent(req, res) {
           await projetModel.rattacherProjetEvent(idevent, projets[i].idProjet);
         }
 
+
         for (let i = 0; i < regles.length; i++) {
           await regleModel.ajouterRegle(idevent, regles[i].titre, regles[i].contenu);
         }
@@ -148,17 +150,18 @@ async function modifierEvent(req, res) {
         return res.status(400).json({ erreur: "L'événement n'a pas pu être modifié" });
       }
     }
-  } else if (req.userProfile === 'etudiant') {
+    // } else if (req.userProfile === 'etudiant') {
 
-    res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "etudiant" });
-  } else if (req.userProfile === 'gestionnaire') {
+    //   res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "etudiant" });
+    // } else if (req.userProfile === 'gestionnaire') {
 
-    res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "gestionnaire" });
-  } else if (req.userProfile === 'aucun') {
+    //   res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "gestionnaire" });
+    // } else if (req.userProfile === 'aucun') {
 
-    res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "Aucun" });
+    //   res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "Aucun" });
+    // }
   }
-}
+
 
 async function supprimerEvent(req, res) {
   if (req.userProfile === 'admin') {
