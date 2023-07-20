@@ -146,8 +146,6 @@ async function modifierEquipe(req, res) {
   }
 }
 
-
-
 async function informationsEquipe(req, res) {
   if (req.userProfile === 'admin') {
     if (req.method === 'OPTIONS') {

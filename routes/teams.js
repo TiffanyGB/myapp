@@ -31,6 +31,15 @@ router.all('/delete/:id', (req, res, next) => {
     // profil.checkStudentProfile,
     equipeController.supprimerEquipe);
 
+/* Récupérer les infos modifiables d'une équipe*/
+router.all('/:id/infos', (req, res, next) => {
+    res.locals.idEquipe = req.params.id;
+    next();
+}, indexController.verifyToken,
+    // profil.checkStudentProfile,
+    equipeController.modifierEquipe);
+
+
 /**Voir une équipe */
 router.all('/:id', (req, res, next) => {
     res.locals.idEquipe = req.params.id;

@@ -73,7 +73,7 @@ async function createEvent(req, res) {
 
 async function modifierEvent(req, res) {
 
-  // if (req.userProfile === 'admin') {
+  if (req.userProfile === 'admin') {
 
   if (req.method === 'OPTIONS') {
 
@@ -150,16 +150,16 @@ async function modifierEvent(req, res) {
         return res.status(400).json({ erreur: "L'événement n'a pas pu être modifié" });
       }
     }
-    // } else if (req.userProfile === 'etudiant') {
+    } else if (req.userProfile === 'etudiant') {
 
-    //   res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "etudiant" });
-    // } else if (req.userProfile === 'gestionnaire') {
+      res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "etudiant" });
+    } else if (req.userProfile === 'gestionnaire') {
 
-    //   res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "gestionnaire" });
-    // } else if (req.userProfile === 'aucun') {
+      res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "gestionnaire" });
+    } else if (req.userProfile === 'aucun') {
 
-    //   res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "Aucun" });
-    // }
+      res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "Aucun" });
+    }
   }
 
 
