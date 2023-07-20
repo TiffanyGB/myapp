@@ -99,6 +99,18 @@ async function supprimerEquipe(req, res) {
   }
 }
 
+function getInfosEquipe(req, res) {
+
+  if (req.method === 'OPTIONS') {
+    res.status(200).json({ sucess: 'Agress granted' });
+  }
+  else if (req.method === 'GET') {
+
+    //statut, capitaine, membres,description, nom, projet, github
+  }
+
+}
+
 async function modifierEquipe(req, res) {
   if (req.method === 'OPTIONS') {
     res.status(200).json({ sucess: 'Agress granted' });
@@ -183,5 +195,6 @@ module.exports = {
   informationsEquipe,
   creerEquipe,
   supprimerEquipe,
-  modifierEquipe
+  modifierEquipe,
+  getInfosEquipe
 }

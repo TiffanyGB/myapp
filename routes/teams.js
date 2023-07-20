@@ -37,7 +37,7 @@ router.all('/:id/infos', (req, res, next) => {
     next();
 }, indexController.verifyToken,
     // profil.checkStudentProfile,
-    equipeController.modifierEquipe);
+    equipeController.getInfosEquipe);
 
 
 /**Voir une équipe */

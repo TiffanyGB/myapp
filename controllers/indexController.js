@@ -180,7 +180,7 @@ async function connexion(req, res) {
       .withMessage('Le mot de passe doit contenir au moins une lettre majuscule')
       .matches(/[0-9]/)
       .withMessage('Le mot de passe doit contenir au moins un chiffre')
-      .matches(/[!@#$%^&*]/)
+      .matches(/[\W!@#$%^&*]/)
       .withMessage('Le mot de passe doit contenir au moins un caractère spécial')
       .run(req);
 

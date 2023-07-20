@@ -6,6 +6,64 @@ const ressourceModel = require('./ressourceModel');
 const classementModel = require('./classementModel');
 const finalisteModel = require('./finalisteModel');
 const equipeModel = require('./equipeModel');
+const validationDonnees = require('../middleware/validationDonnees');
+const { body } = require('express-validator');
+
+const validateEvent = [
+    body('typeEvent')
+        .notEmpty().withMessage('Le type ne doit pas être vide.')
+        .matches(/^(challenge|battle)$/).withMessage('Le type doit être soit "challenge" soit "battle".')
+        .isLength({ min: 2, max: 30 }).withMessage('Le type doit avoir une longueur comprise entre 2 et 30 caractères.'),
+
+    body('nom')
+        .notEmpty().withMessage('Le nom ne doit pas être vide.')
+        .matches(/^[\Wa-zA-ZÀ-ÿ0-9 \-']*$/)
+        .isLength({ min: 2, max: 50 }).withMessage('Le nom doit avoir une longueur comprise entre 3 et 50 caractères.'),
+
+    body('inscription')
+        .notEmpty().withMessage('La date ne doit pas être vide.')
+        .isLength({ min: 10, max: 30 }).withMessage('La date doit avoir une longueur comprise entre 3 et 30 caractères.')
+        .matches(/^[0-9a-zA-Z]+$/).withMessage('Le pseudo ne doit contenir que des lettres et des chiffres.'),
+
+    body('debut')
+        .notEmpty().withMessage('La date ne doit pas être vide.')
+        .isLength({ min: 10, max: 30 }).withMessage('La date doit avoir une longueur comprise entre 3 et 30 caractères.')
+        .matches(/^[0-9a-zA-Z]+$/).withMessage('Le pseudo ne doit contenir que des lettres et des chiffres.'),
+
+    body('fin')
+        /* Rend la validation facultative si la valeur est vide ou nulle*/
+        .notEmpty().withMessage('La date ne doit pas être vide.')
+        .isLength({ min: 10, max: 30 }).withMessage('La date doit avoir une longueur comprise entre 3 et 30 caractères.')
+        .matches(/^[0-9a-zA-Z]+$/).withMessage('Le pseudo ne doit contenir que des lettres et des chiffres.'),
+
+    body('description')
+        /* Rend la validation facultative si la valeur est vide ou nulle*/
+        .optional({ nullable: true, checkFalsy: true })
+        .isLength({ min: 0, max: 5000 }).withMessage('Le lien GitHub doit avoir une longueur comprise entre 0 et 5000 caractères.'),
+
+
+    body('nombreMinEquipe')
+        /* Rend la validation facultative si la valeur est vide ou nulle*/
+        .notEmpty().withMessage('La date ne doit pas être vide.')
+        .matches(/^[0-9]*$/).withMessage("Il doit y a voir que des chiffres.")
+        .isLength({ min: 1, max: 30 }).withMessage('La ville doit avoir une longueur comprise entre 1 et 50 caractères.'),
+
+    // body('nombreMaxEquipe')
+    //     /* Rend la validation facultative si la valeur est vide ou nulle*/
+    //     .optional({ nullable: true, checkFalsy: true })
+    //     .isURL().withMessage('Le lien LinkedIn doit être une URL valide.')
+    //     .isLength({ min: 0, max: 300 }).withMessage('Le lien LinkedIn doit avoir une longueur comprise entre 2 et 300 caractères.'),
+
+    // body('messageFin')
+    //     /* Rend la validation facultative si la valeur est vide ou nulle*/
+    //     .optional({ nullable: true, checkFalsy: true })
+    //     .isURL().withMessage('Le lien GitHub doit être une URL valide.')
+    //     .isLength({ min: 0, max: 300 }).withMessage('Le lien GitHub doit avoir une longueur comprise entre 2 et 300 caractères.'),
+
+    /**Appel du validateur */
+    validationDonnees.validateUserData,
+];
+
 
 /**Liste des événements */
 function chercherListeEvenement() {
@@ -41,23 +99,24 @@ function chercherEvenement(idEvent) {
     });
 }
 
+/*Création d'événement */
 async function creerEvent(valeurs_event, regles) {
     const inserer = `
       INSERT INTO Evenement (type_event, nom, debut_inscription, date_debut, date_fin, description_event, nombre_min_equipe, nombre_max_equipe)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING idevent
-    `;
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING idevent`;
 
     try {
         const result = await pool.query(inserer, valeurs_event);
+        /* Récupération de l'id de l'event (pour l'insertion des règles) */
         const id = result.rows[0].idevent;
 
+        /*Insertion des règles */
         for (let i = 0; i < regles.length; i++) {
             await regleModel.ajouterRegle(id, regles[i].titre, regles[i].contenu);
         }
-
         return id;
+
     } catch (error) {
-        console.error('Erreur lors de l\'insertion des données côté étudiant :', error);
         throw error;
     }
 }
@@ -210,9 +269,9 @@ async function jsonEventChoisi(idEvent, typeUser) {
                 let projetCourant = listeProjets[i];
                 let projetInfos = {};
 
-                if(projetCourant.imgprojet == null){
+                if (projetCourant.imgprojet == null) {
                     projetInfos.img = '';
-                }else{
+                } else {
                     projetInfos.img = projetCourant.imgprojet;
                 }
                 projetInfos.titre = projetCourant.nom;
@@ -346,88 +405,88 @@ async function creerJsonTousEvents() {
         //     return false;
         // } else {
 
-            tabRetour = {};
+        tabRetour = {};
 
-            tabRetour.oldEvents = [];
-            tabRetour.actualEvent = [];
+        tabRetour.oldEvents = [];
+        tabRetour.actualEvent = [];
 
-            for (i = 0; i < listesAnciens.rows.length; i++) {
+        for (i = 0; i < listesAnciens.rows.length; i++) {
 
-                ancienCourant = listesAnciens.rows[i];
-                courantInfos = {};
+            ancienCourant = listesAnciens.rows[i];
+            courantInfos = {};
 
-                courantInfos.type = ancienCourant.type_event;
-                courantInfos.id = ancienCourant.idevent;
-                courantInfos.titre = ancienCourant.nom;
-                courantInfos.image = ancienCourant.img;
-                courantInfos.debut = ancienCourant.date_debut;
-                courantInfos.fin = ancienCourant.date_fin;
-                courantInfos.phase = "Terminé";
+            courantInfos.type = ancienCourant.type_event;
+            courantInfos.id = ancienCourant.idevent;
+            courantInfos.titre = ancienCourant.nom;
+            courantInfos.image = ancienCourant.img;
+            courantInfos.debut = ancienCourant.date_debut;
+            courantInfos.fin = ancienCourant.date_fin;
+            courantInfos.phase = "Terminé";
 
-                let listeProjets = await projetModel.recuperer_projets(ancienCourant.idevent);
-                let gainTotal = 0;
+            let listeProjets = await projetModel.recuperer_projets(ancienCourant.idevent);
+            let gainTotal = 0;
 
-                let motCle = [];
+            let motCle = [];
 
 
-                for (j = 0; j < listeProjets.length; j++) {
-                    gainTotal += listeProjets[j].recompense;
+            for (j = 0; j < listeProjets.length; j++) {
+                gainTotal += listeProjets[j].recompense;
 
-                    let recupeMot = await motCleModel.recupererMot(listeProjets[j].idprojet);
+                let recupeMot = await motCleModel.recupererMot(listeProjets[j].idprojet);
 
-                    for (k = 0; k < recupeMot.length; k++) {
-                        motCle.push(recupeMot[k].mot);
-                    }
+                for (k = 0; k < recupeMot.length; k++) {
+                    motCle.push(recupeMot[k].mot);
                 }
-                courantInfos.mot = motCle;
-                courantInfos.gain = gainTotal;
-
-                tabRetour.oldEvents.push(courantInfos);
             }
+            courantInfos.mot = motCle;
+            courantInfos.gain = gainTotal;
 
-            for (i = 0; i < listeActuels.rows.length; i++) {
-
-                actuelCourant = listeActuels.rows[i];
-                courantInfos = {};
-
-                courantInfos.type = actuelCourant.type_event;
-                courantInfos.id = actuelCourant.idevent;
-                courantInfos.titre = actuelCourant.nom;
-                courantInfos.image = actuelCourant.img;
-                courantInfos.debut = actuelCourant.date_debut;
-                courantInfos.fin = actuelCourant.date_fin;
-
-                const currentDate = new Date();
-                if (actuelCourant.date_debut > currentDate) {
-                    courantInfos.phase = "Inscriptions";
-                } else {
-                    courantInfos.phase = "En cours";
-                }
-
-                let listeProjets = await projetModel.recuperer_projets(actuelCourant.idevent);
-                let gainTotal = 0;
-                let motCle = [];
-
-
-                for (j = 0; j < listeProjets.length; j++) {
-                    gainTotal += listeProjets[j].recompense;
-
-                    let recupeMot = await motCleModel.recupererMot(listeProjets[j].idprojet);
-
-                    for (k = 0; k < recupeMot.length; k++) {
-                        motCle.push(recupeMot[k].mot);
-                    }
-
-                }
-
-
-                courantInfos.mot = motCle;
-                courantInfos.gain = gainTotal;
-
-                tabRetour.actualEvent.push(courantInfos);
-            }
-            return tabRetour;
+            tabRetour.oldEvents.push(courantInfos);
         }
+
+        for (i = 0; i < listeActuels.rows.length; i++) {
+
+            actuelCourant = listeActuels.rows[i];
+            courantInfos = {};
+
+            courantInfos.type = actuelCourant.type_event;
+            courantInfos.id = actuelCourant.idevent;
+            courantInfos.titre = actuelCourant.nom;
+            courantInfos.image = actuelCourant.img;
+            courantInfos.debut = actuelCourant.date_debut;
+            courantInfos.fin = actuelCourant.date_fin;
+
+            const currentDate = new Date();
+            if (actuelCourant.date_debut > currentDate) {
+                courantInfos.phase = "Inscriptions";
+            } else {
+                courantInfos.phase = "En cours";
+            }
+
+            let listeProjets = await projetModel.recuperer_projets(actuelCourant.idevent);
+            let gainTotal = 0;
+            let motCle = [];
+
+
+            for (j = 0; j < listeProjets.length; j++) {
+                gainTotal += listeProjets[j].recompense;
+
+                let recupeMot = await motCleModel.recupererMot(listeProjets[j].idprojet);
+
+                for (k = 0; k < recupeMot.length; k++) {
+                    motCle.push(recupeMot[k].mot);
+                }
+
+            }
+
+
+            courantInfos.mot = motCle;
+            courantInfos.gain = gainTotal;
+
+            tabRetour.actualEvent.push(courantInfos);
+        }
+        return tabRetour;
+    }
     // }
     catch (error) {
         throw error;
@@ -453,14 +512,14 @@ async function jsonlisteEquipeEvent(idEvent) {
             }
         }
         return (jsonRetour);
-        
+
     } catch (error) {
         console.error(error);
     }
 }
 
 /*Pour la modification d'un event */
-async function recup_Infos_Modif_Event(idEvent){
+async function recup_Infos_Modif_Event(idEvent) {
 
     let jsonRetour = await jsonEventChoisi(idEvent);
     delete jsonRetour.finalistes;
@@ -494,5 +553,6 @@ module.exports = {
     creerEvent,
     supprimerEvent,
     jsonlisteEquipeEvent,
-    recup_Infos_Modif_Event
+    recup_Infos_Modif_Event,
+    validateEvent
 }
