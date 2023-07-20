@@ -1,4 +1,18 @@
 const pool = require('../database/configDB');
+const { body } = require('express-validator');
+
+
+async function validerRegles(req) {
+    body('titre')
+        .notEmpty().withMessage('Le nom ne doit pas être vide.')
+        .isLength({ min: 2, max: 50 }).withMessage('Le prénom doit avoir une longueur comprise entre 2 et 50 caractères.')
+        .run(req);
+
+    body('contenu')
+        .notEmpty().withMessage('Le lien ne doit pas être vide.')
+        .isLength({ min: 2, max: 1000 }).withMessage('Le lien doit avoir une longueur comprise entre 3 et 1000 caractères.')
+        .run(req);
+}
 
 /**Récupérer une regle à partir de l'id de l'event */
 function recuperer_regles(idEvent) {
@@ -50,5 +64,6 @@ async function supprimerRegles(idEvent) {
 module.exports = {
     recuperer_regles,
     ajouterRegle,
-    supprimerRegles
+    supprimerRegles,
+    validerRegles
 }

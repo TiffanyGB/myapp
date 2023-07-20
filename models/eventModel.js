@@ -11,6 +11,7 @@ const { body } = require('express-validator');
 
 const validateEvent = [
     body('typeEvent')
+        .optional()
         .notEmpty().withMessage('Le type ne doit pas être vide.')
         .matches(/^(challenge|battle)$/).withMessage('Le type doit être soit "challenge" soit "battle".')
         .isLength({ min: 2, max: 30 }).withMessage('Le type doit avoir une longueur comprise entre 2 et 30 caractères.'),
@@ -23,42 +24,44 @@ const validateEvent = [
     body('inscription')
         .notEmpty().withMessage('La date ne doit pas être vide.')
         .isLength({ min: 10, max: 30 }).withMessage('La date doit avoir une longueur comprise entre 3 et 30 caractères.')
-        .matches(/^[0-9a-zA-Z]+$/).withMessage('Le pseudo ne doit contenir que des lettres et des chiffres.'),
+        .matches(/^[0-9a-zA-Z\-\ :.]+$/).withMessage('Le pseudo ne doit contenir que des lettres et des chiffres.'),
 
     body('debut')
         .notEmpty().withMessage('La date ne doit pas être vide.')
         .isLength({ min: 10, max: 30 }).withMessage('La date doit avoir une longueur comprise entre 3 et 30 caractères.')
-        .matches(/^[0-9a-zA-Z]+$/).withMessage('Le pseudo ne doit contenir que des lettres et des chiffres.'),
+        .matches(/^[0-9a-zA-Z\-\ :.]+$/).withMessage('Le pseudo ne doit contenir que des lettres et des chiffres.'),
 
     body('fin')
-        /* Rend la validation facultative si la valeur est vide ou nulle*/
         .notEmpty().withMessage('La date ne doit pas être vide.')
         .isLength({ min: 10, max: 30 }).withMessage('La date doit avoir une longueur comprise entre 3 et 30 caractères.')
-        .matches(/^[0-9a-zA-Z]+$/).withMessage('Le pseudo ne doit contenir que des lettres et des chiffres.'),
+        .matches(/^[0-9a-zA-Z\-\ :.]+$/).withMessage('Le pseudo ne doit contenir que des lettres et des chiffres.'),
 
     body('description')
-        /* Rend la validation facultative si la valeur est vide ou nulle*/
         .optional({ nullable: true, checkFalsy: true })
         .isLength({ min: 0, max: 5000 }).withMessage('Le lien GitHub doit avoir une longueur comprise entre 0 et 5000 caractères.'),
 
 
     body('nombreMinEquipe')
-        /* Rend la validation facultative si la valeur est vide ou nulle*/
         .notEmpty().withMessage('La date ne doit pas être vide.')
         .matches(/^[0-9]*$/).withMessage("Il doit y a voir que des chiffres.")
-        .isLength({ min: 1, max: 30 }).withMessage('La ville doit avoir une longueur comprise entre 1 et 50 caractères.'),
+        .isInt({ min: 1, max: 30 }).withMessage('Le nombre minimum par équipe doit être un nombre entre 1 et 30.'),
 
-    // body('nombreMaxEquipe')
-    //     /* Rend la validation facultative si la valeur est vide ou nulle*/
-    //     .optional({ nullable: true, checkFalsy: true })
-    //     .isURL().withMessage('Le lien LinkedIn doit être une URL valide.')
-    //     .isLength({ min: 0, max: 300 }).withMessage('Le lien LinkedIn doit avoir une longueur comprise entre 2 et 300 caractères.'),
+    body('nombreMaxEquipe')
+        .notEmpty().withMessage('La date ne doit pas être vide.')
+        .matches(/^[0-9]*$/).withMessage("Il doit y a voir que des chiffres.")
+        .isInt({ min: 1, max: 30 }).withMessage('Le nombre maximum par équipe doit être un nombre entre 1 et 30.')
+        .custom((value, { req }) => {
+            const nombreMinEquipe = parseInt(req.body.nombreMinEquipe);
+            const nombreMaxEquipe = parseInt(value);
+            if (nombreMaxEquipe < nombreMinEquipe) {
+                throw new Error('Le nombre maximum d\'équipes doit être supérieur ou égal au nombre minimum d\'équipes.');
+            }
+            return true;
+        }),
 
-    // body('messageFin')
-    //     /* Rend la validation facultative si la valeur est vide ou nulle*/
-    //     .optional({ nullable: true, checkFalsy: true })
-    //     .isURL().withMessage('Le lien GitHub doit être une URL valide.')
-    //     .isLength({ min: 0, max: 300 }).withMessage('Le lien GitHub doit avoir une longueur comprise entre 2 et 300 caractères.'),
+    body('messageFin')
+        .optional({ nullable: true, checkFalsy: true })
+        .isLength({ min: 2, max: 3000 }).withMessage('Le lien GitHub doit avoir une longueur comprise entre 2 et 3000 caractères.'),
 
     /**Appel du validateur */
     validationDonnees.validateUserData,
@@ -121,7 +124,6 @@ async function creerEvent(valeurs_event, regles) {
     }
 }
 
-
 /**Modifier */
 async function modifierEvent(valeurs) {
     try {
@@ -150,8 +152,6 @@ async function modifierEvent(valeurs) {
         throw error;
     }
 }
-
-
 
 /**Supprimer */
 async function supprimerEvent(idEvent) {
@@ -336,7 +336,7 @@ async function jsonEventChoisi(idEvent, typeUser) {
 
             let classementFinal = await classementModel.chercherClassement(idEvent);
 
-            if (classementFinal = []) {
+            if (classementFinal == []) {
                 tabRetour.classement = null;
             } else {
                 tabRetour.podium = [];
@@ -352,7 +352,7 @@ async function jsonEventChoisi(idEvent, typeUser) {
 
             let finalistes = await finalisteModel.chercher_finalistes(idEvent);
 
-            if (finalistes = []) {
+            if (finalistes == []) {
                 tabRetour.finalistes = '';
             } else {
 
@@ -387,7 +387,7 @@ async function jsonEventChoisi(idEvent, typeUser) {
             }
             return tabRetour;
         } else {
-            throw new Error('Evenement non trouvé: erreur dans le fichier "' + __filename + '" dans "' + arguments.callee.name + '"');
+            throw new Error('Evenement non trouvé');
         }
     } catch (error) {
         throw error;
@@ -541,7 +541,6 @@ async function recup_Infos_Modif_Event(idEvent) {
     return jsonRetour;
 }
 
-recup_Infos_Modif_Event(2);
 
 module.exports = {
     chercherEvenement,

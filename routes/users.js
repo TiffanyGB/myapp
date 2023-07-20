@@ -26,9 +26,9 @@ const userController = require('../controllers/userController');
 const indexController = require('../controllers/indexController');
 const userModel = require('../models/userModel');
 const adminProfile = require('../middleware/verifProfil');
+const checkAdminProfile = adminProfile.checkProfile('admin');
 const validationDonnees = require('../middleware/validationDonnees');
 
-const checkAdminProfile = adminProfile.checkProfile('admin');
 
 /**
  * @route GET /users

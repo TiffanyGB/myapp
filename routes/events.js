@@ -10,7 +10,7 @@ const checkAdminProfile = profil.checkProfile('admin');
 /**Créer events */
 router.all('/creerEvent',
     indexController.verifyToken,
-    // checkAdminProfile,
+    checkAdminProfile,
     eventModel.validateEvent,
     eventsController.createEvent);
 
@@ -19,6 +19,8 @@ router.all('/edit/:id', (req, res, next) => {
     res.locals.idevent = req.params.id;
     next();
 }, indexController.verifyToken,
+    checkAdminProfile,
+    eventModel.validateEvent,
     eventsController.modifierEvent);
 
 /**supprimer */
@@ -26,9 +28,10 @@ router.all('/delete/:id', (req, res, next) => {
     res.locals.idevent = req.params.id;
     next();
 }, indexController.verifyToken,
+    checkAdminProfile,
     eventsController.supprimerEvent);
 
-/**Voir les équipes d'un event */
+/**Voir les équipes d'un event */ //Rajouter profil ici
 router.all('/:id/teams', (req, res, next) => {
     res.locals.idevent = req.params.id;
     next();

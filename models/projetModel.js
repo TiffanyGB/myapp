@@ -1,27 +1,10 @@
-const { func } = require('joi');
 const pool = require('../database/configDB');
 const motcleModel = require('./motCleModel');
 const ressourceModel = require('./ressourceModel');
 const gerer = require('./gererProjet');
-const { body, validationResult } = require('express-validator');
+const { body } = require('express-validator');
 const { json } = require('body-parser');
-
-
-/**Valider les données */
-function validateUserData(req, res, next) {
-    // Exécuter les validateurs Express Validator
-    const errors = validationResult(req);
-
-    // Vérifier s'il y a des erreurs de validation
-    if (!errors.isEmpty()) {
-        // Renvoyer les erreurs de validation au client
-        return res.status(400).json({ errors: errors.array() });
-    }
-
-    // Si les données sont valides, passer à l'étape suivante
-    next();
-}
-
+const validationDonnees = require('../middleware/validationDonnees');
 
 const validateProjet = [
     body('nom')
@@ -44,7 +27,7 @@ const validateProjet = [
         .isLength({ min: 10, max: 10000 }).withMessage('La description doit avoir une longueur comprise entre 10 et 10000 caractères.'),
 
     /**Appel du validateur */
-    validateUserData,
+    validationDonnees.validateUserData,
 ];
 
 /**Liste des projets */
@@ -66,10 +49,10 @@ function tousLesProjets() {
 /**Chercher la liste des projets d'un event */
 function recuperer_projets(idEvent) {
 
-    const chercherProjets = `SELECT * FROM Projet WHERE idevent = ${idEvent}`
+    const chercherProjets = `SELECT * FROM Projet WHERE idevent = $1`
 
     return new Promise((resolve, reject) => {
-        pool.query(chercherProjets)
+        pool.query(chercherProjets, [idEvent])
             .then((res) => {
                 resolve(res.rows);
             })
@@ -93,7 +76,6 @@ function chercherProjetId(idProjet) {
             });
     });
 }
-
 
 /**Créer un projet */
 async function creerProjet(valeur_projet) {
@@ -153,83 +135,71 @@ async function supprimerProjet(idProjet) {
     });
 }
 
-
 /**JSON avec tous les projets */
 async function listeProjetsJson() {
 
     try {
         let projetsListe = await tousLesProjets();
 
-        if (projetsListe === 0) {
-            json.message = "Aucun projet n'existe";
-            return 'aucun';
-        }
-        else {
+        /*Json contenant les projets existants à renvoyé*/
+        let jsonRetour = {};
+        jsonRetour.projets = [];
 
-            let jsonRetour = {};
-            jsonRetour.projets = [];
+        for (i = 0; i < projetsListe.length; i++) {
 
-            for (i = 0; i < projetsListe.length; i++) {
+            projetCourant = projetsListe[i];
 
-                projetCourant = projetsListe[i];
+            temp = {}
 
-                temp = {}
+            temp.idProjet = projetCourant.idprojet;
+            temp.nom = projetCourant.nom;
 
-                temp.idProjet = projetCourant.idprojet;
-                temp.nom = projetCourant.nom;
+            if (projetCourant.idevent == null) {
+                temp.idevent = '';
+            } else {
+                temp.idevent = projetCourant.idevent;
+            }
+            temp.description = projetCourant.description_projet;
+            temp.derniereModif = projetCourant.dernieremodif;
+            console.log(projetCourant.dernieremodif)
+            temp.recompense = projetCourant.recompense;
+            temp.image = projetCourant.imgprojet;
+            temp.sujet = projetCourant.sujet;
+            temp.themes = [];
 
-                if (projetCourant.idevent == null) {
-                    temp.idevent = '';
-                } else {
-                    temp.idevent = projetCourant.idevent;
-                }
-                temp.description = projetCourant.description_projet;
-                temp.derniereModif = projetCourant.dernieremodif;
-                console.log(projetCourant.dernieremodif)
-                temp.recompense = projetCourant.recompense;
-                temp.image = projetCourant.imgprojet;
-                temp.sujet = projetCourant.sujet;
-                temp.themes = [];
+            const listeMots = await motcleModel.recupererMot(projetCourant.idprojet);
 
-                const listeMots = await motcleModel.recupererMot(projetCourant.idprojet);
+            for (j = 0; j < listeMots.length; j++) {
 
-                for (j = 0; j < listeMots.length; j++) {
-
-                    let motCourant = listeMots[j];
-                    temp.themes.push(motCourant.mot);
-                }
-
-                temp.ressources = [];
-
-                let listeRessource = await ressourceModel.recuperer_toutes_ressources(projetCourant.idprojet);
-                console.log
-                for (j = 0; j < listeRessource.length; j++) {
-
-                    let ressourceCourante = listeRessource[j];
-                    let ressourcesInfos = {};
-
-                    ressourcesInfos.titre = ressourceCourante.titre;
-                    ressourcesInfos.type = ressourceCourante.type_ressource;
-                    ressourcesInfos.lien = ressourceCourante.lien;
-                    ressourcesInfos.description = ressourceCourante.description_ressource;
-                    ressourcesInfos.statut = ressourceCourante.statut;
-
-                    temp.ressources.push(ressourcesInfos);
-
-                }
-                jsonRetour.projets.push(temp);
+                let motCourant = listeMots[j];
+                temp.themes.push(motCourant.mot);
             }
 
+            temp.ressources = [];
 
-            console.log('', jsonRetour);
-            return jsonRetour;
+            let listeRessource = await ressourceModel.recuperer_toutes_ressources(projetCourant.idprojet);
+            console.log
+            for (j = 0; j < listeRessource.length; j++) {
+
+                let ressourceCourante = listeRessource[j];
+                let ressourcesInfos = {};
+
+                ressourcesInfos.titre = ressourceCourante.titre;
+                ressourcesInfos.type = ressourceCourante.type_ressource;
+                ressourcesInfos.lien = ressourceCourante.lien;
+                ressourcesInfos.description = ressourceCourante.description_ressource;
+                ressourcesInfos.statut = ressourceCourante.statut;
+
+                temp.ressources.push(ressourcesInfos);
+            }
+            jsonRetour.projets.push(temp);
         }
+        return jsonRetour;
     }
-    catch {
-
+    catch (error) {
+        throw error;
     }
 }
-
 
 /**Informations d'un projet */
 async function infosProjet(idProjet) {
@@ -344,8 +314,6 @@ async function detacherProjetEvent(idEvent) {
         throw error;
     }
 }
-
-
 
 module.exports = {
     tousLesProjets,

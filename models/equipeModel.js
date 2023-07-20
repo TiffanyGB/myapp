@@ -72,7 +72,6 @@ async function creerEquipe(valeurs) {
             pool.query(inserer, valeurs)
                 .then((result) => {
                     let id = result.rows[0].idequipe;
-                    console.log('oui', id)
                     resolve(id);
                 })
         });

@@ -5,11 +5,17 @@ const indexController = require('../controllers/indexController');
 const projetController = require('../controllers/projetController');
 const projetModel = require('../models/projetModel');
 const equipeController = require('../controllers/equipeController');
+const adminProfile = require('../middleware/verifProfil');
+const checkAdminProfile = adminProfile.checkProfile('admin');
+
 
 /**Voir la liste des projets*/
-router.all('/', indexController.verifyToken, projetController.voirListeProjets);
+router.all('/',
+    indexController.verifyToken,
+    checkAdminProfile,
+    projetController.voirListeProjets);
 
-router.all('/creerProjets',indexController.verifyToken, projetController.creationProjet);
+router.all('/creerProjets', indexController.verifyToken, projetController.creationProjet);
 
 
 /**voir informations d'un projet */

@@ -1,11 +1,11 @@
-const { json } = require('body-parser');
-const pool = require('../database/configDB');
 const gestionnaireExterneModel = require('./gestionnaireExterneModel');
 const gestionnaireIaModel = require('./gestionnaireIaModel');
 const userModel = require('./userModel');
 
 
-/**JSON de la liste des utilisateurs */
+/*JSON de la liste des gestionnaires externes et internes
+ * Pour la gestion des projets
+ */
 async function envoyer_json_liste_gestionnaires() {
 
     try {
@@ -14,7 +14,7 @@ async function envoyer_json_liste_gestionnaires() {
         jsonRetour.gestionnairesExternes = [];
         jsonRetour.gestionnairesIa = [];
 
-
+        /*Liste des gestionnaires externes et internes */
         const listeGExt = await gestionnaireExterneModel.chercherListeGestionnairesExt();
         const listeGIa = await gestionnaireIaModel.chercherListeGestionnaireIapau();
 
@@ -22,6 +22,7 @@ async function envoyer_json_liste_gestionnaires() {
             return 'aucun_gestionnaires';
         }
 
+        /*Externes */
         if (listeGExt.length > 0) {
 
             for (i = 0; i < listeGExt.length; i++) {
@@ -44,7 +45,6 @@ async function envoyer_json_liste_gestionnaires() {
                     tempInfo.Nom = userCourant[0].nom;
                     tempInfo.Prenom = userCourant[0].prenom;
                     tempInfo.Mail = userCourant[0].email;
-
                 }
 
                 tempInfo.id = gestionnaireCourant.id_g_externe;
@@ -55,6 +55,7 @@ async function envoyer_json_liste_gestionnaires() {
             }
         }
 
+        /*IA Pau*/
         if (listeGIa.length > 0) {
 
             for (i = 0; i < listeGIa.length; i++) {
@@ -87,14 +88,12 @@ async function envoyer_json_liste_gestionnaires() {
                 jsonRetour.gestionnairesIa.push(tempInfo);
             }
         }
-
         return jsonRetour;
 
     } catch (error) {
         throw error;
     }
 }
-
 
 module.exports = {
     envoyer_json_liste_gestionnaires

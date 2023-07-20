@@ -99,14 +99,22 @@ async function supprimerEquipe(req, res) {
   }
 }
 
-function getInfosEquipe(req, res) {
+async function getInfosEquipe(req, res) {
 
   if (req.method === 'OPTIONS') {
     res.status(200).json({ sucess: 'Agress granted' });
   }
   else if (req.method === 'GET') {
 
-    //statut, capitaine, membres,description, nom, projet, github
+  
+    const idEquipe = res.locals.idEquipe;
+
+    const equipe = await equipeModel.chercherEquipeID(idEquipe);
+    if (equipe.length === 0) {
+      return res.status(404).json({ erreur: 'L\'id n\'existe pas' });
+    }
+
+    
   }
 
 }

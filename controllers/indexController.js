@@ -34,7 +34,6 @@ function verifyToken(req, res, next) {
     }
 
     if (decoded.utilisateurType === 'administrateur') {
-
       req.userProfile = 'admin';
 
     } else if (decoded.utilisateurType === 'etudiant') {
@@ -42,10 +41,10 @@ function verifyToken(req, res, next) {
       req.userProfile = 'etudiant';
 
     } else if ((decoded.utilisateurType === 'gestionnaireIA') || (decoded.utilisateurType === 'gestionnaireExterne')) {
-      console.log(decoded.utilisateurType);
       req.userProfile = 'gestionnaire';
     }
     req.decodedToken = decoded;
+    req.id = decoded.utilisateurId;
 
     next();
   });
