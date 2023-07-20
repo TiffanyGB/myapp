@@ -464,7 +464,6 @@ async function jsonlisteEquipeEvent(idEvent) {
 async function recup_Infos_Modif_Event(idEvent){
 
     let jsonRetour = await jsonEventChoisi(idEvent);
-//idEvent, idProjet, supprimer recompense,
     delete jsonRetour.finalistes;
     delete jsonRetour.classement;
     delete jsonRetour.userIsInterested;

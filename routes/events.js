@@ -34,7 +34,7 @@ router.all('/:id/infos', (req, res, next) => {
     res.locals.idevent = req.params.id;
     next();
 }, indexController.verifyToken,
-    // profil.checkAdminProfile,
+    profil.checkAdminProfile,
     eventsController.recupInfoEvent);
 
 
