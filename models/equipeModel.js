@@ -5,17 +5,17 @@ const { body } = require('express-validator');
 const validerEquipe = [
     body('nom')
         .notEmpty().withMessage('Le nom ne doit pas être vide.')
-        .matches(/^[\Wa-zA-ZÀ-ÿ \-']*$/)
+        .matches(/^[\W0-9a-zA-ZÀ-ÿ \-']*$/)
         .isLength({ min: 2, max: 30 }).withMessage('Le prénom doit avoir une longueur comprise entre 2 et 30 caractères.'),
 
-        body('statut')
+    body('statut')
         .notEmpty().withMessage('Le statut ne doit pas être vide.')
         .matches(/^(ouvert|fermé)$/).withMessage('Le statut doit être soit "ouvert" soit "fermé".')
         .isLength({ min: 5, max: 6 }).withMessage('Le statut doit avoir une longueur de 6 caractères.'),
-    
+
 
     body('description')
-    .optional({ nullable: true, checkFalsy: true })
+        .optional({ nullable: true, checkFalsy: true })
         .isLength({ min: 10, max: 2000 }).withMessage('Le pseudo doit avoir une longueur comprise entre 3 et 2000 caractères.'),
 
     body('idCapitaine')
@@ -62,16 +62,40 @@ async function chercherEquipeID(id) {
     });
 }
 
-function creerEquipe(valeurs) {
+async function creerEquipe(valeurs) {
 
     const inserer = `INSERT INTO Equipe (idCapitaine, nom, description_equipe, statut_recrutement, idProjet)
-    VALUES ($1, $2, $3, $4, $5)`;
-    
+    VALUES ($1, $2, $3, $4, $5) RETURNING idEquipe`;
+
     try {
-        pool.query(inserer, valeurs);
-    }catch(error){
-        throw error
+        return new Promise((resolve, reject) => {
+            pool.query(inserer, valeurs)
+                .then((result) => {
+                    let id = result.rows[0].idequipe;
+                    console.log('oui',id)
+                    resolve(id);
+                })
+        });
+    } catch (error) {
+        throw error;
     }
+}
+
+function ajouterMembre(valeurs, idEquipe) {
+
+    for (i = 0; i < valeurs.length; i++) {
+
+        let info = [valeurs[i], idEquipe];
+        let inserer = `INSERT INTO Appartenir (idUser, idEquipe)
+        VALUES ($1, $2)`;
+
+        try {
+            pool.query(inserer, info);
+        } catch (error) {
+            throw error
+        }
+    }
+
 }
 
 function supprimerEquipe() {
@@ -130,8 +154,6 @@ async function jsonInfosEquipe(idEquipe) {
 
             return jsonRetour;
         }
-
-
 
     } catch (error) {
         throw error;
@@ -212,5 +234,6 @@ module.exports = {
     listeEquipeProjet,
     jsonInfosEquipe,
     chercherEquipeID,
-    validerEquipe
+    validerEquipe,
+    ajouterMembre
 }

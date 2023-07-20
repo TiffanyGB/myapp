@@ -210,8 +210,13 @@ async function jsonEventChoisi(idEvent, typeUser) {
                 let projetCourant = listeProjets[i];
                 let projetInfos = {};
 
-                projetInfos.img = projetCourant.imgprojet;
+                if(projetCourant.imgprojet == null){
+                    projetInfos.img = '';
+                }else{
+                    projetInfos.img = projetCourant.imgprojet;
+                }
                 projetInfos.titre = projetCourant.nom;
+                projetInfos.idprojet = projetCourant.idprojet;
                 projetInfos.description = projetCourant.description_projet;
                 projetInfos.recompense = projetCourant.recompense;
                 projetInfos.sujet = projetCourant.sujet;
@@ -289,7 +294,7 @@ async function jsonEventChoisi(idEvent, typeUser) {
             let finalistes = await finalisteModel.chercher_finalistes(idEvent);
 
             if (finalistes = []) {
-                tabRetour.finalistes = null;
+                tabRetour.finalistes = '';
             } else {
 
                 tabRetour.finalistes = [];
@@ -301,8 +306,8 @@ async function jsonEventChoisi(idEvent, typeUser) {
 
             let message = await recuperer_message_fin(idEvent);
 
-            if (message = null) {
-                tabRetour.messageFin = null;
+            if (message[0] == null) {
+                tabRetour.messageFin = '';
             } else {
                 tabRetour.messageFin = message;
             }
@@ -455,8 +460,31 @@ async function jsonlisteEquipeEvent(idEvent) {
     }
 }
 
+/*Pour la modification d'un event */
+async function recup_Infos_Modif_Event(idEvent){
+
+    let jsonRetour = await jsonEventChoisi(idEvent);
+//idEvent, idProjet, supprimer recompense,
+    delete jsonRetour.finalistes;
+    delete jsonRetour.classement;
+    delete jsonRetour.userIsInterested;
+    delete jsonRetour.team;
+    delete jsonRetour.themes;
 
 
+
+    jsonRetour.projet.forEach((projet) => {
+        delete projet.ressources;
+        delete projet.recompense;
+        delete projet.thematique;
+        delete projet.img;
+        projet.idEvent = idEvent;
+    });
+
+    return jsonRetour;
+}
+
+recup_Infos_Modif_Event(2);
 
 module.exports = {
     chercherEvenement,
@@ -467,5 +495,6 @@ module.exports = {
     modifierEvent,
     creerEvent,
     supprimerEvent,
-    jsonlisteEquipeEvent
+    jsonlisteEquipeEvent,
+    recup_Infos_Modif_Event
 }

@@ -2,7 +2,7 @@ const equipeModel = require('../models/equipeModel');
 const projetModel = require('../models/projetModel');
 
 async function retournerEquipeProjet(req, res) {
-  // if (req.userProfile === 'admin') {
+  if (req.userProfile === 'admin') {
     if (req.method === 'OPTIONS') {
       res.status(200).json({ sucess: 'Agress granted' });
     }
@@ -24,19 +24,17 @@ async function retournerEquipeProjet(req, res) {
         res.status(400).json({ erreur: "Erreur lors de la récupération des équipes" });
       }
     }
-  // } else if (req.userProfile === 'etudiant') {
+  } else if (req.userProfile === 'etudiant') {
 
-  //   res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "etudiant" });
-  // } else if (req.userProfile === 'gestionnaire') {
+    res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "etudiant" });
+  } else if (req.userProfile === 'gestionnaire') {
 
-  //   res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "gestionnaire" });
-  // } else if (req.userProfile === 'aucun') {
+    res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "gestionnaire" });
+  } else if (req.userProfile === 'aucun') {
 
-  //   res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "Aucun" });
-  // }
+    res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "Aucun" });
+  }
 }
-
-
 
 async function creerEquipe(req, res) {
   if (req.method === 'OPTIONS') {
@@ -62,10 +60,15 @@ async function creerEquipe(req, res) {
       idProjet
     ]
 
+    /**On ajoute le capitaine aux membres de l'équipe */
+    membre.push(idCapitaine);
 
     try {
-      await equipeModel.creerEquipe(infos); 
-      res.status(200).json({ message: 'Équipe créée avec succès' });
+      let idEquipe = await equipeModel.creerEquipe(infos);
+
+      await equipeModel.ajouterMembre(membre, idEquipe);
+
+      res.status(200).json({ message: 'Équipe ' +idEquipe +' créée avec succès' });
     } catch (error) {
       res.status(400).json({ erreur: 'Erreur création équipe.' });
     }
@@ -83,7 +86,7 @@ async function supprimerEquipe(req, res) {
 }
 
 async function informationsEquipe(req, res) {
-  // if (req.userProfile === 'admin') {
+  if (req.userProfile === 'admin') {
     if (req.method === 'OPTIONS') {
       res.status(200).json({ sucess: 'Agress granted' });
     } else if (req.method === 'GET') {
@@ -106,13 +109,13 @@ async function informationsEquipe(req, res) {
         res.status(500).json({ erreur: "Erreur lors de la récupération de l'équipe" });
       }
     }
-  // } else if (req.userProfile === 'etudiant') {
-  //   res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "etudiant" });
-  // } else if (req.userProfile === 'gestionnaire') {
-  //   res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "gestionnaire" });
-  // } else if (req.userProfile === 'aucun') {
-  //   res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "Aucun" });
-  // }
+  } else if (req.userProfile === 'etudiant') {
+    res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "etudiant" });
+  } else if (req.userProfile === 'gestionnaire') {
+    res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "gestionnaire" });
+  } else if (req.userProfile === 'aucun') {
+    res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "Aucun" });
+  }
 }
 module.exports = {
   retournerEquipeProjet,

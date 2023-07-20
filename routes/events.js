@@ -2,8 +2,7 @@ var express = require('express');
 var router = express.Router();
 const indexController = require('../controllers/indexController');
 const eventsController = require('../controllers/eventsController');
-const equipeController = require('../controllers/equipeController');
-const equipeModel = require('../models/equipeModel');
+const profil = require('../middleware/verifProfil');
 
 /**Créer events */
 router.all('/creerEvent',
@@ -31,12 +30,12 @@ router.all('/:id/teams', (req, res, next) => {
 }, indexController.verifyToken,
     eventsController.listeEquipes);
 
-/* Créer une équipe liée à l'event */
-router.all('/:id/teams/create', (req, res, next) => {
+router.all('/:id/infos', (req, res, next) => {
     res.locals.idevent = req.params.id;
     next();
 }, indexController.verifyToken,
-    equipeController.creerEquipe,
-    equipeModel.validerEquipe);
+    // profil.checkAdminProfile,
+    eventsController.recupInfoEvent);
+
 
 module.exports = router;

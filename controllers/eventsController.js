@@ -203,25 +203,25 @@ async function supprimerEvent(req, res) {
 async function listeEquipes(req, res) {
 
   if (req.userProfile === 'admin') {
-  if (req.method === 'OPTIONS') {
-    res.status(200).json({ sucess: 'Agress granted' });
-  }
-  else if (req.method === 'GET') {
-
-    const idevent = res.locals.idevent;
-
-    try {
-      // Vérifier que l'id existe dans la bdd, sinon 404 error
-      const event = await eventModel.jsonlisteEquipeEvent(idevent);
-
-      if (event.length === 0) {
-        return res.status(404).json({ erreur: 'L\'id n\'existe pas' });
-      }else{
-        res.status(200).json(event)
-      }
-    } catch {
-
+    if (req.method === 'OPTIONS') {
+      res.status(200).json({ sucess: 'Agress granted' });
     }
+    else if (req.method === 'GET') {
+
+      const idevent = res.locals.idevent;
+
+      try {
+        // Vérifier que l'id existe dans la bdd, sinon 404 error
+        const event = await eventModel.jsonlisteEquipeEvent(idevent);
+
+        if (event.length === 0) {
+          return res.status(404).json({ erreur: 'L\'id n\'existe pas' });
+        } else {
+          res.status(200).json(event)
+        }
+      } catch {
+
+      }
     } else if (req.userProfile === 'etudiant') {
 
       res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "etudiant" });
@@ -235,10 +235,28 @@ async function listeEquipes(req, res) {
   }
 }
 
+async function recupInfoEvent(req, res) {
+  if (req.userProfile === 'admin') {
+    if (req.method === 'OPTIONS') {
+      res.status(200).json({ sucess: 'Agress granted' });
+    }
+    else if (req.method === 'GET') {
+
+      const idevent = res.locals.idevent;
+
+      const a = await eventModel.recup_Infos_Modif_Event(idevent);
+
+
+      res.status(200).json(a);
+
+    }
+  }
+}
 
 module.exports = {
   createEvent,
   modifierEvent,
   supprimerEvent,
-  listeEquipes
+  listeEquipes,
+  recupInfoEvent
 }
