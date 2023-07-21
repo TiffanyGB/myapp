@@ -6,6 +6,8 @@ const ressourceModel = require('./ressourceModel');
 const classementModel = require('./classementModel');
 const finalisteModel = require('./finalisteModel');
 const equipeModel = require('./equipeModel');
+const { aUneEquipe, jsonListeEquipeProjet } = require('./equipeModel');
+
 const validationDonnees = require('../middleware/validationDonnees');
 const { body } = require('express-validator');
 
@@ -373,7 +375,7 @@ async function jsonEventChoisi(idEvent, typeUser) {
 
             if (typeUser === 'etudiant') {
 
-                const equipe = await equipeModel.aUneEquipe(4); /**Mettre id User */
+                const equipe = await aUneEquipe(4); /**Mettre id User */
                 tabRetour.userIsInterested = false;
 
                 if (equipe > 0) {
@@ -504,7 +506,7 @@ async function jsonlisteEquipeEvent(idEvent) {
         jsonRetour.equipes = [];
 
         for (let i = 0; i < listeProjets.length; i++) {
-            let equipeList = await equipeModel.jsonListeEquipeProjet(listeProjets[i].idprojet);
+            let equipeList = await jsonListeEquipeProjet(listeProjets[i].idprojet);
 
 
             for (j = 0; j < equipeList.equipe.length; j++) {

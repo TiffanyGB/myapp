@@ -6,6 +6,7 @@ const equipeModel = require('../models/equipeModel');
 const profil = require('../middleware/verifProfil');
 
 const etudiantProfil = profil.checkProfile('etudiant');
+const adminProfil = profil.checkProfile('admin');
 const profilMultiple = profil.checkAEG();
 
 
@@ -30,8 +31,13 @@ router.all('/delete/:id', (req, res, next) => {
     res.locals.idEquipe = req.params.id;
     next();
 }, indexController.verifyToken,
-    // profil.checkStudentProfile,
+    profilMultiple,
     equipeController.supprimerEquipe);
+
+router.all('/ouvertes',
+    indexController.verifyToken,
+    // profilMultiple,
+    equipeController.listeOuvertes);
 
 /* Récupérer les infos modifiables d'une équipe*/
 router.all('/:id/infos', (req, res, next) => {
@@ -42,10 +48,13 @@ router.all('/:id/infos', (req, res, next) => {
     equipeController.getInfosEquipe);
 
 
+
 /**Voir une équipe */
 router.all('/:id', (req, res, next) => {
     res.locals.idEquipe = req.params.id;
     next();
-}, indexController.verifyToken, equipeController.informationsEquipe);
+}, indexController.verifyToken,
+    adminProfil,
+    equipeController.informationsEquipeAdmin);
 
 module.exports = router;

@@ -1,11 +1,3 @@
-function checkStudentProfile(req, res, next) {
-  if (req.userProfile === 'etudiant') {
-    next();
-  } else {
-    res.status(400).json({ erreur: "Mauvais profil, il faut être etudiant" });
-  }
-}
-
 /*Un seul profil autorisé */
 function checkProfile(type) {
   return function(req, res, next) {
@@ -24,6 +16,9 @@ function checkAEG(){
       next();
     }else if(req.userProfile === 'gestionnaire'){
       console.log(req.id);
+      const id = res.locals.idEquipe; 
+      console.log(id);
+      
       next();
     }else if(req.userProfile === 'etudiant'){
 
@@ -34,5 +29,6 @@ function checkAEG(){
   };
 }
 
+/**Vérifier capitaine et respo projet */
 
-module.exports = {checkStudentProfile, checkProfile, checkAEG };
+module.exports = {checkProfile, checkAEG };

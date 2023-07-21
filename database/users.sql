@@ -28,7 +28,7 @@ DROP TABLE IF EXISTS Resultat CASCADE;
 DROP TABLE IF EXISTS Interested CASCADE;
 DROP TABLE IF EXISTS Gerer_externe CASCADE;
 DROP TABLE IF EXISTS Gerer_ia_pau CASCADE;
-
+DROP TABLE IF EXISTS DemandeEquipe CASCADE;
 
 
 CREATE TABLE Utilisateur(
@@ -102,6 +102,7 @@ CREATE TABLE Equipe(
     description_equipe TEXT DEFAULT NULL,
     statut_recrutement VARCHAR(30) CHECK (statut_recrutement IN ('ouvert', 'fermé')),
     lien_github TEXT DEFAULT NULL,
+    lienDiscussion TEXT DEFAULT NULL,
     idProjet INT REFERENCES Projet(idProjet) ON DELETE CASCADE,
     idCapitaine INT REFERENCES Etudiant(idEtudiant) ON DELETE CASCADE,
     finaliste INT REFERENCES Evenement(idEvent) ON DELETE CASCADE
@@ -191,6 +192,12 @@ CREATE TABLE Gerer_ia_pau(
 CREATE TABLE Gerer_externe(
     id_g_externe INT REFERENCES Gestionnaire_externe(id_g_externe) ON DELETE CASCADE,
     idProjet INT REFERENCES Projet(idProjet) ON DELETE CASCADE
+);
+
+CREATE TABLE DemandeEquipe(
+    idUser INT REFERENCES Utilisateur(idUser) ON DELETE CASCADE,
+    idEquipe INT REFERENCES Equipe(idEquipe) ON DELETE CASCADE,
+    messageDemande TEXT DEFAULT NULL
 );
 
 INSERT INTO Evenement (nom, debut_inscription, date_debut, date_fin, description_event, nombre_min_equipe, nombre_max_equipe, type_event)
