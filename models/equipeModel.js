@@ -268,17 +268,17 @@ async function jsonInformationsEquipe(idEquipe, req) {
 
             /*Nombre de membres de l'équipe */
             const membres = await ListeMembre(idEquipe);
-            jsonRetour.nombreMembre = membres.length;
+            jsonRetour.nombre_membres = membres.length;
 
             //Nombre max de l'event
             const projet = await projetModel.chercherProjetId(temp1.idprojet);
             let idevent = projet[0].idevent;
 
             const event = await chercherEvenement(idevent);
-            jsonRetour.maxMembresEvent = event[0].nombre_max_equipe;
+            jsonRetour.nombre_max_membres = event[0].nombre_max_equipe;
 
             /* Equipe ouverte ou fermée */
-            jsonRetour.statut = temp1.statut_recrutement;
+            jsonRetour.statutRecrutement = temp1.statut_recrutement;
 
             /* Description */
             if (temp1.description_equipe == null) {
@@ -295,7 +295,7 @@ async function jsonInformationsEquipe(idEquipe, req) {
             jsonRetour.capitaine.id = temp1.idcapitaine;
 
             jsonRetour.capitaine.pseudo = capitaine[0].pseudo;
-            jsonRetour.capitaine.email = capitaine[0].email;
+            jsonRetour.capitaine.email = capitaine[0].mail;
 
             /* Infos des membres, id et pseudo */
             jsonRetour.membres = [];
@@ -333,7 +333,7 @@ async function jsonInformationsEquipe(idEquipe, req) {
             /*L'étudiant fait parti de l'équipe*/
             //Amélioration, rajouter si profil = etudiant regarder si fait partie de l'quipe
 
-            const etudiant = await appartenirEquipe(15, 1);
+            const etudiant = await appartenirEquipe(req.id, idEquipe);
 
             if (etudiant.length === 0) {
                 jsonRetour.dansEquipe = false;
@@ -341,19 +341,19 @@ async function jsonInformationsEquipe(idEquipe, req) {
             }
             jsonRetour.dansEquipe = true;
 
-            // if(jsonRetour.capitaine.id === req.id){
-            //     jsonRetour.estCapitaine = true;
+            if(jsonRetour.capitaine.id === req.id){
+                jsonRetour.estCapitaine = true;
 
-            // }else{
-            //     jsonRetour.estCapitaine = false;
-            // }
+            }else{
+                jsonRetour.estCapitaine = false;
+            }
 
             jsonRetour.reponseQuestionAll = true;
 
             if (temp.lien_github == null) {
-                jsonRetour.github = '';
+                jsonRetour.git = '';
             } else {
-                jsonRetour.github = temp.lien_github;
+                jsonRetour.git = temp.lien_github;
             }
 
             if (temp.liendiscussion == null) {
