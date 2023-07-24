@@ -9,7 +9,7 @@ const etudiantProfil = profil.checkProfile('etudiant');
 const adminProfil = profil.checkProfile('admin');
 const profilMultiple = profil.checkAEG();
 const capitaine = profil.checkCapitaine;
-
+const aucunProfil = profil.interdireAucunProfil;
 
 /**Créer une équipe */
 router.all('/creationEquipe',
@@ -24,7 +24,8 @@ router.all('/edit/:id', (req, res, next) => {
     res.locals.idEquipe = req.params.id;
     next();
 }, indexController.verifyToken,
-    // profilMultiple,
+    capitaine,
+    equipeModel.validerEquipe,
     equipeController.modifierEquipe);
 
 /* Supprimer une équipe */
@@ -32,12 +33,12 @@ router.all('/delete/:id', (req, res, next) => {
     res.locals.idEquipe = req.params.id;
     next();
 }, indexController.verifyToken,
-    // profilMultiple,
+    capitaine,
     equipeController.supprimerEquipe);
 
 router.all('/ouvertes',
     indexController.verifyToken,
-    // profilMultiple,
+    etudiantProfil,
     equipeController.listeOuvertes);
 
 /* Promouvoir un membre --> capitaine*/
@@ -53,23 +54,30 @@ router.all('/:id/supprimerMembre', (req, res, next) => {
     res.locals.idEquipe = req.params.id;
     next();
 }, indexController.verifyToken,
-    // profil.checkStudentProfile,
+    capitaine,
     equipeController.supprimerMembre);
 
 router.all('/:id/quitterEquipe', (req, res, next) => {
     res.locals.idEquipe = req.params.id;
     next();
 }, indexController.verifyToken,
-    // profil.checkStudentProfile,
+    etudiantProfil,
     equipeController.quitterEquipe);
 
 router.all('/:id/infos', (req, res, next) => {
     res.locals.idEquipe = req.params.id;
     next();
 }, indexController.verifyToken,
-    // profil.checkStudentProfile,
+    aucunProfil,
     equipeController.getInfosEquipe);
 
+
+router.all('/:id/modifierGit', (req, res, next) => {
+    res.locals.idEquipe = req.params.id;
+    next();
+}, indexController.verifyToken,
+    etudiantProfil,
+    equipeController.modifierGit);
 
 router.all('/:id/demandeAdmission', (req, res, next) => {
     res.locals.idEquipe = req.params.id;
@@ -83,15 +91,15 @@ router.all('/:id/AccepterDemande', (req, res, next) => {
     res.locals.idEquipe = req.params.id;
     next();
 }, indexController.verifyToken,
-    // profil.checkStudentProfile,
+    capitaine,
     equipeController.accepterDemande);
 
 router.all('/:id/declinerDemande', (req, res, next) => {
     res.locals.idEquipe = req.params.id;
     next();
 }, indexController.verifyToken,
-    // profil.checkStudentProfile,
-    equipeController.getInfosEquipe);
+    capitaine,
+    equipeController.declinerDemande);
 
 /**Voir une équipe */
 router.all('/:id', (req, res, next) => {
@@ -100,8 +108,5 @@ router.all('/:id', (req, res, next) => {
 }, indexController.verifyToken,
     adminProfil,
     equipeController.informationsEquipeAdmin);
-
-
-
 
 module.exports = router;

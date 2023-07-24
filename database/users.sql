@@ -103,7 +103,7 @@ CREATE TABLE Equipe(
     statut_recrutement VARCHAR(30) CHECK (statut_recrutement IN ('ouvert', 'fermé')),
     lien_github TEXT DEFAULT NULL,
     lienDiscussion TEXT DEFAULT NULL,
-    preferenceQuestionnaire BOOLEAN DEFAULT true
+    preferenceQuestionnaire BOOLEAN DEFAULT false,
     idProjet INT REFERENCES Projet(idProjet) ON DELETE CASCADE,
     idCapitaine INT REFERENCES Etudiant(idEtudiant) ON DELETE CASCADE,
     finaliste INT REFERENCES Evenement(idEvent) ON DELETE CASCADE

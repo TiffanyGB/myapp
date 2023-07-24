@@ -11,7 +11,7 @@ const validerEquipe = [
     body('nom')
         .notEmpty().withMessage('Le nom ne doit pas être vide.')
         .matches(/^[\W0-9a-zA-ZÀ-ÿ \-']*$/)
-        .isLength({ min: 2, max: 30 }).withMessage('Le prénom doit avoir une longueur comprise entre 2 et 30 caractères.'),
+        .isLength({ min: 2, max: 30 }).withMessage('Le nom doit avoir une longueur comprise entre 2 et 30 caractères.'),
 
     body('statut')
         .notEmpty().withMessage('Le statut ne doit pas être vide.')
@@ -21,7 +21,7 @@ const validerEquipe = [
 
     body('description')
         .optional({ nullable: true, checkFalsy: true })
-        .isLength({ min: 10, max: 2000 }).withMessage('Le pseudo doit avoir une longueur comprise entre 3 et 2000 caractères.'),
+        .isLength({ min: 3, max: 2000 }).withMessage('La description doit avoir une longueur comprise entre 3 et 2000 caractères.'),
 
     //Doit être controllé si le profil est admin ou gestionnaire
     // body('idCapitaine')
@@ -30,10 +30,20 @@ const validerEquipe = [
     //     .matches(/^[0-9]*$/).withMessage("L'id ne doit contenir que des chiffres.")
     //     .isInt({ min: 1, max: 10000 }).withMessage("L'id doit contenir entre 1 et 10000 chiffres."),
 
+    body('lien_discussion')
+    .optional({ nullable: true, checkFalsy: true })
+    .isURL().withMessage('Doit être un lien')
+    .isLength({max:300}),
+
+    body('preferenceQuestionnaire')
+    .optional()
+    .matches(/^(true|false)$/).withMessage('La préférence doit être soit "true" soit "false".')
+    .isLength({max:5}),
+
     body('idProjet')
         .notEmpty().withMessage('Le prénom ne doit pas être vide.')
         .matches(/^[0-9]*$/).withMessage("L\'id ne doit avoir que des chiffres.")
-        .isLength({ min: 1, max: 10000 }),
+        .isLength({ min: 1, max: 1000 }),
 
     /**Appel du validateur */
     validationDonnees.validateUserData,
@@ -129,14 +139,26 @@ function modifierEquipe(valeurs) {
     SET nom = $1,
     description_equipe = $2,
     statut_recrutement = $3,
-    lien_github = $4,
-    idProjet = $5,
-    lienDiscussion = $6,
-    preferenceQuestionnaire = $7
-    WHERE idEquipe = $8`;
+    idProjet = $4,
+    lienDiscussion = $5,
+    preferenceQuestionnaire = $6
+    WHERE idEquipe = $7`;
 
     try {
         pool.query(modifier, valeurs);
+    } catch (error) {
+        throw error;
+    }
+}
+
+function modifier_git(github, idEquipe) {
+
+    const modifier = `UPDATE Equipe
+    SET lien_github = $1
+    WHERE idEquipe = $2`;
+
+    try {
+        pool.query(modifier, [github, idEquipe]);
     } catch (error) {
         throw error;
     }
@@ -253,7 +275,7 @@ function recupererDemande(idEquipe) {
 }
 
 /* retourner l'id de l'équipe */
-function aUneEquipe(idEtudiant) {
+async function aUneEquipe(idEtudiant) {
 
     const appartientAUneEquipe = `SELECT * FROM Appartenir WHERE idUser = $1`;
 
@@ -267,6 +289,7 @@ function aUneEquipe(idEtudiant) {
             });
     });
 }
+
 
 /* Promouvoir capitaine */
 function promouvoir(idEquipe, idEtudiant) {
@@ -328,22 +351,26 @@ async function jsonInformationsEquipe(idEquipe, req) {
             jsonRetour.capitaine.id = temp1.idcapitaine;
 
             jsonRetour.capitaine.pseudo = capitaine[0].pseudo;
-            jsonRetour.capitaine.email = capitaine[0].mail;
+            jsonRetour.capitaine.email = capitaine[0].email;
 
             /* Infos des membres, id et pseudo */
             jsonRetour.membres = [];
 
             for (i = 0; i < membres.length; i++) {
 
-                temp = {};
                 membreCourant = membres[i];
-                temp.id = membreCourant.iduser;
 
-                let user = await userModel.chercherUserID(membreCourant.iduser);
+                if(membreCourant.iduser != temp1.idcapitaine){
+                    temp = {};
+                    temp.id = membreCourant.iduser;
+    
+                    let user = await userModel.chercherUserID(membreCourant.iduser);
+    
+                    temp.pseudo = user[0].pseudo;
+    
+                    jsonRetour.membres.push(temp);
+                }
 
-                temp.pseudo = user[0].pseudo;
-
-                jsonRetour.membres.push(temp);
             }
 
             /* Infos projet */
@@ -364,7 +391,8 @@ async function jsonInformationsEquipe(idEquipe, req) {
             }
 
             /*L'étudiant fait parti de l'équipe*/
-            //Amélioration, rajouter si profil = etudiant regarder si fait partie de l'quipe
+            //Amélioration, rajouter si profil = etudiant regarder si fait partie de l'quipe, pour ne pas le faire
+            //pour l'admin
 
             const etudiant = await appartenirEquipe(req.id, idEquipe);
 
@@ -383,16 +411,16 @@ async function jsonInformationsEquipe(idEquipe, req) {
 
             jsonRetour.reponseQuestionAll = true;
 
-            if (temp.lien_github == null) {
+            if (temp1.lien_github == null) {
                 jsonRetour.git = '';
             } else {
-                jsonRetour.git = temp.lien_github;
+                jsonRetour.git = temp1.lien_github;
             }
 
-            if (temp.liendiscussion == null) {
+            if (temp1.liendiscussion == null) {
                 jsonRetour.lien_discussion = '';
             } else {
-                jsonRetour.lien_discussion = temp.liendiscussion;
+                jsonRetour.lien_discussion = temp1.liendiscussion;
             }
 
             /*liste projet event pour modifier le choix*/
@@ -641,5 +669,6 @@ module.exports = {
     quitterEquipe,
     appartenirEquipe,
     envoyerDemande,
-    demandeDejaEnvoyee
+    demandeDejaEnvoyee,
+    modifier_git
 }

@@ -13,7 +13,7 @@ async function retournerEquipeProjet(req, res) {
     else if (req.method === 'GET') {
       const idProjet = res.locals.projetId;
 
-      /**Vérifier que l'id existe dans la bdd, sinon 404 error */
+      /**Vérifier si l'id existe dans la bdd, sinon 404 error */
       projetModel.chercherProjetId(idProjet)
         .then((result) => {
           if (result.length === 0) {
@@ -49,6 +49,7 @@ async function creerEquipe(req, res) {
     //Si admin ou gestionnaire, ne pas recuperer l'id capitaine dans le token
     const idCapitaine = req.id;
 
+    /*Récupération données du body */
     const {
       nom,
       statut,
@@ -64,21 +65,25 @@ async function creerEquipe(req, res) {
       idProjet
     ]
 
+    /* L'utilisateur qui crée l'équipe ne doit pas en avoir une autre */
     try {
-      const aUnequipe = equipeModel.aUneEquipe(idCapitaine);
-      if (aUnequipe.length != 0) {
+      const aUnequipe = await equipeModel.aUneEquipe(idCapitaine);
+
+      if (aUnequipe.length > 0) {
         return res.status(400).json({ erreur: 'A déjà une équipe.' });
       }
     } catch {
       return res.status(400).json({ erreur: 'Erreur vérification de l\'appartenance à une équipe.' });
     }
 
+    /* Création de l'équipe */
     try {
       let idEquipe = await equipeModel.creerEquipe(infos);
 
       equipeModel.ajouterMembre(idCapitaine, idEquipe);
 
       return res.status(200).json({ message: 'Équipe ' + idEquipe + ' créée avec succès. Capitaine: ' + idCapitaine });
+
     } catch (error) {
       return res.status(400).json({ erreur: 'Erreur création équipe.' });
     }
@@ -98,7 +103,6 @@ async function modifierEquipe(req, res) {
       statut,
       description,
       idProjet,
-      github,
       lien_discussion,
       preferenceQuestionnaire
     } = req.body;
@@ -108,25 +112,69 @@ async function modifierEquipe(req, res) {
       nom,
       description,
       statut,
-      github,
       idProjet,
-      idEquipe,
       lien_discussion,
-      preferenceQuestionnaire
+      preferenceQuestionnaire,
+      idEquipe
     ]
 
     try {
-      // Vérifier que l'id existe dans la bdd
-      const user = await equipeModel.chercherEquipeID(idEquipe);
-      if (user.length === 0) {
-        return res.status(404).json({ erreur: 'L\'id n\'existe pas' });
-      }
+      /* Vérification de l'existence de l'id dans le verif profil*/
+
       equipeModel.modifierEquipe(valeurs);
       res.status(200).json({ message: "Equipe modifiée" });
 
     } catch {
       res.status(400).json({ error: "Modification de l'équipe" });
     }
+  }
+}
+
+async function modifierGit(req, res) {
+  if (req.method === 'OPTIONS') {
+    res.status(200).json({ sucess: 'Agress granted' });
+  }
+  else if (req.method === 'PATCH') {
+
+    /*Récupération données du body */
+    const {
+      lien_github
+    } = req.body;
+
+    const idEquipe = res.locals.idEquipe;
+    const idUser = req.id;
+
+    /* Vérifier si l'équipe existe */
+    const equipe = await equipeModel.chercherEquipeID(idEquipe);
+
+    if (equipe.length === 0) {
+      return res.status(404).json({ erreur: 'L\'id de l\'équipe n\'existe pas' });
+    }
+
+    /*Vérifier si l'étudiant est dans l'équipe */
+    const appartenir = await equipeModel.appartenirEquipe(idUser, idEquipe);
+    if (appartenir.length === 0) {
+      return res.status(404).json({ erreur: 'L\'étudiant ne fait pas partie de l\'équipe' });
+    }
+
+    await body('lien_github')
+      .optional({ nullable: true, checkFalsy: true })
+      .isLength({ min: 0, max: 200 }).withMessage('Le message doit contenir entre 4 et 300 caracteres')
+      .isURL().withMessage('Doit être un lien')
+      .run(req);
+
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    try {
+      equipeModel.modifier_git(lien_github, idEquipe);
+      res.status(200).json({ message: 'Lien github modifié' })
+    } catch {
+      res.status(400).json({ message: 'Erreur modification lien github' })
+    }
+
   }
 }
 
@@ -137,14 +185,11 @@ async function supprimerEquipe(req, res) {
   else if (req.method === 'DELETE') {
 
     try {
-
       const idEquipe = res.locals.idEquipe;
 
-      // Vérifier que l'id existe dans la bdd
-      const user = await equipeModel.chercherEquipeID(idEquipe);
-      if (user.length === 0) {
-        return res.status(404).json({ erreur: 'L\'id n\'existe pas' });
-      }
+      /* Vérification de l'existence de l'id dans le verif profil*/
+
+      /*Suppression */
       equipeModel.supprimerEquipe(idEquipe);
       res.status(200).json({ message: "Equipe supprimée" });
 
@@ -168,16 +213,18 @@ async function promouvoir(req, res) {
         idUser
       } = req.body;
 
-      // Vérifier que l'id existe dans la bdd
-      const user = await equipeModel.chercherEquipeID(idEquipe);
-      if (user.length === 0) {
-        return res.status(404).json({ erreur: 'L\'id n\'existe pas' });
+      /* La verif de l'existence de l'équipe fait dans la verif de profil (middleware) */
+
+      /*Vérifier si l'étudiant est dans l'équipe */
+      const appartenir = await equipeModel.appartenirEquipe(idUser, idEquipe);
+      if (appartenir.length === 0) {
+        return res.status(404).json({ erreur: 'L\'étudiant ne fait pas partie de l\'équipe' });
       }
 
-      /* Vérifier que l'id appartient à un étudiant */
-      const verif = await etudiantModel.chercherStudent(idUser);
-      if (verif.length === 0) {
-        return res.status(400).json({ error: "Le nouveau capitaine n'est pas un étudiant." });
+      /*Le capitaine ne peut pas se promouvoir lui-même */
+      const equipe = await equipeModel.chercherEquipeID(idEquipe);
+      if (idUser === equipe[0].idcapitaine) {
+        return res.status(404).json({ erreur: 'Le capitaine ne peut pas se supprimer lui-même.' });
       }
 
       equipeModel.promouvoir(idEquipe, idUser);
@@ -193,7 +240,7 @@ async function supprimerMembre(req, res) {
   if (req.method === 'OPTIONS') {
     res.status(200).json({ sucess: 'Agress granted' });
   }
-  else if (req.method === 'POST') {
+  else if (req.method === 'DELETE') {
 
     const idEquipe = res.locals.idEquipe;
 
@@ -202,19 +249,18 @@ async function supprimerMembre(req, res) {
     } = req.body;
 
     try {
+      /* Vérification de l'existence de l'id dans le verif profil*/
 
-      // Vérifier que l'id existe dans la bdd
-      const user = await equipeModel.chercherEquipeID(idEquipe);
-      if (user.length === 0) {
-        return res.status(404).json({ erreur: 'L\'id n\'existe pas' });
+      /*Vérifier si l'étudiant est dans l'équipe */
+      const appartenir = await equipeModel.appartenirEquipe(idUser, idEquipe);
+      if (appartenir.length === 0) {
+        return res.status(404).json({ erreur: 'L\'étudiant ne fait pas partie de l\'équipe' });
       }
 
-      /* Vérifier que l'id appartient à un étudiant */
-      let verif = await etudiantModel.chercherStudent(idUser);
-      if (verif.length === 0) {
-        return res.status(400).json({ error: "Le membre n'est pas un étudiant." });
+      const equipe = await equipeModel.chercherEquipeID(idEquipe);
+      if (idUser === equipe[0].idcapitaine) {
+        return res.status(404).json({ erreur: 'Le capitaine ne peut pas se supprimer lui-même.' });
       }
-      //Vérifier que l'etudiant appartienne à l'équipe
 
       equipeModel.supprimerUnMembre(idUser, idEquipe);
       res.status(200).json({ message: "Membre supprimé" });
@@ -238,10 +284,7 @@ async function getInfosEquipe(req, res) {
 
     const idEquipe = res.locals.idEquipe;
 
-    const equipe = await equipeModel.chercherEquipeID(idEquipe);
-    if (equipe.length === 0) {
-      return res.status(404).json({ erreur: 'L\'id n\'existe pas' });
-    }
+    /*La vérification de l'id de l'équipe se fait dans le veif profil */
 
     const jsonRetour = await equipeModel.jsonInformationsEquipe(idEquipe, req);
 
@@ -294,19 +337,26 @@ async function quitterEquipe(req, res) {
   if (req.method === 'OPTIONS') {
     res.status(200).json({ sucess: 'Agress granted' });
   }
-  else if (req.method === 'POST') {
+  else if (req.method === 'DELETE') {
 
     const idUser = req.id;
     const idEquipe = res.locals.idEquipe;
 
+    /* Vérifier l'id de l'équipe */
     const equipe = await equipeModel.chercherEquipeID(idEquipe);
     if (equipe.length === 0) {
-      return res.status(404).json({ erreur: 'L\'id n\'existe pas' });
+      return res.status(404).json({ erreur: 'L\'id de l\'équipe n\'existe pas' });
     }
 
+    /*Doit appartenir à l'équipe */
     const appartenir = await equipeModel.appartenirEquipe(idUser, idEquipe);
     if (appartenir.length === 0) {
       return res.status(404).json({ erreur: 'L\'étudiant n\'appartient pas à l\'équipe' });
+    }
+
+    /*Ne doit pas être capitaine */
+    if (equipe[0].idcapitaine === idUser) {
+      return res.status(404).json({ erreur: 'Le capitaine ne peut pas quitter son équipe' });
     }
 
     try {
@@ -396,10 +446,16 @@ async function accepterDemande(req, res) {
       return res.status(404).json({ erreur: 'L\'id n\'existe pas' });
     }
 
-    /* Vérifier que l'étudiant n'a pas rejoint une équipe */
+    /* Vérifier si l'étudiant n'a pas rejoint une équipe */
     const appartenir = await equipeModel.aUneEquipe(idUser);
     if (appartenir.length > 0) {
       return res.status(404).json({ erreur: 'L\'étudiant a déjà une équipe' });
+    }
+
+    /* Vérifier si l'étudiant a bien envoyé une demande */
+    const envoyee = await equipeModel.demandeDejaEnvoyee(idUser, idEquipe);
+    if (envoyee.length === 0) {
+      return res.status(404).json({ erreur: 'Aucune demande provenant de cet id' });
     }
 
     /* Supprimer les demandes de l'étudiant des autres equipes */
@@ -414,7 +470,42 @@ async function accepterDemande(req, res) {
       res.status(200).json({ message: "Etudiant accepté" });
 
     } catch {
-      res.status(400).json({ error: 'Erreur lors de l\'acceptation du message.' });
+      res.status(400).json({ error: 'Erreur lors de l\'acceptation de l\'étudiant.' });
+    }
+  }
+}
+
+async function declinerDemande(req, res) {
+  if (req.method === 'OPTIONS') {
+    res.status(200).json({ sucess: 'Agress granted' });
+  }
+  else if (req.method === 'POST') {
+
+    const idEquipe = res.locals.idEquipe;
+
+    const {
+      id: idUser
+    } = req.body;
+
+
+    /*Vérif existence équipe */
+    const equipe = await equipeModel.chercherEquipeID(idEquipe);
+    if (equipe.length === 0) {
+      return res.status(404).json({ erreur: 'L\'id n\'existe pas' });
+    }
+
+    /* Vérifier si l'étudiant a bien envoyé une demande */
+    const envoyee = await equipeModel.demandeDejaEnvoyee(idUser, idEquipe);
+    if (envoyee.length === 0) {
+      return res.status(404).json({ erreur: 'Aucune demande provenant de cet id' });
+    }
+
+    try {
+      demandeModel.declinerDemande(idUser, idEquipe);
+      res.status(200).json({ message: "Demande rejetée" });
+
+    } catch {
+      res.status(400).json({ error: 'Erreur lors du rejet de la demande.' });
     }
   }
 }
@@ -431,5 +522,7 @@ module.exports = {
   supprimerMembre,
   quitterEquipe,
   demandeEquipe,
-  accepterDemande
+  accepterDemande,
+  declinerDemande,
+  modifierGit
 }
