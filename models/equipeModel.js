@@ -566,6 +566,7 @@ async function jsonEquipesOuvertes() {
 
     for (i = 0; i < equipes.length; i++) {
         temp = {};
+        temp.id = equipes[i].idequipe;
         temp.nom = equipes[i].nom;
         temp.description = equipes[i].description_equipe;
 
@@ -612,5 +613,6 @@ module.exports = {
     jsonEquipesOuvertes,
     jsonInformationsEquipe,
     supprimerUnMembre,
-    quitterEquipe
+    quitterEquipe,
+    appartenirEquipe    
 }

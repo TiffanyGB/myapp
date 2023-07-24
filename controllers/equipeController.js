@@ -43,6 +43,7 @@ async function creerEquipe(req, res) {
   }
   else if (req.method === 'POST') {
 
+    //Si admin ou gestionnaire, ne pas recuperer l'id capitaine dans le token
     const idCapitaine = req.id;
 
     const {
@@ -60,17 +61,15 @@ async function creerEquipe(req, res) {
       idProjet
     ]
 
-    try{
+    try {
       const aUnequipe = equipeModel.aUneEquipe(idCapitaine);
-      if(aUnequipe.length != 0){
+      if (aUnequipe.length != 0) {
         return res.status(400).json({ erreur: 'A déjà une équipe.' });
       }
-    }catch{
+    } catch {
       return res.status(400).json({ erreur: 'Erreur vérification de l\'appartenance à une équipe.' });
-
     }
 
-    //Si admin ou gestionnaire, ne pas recuperer l'id capitaine dans le token
     try {
       let idEquipe = await equipeModel.creerEquipe(infos);
 
@@ -295,11 +294,25 @@ async function quitterEquipe(req, res) {
   }
   else if (req.method === 'POST') {
 
+    const idUser = req.id;
+    const idEquipe = res.locals.idEquipe;
+
+    const equipe = await equipeModel.chercherEquipeID(idEquipe);
+    if (equipe.length === 0) {
+      return res.status(404).json({ erreur: 'L\'id n\'existe pas' });
+    }
+
+    const appartenir = await equipeModel.appartenirEquipe(idUser, idEquipe);
+    if (appartenir.length === 0) {
+      return res.status(404).json({ erreur: 'L\'étudiant n\'appartient pas à l\'équipe' });
+    }
+
     try {
-      res.status(200).json("ok");
+      equipeModel.quitterEquipe(idEquipe, idUser);
+      res.status(200).json({ message: "Equipe quittée" });
 
     } catch {
-      res.status(400).json({ error: 'Erreur lors de la récupération' });
+      res.status(400).json({ error: 'N\'a pas pu quitter.' });
     }
   }
 }

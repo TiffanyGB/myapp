@@ -1,4 +1,5 @@
 const gererProjet = require('../models/gererProjet');
+const equipeModel = require('../models/equipeModel');
 
 /*Un seul profil autorisé */
 function checkProfile(type) {
@@ -18,17 +19,16 @@ async function checkAEG() {
     if (req.userProfile === 'admin') {
       next();
     } else if (req.userProfile === 'gestionnaire') {
-      console.log(req.id);
       const id = res.locals.idEquipe;
 
-      const gerer_ia = await gererProjet.chercherGestionnaireIA(req.id);
-      const gerer_ext = await gererProjet.chercherGestionnaireExtID(req.id);
+      const gerer_ia = await gererProjet.chercherGestionnaireIA(id, req.id);
+      const gerer_ext = await gererProjet.chercherGestionnaireExtID(id, req.id);
 
       if (gerer_ia.length > 0) {
         next();
       } else if (gerer_ext > 0) {
         next();
-      }else{
+      } else {
         return res.status(400).json({ erreur: `Mauvais profil, il faut gérer l'événement.` });
       }
 
@@ -46,15 +46,22 @@ async function checkAEG() {
 
 
 //Que le capitaine
-function checkCapitaine() {
-  return function (req, res, next) {
-    if (req.userProfile === 'etudiant') {
+async function checkCapitaine(req, res, next) {
+  if (req.userProfile === 'etudiant') {
+    const id = res.locals.idEquipe;
 
+    const equipe = await equipeModel.chercherEquipeID(id);
+
+    if (equipe[0].idcapitaine === req.id) {
+      next();
+    } else {
+      return res.status(400).json({ erreur: `Mauvais profil, il faut être capitaine.` });
     }
-    else {
-      return res.status(400).json({ erreur: `Mauvais profil, il faut être etudiant.` });
-    }
-  };
+
+  } else {
+    return res.status(400).json({ erreur: `Mauvais profil, il faut être étudiant.` });
+  }
 }
+
 
 module.exports = { checkProfile, checkAEG, checkCapitaine };

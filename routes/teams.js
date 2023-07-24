@@ -8,6 +8,7 @@ const profil = require('../middleware/verifProfil');
 const etudiantProfil = profil.checkProfile('etudiant');
 const adminProfil = profil.checkProfile('admin');
 const profilMultiple = profil.checkAEG();
+const capitaine = profil.checkCapitaine;
 
 
 /**Créer une équipe */
@@ -44,7 +45,7 @@ router.all('/:id/promouvoir', (req, res, next) => {
     res.locals.idEquipe = req.params.id;
     next();
 }, indexController.verifyToken,
-    // profil.checkStudentProfile,
+    capitaine,
     equipeController.promouvoir);
 
 /* Supprimer un membre */
@@ -61,6 +62,13 @@ router.all('/:id/quitterEquipe', (req, res, next) => {
 }, indexController.verifyToken,
     // profil.checkStudentProfile,
     equipeController.quitterEquipe);
+
+router.all('/:id/infos', (req, res, next) => {
+    res.locals.idEquipe = req.params.id;
+    next();
+}, indexController.verifyToken,
+    // profil.checkStudentProfile,
+    equipeController.getInfosEquipe);
 
 /**Voir une équipe */
 router.all('/:id', (req, res, next) => {
