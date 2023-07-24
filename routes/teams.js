@@ -84,7 +84,7 @@ router.all('/:id/AccepterDemande', (req, res, next) => {
     next();
 }, indexController.verifyToken,
     // profil.checkStudentProfile,
-    equipeController.getInfosEquipe);
+    equipeController.accepterDemande);
 
 router.all('/:id/declinerDemande', (req, res, next) => {
     res.locals.idEquipe = req.params.id;

@@ -174,19 +174,15 @@ function ListeMembre(idEquipe) {
     });
 }
 
-function ajouterMembre(valeurs, idEquipe) {
+function ajouterMembre(idUser, idEquipe) {
 
-    for (i = 0; i < valeurs.length; i++) {
-
-        let info = [valeurs[i], idEquipe];
-        let inserer = `INSERT INTO Appartenir (idUser, idEquipe)
+    let inserer = `INSERT INTO Appartenir (idUser, idEquipe)
         VALUES ($1, $2)`;
 
-        try {
-            pool.query(inserer, info);
-        } catch (error) {
-            throw error
-        }
+    try {
+        pool.query(inserer, [idUser, idEquipe]);
+    } catch (error) {
+        throw error
     }
 
 }
@@ -404,7 +400,6 @@ async function jsonInformationsEquipe(idEquipe, req) {
 
             const listeProjetEvent = await projetModel.recuperer_projets(idevent);
 
-            console.log(listeProjetEvent)
             for (i = 0; i < listeProjetEvent.length; i++) {
 
                 temp = {};
@@ -596,7 +591,7 @@ async function jsonEquipesOuvertes() {
     return jsonRetour;
 }
 
-function envoyerDemande(valeurs){
+function envoyerDemande(valeurs) {
 
     const envoyer = `INSERT INTO DemandeEquipe
     (idUser, idEquipe, messageDemande)
@@ -609,7 +604,7 @@ function envoyerDemande(valeurs){
     }
 }
 
-async function demandeDejaEnvoyee(idUser, idEquipe){
+async function demandeDejaEnvoyee(idUser, idEquipe) {
 
     const envoyee = `SELECT *
     FROM DemandeEquipe 

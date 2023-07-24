@@ -1,6 +1,7 @@
 const equipeModel = require('../models/equipeModel');
 const projetModel = require('../models/projetModel');
 const etudiantModel = require('../models/etudiantModel');
+const demandeModel = require('../models/demandeModel')
 const { body, validationResult } = require('express-validator');
 
 
@@ -75,7 +76,7 @@ async function creerEquipe(req, res) {
     try {
       let idEquipe = await equipeModel.creerEquipe(infos);
 
-      equipeModel.ajouterMembre([idCapitaine], idEquipe);
+      equipeModel.ajouterMembre(idCapitaine, idEquipe);
 
       return res.status(200).json({ message: 'Équipe ' + idEquipe + ' créée avec succès. Capitaine: ' + idCapitaine });
     } catch (error) {
@@ -258,7 +259,6 @@ async function informationsEquipeAdmin(req, res) {
     try {
 
       const equipeInfos = await equipeModel.chercherEquipeID(idEquipe);
-      console.log(equipeInfos);
 
       if (equipeInfos === 'aucun') {
         return res.status(404).json({ erreur: "L'id de l'équipe n'existe pas" });
@@ -363,7 +363,6 @@ async function demandeEquipe(req, res) {
 
     /* Vérifier si une demande a déjà été envoyée */
     const envoyee = await equipeModel.demandeDejaEnvoyee(idUser, idEquipe);
-    console.log(envoyee)
     if (envoyee.length > 0) {
       return res.status(404).json({ erreur: 'Une demande a déjà été envoyée' });
     }
@@ -374,6 +373,48 @@ async function demandeEquipe(req, res) {
 
     } catch {
       res.status(400).json({ error: 'Erreur lors de l\'envoi du message.' });
+    }
+  }
+}
+
+async function accepterDemande(req, res) {
+  if (req.method === 'OPTIONS') {
+    res.status(200).json({ sucess: 'Agress granted' });
+  }
+  else if (req.method === 'POST') {
+
+    const idEquipe = res.locals.idEquipe;
+
+    const {
+      id: idUser
+    } = req.body;
+
+
+    /*Vérif existence équipe */
+    const equipe = await equipeModel.chercherEquipeID(idEquipe);
+    if (equipe.length === 0) {
+      return res.status(404).json({ erreur: 'L\'id n\'existe pas' });
+    }
+
+    /* Vérifier que l'étudiant n'a pas rejoint une équipe */
+    const appartenir = await equipeModel.aUneEquipe(idUser);
+    if (appartenir.length > 0) {
+      return res.status(404).json({ erreur: 'L\'étudiant a déjà une équipe' });
+    }
+
+    /* Supprimer les demandes de l'étudiant des autres equipes */
+    try {
+      demandeModel.supprimerDemandes(idUser);
+    } catch {
+      return res.status(404).json({ erreur: 'Erreur lors de la suppression des anciennes demandes de l\'étudiant' });
+    }
+
+    try {
+      equipeModel.ajouterMembre(idUser, idEquipe);
+      res.status(200).json({ message: "Etudiant accepté" });
+
+    } catch {
+      res.status(400).json({ error: 'Erreur lors de l\'acceptation du message.' });
     }
   }
 }
@@ -389,5 +430,6 @@ module.exports = {
   promouvoir,
   supprimerMembre,
   quitterEquipe,
-  demandeEquipe
+  demandeEquipe,
+  accepterDemande
 }
