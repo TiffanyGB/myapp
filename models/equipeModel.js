@@ -23,10 +23,12 @@ const validerEquipe = [
         .optional({ nullable: true, checkFalsy: true })
         .isLength({ min: 10, max: 2000 }).withMessage('Le pseudo doit avoir une longueur comprise entre 3 et 2000 caractères.'),
 
-    body('idCapitaine')
-        .notEmpty().withMessage('L\'id ne doit pas être vide.')
-        .matches(/^[0-9]*$/).withMessage("L\'id ne doit avoir que des chiffres.")
-        .isLength({ min: 1, max: 10000 }),
+    //Doit être controllé si le profil est admin ou gestionnaire
+    // body('idCapitaine')
+    //     .optional() // Le champ est optionnel, s'il n'est pas présent, il sera ignoré
+    //     .notEmpty().withMessage("L'id ne doit pas être vide.")
+    //     .matches(/^[0-9]*$/).withMessage("L'id ne doit contenir que des chiffres.")
+    //     .isInt({ min: 1, max: 10000 }).withMessage("L'id doit contenir entre 1 et 10000 chiffres."),
 
     body('idProjet')
         .notEmpty().withMessage('Le prénom ne doit pas être vide.')
@@ -129,8 +131,9 @@ function modifierEquipe(valeurs) {
     statut_recrutement = $3,
     lien_github = $4,
     idProjet = $5,
-    idCapitaine = $6
-    WHERE idEquipe = $7`;
+    lienDiscussion = $6,
+    preferenceQuestionnaire = $7
+    WHERE idEquipe = $8`;
 
     try {
         pool.query(modifier, valeurs);
@@ -201,8 +204,16 @@ async function suprimerTousMembres(idEquipe) {
 
 }
 
-function supprimerListeMembre(idEquipe, valeurs) {
+function supprimerUnMembre(idUser, idEquipe) {
 
+    let supprimer = `DELETE FROM Appartenir 
+    WHERE idUser = $1 AND idEquipe = $2`;
+
+    try {
+        pool.query(supprimer, [idUser, idEquipe]);
+    } catch (error) {
+        throw error
+    }
 }
 
 function supprimerEquipe(idEquipe) {
@@ -212,6 +223,18 @@ function supprimerEquipe(idEquipe) {
 
     try {
         pool.query(supprimer, [idEquipe]);
+    } catch (error) {
+        throw error;
+    }
+}
+
+function quitterEquipe(idEquipe, idMembre) {
+
+    const quitter = `DELETE FROM Appartenir
+    WHERE idEquipe = $1 AND idUser = $2`;
+
+    try {
+        pool.query(quitter, [idEquipe, idMembre]);
     } catch (error) {
         throw error;
     }
@@ -247,6 +270,20 @@ function aUneEquipe(idEtudiant) {
                 reject(error);
             });
     });
+}
+
+/* Promouvoir capitaine */
+function promouvoir(idEquipe, idEtudiant) {
+
+    const promouvoir = `UPDATE Equipe
+    SET idCapitaine = $1
+    WHERE idEquipe = $2`;
+
+    try {
+        pool.query(promouvoir, [idEtudiant, idEquipe]);
+    } catch (error) {
+        throw (error);
+    }
 }
 
 async function jsonInformationsEquipe(idEquipe, req) {
@@ -341,10 +378,10 @@ async function jsonInformationsEquipe(idEquipe, req) {
             }
             jsonRetour.dansEquipe = true;
 
-            if(jsonRetour.capitaine.id === req.id){
+            if (jsonRetour.capitaine.id === req.id) {
                 jsonRetour.estCapitaine = true;
 
-            }else{
+            } else {
                 jsonRetour.estCapitaine = false;
             }
 
@@ -561,6 +598,7 @@ async function jsonEquipesOuvertes() {
 module.exports = {
     aUneEquipe,
     jsonListeEquipeProjet,
+    promouvoir,
     supprimerEquipe,
     creerEquipe,
     listeEquipeProjet,
@@ -572,5 +610,7 @@ module.exports = {
     suprimerTousMembres,
     equipesOuvertes,
     jsonEquipesOuvertes,
-    jsonInformationsEquipe
+    jsonInformationsEquipe,
+    supprimerUnMembre,
+    quitterEquipe
 }

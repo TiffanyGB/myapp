@@ -23,7 +23,7 @@ router.all('/edit/:id', (req, res, next) => {
     res.locals.idEquipe = req.params.id;
     next();
 }, indexController.verifyToken,
-    profilMultiple,
+    // profilMultiple,
     equipeController.modifierEquipe);
 
 /* Supprimer une équipe */
@@ -31,7 +31,7 @@ router.all('/delete/:id', (req, res, next) => {
     res.locals.idEquipe = req.params.id;
     next();
 }, indexController.verifyToken,
-    profilMultiple,
+    // profilMultiple,
     equipeController.supprimerEquipe);
 
 router.all('/ouvertes',
@@ -39,15 +39,28 @@ router.all('/ouvertes',
     // profilMultiple,
     equipeController.listeOuvertes);
 
-/* Récupérer les infos modifiables d'une équipe*/
-router.all('/:id/infos', (req, res, next) => {
+/* Promouvoir un membre --> capitaine*/
+router.all('/:id/promouvoir', (req, res, next) => {
     res.locals.idEquipe = req.params.id;
     next();
 }, indexController.verifyToken,
     // profil.checkStudentProfile,
-    equipeController.getInfosEquipe);
+    equipeController.promouvoir);
 
+/* Supprimer un membre */
+router.all('/:id/supprimerMembre', (req, res, next) => {
+    res.locals.idEquipe = req.params.id;
+    next();
+}, indexController.verifyToken,
+    // profil.checkStudentProfile,
+    equipeController.supprimerMembre);
 
+router.all('/:id/quitterEquipe', (req, res, next) => {
+    res.locals.idEquipe = req.params.id;
+    next();
+}, indexController.verifyToken,
+    // profil.checkStudentProfile,
+    equipeController.quitterEquipe);
 
 /**Voir une équipe */
 router.all('/:id', (req, res, next) => {
@@ -56,5 +69,8 @@ router.all('/:id', (req, res, next) => {
 }, indexController.verifyToken,
     adminProfil,
     equipeController.informationsEquipeAdmin);
+
+
+
 
 module.exports = router;
