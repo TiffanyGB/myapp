@@ -70,6 +70,29 @@ router.all('/:id/infos', (req, res, next) => {
     // profil.checkStudentProfile,
     equipeController.getInfosEquipe);
 
+
+router.all('/:id/demandeAdmission', (req, res, next) => {
+    res.locals.idEquipe = req.params.id;
+    next();
+}, indexController.verifyToken,
+    etudiantProfil,
+    equipeController.demandeEquipe);
+
+
+router.all('/:id/AccepterDemande', (req, res, next) => {
+    res.locals.idEquipe = req.params.id;
+    next();
+}, indexController.verifyToken,
+    // profil.checkStudentProfile,
+    equipeController.getInfosEquipe);
+
+router.all('/:id/declinerDemande', (req, res, next) => {
+    res.locals.idEquipe = req.params.id;
+    next();
+}, indexController.verifyToken,
+    // profil.checkStudentProfile,
+    equipeController.getInfosEquipe);
+
 /**Voir une équipe */
 router.all('/:id', (req, res, next) => {
     res.locals.idEquipe = req.params.id;

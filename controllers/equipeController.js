@@ -317,6 +317,54 @@ async function quitterEquipe(req, res) {
   }
 }
 
+async function demandeEquipe(req, res) {
+  if (req.method === 'OPTIONS') {
+    res.status(200).json({ sucess: 'Agress granted' });
+  }
+  else if (req.method === 'POST') {
+
+    const idUser = req.id;
+    const idEquipe = res.locals.idEquipe;
+
+    const {
+      message
+    } = req.body;
+
+    const valeurs = [
+      idUser,
+      idEquipe,
+      message
+    ]
+
+    /*Vérif existence équipe */
+    const equipe = await equipeModel.chercherEquipeID(idEquipe);
+    if (equipe.length === 0) {
+      return res.status(404).json({ erreur: 'L\'id n\'existe pas' });
+    }
+
+    /* L'étudiant ne doit pas avoir d'équipe */
+    const appartenir = await equipeModel.aUneEquipe(idUser);
+    if (appartenir.length > 0) {
+      return res.status(404).json({ erreur: 'L\'étudiant a déjà une équipe' });
+    }
+
+    /* Vérifier si une demande a déjà été envoyée */
+    const envoyee = await equipeModel.demandeDejaEnvoyee(idUser, idEquipe);
+    console.log(envoyee)
+    if (envoyee.length > 0) {
+      return res.status(404).json({ erreur: 'Une demande a déjà été envoyée' });
+    }
+
+    try {
+      equipeModel.envoyerDemande(valeurs);
+      res.status(200).json({ message: "Message envoyé" });
+
+    } catch {
+      res.status(400).json({ error: 'Erreur lors de l\'envoi du message.' });
+    }
+  }
+}
+
 module.exports = {
   retournerEquipeProjet,
   informationsEquipeAdmin,
@@ -327,5 +375,6 @@ module.exports = {
   listeOuvertes,
   promouvoir,
   supprimerMembre,
-  quitterEquipe
+  quitterEquipe,
+  demandeEquipe
 }

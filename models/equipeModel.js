@@ -596,6 +596,36 @@ async function jsonEquipesOuvertes() {
     return jsonRetour;
 }
 
+function envoyerDemande(valeurs){
+
+    const envoyer = `INSERT INTO DemandeEquipe
+    (idUser, idEquipe, messageDemande)
+    VALUES ($1, $2, $3)`;
+
+    try {
+        pool.query(envoyer, valeurs);
+    } catch (error) {
+        throw (error);
+    }
+}
+
+async function demandeDejaEnvoyee(idUser, idEquipe){
+
+    const envoyee = `SELECT *
+    FROM DemandeEquipe 
+    WHERE idUser = $1 AND idEquipe = $2`;
+
+    return new Promise((resolve, reject) => {
+        pool.query(envoyee, [idUser, idEquipe])
+            .then((res) => {
+                resolve(res.rows);
+            })
+            .catch((error) => {
+                reject(error);
+            });
+    });
+}
+
 module.exports = {
     aUneEquipe,
     jsonListeEquipeProjet,
@@ -614,5 +644,7 @@ module.exports = {
     jsonInformationsEquipe,
     supprimerUnMembre,
     quitterEquipe,
-    appartenirEquipe    
+    appartenirEquipe,
+    envoyerDemande,
+    demandeDejaEnvoyee
 }
