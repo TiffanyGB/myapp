@@ -1,6 +1,8 @@
 const equipeModel = require('../models/equipeModel');
 const projetModel = require('../models/projetModel');
 const etudiantModel = require('../models/etudiantModel');
+const { body, validationResult } = require('express-validator');
+
 
 async function retournerEquipeProjet(req, res) {
   if (req.userProfile === 'admin') {
@@ -335,6 +337,17 @@ async function demandeEquipe(req, res) {
       idEquipe,
       message
     ]
+
+    await body('message')
+      .isLength({ min: 0, max: 200 })
+      .withMessage('Le message doit contenir entre 0 et 200 caracteres')
+      .run(req);
+
+
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
 
     /*Vérif existence équipe */
     const equipe = await equipeModel.chercherEquipeID(idEquipe);
