@@ -87,11 +87,9 @@ async function creerProjet(valeur_projet) {
         pool.query(inserer, valeur_projet)
             .then((result) => {
                 const idProjet = result.rows[0].idprojet;
-                console.log(idProjet);
                 resolve(idProjet);
             })
             .catch((error) => {
-                console.error('Erreur lors de l\'insertion des données :', error);
                 reject(error);
             });
     });
@@ -161,7 +159,6 @@ async function listeProjetsJson() {
             }
             temp.description = projetCourant.description_projet;
             temp.derniereModif = projetCourant.dernieremodif;
-            console.log(projetCourant.dernieremodif)
             temp.recompense = projetCourant.recompense;
             temp.image = projetCourant.imgprojet;
             temp.sujet = projetCourant.sujet;
@@ -178,7 +175,6 @@ async function listeProjetsJson() {
             temp.ressources = [];
 
             let listeRessource = await ressourceModel.recuperer_toutes_ressources(projetCourant.idprojet);
-            console.log
             for (j = 0; j < listeRessource.length; j++) {
 
                 let ressourceCourante = listeRessource[j];
@@ -295,7 +291,6 @@ async function rattacherProjetEvent(idEvent, idProjet) {
     try {
         await pool.query(rattacher, [idEvent, idProjet]);
     } catch (error) {
-        console.error('Erreur lors de la mise à jour du projet :', error);
         throw error;
     }
 }
@@ -310,7 +305,6 @@ async function detacherProjetEvent(idEvent) {
     try {
         await pool.query(rattacher, [idEvent]);
     } catch (error) {
-        console.error('Erreur lors de la mise à jour du projet :', error);
         throw error;
     }
 }

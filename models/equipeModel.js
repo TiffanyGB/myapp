@@ -290,7 +290,6 @@ async function aUneEquipe(idEtudiant) {
     });
 }
 
-
 /* Promouvoir capitaine */
 function promouvoir(idEquipe, idEtudiant) {
 
@@ -332,6 +331,15 @@ async function jsonInformationsEquipe(idEquipe, req) {
 
             const event = await chercherEvenement(idevent);
             jsonRetour.nombre_max_membres = event[0].nombre_max_equipe;
+
+            const minimum = event[0].nombre_min_equipe;
+            console.log(minimum, membres.length, event[0])
+
+            if(membres.length >= minimum){
+                jsonRetour.valide = true;
+            }else{
+                jsonRetour.valide = false;
+            }
 
             /* Equipe ouverte ou fermée */
             jsonRetour.statutRecrutement = temp1.statut_recrutement;

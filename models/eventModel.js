@@ -495,8 +495,6 @@ async function creerJsonTousEvents() {
     }
 }
 
-
-
 async function jsonlisteEquipeEvent(idEvent) {
 
     try {
@@ -529,8 +527,6 @@ async function recup_Infos_Modif_Event(idEvent) {
     delete jsonRetour.userIsInterested;
     delete jsonRetour.team;
     delete jsonRetour.themes;
-
-
 
     jsonRetour.projet.forEach((projet) => {
         delete projet.ressources;

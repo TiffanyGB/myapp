@@ -1,5 +1,6 @@
 const equipeModel = require('../models/equipeModel');
 const projetModel = require('../models/projetModel');
+const eventModel = require('../models/eventModel');
 const etudiantModel = require('../models/etudiantModel');
 const demandeModel = require('../models/demandeModel')
 const { body, validationResult } = require('express-validator');
@@ -65,15 +66,27 @@ async function creerEquipe(req, res) {
       idProjet
     ]
 
-    /* L'utilisateur qui crée l'équipe ne doit pas en avoir une autre */
-    try {
-      const aUnequipe = await equipeModel.aUneEquipe(idCapitaine);
+    /* L'étudiant ne doit pas avoir d'équipe dans l'event*/
 
-      if (aUnequipe.length > 0) {
-        return res.status(400).json({ erreur: 'A déjà une équipe.' });
+    /*Récupérer l'event de l'équipe*/
+    const projet = await projetModel.chercherProjetId(idProjet);
+    const idEvent = projet[0].idevent;
+
+    const projets_event = await projetModel.recuperer_projets(idEvent);
+
+    for (i = 0; i < projets_event.length; i++) {
+
+      const equipes_projets = await equipeModel.listeEquipeProjet(projets_event[i].idprojet);
+
+      for (j = 0; j < equipes_projets.length; j++) {
+
+        let appartenir = await equipeModel.appartenirEquipe(req.id, equipes_projets[j].idequipe);
+        console.log(equipes_projets[j].idequipe, projets_event[0].idprojet)
+
+        if (appartenir.length > 0) {
+          return res.status(404).json({ erreur: 'Il a déjà une équipe dans l\'evenement' });
+        }
       }
-    } catch {
-      return res.status(400).json({ erreur: 'Erreur vérification de l\'appartenance à une équipe.' });
     }
 
     /* Création de l'équipe */
@@ -405,10 +418,28 @@ async function demandeEquipe(req, res) {
       return res.status(404).json({ erreur: 'L\'id n\'existe pas' });
     }
 
-    /* L'étudiant ne doit pas avoir d'équipe */
-    const appartenir = await equipeModel.aUneEquipe(idUser);
-    if (appartenir.length > 0) {
-      return res.status(404).json({ erreur: 'L\'étudiant a déjà une équipe' });
+    /* L'étudiant ne doit pas avoir d'équipe dans l'event*/
+
+    /*Récupérer l'event de l'équipe*/
+    const idProjet = equipe[0].idprojet;
+    const projet = await projetModel.chercherProjetId(idProjet);
+    const idEvent = projet[0].idevent;
+
+    const projets_event = await projetModel.recuperer_projets(idEvent);
+
+    for (i = 0; i < projets_event.length; i++) {
+
+      const equipes_projets = await equipeModel.listeEquipeProjet(projets_event[i].idprojet);
+
+      for (j = 0; j < equipes_projets.length; j++) {
+
+        let appartenir = await equipeModel.appartenirEquipe(idUser, equipes_projets[j].idequipe);
+        console.log(equipes_projets[j].idequipe, projets_event[0].idprojet)
+
+        if (appartenir.length > 0) {
+          return res.status(404).json({ erreur: 'Il a déjà une équipe dans l\'evenement' });
+        }
+      }
     }
 
     /* Vérifier si une demande a déjà été envoyée */
@@ -446,10 +477,27 @@ async function accepterDemande(req, res) {
       return res.status(404).json({ erreur: 'L\'id n\'existe pas' });
     }
 
-    /* Vérifier si l'étudiant n'a pas rejoint une équipe */
-    const appartenir = await equipeModel.aUneEquipe(idUser);
-    if (appartenir.length > 0) {
-      return res.status(404).json({ erreur: 'L\'étudiant a déjà une équipe' });
+    /* L'étudiant ne doit pas avoir d'équipe dans l'event*/
+
+    /*Récupérer l'event de l'équipe*/
+    const projet = await projetModel.chercherProjetId(idProjet);
+    const idEvent = projet[0].idevent;
+
+    const projets_event = await projetModel.recuperer_projets(idEvent);
+
+    for (i = 0; i < projets_event.length; i++) {
+
+      const equipes_projets = await equipeModel.listeEquipeProjet(projets_event[i].idprojet);
+
+      for (j = 0; j < equipes_projets.length; j++) {
+
+        let appartenir = await equipeModel.appartenirEquipe(req.id, equipes_projets[j].idequipe);
+        console.log(equipes_projets[j].idequipe, projets_event[0].idprojet)
+
+        if (appartenir.length > 0) {
+          return res.status(404).json({ erreur: 'Il a déjà une équipe dans l\'evenement' });
+        }
+      }
     }
 
     /* Vérifier si l'étudiant a bien envoyé une demande */
