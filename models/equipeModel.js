@@ -594,7 +594,13 @@ async function jsonMesEquipes(idUser) {
         temp.nomProjet = projet.nom;
 
         /*Capitaine */
-        temp.idCapitaine = equipeCouranteInfos.idcapitaine;
+        if(equipeCouranteInfos.idcapitaine === idUser){
+            temp.estCapitaine = true;
+
+        }else{
+            temp.estCapitaine = false;
+
+        }
         temp.nomCapitaine = ((await userModel.chercherUserID(equipeCouranteInfos.idcapitaine))[0].nom);
 
         /*Nombres de personnes suffisantes pour participer*/

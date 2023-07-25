@@ -303,7 +303,7 @@ async function jsonEventChoisi(idEvent, typeUser, req) {
         let classementFinal = await classementModel.chercherClassement(idEvent);
         console.log(classementFinal)
         if (classementFinal == []) {
-            tabRetour.classement = null;
+            tabRetour.classement = '';
         } else {
             tabRetour.podium = [];
 
