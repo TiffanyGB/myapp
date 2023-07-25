@@ -165,35 +165,25 @@ async function supprimerEvent(req, res) {
 
 async function listeEquipes(req, res) {
 
-  if (req.userProfile === 'admin') {
-    if (req.method === 'OPTIONS') {
-      res.status(200).json({ sucess: 'Agress granted' });
-    }
-    else if (req.method === 'GET') {
+  if (req.method === 'OPTIONS') {
+    res.status(200).json({ sucess: 'Agress granted' });
+  }
+  else if (req.method === 'GET') {
 
-      const idevent = res.locals.idevent;
+    const idevent = res.locals.idevent;
 
-      try {
-        // Vérifier que l'id existe dans la bdd, sinon 404 error
-        const event = await eventModel.jsonlisteEquipeEvent(idevent);
+    try {
+      const event = await eventModel.jsonlisteEquipeEvent(idevent);
 
-        if (event.length === 0) {
-          return res.status(404).json({ erreur: 'L\'id n\'existe pas' });
-        } else {
-          res.status(200).json(event)
-        }
-      } catch {
-
+      // Vérifier que l'id existe dans la bdd, sinon 404 error
+      if (event.equipes.length === 0) {
+        return res.status(404).json({ erreur: 'L\'id n\'existe pas' });
+      } else {
+        res.status(200).json(event)
       }
-    } else if (req.userProfile === 'etudiant') {
-
-      res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "etudiant" });
-    } else if (req.userProfile === 'gestionnaire') {
-
-      res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "gestionnaire" });
-    } else if (req.userProfile === 'aucun') {
-
-      res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "Aucun" });
+    }
+    catch {
+      return res.status(404).json({ erreur: 'Erreur lors de la récupération des informations' });
     }
   }
 }

@@ -69,8 +69,7 @@ const validateEvent = [
     validationDonnees.validateUserData,
 ];
 
-
-/**Liste des événements */
+/*Liste de tous les événements */
 function chercherListeEvenement() {
 
     const users = 'SELECT * FROM Evenement';
@@ -86,15 +85,13 @@ function chercherListeEvenement() {
     });
 }
 
-/**Chercher un événement par son id*/
-
+/*Chercher un événement par son id*/
 function chercherEvenement(idEvent) {
 
     const users = 'SELECT * FROM Evenement WHERE idEvent = $1';
-    const params = [idEvent];
 
     return new Promise((resolve, reject) => {
-        pool.query(users, params)
+        pool.query(users, [idEvent])
             .then((res) => {
                 resolve(res.rows);
             })
@@ -113,23 +110,23 @@ async function creerEvent(valeurs_event, regles) {
     try {
         const result = await pool.query(inserer, valeurs_event);
         /* Récupération de l'id de l'event (pour l'insertion des règles) */
-        const id = result.rows[0].idevent;
+        const idEvent = result.rows[0].idevent;
 
         /*Insertion des règles */
         for (let i = 0; i < regles.length; i++) {
-            await regleModel.ajouterRegle(id, regles[i].titre, regles[i].contenu);
+            await regleModel.ajouterRegle(idEvent, regles[i].titre, regles[i].contenu);
         }
-        return id;
+        return idEvent;
 
     } catch (error) {
         throw error;
     }
 }
 
-/**Modifier */
+/*Modifier un event*/
 async function modifierEvent(valeurs) {
-    try {
-        const modifier = `
+
+    const modifier = `
         UPDATE Evenement 
         SET
           nom = $1,
@@ -143,19 +140,15 @@ async function modifierEvent(valeurs) {
           derniereModif = CURRENT_TIMESTAMP
         WHERE idEvent = $9`;
 
-        try {
-            await pool.query(modifier, valeurs);
-        } catch (error) {
-            console.error("Erreur lors de la mise à jour de l'événement", error);
-            throw error;
-        }
+    try {
+        await pool.query(modifier, valeurs);
     } catch (error) {
         console.error("Erreur lors de la mise à jour de l'événement", error);
         throw error;
     }
 }
 
-/**Supprimer */
+/*Supprimer un event*/
 async function supprimerEvent(idEvent) {
 
     const supprimer = `DELETE FROM Evenement WHERE idEvent = $1`;
@@ -171,7 +164,6 @@ async function supprimerEvent(idEvent) {
             });
     });
 }
-
 
 /**
  * Récupérer les événements terminés dans la base de données
@@ -192,7 +184,6 @@ function recupererAncienEvents() {
     });
 }
 
-
 /**
  * Récupérer les événements non terminés dans la base de données
  * @returns {Promise<Array<Object>>} Une promesse résolue avec un tableau d'objets représentant les événements en cours.
@@ -212,185 +203,172 @@ function recupererEventActuel() {
     });
 }
 
-function recuperer_message_fin(idEvent) {
+async function toutesInfosEvent(idEvent, tabRetour) {
+    const event = (await chercherEvenement(idEvent))[0];
 
-    const message = `SELECT * FROM Evenement WHERE idEvent = '${idEvent}'`;
+    /**Insertion des données de l'event */
+    tabRetour.idEvent = event.idevent;
+    tabRetour.title = event.nom;
+    tabRetour.date_creation = event.debut_inscription;
+    tabRetour.date_debut = event.date_debut;
+    tabRetour.date_fin = event.date_fin;
+    tabRetour.type_challenge = event.type_event;
+    tabRetour.description = event.description_event;
+    tabRetour.nbMinParEquipe = event.nombre_min_equipe;
+    tabRetour.nbMaxParEquipe = event.nombre_max_equipe;
+    tabRetour.projet = [];
+    tabRetour.regles = [];
+    tabRetour.themes = [];
 
-    return new Promise((resolve, reject) => {
-        pool.query(message)
-            .then((res) => {
-                resolve(res);
-            })
-            .catch((error) => {
-                reject(error);
-            });
-    })
+    if (event.message_fin == null) {
+        tabRetour.messageFin = '';
+    } else {
+        tabRetour.messageFin = event.message_fin;
+    }
 }
 
 async function jsonEventChoisi(idEvent, typeUser) {
-    const chercherEvent = `SELECT * FROM Evenement WHERE idevent = ${idEvent}`;
+
     let tabRetour = {};
 
     try {
-        const res = await pool.query(chercherEvent);
-        if (res.rows.length === 1) {
-            const event = res.rows[0];
 
-            /**Insertion des données de l'event */
-            tabRetour.title = event.nom;
-            tabRetour.themes = [];
-            tabRetour.date_creation = event.debut_inscription;
-            tabRetour.date_debut = event.date_debut;
-            tabRetour.date_fin = event.date_fin;
-            tabRetour.type_challenge = event.type_event;
-            tabRetour.description = event.description_event;
-            tabRetour.nbMinParEquipe = event.nombre_min_equipe;
-            tabRetour.nbMaxParEquipe = event.nombre_max_equipe;
-            tabRetour.projet = [];
-            tabRetour.regles = [];
+        toutesInfosEvent(idEvent, tabRetour);
 
 
-            /**Récupérer les projets associé à l'event*/
-            const listeProjets = await projetModel.recuperer_projets(idEvent);
 
-            const listeRegles = await regleModel.recuperer_regles(idEvent);
-            for (i = 0; i < listeRegles.length; i++) {
+        const listeRegles = await regleModel.recuperer_regles(idEvent);
+        for (i = 0; i < listeRegles.length; i++) {
 
-                let regleCourante = listeRegles[i];
-                let reglesInfos = {};
+            let regleCourante = listeRegles[i];
+            let reglesInfos = {};
 
-                reglesInfos.titre = regleCourante.titre;
-                reglesInfos.contenu = regleCourante.contenu;
+            reglesInfos.titre = regleCourante.titre;
+            reglesInfos.contenu = regleCourante.contenu;
 
-                tabRetour.regles.push(reglesInfos);
-            }
+            tabRetour.regles.push(reglesInfos);
+        }
+        
+        /**Récupérer les projets associé à l'event*/
+        const listeProjets = await projetModel.recuperer_projets(idEvent);
 
-            /**Les projets */
-            for (i = 0; i < listeProjets.length; i++) {
+        /**Les projets */
+        for (i = 0; i < listeProjets.length; i++) {
 
-                let projetCourant = listeProjets[i];
-                let projetInfos = {};
+            let projetCourant = listeProjets[i];
+            let projetInfos = {};
 
-                if (projetCourant.imgprojet == null) {
-                    projetInfos.img = '';
-                } else {
-                    projetInfos.img = projetCourant.imgprojet;
-                }
-                projetInfos.titre = projetCourant.nom;
-                projetInfos.idprojet = projetCourant.idprojet;
-                projetInfos.description = projetCourant.description_projet;
-                projetInfos.recompense = projetCourant.recompense;
-                projetInfos.sujet = projetCourant.sujet;
-                projetInfos.thematique = [];
-
-
-                const listeMots = await motCleModel.recupererMot(projetCourant.idprojet);
-
-                for (j = 0; j < listeMots.length; j++) {
-
-                    let motCourant = listeMots[j];
-
-                    tabRetour.themes.push(motCourant.mot);
-
-                    projetInfos.thematique.push(motCourant.mot);
-                }
-
-                /**Les ressources */
-                const listeRessource = await ressourceModel.recuperer_ressourcesPubliques(projetCourant.idprojet);
-
-                projetInfos.ressources = [];
-
-                for (j = 0; j < listeRessource.length; j++) {
-
-                    let ressourceCourante = listeRessource[j];
-                    let ressourcesInfos = {};
-
-                    ressourcesInfos.titre = ressourceCourante.titre;
-                    ressourcesInfos.type = ressourceCourante.type_ressource;
-                    ressourcesInfos.lien = ressourceCourante.lien;
-                    ressourcesInfos.description = ressourceCourante.description_ressource;
-                    ressourcesInfos.statut = ressourceCourante.statut;
-
-                    projetInfos.ressources.push(ressourcesInfos);
-
-                }
-
-                if (typeUser != 'aucun') {
-                    const listeRessourcePv = await ressourceModel.recuperer_ressourcesPrivees(projetCourant.idprojet);
-
-                    for (j = 0; j < listeRessourcePv.length; j++) {
-
-                        let ressourceCourante = listeRessourcePv[j];
-                        let ressourcesPvInfos = {};
-                        ressourcesPvInfos.titre = ressourceCourante.titre;
-                        ressourcesPvInfos.type = ressourceCourante.type_ressource;
-                        ressourcesPvInfos.lien = ressourceCourante.lien;
-                        ressourcesPvInfos.statut = ressourceCourante.statut;
-                        ressourcesPvInfos.description = ressourceCourante.description_ressource;
-                        ressourcesPvInfos.statut = ressourceCourante.statut;
-
-                        projetInfos.ressources.push(ressourcesPvInfos);
-
-                    }
-                }
-                tabRetour.projet.push(projetInfos);
-            }
-
-            let classementFinal = await classementModel.chercherClassement(idEvent);
-
-            if (classementFinal == []) {
-                tabRetour.classement = null;
+            if (projetCourant.imgprojet == null) {
+                projetInfos.img = '';
             } else {
-                tabRetour.podium = [];
+                projetInfos.img = projetCourant.imgprojet;
+            }
+            projetInfos.titre = projetCourant.nom;
+            projetInfos.idprojet = projetCourant.idprojet;
+            projetInfos.description = projetCourant.description_projet;
+            projetInfos.recompense = projetCourant.recompense;
+            projetInfos.sujet = projetCourant.sujet;
+            projetInfos.thematique = [];
 
-                temp = {}
 
-                temp.premier = classementFinal.premier;
-                temp.deuxieme = classementFinal.deuxieme;
-                temp.troisieme = classementFinal.troisieme;
+            const listeMots = await motCleModel.recupererMot(projetCourant.idprojet);
 
-                tabRetour.podium.push(temp);
+            for (j = 0; j < listeMots.length; j++) {
+
+                let motCourant = listeMots[j];
+
+                tabRetour.themes.push(motCourant.mot);
+
+                projetInfos.thematique.push(motCourant.mot);
             }
 
-            let finalistes = await finalisteModel.chercher_finalistes(idEvent);
+            /**Les ressources */
+            const listeRessource = await ressourceModel.recuperer_ressourcesPubliques(projetCourant.idprojet);
 
-            if (finalistes == []) {
-                tabRetour.finalistes = '';
-            } else {
+            projetInfos.ressources = [];
 
-                tabRetour.finalistes = [];
+            for (j = 0; j < listeRessource.length; j++) {
 
-                for (i = 0; i < finalistes.length; i++) {
-                    tabRetour.finalistes.push(finalistes[i]);
+                let ressourceCourante = listeRessource[j];
+                let ressourcesInfos = {};
+
+                ressourcesInfos.titre = ressourceCourante.titre;
+                ressourcesInfos.type = ressourceCourante.type_ressource;
+                ressourcesInfos.lien = ressourceCourante.lien;
+                ressourcesInfos.description = ressourceCourante.description_ressource;
+                ressourcesInfos.statut = ressourceCourante.statut;
+
+                projetInfos.ressources.push(ressourcesInfos);
+
+            }
+
+            if (typeUser != 'aucun') {
+                const listeRessourcePv = await ressourceModel.recuperer_ressourcesPrivees(projetCourant.idprojet);
+
+                for (j = 0; j < listeRessourcePv.length; j++) {
+
+                    let ressourceCourante = listeRessourcePv[j];
+                    let ressourcesPvInfos = {};
+                    ressourcesPvInfos.titre = ressourceCourante.titre;
+                    ressourcesPvInfos.type = ressourceCourante.type_ressource;
+                    ressourcesPvInfos.lien = ressourceCourante.lien;
+                    ressourcesPvInfos.statut = ressourceCourante.statut;
+                    ressourcesPvInfos.description = ressourceCourante.description_ressource;
+                    ressourcesPvInfos.statut = ressourceCourante.statut;
+
+                    projetInfos.ressources.push(ressourcesPvInfos);
+
                 }
             }
+            tabRetour.projet.push(projetInfos);
+        }
 
-            let message = await recuperer_message_fin(idEvent);
+        let classementFinal = await classementModel.chercherClassement(idEvent);
 
-            if (message[0] == null) {
-                tabRetour.messageFin = '';
-            } else {
-                tabRetour.messageFin = message;
+        if (classementFinal == []) {
+            tabRetour.classement = null;
+        } else {
+            tabRetour.podium = [];
+
+            temp = {}
+
+            temp.premier = classementFinal.premier;
+            temp.deuxieme = classementFinal.deuxieme;
+            temp.troisieme = classementFinal.troisieme;
+
+            tabRetour.podium.push(temp);
+        }
+
+        let finalistes = await finalisteModel.chercher_finalistes(idEvent);
+
+        if (finalistes == []) {
+            tabRetour.finalistes = '';
+        } else {
+
+            tabRetour.finalistes = [];
+
+            for (i = 0; i < finalistes.length; i++) {
+                tabRetour.finalistes.push(finalistes[i]);
             }
+        }
 
-            if (typeUser === 'etudiant') {
 
-                const equipe = await aUneEquipe(4); /**Mettre id User */
-                tabRetour.userIsInterested = false;
 
-                if (equipe > 0) {
-                    tabRetour.team = 5;
-                } else {
-                    tabRetour.team = -1;
-                }
+        if (typeUser === 'etudiant') {
+
+            const equipe = await aUneEquipe(4); /**Mettre id User */
+            tabRetour.userIsInterested = false;
+
+            if (equipe > 0) {
+                tabRetour.team = 5;
             } else {
-                tabRetour.userIsInterested = false;
                 tabRetour.team = -1;
             }
-            return tabRetour;
         } else {
-            throw new Error('Evenement non trouvé');
+            tabRetour.userIsInterested = false;
+            tabRetour.team = -1;
         }
+        return tabRetour;
     } catch (error) {
         throw error;
     }
@@ -543,7 +521,6 @@ async function recup_Infos_Modif_Event(idEvent) {
 module.exports = {
     chercherEvenement,
     chercherListeEvenement,
-    recuperer_message_fin,
     jsonEventChoisi,
     creerJsonTousEvents,
     modifierEvent,

@@ -31,14 +31,14 @@ const validerEquipe = [
     //     .isInt({ min: 1, max: 10000 }).withMessage("L'id doit contenir entre 1 et 10000 chiffres."),
 
     body('lien_discussion')
-    .optional({ nullable: true, checkFalsy: true })
-    .isURL().withMessage('Doit être un lien')
-    .isLength({max:300}),
+        .optional({ nullable: true, checkFalsy: true })
+        .isURL().withMessage('Doit être un lien')
+        .isLength({ max: 300 }),
 
     body('preferenceQuestionnaire')
-    .optional()
-    .matches(/^(true|false)$/).withMessage('La préférence doit être soit "true" soit "false".')
-    .isLength({max:5}),
+        .optional()
+        .matches(/^(true|false)$/).withMessage('La préférence doit être soit "true" soit "false".')
+        .isLength({ max: 5 }),
 
     body('idProjet')
         .notEmpty().withMessage('Le prénom ne doit pas être vide.')
@@ -335,9 +335,9 @@ async function jsonInformationsEquipe(idEquipe, req) {
             const minimum = event[0].nombre_min_equipe;
             console.log(minimum, membres.length, event[0])
 
-            if(membres.length >= minimum){
+            if (membres.length >= minimum) {
                 jsonRetour.valide = true;
-            }else{
+            } else {
                 jsonRetour.valide = false;
             }
 
@@ -368,14 +368,14 @@ async function jsonInformationsEquipe(idEquipe, req) {
 
                 membreCourant = membres[i];
 
-                if(membreCourant.iduser != temp1.idcapitaine){
+                if (membreCourant.iduser != temp1.idcapitaine) {
                     temp = {};
                     temp.id = membreCourant.iduser;
-    
+
                     let user = await userModel.chercherUserID(membreCourant.iduser);
-    
+
                     temp.pseudo = user[0].pseudo;
-    
+
                     jsonRetour.membres.push(temp);
                 }
 
@@ -491,50 +491,6 @@ async function jsonInformationsEquipe(idEquipe, req) {
     }
 }
 
-/*A supprimer peut etre*/
-async function jsonInfosEquipe(idEquipe) {
-
-    try {
-
-        const chercher = await chercherEquipeID(idEquipe);
-
-        jsonRetour = {}
-
-        if (chercher === 0) {
-            return 'aucun';
-        } else {
-
-            temp = chercher[0];
-
-            jsonRetour.id = temp.idequipe;
-            jsonRetour.nom = temp.nom;
-            jsonRetour.description = temp.description_equipe;
-            jsonRetour.statut = temp.statut_recrutement;
-            jsonRetour.idProjet = temp.idprojet;
-            jsonRetour.idCapitaine = temp.idcapitaine;
-
-            if (temp.lien_github == null) {
-                jsonRetour.github = '';
-            } else {
-                jsonRetour.github = temp.lien_github;
-            }
-
-            if (temp.finaliste == null) {
-                jsonRetour.finaliste = '';
-
-            } else {
-                jsonRetour.finaliste = temp.finaliste;
-            }
-
-
-            return jsonRetour;
-        }
-
-    } catch (error) {
-        throw error;
-    }
-}
-
 /**Permet de voir les équipes associées à un projet */
 async function jsonListeEquipeProjet(idProjet) {
 
@@ -550,43 +506,90 @@ async function jsonListeEquipeProjet(idProjet) {
 
             temp = {};
 
-            //temp.img = equipeList IMAGE
-
+            /*Equipe */
             temp.id = equipeCourante.idequipe;
-            temp.idProjet = idProjet;
             temp.nom = equipeCourante.nom;
-            if (equipeCourante.description_equipe === null) {
-                temp.description = '';
-            } else {
-                temp.description = equipeCourante.description_equipe;
-            }
-            temp.statut = equipeCourante.statut_recrutement;
 
-            if (equipeCourante.lien_github === null) {
-                temp.lien_github = '';
+            /*Nombre de membres de l'équipe */
+            const membres = await ListeMembre(temp.id);
+            temp.nombreMembre = membres.length;
+
+            /*Projet */
+            temp.idProjet = idProjet;
+            const projet = (await projetModel.chercherProjetId(idProjet))[0];
+            temp.nomProjet = projet.nom;
+
+            /*Nombres de personnes suffisantes pour participer*/
+            let idevent = projet.idevent;
+            const event = (await chercherEvenement(idevent))[0];
+
+            if (temp.nombreMembre >= event.nombre_min_equipe) {
+                temp.valide = true;
             } else {
-                temp.lien_github = equipeCourante.lien_github;
+                temp.valide = false;
             }
 
-            temp.idprojet = equipeCourante.idprojet;
+            /*Capitaine */
             temp.idCapitaine = equipeCourante.idcapitaine;
+            temp.nomCapitaine = ((await userModel.chercherUserID(equipeCourante.idcapitaine))[0].nom);
 
-            if (equipeCourante.finaliste === null) {
-                temp.finaliste = '';
-            } else {
-                temp.finaliste = equipeCourante.finaliste;
-            }
 
             jsonRetour.equipe.push(temp);
         }
-
         return jsonRetour;
-
     } catch (error) {
-
-        console.error(error);
+        throw error;
     }
 }
+
+async function jsonMesEquipes(idUser) {
+
+    let jsonRetour = {};
+    jsonRetour.equipe = [];
+
+    const mesEquipes = await aUneEquipe(idUser);
+
+    for (i = 0; i < mesEquipes.length; i++) {
+
+        let idEquipeCourante = mesEquipes[i].idequipe;
+        let equipeCouranteInfos = (await chercherEquipeID(idEquipeCourante))[0];
+
+        temp = {};
+
+        /*Equipe */
+        temp.id = idEquipeCourante;
+        temp.nom = equipeCouranteInfos.nom;
+
+        /*Nombre de membres de l'équipe */
+        const membres = await ListeMembre(temp.id);
+        temp.nombreMembre = membres.length;
+
+        /*Projet */
+        temp.idProjet = equipeCouranteInfos.idprojet;
+        const projet = (await projetModel.chercherProjetId(temp.idProjet))[0];
+        temp.nomProjet = projet.nom;
+
+        /*Capitaine */
+        temp.idCapitaine = equipeCouranteInfos.idcapitaine;
+        temp.nomCapitaine = ((await userModel.chercherUserID(equipeCouranteInfos.idcapitaine))[0].nom);
+
+        /*Nombres de personnes suffisantes pour participer*/
+        let idevent = projet.idevent;
+        const event = (await chercherEvenement(idevent))[0];
+
+        temp.nombre_max_equipe = event.nombre_max_equipe;
+        temp.nomEvent = event.nom;
+        
+        if(new Date(event.date_fin) < new Date()){
+            temp.fini = true;
+        }else{
+            temp.fini = false;
+        }
+        jsonRetour.equipe.push(temp);
+    }
+    return jsonRetour;
+}
+jsonMesEquipes(15)
 
 async function jsonEquipesOuvertes() {
 
@@ -616,7 +619,7 @@ async function jsonEquipesOuvertes() {
         const membres = await ListeMembre(equipes[i].idequipe);
         temp.nombreMembre = membres.length;
 
-        /* */
+        /*Nombre de membres max */
         let idevent = nomProjet[0].idevent;
 
         const event = await chercherEvenement(idevent);
@@ -657,6 +660,50 @@ async function demandeDejaEnvoyee(idUser, idEquipe) {
     });
 }
 
+/*A supprimer peut etre*/
+// async function jsonInfosEquipe(idEquipe) {
+
+//     try {
+
+//         const chercher = await chercherEquipeID(idEquipe);
+
+//         jsonRetour = {}
+
+//         if (chercher === 0) {
+//             return 'aucun';
+//         } else {
+
+//             temp = chercher[0];
+
+//             jsonRetour.id = temp.idequipe;
+//             jsonRetour.nom = temp.nom;
+//             jsonRetour.description = temp.description_equipe;
+//             jsonRetour.statut = temp.statut_recrutement;
+//             jsonRetour.idProjet = temp.idprojet;
+//             jsonRetour.idCapitaine = temp.idcapitaine;
+
+//             if (temp.lien_github == null) {
+//                 jsonRetour.github = '';
+//             } else {
+//                 jsonRetour.github = temp.lien_github;
+//             }
+
+//             if (temp.finaliste == null) {
+//                 jsonRetour.finaliste = '';
+
+//             } else {
+//                 jsonRetour.finaliste = temp.finaliste;
+//             }
+
+
+//             return jsonRetour;
+//         }
+
+//     } catch (error) {
+//         throw error;
+//     }
+// }
+
 module.exports = {
     aUneEquipe,
     jsonListeEquipeProjet,
@@ -664,7 +711,6 @@ module.exports = {
     supprimerEquipe,
     creerEquipe,
     listeEquipeProjet,
-    jsonInfosEquipe,
     chercherEquipeID,
     validerEquipe,
     ajouterMembre,
@@ -678,5 +724,6 @@ module.exports = {
     appartenirEquipe,
     envoyerDemande,
     demandeDejaEnvoyee,
-    modifier_git
+    modifier_git,
+    jsonMesEquipes
 }

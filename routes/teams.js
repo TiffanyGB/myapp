@@ -101,12 +101,36 @@ router.all('/:id/declinerDemande', (req, res, next) => {
     capitaine,
     equipeController.declinerDemande);
 
-/**Voir une équipe */
-router.all('/:id', (req, res, next) => {
+router.all('/mesEquipes',
+    indexController.verifyToken,
+    etudiantProfil,
+    equipeController.voirMesEquipes);
+
+router.all('/:id/declinerDemande', (req, res, next) => {
     res.locals.idEquipe = req.params.id;
     next();
 }, indexController.verifyToken,
-    adminProfil,
-    equipeController.informationsEquipeAdmin);
+    capitaine,
+    equipeController.declinerDemande);
+
+
+
+
+
+
+
+
+
+
+
+
+/************************J'enleve cette methode pour voir si ça casse coté front, si non, alors supprimer */
+/**Voir une équipe */
+// router.all('/:id', (req, res, next) => {
+//     res.locals.idEquipe = req.params.id;
+//     next();
+// }, indexController.verifyToken,
+//     adminProfil,
+//     equipeController.informationsEquipeAdmin);
 
 module.exports = router;

@@ -305,30 +305,6 @@ async function getInfosEquipe(req, res) {
   }
 }
 
-/* Admin, inutile je crois, peut etre à supprimer plus tard */
-async function informationsEquipeAdmin(req, res) {
-  if (req.method === 'OPTIONS') {
-    res.status(200).json({ sucess: 'Agress granted' });
-  } else if (req.method === 'GET') {
-    const idEquipe = res.locals.idEquipe;
-
-    try {
-
-      const equipeInfos = await equipeModel.chercherEquipeID(idEquipe);
-
-      if (equipeInfos === 'aucun') {
-        return res.status(404).json({ erreur: "L'id de l'équipe n'existe pas" });
-      } else {
-
-        const equipeList = await equipeModel.jsonInfosEquipe(idEquipe);
-        res.status(200).json(equipeList);
-      }
-    } catch (error) {
-
-      res.status(500).json({ erreur: "Erreur lors de la récupération de l'équipe" });
-    }
-  }
-}
 
 async function listeOuvertes(req, res) {
   if (req.method === 'OPTIONS') {
@@ -558,9 +534,53 @@ async function declinerDemande(req, res) {
   }
 }
 
+async function voirMesEquipes(req, res) {
+  if (req.method === 'OPTIONS') {
+    res.status(200).json({ sucess: 'Agress granted' });
+  }
+  else if (req.method === 'GET') {
+
+    try{
+      const jsonInfos = await equipeModel.jsonMesEquipes(req.id);
+      res.status(200).json(jsonInfos);
+
+    }catch{
+      res.status(400).json({erreur: "Erreur lors de la récupération des données."});
+    }
+  }
+}
+
+
+
+
+/* Admin, inutile je crois, peut etre à supprimer plus tard */
+// async function informationsEquipeAdmin(req, res) {
+//   if (req.method === 'OPTIONS') {
+//     res.status(200).json({ sucess: 'Agress granted' });
+//   } else if (req.method === 'GET') {
+//     const idEquipe = res.locals.idEquipe;
+
+//     try {
+
+//       const equipeInfos = await equipeModel.chercherEquipeID(idEquipe);
+
+//       if (equipeInfos.length === 0) {
+//         return res.status(404).json({ erreur: "L'id de l'équipe n'existe pas" });
+//       } else {
+
+//         const equipeList = await equipeModel.jsonInfosEquipe(idEquipe);
+//         res.status(200).json(equipeList);
+//       }
+//     } catch (error) {
+
+//       res.status(500).json({ erreur: "Erreur lors de la récupération de l'équipe" });
+//     }
+//   }
+// }
+
+
 module.exports = {
   retournerEquipeProjet,
-  informationsEquipeAdmin,
   creerEquipe,
   supprimerEquipe,
   modifierEquipe,
@@ -572,5 +592,6 @@ module.exports = {
   demandeEquipe,
   accepterDemande,
   declinerDemande,
-  modifierGit
+  modifierGit,
+  voirMesEquipes
 }

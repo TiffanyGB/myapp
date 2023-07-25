@@ -14,7 +14,7 @@ router.all('/creerEvent',
     eventModel.validateEvent,
     eventsController.createEvent);
 
-/**Modifier */
+/**Modifier un event */
 router.all('/edit/:id', (req, res, next) => {
     res.locals.idevent = req.params.id;
     next();
@@ -23,7 +23,7 @@ router.all('/edit/:id', (req, res, next) => {
     eventModel.validateEvent,
     eventsController.modifierEvent);
 
-/**supprimer */
+/**supprimer un event*/
 router.all('/delete/:id', (req, res, next) => {
     res.locals.idevent = req.params.id;
     next();
@@ -31,13 +31,15 @@ router.all('/delete/:id', (req, res, next) => {
     checkAdminProfile,
     eventsController.supprimerEvent);
 
-/**Voir les équipes d'un event */ //Rajouter profil ici
+/**Voir les équipes d'un event */
 router.all('/:id/teams', (req, res, next) => {
     res.locals.idevent = req.params.id;
     next();
 }, indexController.verifyToken,
+    checkAdminProfile,
     eventsController.listeEquipes);
 
+/*Infos d'un event pour modif */
 router.all('/:id/infos', (req, res, next) => {
     res.locals.idevent = req.params.id;
     next();

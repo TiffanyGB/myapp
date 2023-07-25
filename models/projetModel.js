@@ -197,6 +197,9 @@ async function listeProjetsJson() {
     }
 }
 
+async function toutesInfosProjet(idEvent, tabRetour) {}
+
+
 /**Informations d'un projet */
 async function infosProjet(idProjet) {
 
@@ -320,5 +323,6 @@ module.exports = {
     modifierProjet,
     rattacherProjetEvent,
     detacherProjetEvent,
-    infosProjet
+    infosProjet,
+    toutesInfosProjet
 }

@@ -13,7 +13,6 @@ function checkProfile(type) {
   };
 }
 /*ASG --> Admin, etudiant(capitaine), gestionnaire*/
-// Assurez-vous que la fonction externe est asynchrone (marquée avec async)
 async function checkAEG() {
   return async function (req, res, next) {
     if (req.userProfile === 'admin') {
@@ -40,8 +39,6 @@ async function checkAEG() {
     }
   };
 }
-
-
 
 //Que le capitaine
 async function checkCapitaine(req, res, next) {
