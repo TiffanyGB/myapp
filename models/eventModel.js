@@ -203,10 +203,11 @@ function recupererEventActuel() {
     });
 }
 
+/*Crée un json avec toutes les informations dans la bdd d'un evenement sauf la derniere modification */
+/*Peut etre l'ajouter? */
 async function toutesInfosEvent(idEvent, tabRetour) {
     const event = (await chercherEvenement(idEvent))[0];
 
-    /**Insertion des données de l'event */
     tabRetour.idEvent = event.idevent;
     tabRetour.title = event.nom;
     tabRetour.date_creation = event.debut_inscription;
@@ -216,28 +217,29 @@ async function toutesInfosEvent(idEvent, tabRetour) {
     tabRetour.description = event.description_event;
     tabRetour.nbMinParEquipe = event.nombre_min_equipe;
     tabRetour.nbMaxParEquipe = event.nombre_max_equipe;
-    tabRetour.projet = [];
-    tabRetour.regles = [];
-    tabRetour.themes = [];
 
     if (event.message_fin == null) {
         tabRetour.messageFin = '';
     } else {
         tabRetour.messageFin = event.message_fin;
     }
+    tabRetour.regles = [];
+    tabRetour.projet = [];
+    tabRetour.themes = [];
 }
 
-async function jsonEventChoisi(idEvent, typeUser) {
+async function jsonEventChoisi(idEvent, typeUser, req) {
 
     let tabRetour = {};
 
     try {
 
+        /*Récupérer toutes les infos liés à l'event*/
         toutesInfosEvent(idEvent, tabRetour);
 
-
-
+        /*Les règles de l'event */
         const listeRegles = await regleModel.recuperer_regles(idEvent);
+
         for (i = 0; i < listeRegles.length; i++) {
 
             let regleCourante = listeRegles[i];
@@ -248,29 +250,19 @@ async function jsonEventChoisi(idEvent, typeUser) {
 
             tabRetour.regles.push(reglesInfos);
         }
-        
+
         /**Récupérer les projets associé à l'event*/
         const listeProjets = await projetModel.recuperer_projets(idEvent);
 
-        /**Les projets */
+        /*Pour chaque projet, récupérer ses infos, ses ressources et ses mots-clés */
         for (i = 0; i < listeProjets.length; i++) {
 
             let projetCourant = listeProjets[i];
             let projetInfos = {};
 
-            if (projetCourant.imgprojet == null) {
-                projetInfos.img = '';
-            } else {
-                projetInfos.img = projetCourant.imgprojet;
-            }
-            projetInfos.titre = projetCourant.nom;
-            projetInfos.idprojet = projetCourant.idprojet;
-            projetInfos.description = projetCourant.description_projet;
-            projetInfos.recompense = projetCourant.recompense;
-            projetInfos.sujet = projetCourant.sujet;
-            projetInfos.thematique = [];
+            projetModel.toutesInfosProjet(projetCourant, projetInfos);
 
-
+            /*Mots-clés*/
             const listeMots = await motCleModel.recupererMot(projetCourant.idprojet);
 
             for (j = 0; j < listeMots.length; j++) {
@@ -283,7 +275,7 @@ async function jsonEventChoisi(idEvent, typeUser) {
             }
 
             /**Les ressources */
-            const listeRessource = await ressourceModel.recuperer_ressourcesPubliques(projetCourant.idprojet);
+            const listeRessource = await ressourceModel.recuperer_toutes_ressources(projetCourant.idprojet);
 
             projetInfos.ressources = [];
 
@@ -291,40 +283,25 @@ async function jsonEventChoisi(idEvent, typeUser) {
 
                 let ressourceCourante = listeRessource[j];
                 let ressourcesInfos = {};
+                let statut = ressourceCourante.statut;
 
-                ressourcesInfos.titre = ressourceCourante.titre;
-                ressourcesInfos.type = ressourceCourante.type_ressource;
-                ressourcesInfos.lien = ressourceCourante.lien;
-                ressourcesInfos.description = ressourceCourante.description_ressource;
-                ressourcesInfos.statut = ressourceCourante.statut;
-
-                projetInfos.ressources.push(ressourcesInfos);
-
-            }
-
-            if (typeUser != 'aucun') {
-                const listeRessourcePv = await ressourceModel.recuperer_ressourcesPrivees(projetCourant.idprojet);
-
-                for (j = 0; j < listeRessourcePv.length; j++) {
-
-                    let ressourceCourante = listeRessourcePv[j];
-                    let ressourcesPvInfos = {};
-                    ressourcesPvInfos.titre = ressourceCourante.titre;
-                    ressourcesPvInfos.type = ressourceCourante.type_ressource;
-                    ressourcesPvInfos.lien = ressourceCourante.lien;
-                    ressourcesPvInfos.statut = ressourceCourante.statut;
-                    ressourcesPvInfos.description = ressourceCourante.description_ressource;
-                    ressourcesPvInfos.statut = ressourceCourante.statut;
-
-                    projetInfos.ressources.push(ressourcesPvInfos);
-
+                /*Les ressources privées nécessient d'être connecté  */
+                if((statut === 'public') || (statut === 'privé' && typeUser != 'aucun')){
+                    ressourcesInfos.titre = ressourceCourante.titre;
+                    ressourcesInfos.type = ressourceCourante.type_ressource;
+                    ressourcesInfos.lien = ressourceCourante.lien;
+                    ressourcesInfos.description = ressourceCourante.description_ressource;
+                    ressourcesInfos.statut = statut;
+    
+                    projetInfos.ressources.push(ressourcesInfos);
                 }
             }
             tabRetour.projet.push(projetInfos);
         }
 
+        /*Classement */
         let classementFinal = await classementModel.chercherClassement(idEvent);
-
+        console.log(classementFinal)
         if (classementFinal == []) {
             tabRetour.classement = null;
         } else {
@@ -339,6 +316,7 @@ async function jsonEventChoisi(idEvent, typeUser) {
             tabRetour.podium.push(temp);
         }
 
+        /*Finalistes */
         let finalistes = await finalisteModel.chercher_finalistes(idEvent);
 
         if (finalistes == []) {
@@ -352,15 +330,14 @@ async function jsonEventChoisi(idEvent, typeUser) {
             }
         }
 
-
-
+        /*Infos étudiants, équipe dans l'event s'il en a une */
         if (typeUser === 'etudiant') {
 
-            const equipe = await aUneEquipe(4); /**Mettre id User */
+            const idEquipe = await equipeModel.aUneEquipeDansEvent(req.id, idEvent);
             tabRetour.userIsInterested = false;
 
-            if (equipe > 0) {
-                tabRetour.team = 5;
+            if (idEquipe > 0) {
+                tabRetour.team = idEquipe;
             } else {
                 tabRetour.team = -1;
             }
@@ -380,10 +357,6 @@ async function creerJsonTousEvents() {
 
         let listesAnciens = await recupererAncienEvents();
         let listeActuels = await recupererEventActuel();
-
-        // if (listesAnciens.rows.length === 0) {
-        //     return false;
-        // } else {
 
         tabRetour = {};
 
@@ -458,8 +431,6 @@ async function creerJsonTousEvents() {
                 }
 
             }
-
-
             courantInfos.mot = motCle;
             courantInfos.gain = gainTotal;
 

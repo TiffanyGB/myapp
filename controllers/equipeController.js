@@ -84,7 +84,7 @@ async function creerEquipe(req, res) {
         console.log(equipes_projets[j].idequipe, projets_event[0].idprojet)
 
         if (appartenir.length > 0) {
-          return res.status(404).json({ erreur: 'Il a déjà une équipe dans l\'evenement' });
+          return res.status(404).json({ erreur: 'Vous avez déjà une équipe dans cet évènement' });
         }
       }
     }
@@ -95,7 +95,7 @@ async function creerEquipe(req, res) {
 
       equipeModel.ajouterMembre(idCapitaine, idEquipe);
 
-      return res.status(200).json({ message: 'Équipe ' + idEquipe + ' créée avec succès. Capitaine: ' + idCapitaine });
+      return res.status(200).json(idEquipe);
 
     } catch (error) {
       return res.status(400).json({ erreur: 'Erreur création équipe.' });
@@ -413,7 +413,7 @@ async function demandeEquipe(req, res) {
         console.log(equipes_projets[j].idequipe, projets_event[0].idprojet)
 
         if (appartenir.length > 0) {
-          return res.status(404).json({ erreur: 'Il a déjà une équipe dans l\'evenement' });
+          return res.status(404).json({ erreur: 'Vous avez déjà une équipe dans cet évènement' });
         }
       }
     }
@@ -471,7 +471,7 @@ async function accepterDemande(req, res) {
         console.log(equipes_projets[j].idequipe, projets_event[0].idprojet)
 
         if (appartenir.length > 0) {
-          return res.status(404).json({ erreur: 'Il a déjà une équipe dans l\'evenement' });
+          return res.status(404).json({ erreur: 'L\'utilisateur a déjà rejoint une équipe dans l\'évènement' });
         }
       }
     }

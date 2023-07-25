@@ -1,7 +1,6 @@
 const pool = require('../database/configDB');
 const { body } = require('express-validator');
 
-
 async function validerRegles(req) {
     body('titre')
         .notEmpty().withMessage('Le nom ne doit pas être vide.')
@@ -17,10 +16,10 @@ async function validerRegles(req) {
 /**Récupérer une regle à partir de l'id de l'event */
 function recuperer_regles(idEvent) {
 
-    const chercherProjets = `SELECT * FROM Regle WHERE idevent = ${idEvent}`
+    const chercherProjets = `SELECT * FROM Regle WHERE idevent = $1`
 
     return new Promise((resolve, reject) => {
-        pool.query(chercherProjets)
+        pool.query(chercherProjets, [idEvent])
             .then((res) => {
                 resolve(res.rows);
             })
@@ -61,9 +60,10 @@ async function supprimerRegles(idEvent) {
     }
 }
 
+
 module.exports = {
     recuperer_regles,
     ajouterRegle,
     supprimerRegles,
-    validerRegles
+    validerRegles,
 }

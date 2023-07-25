@@ -249,7 +249,7 @@ async function voirEvent(req, res) {
     /**Si c'est un admin, afficher les infos de l'admin */
     if (req.userProfile === 'admin' || req.userProfile === 'gestionnaire') {
 
-      eventModel.jsonEventChoisi(eventID, 'admin')
+      eventModel.jsonEventChoisi(eventID, 'admin', req)
         .then((result) => {
           res.status(200).json(result);
         })
@@ -261,7 +261,7 @@ async function voirEvent(req, res) {
     }
     /**Si c'est un etudiant, afficher les infos de l'etudiant en plus, (equipe) */
     else if (req.userProfile === 'etudiant') {
-      eventModel.jsonEventChoisi(eventID, 'etudiant')
+      eventModel.jsonEventChoisi(eventID, 'etudiant', req)
         .then((result) => {
           res.status(200).json(result);
         })
@@ -271,7 +271,7 @@ async function voirEvent(req, res) {
     }
     /**Si non connecté ne pas envoyer les infos des ressources privées */
     else if (req.userProfile === 'aucun') {
-      eventModel.jsonEventChoisi(eventID, 'aucun')
+      eventModel.jsonEventChoisi(eventID, 'aucun', req)
         .then((result) => {
           res.status(200).json(result);
         })

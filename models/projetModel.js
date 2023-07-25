@@ -197,7 +197,23 @@ async function listeProjetsJson() {
     }
 }
 
-async function toutesInfosProjet(idEvent, tabRetour) {}
+/*Crée un json avec toutes les informations dans la bdd d'un evenement sauf la derniere modification */
+/*Peut etre l'ajouter? */
+async function toutesInfosProjet(projetCourant, projetInfos) {
+
+    if (projetCourant.imgprojet == null) {
+        projetInfos.img = '';
+    } else {
+        projetInfos.img = projetCourant.imgprojet;
+    }
+    projetInfos.titre = projetCourant.nom;
+    projetInfos.idprojet = projetCourant.idprojet;
+    projetInfos.description = projetCourant.description_projet;
+    projetInfos.recompense = projetCourant.recompense;
+    projetInfos.sujet = projetCourant.sujet;
+    projetInfos.thematique = [];
+    projetInfos.ressources = [];
+}
 
 
 /**Informations d'un projet */

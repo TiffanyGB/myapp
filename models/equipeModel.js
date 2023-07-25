@@ -274,7 +274,7 @@ function recupererDemande(idEquipe) {
     });
 }
 
-/* retourner l'id de l'équipe */
+/* Les équipes de l'user */
 async function aUneEquipe(idEtudiant) {
 
     const appartientAUneEquipe = `SELECT * FROM Appartenir WHERE idUser = $1`;
@@ -289,6 +289,30 @@ async function aUneEquipe(idEtudiant) {
             });
     });
 }
+
+async function aUneEquipeDansEvent(idUser, idEvent) {
+    try {
+
+        const projets_event = await projetModel.recuperer_projets(idEvent);
+
+        for (i = 0; i < projets_event.length; i++) {
+            const equipes_projets = await listeEquipeProjet(projets_event[i].idprojet);
+
+            for (j = 0; j < equipes_projets.length; j++) {
+                let appartenir = await appartenirEquipe(idUser, equipes_projets[j].idequipe);
+
+                if (appartenir.length > 0) {
+
+                    return appartenir[0].idequipe;
+                }
+            }
+        }
+        return -1;
+    } catch (error) {
+        throw error;
+    }
+}
+
 
 /* Promouvoir capitaine */
 function promouvoir(idEquipe, idEtudiant) {
@@ -579,10 +603,10 @@ async function jsonMesEquipes(idUser) {
 
         temp.nombre_max_equipe = event.nombre_max_equipe;
         temp.nomEvent = event.nom;
-        
-        if(new Date(event.date_fin) < new Date()){
+
+        if (new Date(event.date_fin) < new Date()) {
             temp.fini = true;
-        }else{
+        } else {
             temp.fini = false;
         }
         jsonRetour.equipe.push(temp);
@@ -725,5 +749,6 @@ module.exports = {
     envoyerDemande,
     demandeDejaEnvoyee,
     modifier_git,
-    jsonMesEquipes
+    jsonMesEquipes,
+    aUneEquipeDansEvent
 }
