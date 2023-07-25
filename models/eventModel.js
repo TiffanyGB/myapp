@@ -302,8 +302,8 @@ async function jsonEventChoisi(idEvent, typeUser, req) {
         /*Classement */
         let classementFinal = await classementModel.chercherClassement(idEvent);
         console.log(classementFinal)
-        if (classementFinal == []) {
-            tabRetour.classement = '';
+        if (classementFinal.length === 0) {
+            tabRetour.classement = [];
         } else {
             tabRetour.podium = [];
 
@@ -319,8 +319,8 @@ async function jsonEventChoisi(idEvent, typeUser, req) {
         /*Finalistes */
         let finalistes = await finalisteModel.chercher_finalistes(idEvent);
 
-        if (finalistes == []) {
-            tabRetour.finalistes = '';
+        if (finalistes.length === 0) {
+            tabRetour.finalistes = [];
         } else {
 
             tabRetour.finalistes = [];
@@ -334,6 +334,7 @@ async function jsonEventChoisi(idEvent, typeUser, req) {
         if (typeUser === 'etudiant') {
 
             const idEquipe = await equipeModel.aUneEquipeDansEvent(req.id, idEvent);
+            console.log(idEvent, req.id, idEquipe)
             tabRetour.userIsInterested = false;
 
             if (idEquipe > 0) {
