@@ -3,6 +3,7 @@ const passwordModel = require('../models/passwordModel');
 const profilModel = require('./profilModel');
 const validationDonnees = require('../middleware/validationDonnees');
 const verif = require('../controllers/Auth/verificationExistenceController');
+const preference = require('./profilModel');
 const { body } = require('express-validator');
 
 const validateUser = [
@@ -105,8 +106,6 @@ async function insererUser(values, password, values2, type) {
 
     let mdp = await passwordModel.salageMdp(password);
 
-    /**inserr mdp avec un tableau */
-
     const insertUser = `
       INSERT INTO Utilisateur (nom, prenom, pseudo, email, lien_linkedin, lien_github, ville, date_inscription, typeUser, hashMdp)
       VALUES ($1, $2, $3, $4, $5, $6, $7, CURRENT_TIMESTAMP, $8, $9)  RETURNING iduser`;
@@ -117,9 +116,10 @@ async function insererUser(values, password, values2, type) {
 
         /**Pas d'utilisateur ayant les mêmes id, on peut insérer */
         if (nonExiste) {
-            return new Promise((resolve, reject) => {
+            return new Promise((resolve) => {
                 pool.query(insertUser, values)
                     .then((result) => {
+
                         let id = result.rows[0].iduser;
                         profilModel.preferences(id);
                         resolve(id);
@@ -224,14 +224,14 @@ function supprimerUser(idUser) {
 
     const suppr = `DELETE FROM Utilisateur WHERE idUser = $1`;
 
-    try{
+    try {
         pool.query(suppr, [idUser])
-    }catch{
+    } catch {
         throw error;
     }
 }
 
-
+/*Sert a r */
 function supprimerUserID(idUser) {
 
     const suppr = `DELETE FROM Utilisateur WHERE idUser = $1`;
@@ -247,6 +247,37 @@ function supprimerUserID(idUser) {
             });
 
     });
+}
+
+async function getInfosProfil(id) {
+
+    // etudiant: ecole, niveau
+    // gestionnaire ia role
+    // externe metier role
+
+    const user = (await chercherUserID(id))[0];
+    jsonRetour = {};
+
+    jsonRetour.idUser = id;
+    // jsonRetour.type = user.typeuser;
+    jsonRetour.nom = user.nom;
+    jsonRetour.prenom = user.prenom;
+    jsonRetour.pseudo = user.pseudo;
+    jsonRetour.email = user.email;
+    jsonRetour.lien_linkedin = user.lien_linkedin;
+    jsonRetour.lien_github = user.lien_github;
+    jsonRetour.ville = user.ville;
+
+    const preferences = await preference.getPreferences(id);
+    jsonRetour.preferences = [];
+    jsonRetour.preference = JSON.parse(JSON.stringify(preferences[0]));
+
+    /*Les préférences */
+    //git, linkedin, ville
+    //ecole, niveau, metier
+
+    console.log(jsonRetour.preference.iduser)
+
 }
 
 

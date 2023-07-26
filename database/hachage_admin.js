@@ -17,7 +17,7 @@ const createDefaultUser = async () => {
         if (!nonExiste) {
 
             const idUser = await userModel.chercherUserPseudo(valeurs[0]);
-            const supprimer = await userModel.supprimerUser(idUser, 'admini');
+            userModel.supprimerUser(idUser);
         }
 
         const hashedPassword = await passwordModel.salageMdp(password);
@@ -33,8 +33,6 @@ const createDefaultUser = async () => {
         await pool.query(query, params);
 
         console.log('Utilisateur par défaut créé avec succès');
-
-
 
 
     } catch (error) {

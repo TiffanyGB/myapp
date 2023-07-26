@@ -544,7 +544,7 @@ async function jsonListeEquipeProjet(idProjet) {
             /*Capitaine */
             temp.idCapitaine = equipeCourante.idcapitaine;
             temp.nomCapitaine = ((await userModel.chercherUserID(equipeCourante.idcapitaine))[0].nom);
-
+            console.log(temp.nomCapitaine)
 
             jsonRetour.equipe.push(temp);
         }
@@ -553,7 +553,6 @@ async function jsonListeEquipeProjet(idProjet) {
         throw error;
     }
 }
-
 async function jsonMesEquipes(idUser) {
 
     let jsonRetour = {};

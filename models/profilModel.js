@@ -1,12 +1,6 @@
 const pool = require('../database/configDB');
 
 /****************************** PROFIL ****************************/
-function getInfosProfil(req,id) {
-
-    //nom, prenom, email, pseudo
-
-}
-
 function supprimerSonCompte(idUser) {
 
     const supprimer = `DELETE FROM Utilisateur
@@ -56,7 +50,12 @@ function getPreferences(idUser) {
     WHERE idUser = $1`;
 
     try {
-        pool.query(get, [idUser])
+        return new Promise((resolve) => {
+            pool.query(get, [idUser])
+                .then((res) => {
+                    resolve(res.rows);
+                });
+        });
     } catch (error) {
         throw (error);
     }
@@ -67,5 +66,4 @@ module.exports = {
     modifierPreferences,
     getPreferences,
     supprimerSonCompte,
-    getInfosProfil
 }

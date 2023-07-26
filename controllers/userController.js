@@ -135,86 +135,85 @@ async function createUser(req, res) {
     userModel.insererUser(valeurs_communes, password, valeurs_id, type)
       .then((insertion) => {
         /**Insertion doit contenir l'id de l'utilisateur */
-        if (typeof insertion === 'number') {
+        // if (typeof insertion === 'number') {
 
-          /**On insère les infos supplémentaires dans la table appropriée au type*/
-          switch (type) {
-            case 'etudiant':
+        //   /**On insère les infos supplémentaires dans la table appropriée au type*/
+        //   switch (type) {
+        //     case 'etudiant':
 
-              etudiantModel.creerEtudiant(userEcole, userNiveauEtude, insertion)
-                .then(() => {
+        //       etudiantModel.creerEtudiant(userEcole, userNiveauEtude, insertion)
+        //         .then(() => {
 
-                  res.status(200).json({ message: 'Inscription réussie' });
-                })
-                .catch(() => {
-                  /**Supprimer l'utilisateur dans la table utilisateur s'il y a un souci */
-                  userModel.supprimerUser(insertion, 'etudiant')
-                  res.status(400).json({ erreur: "erreur", Détails: "Utilisateur supprimé de la table utilisateur" });
-                });
+        //           res.status(200).json({ message: 'Inscription réussie' });
+        //         })
+        //         .catch(() => {
+        //           /**Supprimer l'utilisateur dans la table utilisateur s'il y a un souci */
+        //           userModel.supprimerUser(insertion, 'etudiant')
+        //           res.status(400).json({ erreur: "erreur", Détails: "Utilisateur supprimé de la table utilisateur" });
+        //         });
 
-              break;
+        //       break;
 
-            case 'administrateur':
-              adminModel.creerAdmin(insertion)
-                .then(() => {
-                  res.status(200).json({ message: 'Inscription Admin réussie' });
-                })
-                .catch(() => {
-                  /**Supprimer l'utilisateur dans la table utilisateur s'il y a un souci */
-                  userModel.supprimerUser(insertion, 'Admini')
-                  res.status(400).json({ erreur: "erreur", Détails: "Utilisateur supprimé de la table utilisateur" });
-                });
+        //     case 'administrateur':
+        //       adminModel.creerAdmin(insertion)
+        //         .then(() => {
+        //           res.status(200).json({ message: 'Inscription Admin réussie' });
+        //         })
+        //         .catch(() => {
+        //           /**Supprimer l'utilisateur dans la table utilisateur s'il y a un souci */
+        //           userModel.supprimerUser(insertion, 'Admini')
+        //           res.status(400).json({ erreur: "erreur", Détails: "Utilisateur supprimé de la table utilisateur" });
+        //         });
 
-              break;
+        //       break;
 
-            case 'gestionnaireExterne':
-              gestionnaireExterneModel.creerGestionnaireExterne(insertion, userEntreprise, userMetier)
-                .then(() => {
-                  res.status(200).json({ message: 'Inscription réussie' });
-                })
-                .catch(() => {
-                  /**Supprimer l'utilisateur dans la table utilisateur s'il y a un souci */
-                  userModel.supprimerUser(insertion, 'Gestionnaire_externe')
-                  res.status(400).json({ erreur: "erreur", Détails: "Utilisateur supprimé de la table utilisateur" });
-                });
+        //     case 'gestionnaireExterne':
+        //       gestionnaireExterneModel.creerGestionnaireExterne(insertion, userEntreprise, userMetier)
+        //         .then(() => {
+        //           res.status(200).json({ message: 'Inscription réussie' });
+        //         })
+        //         .catch(() => {
+        //           /**Supprimer l'utilisateur dans la table utilisateur s'il y a un souci */
+        //           userModel.supprimerUser(insertion, 'Gestionnaire_externe')
+        //           res.status(400).json({ erreur: "erreur", Détails: "Utilisateur supprimé de la table utilisateur" });
+        //         });
 
-              break;
+        //       break;
 
-            case 'gestionnaireIA':
-              gestionnaireIaModel.creerGestionnaireIA(insertion, userRole)
-                .then(() => {
-                  res.status(200).json({ message: 'Inscription réussie' });
-                })
-                .catch(() => {
-                  /**Supprimer l'utilisateur dans la table utilisateur s'il y a un souci */
-                  userModel.supprimerUser(insertion, 'Gestionnaire_iapau')
-                  res.status(400).json({ erreur: "erreur", Détails: "Utilisateur supprimé de la table utilisateur" });
-                });
+        //     case 'gestionnaireIA':
+        //       gestionnaireIaModel.creerGestionnaireIA(insertion, userRole)
+        //         .then(() => {
+        //           res.status(200).json({ message: 'Inscription réussie' });
+        //         })
+        //         .catch(() => {
+        //           /**Supprimer l'utilisateur dans la table utilisateur s'il y a un souci */
+        //           userModel.supprimerUser(insertion, 'Gestionnaire_iapau')
+        //           res.status(400).json({ erreur: "erreur", Détails: "Utilisateur supprimé de la table utilisateur" });
+        //         });
 
-              break;
+        //       break;
 
-            default:
-              userModel.supprimerUserID(insertion);
-              res.status(400).json({ message: 'Le type est incorrect.' });
+        //     default:
+        //       userModel.supprimerUserID(insertion);
+        //       res.status(400).json({ message: 'Le type est incorrect.' });
 
-              break;
-          }
-        }
+        //       break;
+        //   }
+        // }
 
         /**Pseudo et/ou email déjà pris */
-        else if (insertion === 'les2') {
-          res.status(400).json({ Existe: 'Mail et pseudo' });
+        //  if (insertion === 'les2') {
+        //   res.status(400).json({ Existe: 'Mail et pseudo' });
 
-        } else if (insertion === 'pseudo') {
-          res.status(400).json({ Existe: 'Pseudo' });
+        // } else if (insertion === 'pseudo') {
+        //   res.status(400).json({ Existe: 'Pseudo' });
 
-        } else if (insertion === 'mail') {
-          res.status(400).json({ Existe: 'Mail' });
-
-        }
+        // } else if (insertion === 'mail') {
+        //   res.status(400).json({ Existe: 'Mail' });
+        // }
 
       }).catch(() => {
-        res.status(400).json({ message: 'Erreur lors de l\'insertion de l\'utilisateur.' });
+        res.status(400).json({ message: 'Erreur lors de l\'insertion de l\'utilisateur' });
       });
   }
 }
@@ -460,7 +459,11 @@ async function supprimerUser(req, res) {
 }
 
 async function getInfosProfil(req, res) {
+  if (req.method === "OPTIONS") {
+    res.status(200).json({ success: 'Access granted' });
 
+  } else if (req.method === 'GET') {
+  }
 }
 
 module.exports = {

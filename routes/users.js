@@ -51,7 +51,6 @@ router.all(
   '/create',
   userModel.validateUser,
   indexController.verifyToken,
-  checkAdminProfile,
   validationDonnees.validatePasswordCreation,
   userController.createUser,
 

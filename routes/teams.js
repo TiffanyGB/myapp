@@ -40,7 +40,7 @@ router.all('/:id/ouvertes', (req, res, next) => {
     res.locals.idEvent = req.params.id;
     next();
 }, indexController.verifyToken,
-    etudiantProfil,
+    // etudiantProfil,
     equipeController.listeOuvertes);
 
 /* Promouvoir un membre --> capitaine*/

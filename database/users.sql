@@ -214,8 +214,10 @@ CREATE TABLE Preferences(
     idUser INT PRIMARY KEY REFERENCES Utilisateur(idUser) ON DELETE CASCADE,
     github BOOLEAN DEFAULT true,
     linkedin BOOLEAN DEFAULT true,
+    ville BOOLEAN DEFAULT true,
     ecole BOOLEAN DEFAULT true,
-    niveau_etude BOOLEAN DEFAULT true
+    niveau_etude BOOLEAN DEFAULT true,
+    metier BOOLEAN DEFAULT true
 );
 
 INSERT INTO Evenement (nom, debut_inscription, date_debut, date_fin, description_event, nombre_min_equipe, nombre_max_equipe, type_event)

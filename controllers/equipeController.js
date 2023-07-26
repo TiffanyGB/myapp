@@ -1,11 +1,10 @@
 const equipeModel = require('../models/equipeModel');
 const projetModel = require('../models/projetModel');
 const eventModel = require('../models/eventModel');
-const etudiantModel = require('../models/etudiantModel');
 const demandeModel = require('../models/demandeModel')
 const { body, validationResult } = require('express-validator');
 
-
+/**A mettre dans un dossier autre que controller */
 async function retournerEquipeProjet(req, res) {
   if (req.userProfile === 'admin') {
     if (req.method === 'OPTIONS') {
@@ -272,10 +271,9 @@ async function listeOuvertes(req, res) {
 
     const idEvent = res.locals.idEvent;
 
-    const event = await eventModel.jsonlisteEquipeEvent(idEvent);
-
     // Vérifier que l'id existe dans la bdd, sinon 404 error
-    if (event.equipes.length === 0) {
+    const event = eventModel.chercherEvenement(idEvent)
+    if (event.length === 0) {
       return res.status(404).json({ erreur: 'L\'id de l\'événement n\'existe pas' });
     }
 
@@ -332,7 +330,8 @@ async function demandeEquipe(req, res) {
   else if (req.method === 'POST') {
 
     const idUser = req.id;
-    const idEquipe = res.locals.idEquipe;
+    let idEquipe = res.locals.idEquipe;
+    idEquipe 
 
     const {
       message
@@ -349,6 +348,10 @@ async function demandeEquipe(req, res) {
       .withMessage('Le message doit contenir entre 0 et 200 caracteres')
       .run(req);
 
+
+    if(isNaN(idEquipe)){
+      return res.status(400).json('L\'id de l\'équipe n\'est pas un nombre');
+    }
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -377,7 +380,6 @@ async function demandeEquipe(req, res) {
       for (j = 0; j < equipes_projets.length; j++) {
 
         let appartenir = await equipeModel.appartenirEquipe(idUser, equipes_projets[j].idequipe);
-        console.log(equipes_projets[j].idequipe, projets_event[0].idprojet)
 
         if (appartenir.length > 0) {
           return res.status(404).json({ erreur: 'Vous avez déjà une équipe dans cet évènement' });
@@ -393,10 +395,10 @@ async function demandeEquipe(req, res) {
 
     try {
       equipeModel.envoyerDemande(valeurs);
-      res.status(200).json({ message: "Message envoyé" });
+      return res.status(200).json({ message: "Message envoyé" });
 
     } catch {
-      res.status(400).json({ error: 'Erreur lors de l\'envoi du message.' });
+      return res.status(400).json({ error: 'Erreur lors de l\'envoi du message.' });
     }
   }
 }
@@ -516,7 +518,6 @@ async function voirMesEquipes(req, res) {
     }
   }
 }
-
 
 
 
