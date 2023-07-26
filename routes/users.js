@@ -67,7 +67,7 @@ router.all('/edit/:id', (req, res, next) => {
   res.locals.userId = req.params.id;
   next();
 }, indexController.verifyToken,
-  checkAdminProfile,
+/**Tous les users */
   validationDonnees.validatePasswordModif,
   userController.modifierUser);
 

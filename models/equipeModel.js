@@ -141,8 +141,9 @@ function modifierEquipe(valeurs) {
     statut_recrutement = $3,
     idProjet = $4,
     lienDiscussion = $5,
-    preferenceQuestionnaire = $6
-    WHERE idEquipe = $7`;
+    preferenceQuestionnaire = $6,
+    lien_github = $7
+    WHERE idEquipe = $8`;
 
     try {
         pool.query(modifier, valeurs);
@@ -151,18 +152,6 @@ function modifierEquipe(valeurs) {
     }
 }
 
-function modifier_git(github, idEquipe) {
-
-    const modifier = `UPDATE Equipe
-    SET lien_github = $1
-    WHERE idEquipe = $2`;
-
-    try {
-        pool.query(modifier, [github, idEquipe]);
-    } catch (error) {
-        throw error;
-    }
-}
 
 function appartenirEquipe(idUser, idEquipe) {
 
@@ -755,7 +744,6 @@ module.exports = {
     appartenirEquipe,
     envoyerDemande,
     demandeDejaEnvoyee,
-    modifier_git,
     jsonMesEquipes,
     aUneEquipeDansEvent
 }

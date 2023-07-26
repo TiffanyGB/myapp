@@ -117,7 +117,8 @@ async function modifierEquipe(req, res) {
       description,
       idProjet,
       lien_discussion,
-      preferenceQuestionnaire
+      preferenceQuestionnaire,
+      github
     } = req.body;
 
 
@@ -128,6 +129,7 @@ async function modifierEquipe(req, res) {
       idProjet,
       lien_discussion,
       preferenceQuestionnaire,
+      github,
       idEquipe
     ]
 
@@ -143,53 +145,6 @@ async function modifierEquipe(req, res) {
   }
 }
 
-async function modifierGit(req, res) {
-  if (req.method === 'OPTIONS') {
-    res.status(200).json({ sucess: 'Agress granted' });
-  }
-  else if (req.method === 'PATCH') {
-
-    /*Récupération données du body */
-    const {
-      lien_github
-    } = req.body;
-
-    const idEquipe = res.locals.idEquipe;
-    const idUser = req.id;
-
-    /* Vérifier si l'équipe existe */
-    const equipe = await equipeModel.chercherEquipeID(idEquipe);
-
-    if (equipe.length === 0) {
-      return res.status(404).json({ erreur: 'L\'id de l\'équipe n\'existe pas' });
-    }
-
-    /*Vérifier si l'étudiant est dans l'équipe */
-    const appartenir = await equipeModel.appartenirEquipe(idUser, idEquipe);
-    if (appartenir.length === 0) {
-      return res.status(404).json({ erreur: 'L\'étudiant ne fait pas partie de l\'équipe' });
-    }
-
-    await body('lien_github')
-      .optional({ nullable: true, checkFalsy: true })
-      .isLength({ min: 0, max: 200 }).withMessage('Le message doit contenir entre 4 et 300 caracteres')
-      .isURL().withMessage('Doit être un lien')
-      .run(req);
-
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-
-    try {
-      equipeModel.modifier_git(lien_github, idEquipe);
-      res.status(200).json({ message: 'Lien github modifié' })
-    } catch {
-      res.status(400).json({ message: 'Erreur modification lien github' })
-    }
-
-  }
-}
 
 async function supprimerEquipe(req, res) {
   if (req.method === 'OPTIONS') {
@@ -595,6 +550,5 @@ module.exports = {
   demandeEquipe,
   accepterDemande,
   declinerDemande,
-  modifierGit,
   voirMesEquipes
 }

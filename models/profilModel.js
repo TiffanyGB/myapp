@@ -1,8 +1,17 @@
 const pool = require('../database/configDB');
 
 /****************************** PROFIL ****************************/
+function getInfosProfil(){
 
+}
 
+function modifierProfil(){
+
+}
+
+function supprimerCompte(){
+
+}
 
 /****************************** PREFERENCES ****************************/
 
@@ -14,7 +23,7 @@ function preferences(id) {
 
     try {
         pool.query(inserer, [id]);
-    } catch {
+    } catch (error){
         throw error;
     }
 }
@@ -23,11 +32,32 @@ function preferences(id) {
 function modifierPreferences(valeurs){
 
     const modifier = `UPDATE Preferences 
-    WHERE`;
+    SET
+    WHERE idUser = $5`;
+
+    try{
+        pool.query(modifier, valeurs);
+    }catch (error){
+        throw error;
+    }
 }
 
+/*Récupérer préférences*/
+function getPreferences(idUser){
+
+    const get = `SELECT * 
+    FROM Preferences
+    WHERE idUser = $1`;
+
+    try{
+        pool.query(get, [idUser])
+    }catch{
+
+    }
+}
 
 module.exports = {
     preferences,
-    modifierPreferences
+    modifierPreferences,
+    getPreferences
 }

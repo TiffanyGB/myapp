@@ -233,10 +233,11 @@ async function modifierUser(req, res) {
       .then((result) => {
 
         if (result.length === 0) {
-          res.status(404).json({ erreur: 'L\'id n\'existe pas' });
+          return res.status(404).json({ erreur: 'L\'id n\'existe pas' });
         }
       });
 
+      console.log(req.userProfile)
     /**Récupération des données */
     const {
       nom: userNom,

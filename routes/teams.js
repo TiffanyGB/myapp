@@ -72,13 +72,6 @@ router.all('/:id/infos', (req, res, next) => {
     equipeController.getInfosEquipe);
 
 
-router.all('/:id/modifierGit', (req, res, next) => {
-    res.locals.idEquipe = req.params.id;
-    next();
-}, indexController.verifyToken,
-    etudiantProfil,
-    equipeController.modifierGit);
-
 router.all('/:id/demandeAdmission', (req, res, next) => {
     res.locals.idEquipe = req.params.id;
     next();
