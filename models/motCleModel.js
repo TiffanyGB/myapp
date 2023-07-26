@@ -3,10 +3,10 @@ const pool = require('../database/configDB');
 
 function recupererMot(idProjet) {
 
-    const chercherMots = `SELECT * FROM mot_cle WHERE idProjet = ${idProjet}`
+    const chercherMots = `SELECT * FROM mot_cle WHERE idProjet = $1`
 
     return new Promise((resolve, reject) => {
-        pool.query(chercherMots)
+        pool.query(chercherMots, [idProjet])
             .then((res) => {
                 resolve(res.rows);
             })
@@ -15,7 +15,6 @@ function recupererMot(idProjet) {
             });
     });
 }
-
 
 /**Insérer mot clé */
 async function insererMot(valeurs) {

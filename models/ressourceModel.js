@@ -5,8 +5,7 @@ const pool = require('../database/configDB');
 function ajouterRessources(valeurs) {
 
     const ajouter = `INSERT INTO Ressource (titre, type_ressource, lien, date_apparition, statut, description_ressource, idProjet)
-    VALUES ($1,$2,$3,$4,$5,$6, $7
-        ) `;
+    VALUES ($1,$2,$3,$4,$5,$6, $7) `;
 
     try {
         pool.query(ajouter, valeurs);
@@ -19,10 +18,10 @@ function ajouterRessources(valeurs) {
 /**Ressources publiques */
 function recuperer_ressourcesPubliques(idProjet) {
 
-    const chercherRessources = `SELECT * FROM Ressource WHERE idprojet = ${idProjet} AND statut = 'public'`;
+    const chercherRessources = `SELECT * FROM Ressource WHERE idprojet = $1 AND statut = 'public'`;
 
     return new Promise((resolve, reject) => {
-        pool.query(chercherRessources)
+        pool.query(chercherRessources, [idProjet])
             .then((res) => {
                 resolve(res.rows);
             })
@@ -35,10 +34,10 @@ function recuperer_ressourcesPubliques(idProjet) {
 /**Ressources privées */
 function recuperer_ressourcesPrivees(idProjet) {
 
-    const chercherRessources = `SELECT * FROM Ressource WHERE idprojet = ${idProjet} and statut= 'privé'`;
+    const chercherRessources = `SELECT * FROM Ressource WHERE idprojet = $1 and statut= 'privé'`;
 
     return new Promise((resolve, reject) => {
-        pool.query(chercherRessources)
+        pool.query(chercherRessources, [idProjet])
             .then((res) => {
                 resolve(res.rows);
             })
@@ -51,10 +50,10 @@ function recuperer_ressourcesPrivees(idProjet) {
 /**toutes les ressources d'un projet */
 function recuperer_toutes_ressources(idProjet) {
 
-    const chercherRessources = `SELECT * FROM Ressource WHERE idprojet = '${idProjet}'`;
+    const chercherRessources = `SELECT * FROM Ressource WHERE idprojet = $1`;
 
     return new Promise((resolve, reject) => {
-        pool.query(chercherRessources)
+        pool.query(chercherRessources, [idProjet])
             .then((res) => {
                 resolve(res.rows);
             })

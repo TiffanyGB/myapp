@@ -68,8 +68,8 @@ function chercherStudent(idUser) {
  */
 async function creerEtudiant(ecole, niveau, id) {
 
-    const values_etudiant = [ecole, niveau];
-    const requet = `INSERT INTO Etudiant (idEtudiant, ecole, niveau_etude) VALUES ('${id}', $1, $2)`;
+    const values_etudiant = [id, ecole, niveau];
+    const requet = `INSERT INTO Etudiant (idEtudiant, ecole, niveau_etude) VALUES ($1, $2, $3)`;
 
     try {
         return new Promise((resolve, reject) => {
@@ -105,28 +105,21 @@ async function modifierEtudiant(idUser, valeurs, valeurs_etudiant, password) {
             return 'mail';
         }
         const student = `UPDATE Etudiant
-                    SET ecole = '${valeurs_etudiant[1]}',
-                    niveau_etude = '${valeurs_etudiant[2]}' 
-                    WHERE idEtudiant = ${idUser}`;
+                    SET ecole = $1,
+                    niveau_etude = $2 
+                    WHERE idEtudiant = $3`;
 
+        valeurs_etudiant.push(idUser);
         try {
-            pool.query(student);
-            console.log("reussi");
+            pool.query(student, valeurs_etudiant);
         }
         catch (error) {
-            console.error("Erreur lors de la mise à jour de l'étudiant", error);
+            throw error;
         }
-
-
-
-
     } catch (error) {
-        console.error("Erreur lors de la mise à jour de l'étudiant", error);
         throw error;
     }
 }
-
-
 
 module.exports = {
     chercherStudent,

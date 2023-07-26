@@ -29,6 +29,7 @@ DROP TABLE IF EXISTS Interested CASCADE;
 DROP TABLE IF EXISTS Gerer_externe CASCADE;
 DROP TABLE IF EXISTS Gerer_ia_pau CASCADE;
 DROP TABLE IF EXISTS DemandeEquipe CASCADE;
+DROP TABLE IF EXISTS Preferences CASCADE;
 
 
 CREATE TABLE Utilisateur(
@@ -160,17 +161,20 @@ CREATE TABLE Mot_cle(
 
 CREATE TABLE Appartenir(
     idUser INT REFERENCES Utilisateur(idUser) ON DELETE CASCADE,
-    idEquipe INT REFERENCES Equipe(idEquipe) ON DELETE CASCADE
+    idEquipe INT REFERENCES Equipe(idEquipe) ON DELETE CASCADE,
+    PRIMARY KEY (idUser, idEquipe)
 );
 
 CREATE TABLE Represente(
     idMot INT REFERENCES Mot_cle(idMot) ON DELETE CASCADE,
-    idProjet Int REFERENCES Projet(idProjet) ON DELETE CASCADE
+    idProjet Int REFERENCES Projet(idProjet) ON DELETE CASCADE,
+    PRIMARY KEY (idMot, idProjet)
 );
 
 CREATE TABLE Interested(
     idUser INT REFERENCES Utilisateur(idUser) ON DELETE CASCADE,
-    idEvent INT REFERENCES Evenement(idEvent) ON DELETE CASCADE
+    idEvent INT REFERENCES Evenement(idEvent) ON DELETE CASCADE,
+    PRIMARY KEY(idUser, idEvent)
 );
 
 CREATE TABLE Classement(
@@ -182,23 +186,36 @@ CREATE TABLE Classement(
 
 CREATE TABLE Resultat(
     idEvent INT REFERENCES Evenement(idEvent) ON DELETE CASCADE,
-    classement INT REFERENCES Classement(idClassement) ON DELETE CASCADE
+    classement INT REFERENCES Classement(idClassement) ON DELETE CASCADE,
+    PRIMARY KEY(idEvent, classement)
 );
 
 CREATE TABLE Gerer_ia_pau(
     id_g_iapau INT REFERENCES Gestionnaire_iapau(id_g_iapau) ON DELETE CASCADE,
-    idProjet INT REFERENCES Projet(idProjet) ON DELETE CASCADE
+    idProjet INT REFERENCES Projet(idProjet) ON DELETE CASCADE,
+    PRIMARY KEY(id_g_iapau, idProjet)
 );
 
 CREATE TABLE Gerer_externe(
     id_g_externe INT REFERENCES Gestionnaire_externe(id_g_externe) ON DELETE CASCADE,
-    idProjet INT REFERENCES Projet(idProjet) ON DELETE CASCADE
+    idProjet INT REFERENCES Projet(idProjet) ON DELETE CASCADE,
+    PRIMARY KEY(id_g_externe, idProjet)
 );
 
 CREATE TABLE DemandeEquipe(
     idUser INT REFERENCES Utilisateur(idUser) ON DELETE CASCADE,
     idEquipe INT REFERENCES Equipe(idEquipe) ON DELETE CASCADE,
-    messageDemande TEXT DEFAULT NULL
+    messageDemande TEXT DEFAULT NULL,
+    PRIMARY KEY(idUser, idEquipe)
+
+);
+
+CREATE TABLE Preferences(
+    idUser INT PRIMARY KEY REFERENCES Utilisateur(idUser) ON DELETE CASCADE,
+    github BOOLEAN DEFAULT true,
+    linkedin BOOLEAN DEFAULT true,
+    ecole BOOLEAN DEFAULT true,
+    niveau_etude BOOLEAN DEFAULT true
 );
 
 INSERT INTO Evenement (nom, debut_inscription, date_debut, date_fin, description_event, nombre_min_equipe, nombre_max_equipe, type_event)

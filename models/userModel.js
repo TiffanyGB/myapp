@@ -1,5 +1,6 @@
 const pool = require('../database/configDB');
 const passwordModel = require('../models/passwordModel');
+const profilModel = require('./profilModel');
 const validationDonnees = require('../middleware/validationDonnees');
 const verif = require('../controllers/Auth/verificationExistenceController');
 const { body } = require('express-validator');
@@ -19,7 +20,7 @@ const validateUser = [
         .notEmpty().withMessage('Le pseudo ne doit pas être vide.')
         .isLength({ min: 2, max: 30 }).withMessage('Le pseudo doit avoir une longueur comprise entre 3 et 30 caractères.')
         .matches(/^[^\s<>]+$/).withMessage('Le pseudo ne doit contenir que des lettres, des chiffres et des caractères spéciaux, sauf les espaces et les symboles "<>".')
-,
+    ,
     body('email')
         .notEmpty().withMessage('L\'email ne doit pas être vide.')
         .isEmail().withMessage('L\'email doit être une adresse email valide.')
@@ -82,10 +83,10 @@ function chercherUserID(idUser) {
 
 /**Pour supprimer, odifier la fonction de hachage de l'admin */
 function chercherUserPseudo(pseudo) {
-    const user = `SELECT idUser FROM utilisateur WHERE pseudo = '${pseudo}'`;
+    const user = `SELECT idUser FROM utilisateur WHERE pseudo = $1`;
 
     return new Promise((resolve, reject) => {
-        pool.query(user)
+        pool.query(user, [pseudo])
             .then((result) => {
                 if (result.rows.length > 0) {
                     resolve(result.rows[0].iduser);
@@ -108,9 +109,10 @@ async function insererUser(values, password, values2, type) {
 
     const insertUser = `
       INSERT INTO Utilisateur (nom, prenom, pseudo, email, lien_linkedin, lien_github, ville, date_inscription, typeUser, hashMdp)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, CURRENT_TIMESTAMP, '${type}', '${mdp}')  RETURNING iduser`;
+      VALUES ($1, $2, $3, $4, $5, $6, $7, CURRENT_TIMESTAMP, $8, $9)  RETURNING iduser`;
 
     try {
+        values.push(type, mdp)
         const nonExiste = await verif.verifExistence(values2);
 
         /**Pas d'utilisateur ayant les mêmes id, on peut insérer */
@@ -119,11 +121,8 @@ async function insererUser(values, password, values2, type) {
                 pool.query(insertUser, values)
                     .then((result) => {
                         let id = result.rows[0].iduser;
+                        profilModel.preferences(id);
                         resolve(id);
-                    })
-                    .catch((error) => {
-                        console.error('Fichier "' + __filename + '" fonction: "' + arguments.callee.name + ':\nErreur lors de l\'insertion des données côté utilisateur:', error);
-                        reject(error);
                     });
             });
         }
@@ -141,10 +140,10 @@ async function insererUser(values, password, values2, type) {
             }
         }
     } catch (error) {
-        console.error('Erreur lors de l\'insertion des données côté utilisateur:', error);
         throw error;
     }
 }
+
 
 /**Modifier un utilisateur */
 async function modifierUser(idUser, valeurs, password) {
@@ -219,6 +218,9 @@ async function modifierUser(idUser, valeurs, password) {
         })
 }
 
+
+
+
 /**Supprimer */
 //Doit être Etudiant, admini, gestionnaire_iapau ou gestionnaire_externe
 function supprimerUser(idUser, role) {
@@ -239,13 +241,13 @@ function supprimerUser(idUser, role) {
             break;
     }
 
-    const suppRole = `DELETE FROM ${role} WHERE $1 = '${idUser}'`;
-    const suppr = `DELETE FROM Utilisateur WHERE idUser = '${idUser}'`;
+    const suppRole = `DELETE FROM $1 WHERE $2 = $3`;
+    const suppr = `DELETE FROM Utilisateur WHERE idUser = $1`;
 
     return new Promise((resolve, reject) => {
-        pool.query(suppRole, [id])
+        pool.query(suppRole, [role, id, idUser])
             .then(() => {
-                pool.query(suppr)
+                pool.query(suppr, [idUser])
                     .then(() => {
                         resolve('ok');
                     })
@@ -262,11 +264,11 @@ function supprimerUser(idUser, role) {
 
 function supprimerUserID(idUser) {
 
-    const suppr = `DELETE FROM Utilisateur WHERE idUser = '${idUser}'`;
+    const suppr = `DELETE FROM Utilisateur WHERE idUser = $1`;
 
     return new Promise((resolve, reject) => {
 
-        pool.query(suppr)
+        pool.query(suppr, [idUser])
             .then(() => {
                 resolve('ok');
             })

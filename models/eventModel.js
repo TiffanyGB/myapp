@@ -334,7 +334,7 @@ async function jsonEventChoisi(idEvent, typeUser, req) {
         if (typeUser === 'etudiant') {
 
             const idEquipe = await equipeModel.aUneEquipeDansEvent(req.id, idEvent);
-            console.log(idEvent, req.id, idEquipe)
+
             tabRetour.userIsInterested = false;
 
             if (idEquipe > 0) {
@@ -352,6 +352,7 @@ async function jsonEventChoisi(idEvent, typeUser, req) {
     }
 }
 
+/*Tous les events de l'asso */
 async function creerJsonTousEvents() {
 
     try {
@@ -364,6 +365,7 @@ async function creerJsonTousEvents() {
         tabRetour.oldEvents = [];
         tabRetour.actualEvent = [];
 
+        /*Infos des anciens  events*/
         for (i = 0; i < listesAnciens.rows.length; i++) {
 
             ancienCourant = listesAnciens.rows[i];
@@ -380,8 +382,8 @@ async function creerJsonTousEvents() {
             let listeProjets = await projetModel.recuperer_projets(ancienCourant.idevent);
             let gainTotal = 0;
 
+            /*les mots-clés provenant de la liste des projets de l'event */
             let motCle = [];
-
 
             for (j = 0; j < listeProjets.length; j++) {
                 gainTotal += listeProjets[j].recompense;
@@ -398,6 +400,7 @@ async function creerJsonTousEvents() {
             tabRetour.oldEvents.push(courantInfos);
         }
 
+        /*Evenement pas encore passés */
         for (i = 0; i < listeActuels.rows.length; i++) {
 
             actuelCourant = listeActuels.rows[i];
@@ -439,23 +442,24 @@ async function creerJsonTousEvents() {
         }
         return tabRetour;
     }
-    // }
     catch (error) {
         throw error;
     }
 }
 
+/*Liste des équipes associées à un event */
 async function jsonlisteEquipeEvent(idEvent) {
 
     try {
+        /*On récupère la liste des projets liés à l'evenement */
         const listeProjets = await projetModel.recuperer_projets(idEvent);
 
-        const jsonRetour = {}; // Assurez-vous d'initialiser jsonRetour comme un objet vide ici
+        const jsonRetour = {}; 
         jsonRetour.equipes = [];
 
+        /*On récupère les équipes de chaques event*/
         for (let i = 0; i < listeProjets.length; i++) {
             let equipeList = await jsonListeEquipeProjet(listeProjets[i].idprojet);
-
 
             for (j = 0; j < equipeList.equipe.length; j++) {
                 jsonRetour.equipes.push(equipeList.equipe[j]);
@@ -464,7 +468,7 @@ async function jsonlisteEquipeEvent(idEvent) {
         return (jsonRetour);
 
     } catch (error) {
-        console.error(error);
+        throw error;
     }
 }
 
@@ -488,7 +492,6 @@ async function recup_Infos_Modif_Event(idEvent) {
 
     return jsonRetour;
 }
-
 
 module.exports = {
     chercherEvenement,

@@ -297,8 +297,11 @@ async function getInfosEquipe(req, res) {
 
     const idEquipe = res.locals.idEquipe;
 
-    /*La vérification de l'id de l'équipe se fait dans le veif profil */
-
+    /* Vérifier l'id de l'équipe */
+    const equipe = await equipeModel.chercherEquipeID(idEquipe);
+    if (equipe.length === 0) {
+      return res.status(404).json({ erreur: 'L\'id de l\'équipe n\'existe pas' });
+    }
     const jsonRetour = await equipeModel.jsonInformationsEquipe(idEquipe, req);
 
     res.status(200).json(jsonRetour);
@@ -540,12 +543,12 @@ async function voirMesEquipes(req, res) {
   }
   else if (req.method === 'GET') {
 
-    try{
+    try {
       const jsonInfos = await equipeModel.jsonMesEquipes(req.id);
       res.status(200).json(jsonInfos);
 
-    }catch{
-      res.status(400).json({erreur: "Erreur lors de la récupération des données."});
+    } catch {
+      res.status(400).json({ erreur: "Erreur lors de la récupération des données." });
     }
   }
 }

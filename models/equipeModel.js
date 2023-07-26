@@ -313,7 +313,6 @@ async function aUneEquipeDansEvent(idUser, idEvent) {
     }
 }
 
-
 /* Promouvoir capitaine */
 function promouvoir(idEquipe, idEtudiant) {
 
@@ -343,13 +342,14 @@ async function jsonInformationsEquipe(idEquipe, req) {
             let temp1 = chercher[0];
 
             /*Nom*/
+            console.log(temp1)
             jsonRetour.nom = temp1.nom;
 
             /*Nombre de membres de l'équipe */
             const membres = await ListeMembre(idEquipe);
             jsonRetour.nombre_membres = membres.length;
 
-            //Nombre max de l'event
+            /*Nombre max de l'event*/
             const projet = await projetModel.chercherProjetId(temp1.idprojet);
             let idevent = projet[0].idevent;
 
@@ -514,6 +514,7 @@ async function jsonInformationsEquipe(idEquipe, req) {
         throw error;
     }
 }
+
 
 /**Permet de voir les équipes associées à un projet */
 async function jsonListeEquipeProjet(idProjet) {

@@ -2,10 +2,10 @@ const pool =require('../database/configDB');
 
 
 function chercherClassement(idEvent) {
-    const classement = `SELECT classement FROM Resultat WHERE idevent = '${idEvent}'`;
+    const classement = `SELECT classement FROM Resultat WHERE idevent = $1`;
 
     return new Promise((resolve, reject) => {
-        pool.query(classement)
+        pool.query(classement, [idEvent])
             .then((res) => {
                 resolve(res.rows);
             })
@@ -15,7 +15,6 @@ function chercherClassement(idEvent) {
     });
 }
 
-/**Modifier classement */
 
 
 module.exports = {

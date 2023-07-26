@@ -8,7 +8,7 @@ async function chercherGestionnaireIA(idProjet) {
         WHERE idProjet = $1`;
 
         return new Promise((resolve, reject) => {
-            pool.query(attribuer, valeurs) 
+            pool.query(attribuer, valeurs)
                 .then((res) => {
                     resolve(res.rows);
                 })
@@ -16,7 +16,6 @@ async function chercherGestionnaireIA(idProjet) {
                     reject(err);
                 });
         });
-
     } catch (error) {
         throw error;
     }
@@ -30,7 +29,7 @@ async function chercherGestionnaireExtID(idProjet, idGestionnaire) {
         WHERE idProjet = $1 and id_g_externe = $2`;
 
         return new Promise((resolve, reject) => {
-            pool.query(attribuer, valeurs) 
+            pool.query(attribuer, valeurs)
                 .then((res) => {
                     resolve(res.rows);
                 })
@@ -38,7 +37,6 @@ async function chercherGestionnaireExtID(idProjet, idGestionnaire) {
                     reject(err);
                 });
         });
-
     } catch (error) {
         throw error;
     }
@@ -52,7 +50,7 @@ async function chercherGestionnaireIAID(idProjet, idGestionnaire) {
         WHERE idProjet = $1 and id_g_iapau = $2`;
 
         return new Promise((resolve, reject) => {
-            pool.query(attribuer, valeurs) 
+            pool.query(attribuer, valeurs)
                 .then((res) => {
                     resolve(res.rows);
                 })
@@ -60,7 +58,6 @@ async function chercherGestionnaireIAID(idProjet, idGestionnaire) {
                     reject(err);
                 });
         });
-
     } catch (error) {
         throw error;
     }
@@ -75,7 +72,7 @@ async function chercherGestionnaireExt(idProjet) {
         WHERE idProjet = $1`;
 
         return new Promise((resolve, reject) => {
-            pool.query(attribuer, valeurs) 
+            pool.query(attribuer, valeurs)
                 .then((res) => {
                     resolve(res.rows);
                 })
@@ -83,12 +80,10 @@ async function chercherGestionnaireExt(idProjet) {
                     reject(err);
                 });
         });
-
     } catch (error) {
         throw error;
     }
 }
-
 
 async function attribuerProjetIA(idProjet, idGestionnaire) {
 

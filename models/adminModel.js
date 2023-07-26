@@ -19,10 +19,9 @@ function chercherListeAdmins() {
 /**Chercher un admin par son id*/
 function chercherAdminID(idUser) {
     const users = 'SELECT * FROM Admini WHERE idAdmin = $1';
-    const params = [idUser];
 
     return new Promise((resolve, reject) => {
-        pool.query(users, params)
+        pool.query(users, [idUser])
             .then((res) => {
                 resolve(res.rows);
             })
@@ -45,11 +44,11 @@ function chercherAdminID(idUser) {
  * - 'mail' si l'email existe déjà.
  */
 async function creerAdmin(id) {
-    const requet = `INSERT INTO Admini (idAdmin) VALUES ('${id}')`;
+    const requet = `INSERT INTO Admini (idAdmin) VALUES ($1)`;
 
     try {
         return new Promise((resolve, reject) => {
-            pool.query(requet)
+            pool.query(requet, [id])
                 .then(() => {
                     resolve('true');
                 })
@@ -59,7 +58,6 @@ async function creerAdmin(id) {
         });
     }
     catch (error) {
-        console.error('Erreur lors de l\'insertion des données côté admin :', error);
         throw error;
     }
 }
@@ -72,11 +70,9 @@ async function modifierAdministrateur(idUser, valeurs, password) {
         userModel.modifierUser(idUser, valeurs, password);
 
     } catch (error) {
-        console.error("Erreur lors de la mise à jour de l'admin", error);
         throw error;
     }
 }
-
 
 
 module.exports = {

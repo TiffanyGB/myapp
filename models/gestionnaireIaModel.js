@@ -83,8 +83,8 @@ function chercherGestionnaireIapau(idUser) {
  */
 async function creerGestionnaireIA(id, role_asso) {
 
-    const valeurs_ges = [role_asso];
-    const requet = `INSERT INTO Gestionnaire_iapau (id_g_iapau, role_asso) VALUES ('${id}', $1)`;
+    const valeurs_ges = [id, role_asso];
+    const requet = `INSERT INTO Gestionnaire_iapau (id_g_iapau, role_asso) VALUES ($1, $2)`;
 
     try {
         return new Promise((resolve, reject) => {
@@ -98,10 +98,8 @@ async function creerGestionnaireIA(id, role_asso) {
         });
     }
     catch (error) {
-        console.error('Erreur lors de l\'insertion des données côté etudiant :', error);
         throw error;
     }
-
 }
 
 

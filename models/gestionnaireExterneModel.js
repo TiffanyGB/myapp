@@ -47,7 +47,6 @@ function chercherListeGestionnairesExt() {
 }
 
 /**Chercher un gestionnaire externe par son id*/
-
 function chercherGestionnaireExtID(IdUser) {
 
     const users = `SELECT * FROM Gestionnaire_externe WHERE id_g_externe = $1`;
@@ -82,8 +81,8 @@ function chercherGestionnaireExtID(IdUser) {
 
 async function creerGestionnaireExterne(id, entreprise, metier) {
 
-    const valeurs_ges = [entreprise, metier];
-    const requet = `INSERT INTO Gestionnaire_externe (id_g_externe, entreprise, metier) VALUES ('${id}', $1, $2)`;
+    const valeurs_ges = [id, entreprise, metier];
+    const requet = `INSERT INTO Gestionnaire_externe (id_g_externe, entreprise, metier) VALUES ($1, $2, $3)`;
 
     try {
         return new Promise((resolve, reject) => {
@@ -97,15 +96,12 @@ async function creerGestionnaireExterne(id, entreprise, metier) {
         });
     }
     catch (error) {
-        console.error('Erreur lors de l\'insertion des données côté etudiant :', error);
         throw error;
     }
-
 }
 
 /**Modifier */
 async function modifierExterne(idUser, valeurs, metier, entreprise, password) {
-
 
 }
 
