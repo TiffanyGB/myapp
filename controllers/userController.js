@@ -232,9 +232,9 @@ async function modifierUser(req, res) {
     const idToken = req.id;
     const profil = req.userProfile;
 
-    if(profil != 'admin' && idUser === idToken){
-      console.log('ok')
-      // return res.status(404).json({ erreur: 'Il faut être administrateur pour modifier un autre compte que le sien.' });
+
+    if (profil != 'admin' && idUser != idToken) {
+      return res.status(404).json({ erreur: 'Il faut être administrateur pour modifier un autre compte que le sien.' });
     }
 
     /**Vérifier que l'id existe dans la bdd, sinon 404 error */
@@ -326,7 +326,7 @@ async function modifierUser(req, res) {
       case 'gestionnaireIA':
         await gestionnaireIaModel.validerGestionnaireIA(req);
         break;
-      case 'administrateur':
+      case 'admin':
         break;
       default:
         return res.status(400).json({ erreur: "Le type est incorrect" });
@@ -436,6 +436,8 @@ async function supprimerUser(req, res) {
     /**Récupérer l'id de l'utilisateur dans l'url */
     const userId = res.locals.userId;
 
+    /*L'administrateur ne peut pas se supprimer lui même */
+
     try {
       /*Vérifier que l'id existe dans la bdd*/
       const user = await userModel.chercherUserID(userId);
@@ -456,6 +458,10 @@ async function supprimerUser(req, res) {
       return res.status(500).json({ erreur: 'Erreur lors de la suppression de l\'utilisateur' });
     }
   }
+}
+
+async function getInfosProfil(req, res){
+
 }
 
 module.exports = {

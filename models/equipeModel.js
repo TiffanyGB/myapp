@@ -430,7 +430,7 @@ async function jsonInformationsEquipe(idEquipe, req) {
                 jsonRetour.estCapitaine = false;
             }
 
-            jsonRetour.reponseQuestionAll = true;
+            jsonRetour.reponseQuestionAll = temp1.preferencequestionnaire;
 
             if (temp1.lien_github == null) {
                 jsonRetour.git = '';
