@@ -1,7 +1,9 @@
 const pool = require('../database/configDB');
 
 /****************************** PROFIL ****************************/
-function getInfosProfil() {
+function getInfosProfil(req,id) {
+
+    //nom, prenom, email, pseudo
 
 }
 
@@ -64,5 +66,6 @@ module.exports = {
     preferences,
     modifierPreferences,
     getPreferences,
-    supprimerSonCompte
+    supprimerSonCompte,
+    getInfosProfil
 }

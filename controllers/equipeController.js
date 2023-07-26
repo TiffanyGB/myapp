@@ -270,8 +270,17 @@ async function listeOuvertes(req, res) {
   }
   else if (req.method === 'GET') {
 
+    const idEvent = res.locals.idEvent;
+
+    const event = await eventModel.jsonlisteEquipeEvent(idEvent);
+
+    // Vérifier que l'id existe dans la bdd, sinon 404 error
+    if (event.equipes.length === 0) {
+      return res.status(404).json({ erreur: 'L\'id de l\'événement n\'existe pas' });
+    }
+
     try {
-      const equipesOuvertes = await equipeModel.jsonEquipesOuvertes();
+      const equipesOuvertes = await equipeModel.jsonEquipesOuvertes(idEvent, req);
       res.status(200).json(equipesOuvertes);
 
     } catch {

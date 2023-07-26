@@ -152,7 +152,6 @@ function modifierEquipe(valeurs) {
     }
 }
 
-
 function appartenirEquipe(idUser, idEquipe) {
 
     const chercher = `SELECT * FROM Appartenir 
@@ -504,8 +503,7 @@ async function jsonInformationsEquipe(idEquipe, req) {
     }
 }
 
-
-/**Permet de voir les équipes associées à un projet */
+/*Permet de voir les équipes associées à un projet */
 async function jsonListeEquipeProjet(idProjet) {
 
     try {
@@ -584,10 +582,10 @@ async function jsonMesEquipes(idUser) {
         temp.nomProjet = projet.nom;
 
         /*Capitaine */
-        if(equipeCouranteInfos.idcapitaine === idUser){
+        if (equipeCouranteInfos.idcapitaine === idUser) {
             temp.estCapitaine = true;
 
-        }else{
+        } else {
             temp.estCapitaine = false;
 
         }
@@ -609,43 +607,63 @@ async function jsonMesEquipes(idUser) {
     }
     return jsonRetour;
 }
-jsonMesEquipes(15)
 
-async function jsonEquipesOuvertes() {
+async function jsonEquipesOuvertes(idEvent, req) {
 
-    /*Récupérer toutes les équipes ouvertes */
-    const equipes = await equipesOuvertes();
     jsonRetour = {};
     jsonRetour.equipes = [];
 
-    for (i = 0; i < equipes.length; i++) {
-        temp = {};
-        temp.id = equipes[i].idequipe;
-        temp.nom = equipes[i].nom;
-        temp.description = equipes[i].description_equipe;
+    const projet_event = await projetModel.recuperer_projets(idEvent);
+    let listeEquipes;
+    for (i = 0; i < projet_event.length; i++) {
 
-        /*Nom du proejt */
-        const nomProjet = await projetModel.chercherProjetId(equipes[i].idprojet);
-        temp.nomProjet = nomProjet[0].nom;
-        temp.lienProjet = nomProjet[0].sujet;
+        listeEquipes = await listeEquipeProjet(projet_event[i].idprojet);
 
+        for (i = 0; i < listeEquipes.length; i++) {
+            if (listeEquipes[i].statut_recrutement === 'ouvert') {
+                temp = {};
+                temp.idEquipe = listeEquipes[i].idequipe;
+                temp.nom = listeEquipes[i].nom;
 
-        /*Infos du capitaine */
-        const capitaine = await userModel.chercherUserID(equipes[i].idcapitaine);
-        temp.nomCapitaine = capitaine[0].nom;
-        temp.prenomCapitaine = capitaine[0].prenom;
+                /*Nom du proejt */
+                const nomProjet = await projetModel.chercherProjetId(listeEquipes[i].idprojet);
+                temp.projet = nomProjet[0].nom;
+                temp.lienProjet = nomProjet[0].sujet;
 
-        /*Nombre de membres de l'équipe */
-        const membres = await ListeMembre(equipes[i].idequipe);
-        temp.nombreMembre = membres.length;
+                /*Infos du capitaine */
+                temp.capitaine = {};
+                const capitaine = await userModel.chercherUserID(listeEquipes[i].idcapitaine);
+                temp.capitaine.pseudo = capitaine[0].pseudo;
+                temp.capitaine.idCapitaine = capitaine[0].iduser;
 
-        /*Nombre de membres max */
-        let idevent = nomProjet[0].idevent;
+                /*Nombre de membres de l'équipe */
+                const membres = await ListeMembre(listeEquipes[i].idequipe);
+                temp.nbMembres = membres.length;
 
-        const event = await chercherEvenement(idevent);
-        temp.maxMembresEvent = event[0].nombre_max_equipe;
+                /*Nombre de membres max */
+                let idevent = nomProjet[0].idevent;
 
-        jsonRetour.equipes.push(temp);
+                const event = (await chercherEvenement(idevent))[0];
+                temp.maxNbMembres = event.nombre_max_equipe;
+
+                /*Nombres de personnes suffisantes pour participer*/
+                if (temp.nbMembres >= event.nombre_min_equipe) {
+                    temp.teamValide = true;
+                } else {
+                    temp.teamValide = false;
+                }
+
+                /* Vérifier si une demande a déjà été envoyée */
+                const envoyee = await demandeDejaEnvoyee(req.id, temp.idEquipe);
+                if (envoyee.length > 0) {
+                    temp.hasSentDemand = true;
+                }else{
+                    temp.hasSentDemand = false;
+                }
+
+                jsonRetour.equipes.push(temp);
+            }
+        }
     }
     return jsonRetour;
 }

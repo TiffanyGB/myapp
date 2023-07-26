@@ -219,46 +219,16 @@ async function modifierUser(idUser, valeurs, password) {
 }
 
 
-
-
 /**Supprimer */
-//Doit être Etudiant, admini, gestionnaire_iapau ou gestionnaire_externe
-function supprimerUser(idUser, role) {
+function supprimerUser(idUser) {
 
-    let id;
-    switch (role) {
-        case 'admini':
-            id = 'idadmin';
-            break;
-        case 'etudiant':
-            id = 'idetudiant';
-            break;
-        case 'gestionnaire_iapau':
-            id = 'id_g_iapau';
-            break;
-        case 'gestionnaire_externe':
-            id = 'id_g_externe';
-            break;
-    }
-
-    const suppRole = `DELETE FROM $1 WHERE $2 = $3`;
     const suppr = `DELETE FROM Utilisateur WHERE idUser = $1`;
 
-    return new Promise((resolve, reject) => {
-        pool.query(suppRole, [role, id, idUser])
-            .then(() => {
-                pool.query(suppr, [idUser])
-                    .then(() => {
-                        resolve('ok');
-                    })
-                    .catch((error) => {
-                        reject(error);
-                    });
-            })
-            .catch((error) => {
-                reject(error);
-            });
-    });
+    try{
+        pool.query(suppr, [idUser])
+    }catch{
+        throw error;
+    }
 }
 
 

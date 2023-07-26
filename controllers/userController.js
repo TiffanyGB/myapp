@@ -437,6 +437,9 @@ async function supprimerUser(req, res) {
     const userId = res.locals.userId;
 
     /*L'administrateur ne peut pas se supprimer lui même */
+    if(userId === req.id){
+      return res.status(400).json('L\'administrateur ne peut pas se supprimer lui-même');
+    }
 
     try {
       /*Vérifier que l'id existe dans la bdd*/
@@ -446,13 +449,9 @@ async function supprimerUser(req, res) {
       }
 
       /*Supprimer l'utilisateur*/
-      const result = await userModel.supprimerUser(userId, 'admini');
+      userModel.supprimerUser(userId);
 
-      if (result === 'ok') {
-        return res.status(200).json({ message: "Suppression réussie" });
-      }
-
-      return res.status(400).json({ erreur: 'Echec de la suppression' });
+      return res.status(200).json({ message: "Suppression réussie" });
 
     } catch (error) {
       return res.status(500).json({ erreur: 'Erreur lors de la suppression de l\'utilisateur' });
@@ -460,7 +459,7 @@ async function supprimerUser(req, res) {
   }
 }
 
-async function getInfosProfil(req, res){
+async function getInfosProfil(req, res) {
 
 }
 
@@ -468,5 +467,6 @@ module.exports = {
   createUser,
   voirUtilisateurs,
   modifierUser,
-  supprimerUser
+  supprimerUser,
+  getInfosProfil
 };

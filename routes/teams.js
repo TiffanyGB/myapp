@@ -36,8 +36,10 @@ router.all('/delete/:id', (req, res, next) => {
     capitaine,
     equipeController.supprimerEquipe);
 
-router.all('/ouvertes',
-    indexController.verifyToken,
+router.all('/:id/ouvertes', (req, res, next) => {
+    res.locals.idEvent = req.params.id;
+    next();
+}, indexController.verifyToken,
     etudiantProfil,
     equipeController.listeOuvertes);
 
