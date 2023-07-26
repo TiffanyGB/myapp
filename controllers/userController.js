@@ -226,7 +226,16 @@ async function modifierUser(req, res) {
     res.status(200).json({ sucess: 'Agress granted' });
   }
   else if (req.method === 'PATCH') {
+
+    /*Si n'est pa admin, vérifier si l'id de l'url est la même que l'utilisteur qui veut modifier */
     const idUser = res.locals.userId;
+    const idToken = req.id;
+    const profil = req.userProfile;
+
+    if(profil != 'admin' && idUser === idToken){
+      console.log('ok')
+      // return res.status(404).json({ erreur: 'Il faut être administrateur pour modifier un autre compte que le sien.' });
+    }
 
     /**Vérifier que l'id existe dans la bdd, sinon 404 error */
     userModel.chercherUserID(idUser)
@@ -237,7 +246,6 @@ async function modifierUser(req, res) {
         }
       });
 
-      console.log(req.userProfile)
     /**Récupération des données */
     const {
       nom: userNom,

@@ -61,6 +61,7 @@ async function checkCapitaine(req, res, next) {
   }
 }
 
+/*Doit etre connecté */
 async function interdireAucunProfil(req, res, next) {
   if (req.userProfile === 'aucun') {
       return res.status(400).json({ erreur: `Il faut avoir un compte.` });

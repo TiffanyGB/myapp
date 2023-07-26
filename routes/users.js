@@ -25,10 +25,10 @@ var router = express.Router();
 const userController = require('../controllers/userController');
 const indexController = require('../controllers/indexController');
 const userModel = require('../models/userModel');
-const adminProfile = require('../middleware/verifProfil');
-const checkAdminProfile = adminProfile.checkProfile('admin');
+const profil = require('../middleware/verifProfil');
+const checkAdminProfile = profil.checkProfile('admin');
 const validationDonnees = require('../middleware/validationDonnees');
-
+const aucunProfil = profil.interdireAucunProfil;
 
 /**
  * @route GET /users
@@ -67,7 +67,7 @@ router.all('/edit/:id', (req, res, next) => {
   res.locals.userId = req.params.id;
   next();
 }, indexController.verifyToken,
-/**Tous les users */
+  aucunProfil,
   validationDonnees.validatePasswordModif,
   userController.modifierUser);
 
