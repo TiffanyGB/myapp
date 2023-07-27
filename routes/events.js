@@ -44,7 +44,7 @@ router.all('/:id/teams', (req, res, next) => {
 
     next();
 }, indexController.verifyToken,
-    checkAdminProfile,
+    // checkAdminProfile,
     eventsController.listeEquipes);
 
 /*Infos d'un event pour modif */

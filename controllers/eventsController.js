@@ -174,13 +174,13 @@ async function listeEquipes(req, res) {
 
     try {
       const event = await eventModel.jsonlisteEquipeEvent(idevent);
-
+      const existe = await eventModel.chercherEvenement(idevent);
       // Vérifier que l'id existe dans la bdd, sinon 404 error
-      if (event.equipes.length === 0) {
+      if (existe === 0) {
         return res.status(404).json({ erreur: 'L\'id n\'existe pas' });
-      } else {
-        res.status(200).json(event)
       }
+      res.status(200).json(event)
+
     }
     catch {
       return res.status(404).json({ erreur: 'Erreur lors de la récupération des informations' });

@@ -562,11 +562,11 @@ async function jsonListeEquipeProjet(idProjet) {
             temp.nombreMaxEquipe = event.nombre_max_equipe;
             temp.nomEvent = event.nom;
             temp.idEvent = event.idevent;
-            temp.dernierSuivi = '';
+            temp.dernierSuivi = event.date_creation;
 
             /*Capitaine */
             temp.idCapitaine = equipeCourante.idcapitaine;
-            temp.nomCapitaine = ((await userModel.chercherUserID(equipeCourante.idcapitaine))[0].pseudo);
+            temp.pseudoCapitaine = ((await userModel.chercherUserID(equipeCourante.idcapitaine))[0].pseudo);
 
             jsonRetour.equipe.push(temp);
         }

@@ -215,7 +215,6 @@ async function toutesInfosProjet(projetCourant, projetInfos) {
     projetInfos.ressources = [];
 }
 
-
 /**Informations d'un projet */
 async function infosProjet(idProjet) {
 
