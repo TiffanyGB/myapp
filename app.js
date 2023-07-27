@@ -10,14 +10,9 @@ const cors = require('cors');
 const multerMiddleware = require('./middleware/multer-config');
 
 /**Routes */
-var adminRouter = require('./routes/admin');
-var etudiantRouter = require('./routes/etudiant');
 var eventsRouter = require('./routes/events');
-var gestionnaireExterneRouter = require('./routes/gestionnaireExterne');
-var gestionnaireIaRouter = require('./routes/gestionnaireIa');
 var indexRouter = require('./routes/index');
 var projetRouter = require('./routes/projet');
-var ressourceRouteur = require('./routes/ressource');
 var usersRouter = require('./routes/users');
 var gestionnaireRouter = require('./routes/gestionnaire');
 var teamsRouter = require('./routes/teams');
@@ -51,18 +46,12 @@ app.use(cors(corsOptions));
 
 /** définit les routes en utilisant les routeurs pour gérer les requêtes correspondantes. */
 app.use('/upload', imagesRouter);
-app.use('/admin', adminRouter);
-app.use('/etudiant', etudiantRouter);
 app.use('/events', eventsRouter);
-app.use('/gestionnaireExterne', gestionnaireExterneRouter);
-app.use('/gestionnaireIA', gestionnaireIaRouter)
 app.use('/', indexRouter);
 app.use('/projet', projetRouter);
-app.use('/ressource', ressourceRouteur);
 app.use('/users', usersRouter);
 app.use('/gestionnaire', gestionnaireRouter);
 app.use('/teams', teamsRouter);
-
 
 
 // Configuration du middleware body-parser

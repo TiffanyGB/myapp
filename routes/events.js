@@ -4,6 +4,8 @@ const indexController = require('../controllers/indexController');
 const eventsController = require('../controllers/eventsController');
 const eventModel = require('../models/eventModel');
 const profil = require('../middleware/verifProfil');
+const { verifIdNombre } = require('../verifications/verifierDonnéesGénérales');
+
 
 const checkAdminProfile = profil.checkProfile('admin');
 
@@ -17,6 +19,8 @@ router.all('/creerEvent',
 /**Modifier un event */
 router.all('/edit/:id', (req, res, next) => {
     res.locals.idevent = req.params.id;
+    verifIdNombre(req.params.id, res, next)
+
     next();
 }, indexController.verifyToken,
     checkAdminProfile,
@@ -26,6 +30,8 @@ router.all('/edit/:id', (req, res, next) => {
 /**supprimer un event*/
 router.all('/delete/:id', (req, res, next) => {
     res.locals.idevent = req.params.id;
+    verifIdNombre(req.params.id, res, next)
+
     next();
 }, indexController.verifyToken,
     checkAdminProfile,
@@ -34,6 +40,8 @@ router.all('/delete/:id', (req, res, next) => {
 /**Voir les équipes d'un event */
 router.all('/:id/teams', (req, res, next) => {
     res.locals.idevent = req.params.id;
+    verifIdNombre(req.params.id, res, next)
+
     next();
 }, indexController.verifyToken,
     checkAdminProfile,
@@ -42,6 +50,8 @@ router.all('/:id/teams', (req, res, next) => {
 /*Infos d'un event pour modif */
 router.all('/:id/infos', (req, res, next) => {
     res.locals.idevent = req.params.id;
+    verifIdNombre(req.params.id, res, next)
+
     next();
 }, indexController.verifyToken,
     checkAdminProfile,

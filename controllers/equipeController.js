@@ -71,21 +71,10 @@ async function creerEquipe(req, res) {
     const projet = await projetModel.chercherProjetId(idProjet);
     const idEvent = projet[0].idevent;
 
-    const projets_event = await projetModel.recuperer_projets(idEvent);
+    const aUneEquipe = await equipeModel.aUneEquipeDansEvent(idCapitaine, idEvent);
 
-    for (i = 0; i < projets_event.length; i++) {
-
-      const equipes_projets = await equipeModel.listeEquipeProjet(projets_event[i].idprojet);
-
-      for (j = 0; j < equipes_projets.length; j++) {
-
-        let appartenir = await equipeModel.appartenirEquipe(req.id, equipes_projets[j].idequipe);
-        console.log(equipes_projets[j].idequipe, projets_event[0].idprojet)
-
-        if (appartenir.length > 0) {
-          return res.status(404).json({ erreur: 'Vous avez déjà une équipe dans cet évènement' });
-        }
-      }
+    if (aUneEquipe != -1) {
+      return res.status(400).json({ erreur: 'Vous avez déjà une équipe dans cet évènement' });
     }
 
     /* Création de l'équipe */
@@ -95,7 +84,6 @@ async function creerEquipe(req, res) {
       equipeModel.ajouterMembre(idCapitaine, idEquipe);
 
       return res.status(200).json(idEquipe);
-
     } catch (error) {
       return res.status(400).json({ erreur: 'Erreur création équipe.' });
     }
@@ -133,7 +121,8 @@ async function modifierEquipe(req, res) {
     ]
 
     try {
-      /* Vérification de l'existence de l'id dans le verif profil*/
+      /*La vérification de l'existence de l'id de l'équipe est faite lors de la
+      vérification de profil (ie il faut être capitaine) dans la route*/
 
       equipeModel.modifierEquipe(valeurs);
       res.status(200).json({ message: "Equipe modifiée" });
@@ -144,7 +133,6 @@ async function modifierEquipe(req, res) {
   }
 }
 
-
 async function supprimerEquipe(req, res) {
   if (req.method === 'OPTIONS') {
     res.status(200).json({ sucess: 'Agress granted' });
@@ -154,7 +142,7 @@ async function supprimerEquipe(req, res) {
     try {
       const idEquipe = res.locals.idEquipe;
 
-      /* Vérification de l'existence de l'id dans le verif profil*/
+      /* Vérification de l'existence de l'id dans le verif profil déjà faite*/
 
       /*Suppression */
       equipeModel.supprimerEquipe(idEquipe);
@@ -185,7 +173,7 @@ async function promouvoir(req, res) {
       /*Vérifier si l'étudiant est dans l'équipe */
       const appartenir = await equipeModel.appartenirEquipe(idUser, idEquipe);
       if (appartenir.length === 0) {
-        return res.status(404).json({ erreur: 'L\'étudiant ne fait pas partie de l\'équipe' });
+        return res.status(400).json({ erreur: 'L\'étudiant ne fait pas partie de l\'équipe' });
       }
 
       /*Le capitaine ne peut pas se promouvoir lui-même */
@@ -221,7 +209,7 @@ async function supprimerMembre(req, res) {
       /*Vérifier si l'étudiant est dans l'équipe */
       const appartenir = await equipeModel.appartenirEquipe(idUser, idEquipe);
       if (appartenir.length === 0) {
-        return res.status(404).json({ erreur: 'L\'étudiant ne fait pas partie de l\'équipe' });
+        return res.status(400).json({ erreur: 'L\'étudiant ne fait pas partie de l\'équipe' });
       }
 
       const equipe = await equipeModel.chercherEquipeID(idEquipe);
@@ -261,7 +249,6 @@ async function getInfosEquipe(req, res) {
     res.status(200).json(jsonRetour);
   }
 }
-
 
 async function listeOuvertes(req, res) {
   if (req.method === 'OPTIONS') {
@@ -331,7 +318,7 @@ async function demandeEquipe(req, res) {
 
     const idUser = req.id;
     let idEquipe = res.locals.idEquipe;
-    idEquipe 
+    idEquipe
 
     const {
       message
@@ -348,10 +335,6 @@ async function demandeEquipe(req, res) {
       .withMessage('Le message doit contenir entre 0 et 200 caracteres')
       .run(req);
 
-
-    if(isNaN(idEquipe)){
-      return res.status(400).json('L\'id de l\'équipe n\'est pas un nombre');
-    }
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -371,20 +354,10 @@ async function demandeEquipe(req, res) {
     const projet = await projetModel.chercherProjetId(idProjet);
     const idEvent = projet[0].idevent;
 
-    const projets_event = await projetModel.recuperer_projets(idEvent);
+    const aUneEquipe = await equipeModel.aUneEquipeDansEvent(idUser, idEvent);
 
-    for (i = 0; i < projets_event.length; i++) {
-
-      const equipes_projets = await equipeModel.listeEquipeProjet(projets_event[i].idprojet);
-
-      for (j = 0; j < equipes_projets.length; j++) {
-
-        let appartenir = await equipeModel.appartenirEquipe(idUser, equipes_projets[j].idequipe);
-
-        if (appartenir.length > 0) {
-          return res.status(404).json({ erreur: 'Vous avez déjà une équipe dans cet évènement' });
-        }
-      }
+    if (aUneEquipe != -1) {
+      return res.status(404).json({ erreur: 'Vous avez déjà une équipe dans cet évènement' });
     }
 
     /* Vérifier si une demande a déjà été envoyée */
@@ -425,30 +398,20 @@ async function accepterDemande(req, res) {
     /* L'étudiant ne doit pas avoir d'équipe dans l'event*/
 
     /*Récupérer l'event de l'équipe*/
+    const idProjet = equipe[0].idprojet;
     const projet = await projetModel.chercherProjetId(idProjet);
     const idEvent = projet[0].idevent;
 
-    const projets_event = await projetModel.recuperer_projets(idEvent);
+    const aUneEquipe = await equipeModel.aUneEquipeDansEvent(idUser, idEvent);
 
-    for (i = 0; i < projets_event.length; i++) {
-
-      const equipes_projets = await equipeModel.listeEquipeProjet(projets_event[i].idprojet);
-
-      for (j = 0; j < equipes_projets.length; j++) {
-
-        let appartenir = await equipeModel.appartenirEquipe(req.id, equipes_projets[j].idequipe);
-        console.log(equipes_projets[j].idequipe, projets_event[0].idprojet)
-
-        if (appartenir.length > 0) {
-          return res.status(404).json({ erreur: 'L\'utilisateur a déjà rejoint une équipe dans l\'évènement' });
-        }
-      }
+    if (aUneEquipe != -1) {
+      return res.status(200).json({ erreur: 'Vous avez déjà une équipe dans cet évènement' });
     }
 
     /* Vérifier si l'étudiant a bien envoyé une demande */
     const envoyee = await equipeModel.demandeDejaEnvoyee(idUser, idEquipe);
     if (envoyee.length === 0) {
-      return res.status(404).json({ erreur: 'Aucune demande provenant de cet id' });
+      return res.status(400).json({ erreur: 'Aucune demande provenant de cet id' });
     }
 
     /* Supprimer les demandes de l'étudiant des autres equipes */
@@ -482,9 +445,8 @@ async function declinerDemande(req, res) {
 
 
     /*Vérif existence équipe */
-    const equipe = await equipeModel.chercherEquipeID(idEquipe);
-    if (equipe.length === 0) {
-      return res.status(404).json({ erreur: 'L\'id n\'existe pas' });
+    if (equipeModel.equipeExiste) {
+      return res.status(404).json({ erreur: 'L\'id de cette équipe n\'existe pas.' });
     }
 
     /* Vérifier si l'étudiant a bien envoyé une demande */

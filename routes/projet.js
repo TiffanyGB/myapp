@@ -7,6 +7,7 @@ const projetModel = require('../models/projetModel');
 const equipeController = require('../controllers/equipeController');
 const adminProfile = require('../middleware/verifProfil');
 const checkAdminProfile = adminProfile.checkProfile('admin');
+const { verifIdNombre } = require('../verifications/verifierDonnéesGénérales');
 
 
 /**Voir la liste des projets*/
@@ -21,6 +22,8 @@ router.all('/creerProjets', indexController.verifyToken, projetController.creati
 /**voir informations d'un projet */
 router.all('/:id', (req, res, next) => {
     res.locals.projetId = req.params.id;
+    verifIdNombre(req.params.id, res, next)
+
     next();
 }, indexController.verifyToken, projetController.infosProjet);
 
@@ -28,18 +31,24 @@ router.all('/:id', (req, res, next) => {
 /**Modifier projet */
 router.all('/edit/:id', (req, res, next) => {
     res.locals.projetId = req.params.id;
+    verifIdNombre(req.params.id, res, next)
+
     next();
 }, indexController.verifyToken, projetController.modifierProjet);
 
 /**Supprimer un projet */
 router.all('/delete/:id', (req, res, next) => {
     res.locals.projetId = req.params.id;
+    verifIdNombre(req.params.id, res, next)
+
     next();
 }, indexController.verifyToken, projetController.supprimerProjet);
 
 /**Voir équipes du projet */
 router.all('/:id/teams', (req, res, next) => {
     res.locals.projetId = req.params.id;
+    verifIdNombre(req.params.id, res, next)
+
     next();
 }, indexController.verifyToken, equipeController.retournerEquipeProjet);
 

@@ -11,6 +11,8 @@ const profilMultiple = profil.checkAEG();
 const capitaine = profil.checkCapitaine;
 const aucunProfil = profil.interdireAucunProfil;
 
+const { verifIdNombre } = require('../verifications/verifierDonnéesGénérales');
+
 /**Créer une équipe */
 router.all('/creationEquipe',
     indexController.verifyToken,
@@ -22,6 +24,9 @@ router.all('/creationEquipe',
 /* Modifier une équipe */
 router.all('/edit/:id', (req, res, next) => {
     res.locals.idEquipe = req.params.id;
+
+    verifIdNombre(res.locals.idEquipe, res, next)
+
     next();
 }, indexController.verifyToken,
     capitaine,
@@ -31,6 +36,9 @@ router.all('/edit/:id', (req, res, next) => {
 /* Supprimer une équipe */
 router.all('/delete/:id', (req, res, next) => {
     res.locals.idEquipe = req.params.id;
+
+    verifIdNombre(res.locals.idEquipe, res, next)
+
     next();
 }, indexController.verifyToken,
     capitaine,
@@ -38,14 +46,20 @@ router.all('/delete/:id', (req, res, next) => {
 
 router.all('/:id/ouvertes', (req, res, next) => {
     res.locals.idEvent = req.params.id;
+
+    verifIdNombre(res.locals.idEvent, res, next)
+
     next();
 }, indexController.verifyToken,
-    // etudiantProfil,
+    etudiantProfil,
     equipeController.listeOuvertes);
 
 /* Promouvoir un membre --> capitaine*/
 router.all('/:id/promouvoir', (req, res, next) => {
     res.locals.idEquipe = req.params.id;
+
+    verifIdNombre(res.locals.idEquipe, res, next)
+
     next();
 }, indexController.verifyToken,
     capitaine,
@@ -54,6 +68,8 @@ router.all('/:id/promouvoir', (req, res, next) => {
 /* Supprimer un membre */
 router.all('/:id/supprimerMembre', (req, res, next) => {
     res.locals.idEquipe = req.params.id;
+    verifIdNombre(res.locals.idEquipe, res, next)
+
     next();
 }, indexController.verifyToken,
     capitaine,
@@ -61,6 +77,8 @@ router.all('/:id/supprimerMembre', (req, res, next) => {
 
 router.all('/:id/quitterEquipe', (req, res, next) => {
     res.locals.idEquipe = req.params.id;
+    verifIdNombre(res.locals.idEquipe, res, next)
+
     next();
 }, indexController.verifyToken,
     etudiantProfil,
@@ -68,6 +86,8 @@ router.all('/:id/quitterEquipe', (req, res, next) => {
 
 router.all('/:id/infos', (req, res, next) => {
     res.locals.idEquipe = req.params.id;
+    verifIdNombre(res.locals.idEquipe, res, next)
+
     next();
 }, indexController.verifyToken,
     aucunProfil,
@@ -76,6 +96,8 @@ router.all('/:id/infos', (req, res, next) => {
 
 router.all('/:id/demandeAdmission', (req, res, next) => {
     res.locals.idEquipe = req.params.id;
+    verifIdNombre(res.locals.idEquipe, res, next)
+
     next();
 }, indexController.verifyToken,
     etudiantProfil,
@@ -84,6 +106,8 @@ router.all('/:id/demandeAdmission', (req, res, next) => {
 
 router.all('/:id/AccepterDemande', (req, res, next) => {
     res.locals.idEquipe = req.params.id;
+    verifIdNombre(res.locals.idEquipe, res, next)
+
     next();
 }, indexController.verifyToken,
     capitaine,
@@ -91,6 +115,8 @@ router.all('/:id/AccepterDemande', (req, res, next) => {
 
 router.all('/:id/declinerDemande', (req, res, next) => {
     res.locals.idEquipe = req.params.id;
+    verifIdNombre(res.locals.idEquipe, res, next)
+
     next();
 }, indexController.verifyToken,
     capitaine,
@@ -103,6 +129,8 @@ router.all('/mesEquipes',
 
 router.all('/:id/declinerDemande', (req, res, next) => {
     res.locals.idEquipe = req.params.id;
+    verifIdNombre(res.locals.idEquipe, res, next)
+
     next();
 }, indexController.verifyToken,
     capitaine,

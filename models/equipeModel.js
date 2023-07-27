@@ -97,6 +97,15 @@ async function chercherEquipeID(id) {
     });
 }
 
+/**Vérifier si existe equipe */
+async function equipeExiste(idEquipe) {
+    const equipe = await equipeModel.chercherEquipeID(idEquipe);
+    if (equipe.length === 0) {
+        return true;
+    }
+}
+
+
 /* requete pour les equipes ouvertes */
 async function equipesOuvertes() {
 
@@ -656,7 +665,7 @@ async function jsonEquipesOuvertes(idEvent, req) {
                 const envoyee = await demandeDejaEnvoyee(req.id, temp.idEquipe);
                 if (envoyee.length > 0) {
                     temp.hasSentDemand = true;
-                }else{
+                } else {
                     temp.hasSentDemand = false;
                 }
 
@@ -762,5 +771,6 @@ module.exports = {
     envoyerDemande,
     demandeDejaEnvoyee,
     jsonMesEquipes,
-    aUneEquipeDansEvent
+    aUneEquipeDansEvent,
+    equipeExiste
 }

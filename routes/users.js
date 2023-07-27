@@ -29,6 +29,7 @@ const profil = require('../middleware/verifProfil');
 const checkAdminProfile = profil.checkProfile('admin');
 const validationDonnees = require('../middleware/validationDonnees');
 const aucunProfil = profil.interdireAucunProfil;
+const { verifIdNombre } = require('../verifications/verifierDonnéesGénérales');
 
 /**
  * @route GET /users
@@ -64,6 +65,8 @@ router.all(
  */
 router.all('/edit/:id', (req, res, next) => {
   res.locals.userId = req.params.id;
+  verifIdNombre(req.params.id, res, next)
+
   next();
 }, indexController.verifyToken,
   aucunProfil,
@@ -79,6 +82,8 @@ router.all('/edit/:id', (req, res, next) => {
  */
 router.all('/delete/:id', (req, res, next) => {
   res.locals.userId = req.params.id;
+  verifIdNombre(req.params.id, res, next)
+
   next();
 }, indexController.verifyToken,
   checkAdminProfile,

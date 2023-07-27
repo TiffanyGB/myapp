@@ -22,10 +22,10 @@ function existePseudo(pseudo) {
   const verif = `SELECT * FROM utilisateur WHERE (pseudo = $1)`;
 
   return new Promise((resolve, reject) => {
-    pool.query(verif)
+    pool.query(verif, [pseudo])
       .then((result) => {
         if (result.rows.length === 0) {
-          resolve(false, [pseudo]);
+          resolve(false);
         } else {
           resolve(true);
         }
