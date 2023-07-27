@@ -15,10 +15,11 @@ function checkProfile(type) {
 /*ASG --> Admin, etudiant(capitaine), gestionnaire*/
 async function checkAEG() {
   return async function (req, res, next) {
+    const id = res.locals.idEquipe;
+
     if (req.userProfile === 'admin') {
       next();
     } else if (req.userProfile === 'gestionnaire') {
-      const id = res.locals.idEquipe;
 
       const gerer_ia = await gererProjet.chercherGestionnaireIA(id, req.id);
       const gerer_ext = await gererProjet.chercherGestionnaireExtID(id, req.id);
@@ -32,10 +33,21 @@ async function checkAEG() {
       }
 
     } else if (req.userProfile === 'etudiant') {
-      // Faites ce que vous voulez pour le profil 'etudiant'
+
+      const equipe = await equipeModel.chercherEquipeID(id);
+
+      if (equipe.length === 0) {
+        return res.status(404).json({ erreur: 'L\'id de l\'équipe n\'existe pas' });
+      }
+      if (equipe[0].idcapitaine === req.id) {
+        next();
+      } else {
+        return res.status(400).json({ erreur: `Mauvais profil, il faut être capitaine.` });
+      }
+
       next();
     } else {
-      res.status(400).json({ erreur: `Mauvais profil, il faut être admin, étudiant ou gestionnaire du projet.` });
+      res.status(400).json({ erreur: `Mauvais profil, il faut être admin, capitaine ou gestionnaire du projet.` });
     }
   };
 }
@@ -64,7 +76,7 @@ async function checkCapitaine(req, res, next) {
 /*Doit etre connecté */
 async function interdireAucunProfil(req, res, next) {
   if (req.userProfile === 'aucun') {
-      return res.status(400).json({ erreur: `Il faut avoir un compte.` });
+    return res.status(400).json({ erreur: `Il faut avoir un compte.` });
   } else {
     next();
   }

@@ -25,8 +25,13 @@ router.all('/creationEquipe',
 router.all('/edit/:id', (req, res, next) => {
     res.locals.idEquipe = req.params.id;
 
-    verifIdNombre(res.locals.idEquipe, res, next)
-
+    try {
+        if (verifIdNombre(res.locals.idEquipe, res) === -1) {
+            return res.status(400).json({ erreur: 'L\'id doit être un nombre.' })
+        }
+    } catch {
+        return res.status(400).json('Problème lors de la vérification du numéro de l\'équipe');
+    }
     next();
 }, indexController.verifyToken,
     capitaine,
@@ -37,8 +42,13 @@ router.all('/edit/:id', (req, res, next) => {
 router.all('/delete/:id', (req, res, next) => {
     res.locals.idEquipe = req.params.id;
 
-    verifIdNombre(res.locals.idEquipe, res, next)
-
+    try {
+        if (verifIdNombre(res.locals.idEquipe, res) === -1) {
+            return res.status(400).json({ erreur: 'L\'id doit être un nombre.' })
+        }
+    } catch {
+        return res.status(400).json('Problème lors de la vérification du numéro de l\'équipe');
+    }
     next();
 }, indexController.verifyToken,
     capitaine,
@@ -47,8 +57,13 @@ router.all('/delete/:id', (req, res, next) => {
 router.all('/:id/ouvertes', (req, res, next) => {
     res.locals.idEvent = req.params.id;
 
-    verifIdNombre(res.locals.idEvent, res, next)
-
+    try {
+        if (verifIdNombre(res.locals.idEquipe, res) === -1) {
+            return res.status(400).json({ erreur: 'L\'id doit être un nombre.' })
+        }
+    } catch {
+        return res.status(400).json('Problème lors de la vérification du numéro de l\'équipe');
+    }
     next();
 }, indexController.verifyToken,
     etudiantProfil,
@@ -58,8 +73,13 @@ router.all('/:id/ouvertes', (req, res, next) => {
 router.all('/:id/promouvoir', (req, res, next) => {
     res.locals.idEquipe = req.params.id;
 
-    verifIdNombre(res.locals.idEquipe, res, next)
-
+    try {
+        if (verifIdNombre(res.locals.idEquipe, res) === -1) {
+            return res.status(400).json({ erreur: 'L\'id doit être un nombre.' })
+        }
+    } catch {
+        return res.status(400).json('Problème lors de la vérification du numéro de l\'équipe');
+    }
     next();
 }, indexController.verifyToken,
     capitaine,
@@ -68,8 +88,13 @@ router.all('/:id/promouvoir', (req, res, next) => {
 /* Supprimer un membre */
 router.all('/:id/supprimerMembre', (req, res, next) => {
     res.locals.idEquipe = req.params.id;
-    verifIdNombre(res.locals.idEquipe, res, next)
-
+    try {
+        if (verifIdNombre(res.locals.idEquipe, res) === -1) {
+            return res.status(400).json({ erreur: 'L\'id doit être un nombre.' })
+        }
+    } catch {
+        return res.status(400).json('Problème lors de la vérification du numéro de l\'équipe');
+    }
     next();
 }, indexController.verifyToken,
     capitaine,
@@ -77,8 +102,13 @@ router.all('/:id/supprimerMembre', (req, res, next) => {
 
 router.all('/:id/quitterEquipe', (req, res, next) => {
     res.locals.idEquipe = req.params.id;
-    verifIdNombre(res.locals.idEquipe, res, next)
-
+    try {
+        if (verifIdNombre(res.locals.idEquipe, res) === -1) {
+            return res.status(400).json({ erreur: 'L\'id doit être un nombre.' })
+        }
+    } catch {
+        return res.status(400).json('Problème lors de la vérification du numéro de l\'équipe');
+    }
     next();
 }, indexController.verifyToken,
     etudiantProfil,
@@ -86,8 +116,14 @@ router.all('/:id/quitterEquipe', (req, res, next) => {
 
 router.all('/:id/infos', (req, res, next) => {
     res.locals.idEquipe = req.params.id;
-    verifIdNombre(res.locals.idEquipe, res, next)
 
+    try {
+        if (verifIdNombre(res.locals.idEquipe, res) === -1) {
+            return res.status(400).json({ erreur: 'L\'id doit être un nombre.' })
+        }
+    } catch {
+        return res.status(400).json('Problème lors de la vérification du numéro de l\'équipe');
+    }
     next();
 }, indexController.verifyToken,
     aucunProfil,
@@ -96,8 +132,14 @@ router.all('/:id/infos', (req, res, next) => {
 
 router.all('/:id/demandeAdmission', (req, res, next) => {
     res.locals.idEquipe = req.params.id;
-    verifIdNombre(res.locals.idEquipe, res, next)
 
+    try {
+        if (verifIdNombre(res.locals.idEquipe, res) === -1) {
+            return res.status(400).json({ erreur: 'L\'id doit être un nombre.' })
+        }
+    } catch {
+        return res.status(400).json('Problème lors de la vérification du numéro de l\'équipe');
+    }
     next();
 }, indexController.verifyToken,
     etudiantProfil,
@@ -106,8 +148,15 @@ router.all('/:id/demandeAdmission', (req, res, next) => {
 
 router.all('/:id/AccepterDemande', (req, res, next) => {
     res.locals.idEquipe = req.params.id;
-    verifIdNombre(res.locals.idEquipe, res, next)
 
+    try {
+        if (verifIdNombre(res.locals.idEquipe, res) === -1) {
+          return res.status(400).json({ erreur: 'L\'id doit être un nombre.' })
+        }
+      } catch {
+        return res.status(400).json('Problème lors de la vérification du numéro de l\'équipe');
+      }
+      
     next();
 }, indexController.verifyToken,
     capitaine,
@@ -115,8 +164,14 @@ router.all('/:id/AccepterDemande', (req, res, next) => {
 
 router.all('/:id/declinerDemande', (req, res, next) => {
     res.locals.idEquipe = req.params.id;
-    verifIdNombre(res.locals.idEquipe, res, next)
 
+    try {
+        if (verifIdNombre(res.locals.idEquipe, res) === -1) {
+          return res.status(400).json({ erreur: 'L\'id doit être un nombre.' })
+        }
+      } catch {
+        return res.status(400).json('Problème lors de la vérification du numéro de l\'équipe');
+      }
     next();
 }, indexController.verifyToken,
     capitaine,
@@ -129,8 +184,14 @@ router.all('/mesEquipes',
 
 router.all('/:id/declinerDemande', (req, res, next) => {
     res.locals.idEquipe = req.params.id;
-    verifIdNombre(res.locals.idEquipe, res, next)
 
+    try {
+        if (verifIdNombre(res.locals.idEquipe, res) === -1) {
+          return res.status(400).json({ erreur: 'L\'id doit être un nombre.' })
+        }
+      } catch {
+        return res.status(400).json('Problème lors de la vérification du numéro de l\'équipe');
+      }
     next();
 }, indexController.verifyToken,
     capitaine,

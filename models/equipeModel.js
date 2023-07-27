@@ -4,6 +4,7 @@ const userModel = require('./userModel');
 const projetModel = require('./projetModel')
 const { body } = require('express-validator');
 const motCleModel = require('../models/motCleModel');
+const gererProjet = require('./gererProjet');
 const modelsInterface = require('../interfaces/EventInterface');
 // const { chercherEvenement } = modelsInterface;
 
@@ -327,187 +328,198 @@ function promouvoir(idEquipe, idEtudiant) {
 async function jsonInformationsEquipe(idEquipe, req) {
 
     try {
-
         const chercher = await chercherEquipeID(idEquipe);
 
         jsonRetour = {}
 
-        if (chercher === 0) {
-            return 'aucun';
+        let temp1 = chercher[0];
+
+        /*Nom*/
+        console.log(temp1)
+        jsonRetour.nom = temp1.nom;
+
+        /*Nombre de membres de l'équipe */
+        const membres = await ListeMembre(idEquipe);
+        jsonRetour.nombre_membres = membres.length;
+
+        /*Nombre max de l'event*/
+        const projet = await projetModel.chercherProjetId(temp1.idprojet);
+        let idevent = projet[0].idevent;
+
+        const event = await chercherEvenement(idevent);
+        jsonRetour.nombre_max_membres = event[0].nombre_max_equipe;
+
+        const minimum = event[0].nombre_min_equipe;
+        console.log(minimum, membres.length, event[0])
+
+        if (membres.length >= minimum) {
+            jsonRetour.valide = true;
         } else {
+            jsonRetour.valide = false;
+        }
 
-            let temp1 = chercher[0];
+        /* Equipe ouverte ou fermée */
+        jsonRetour.statutRecrutement = temp1.statut_recrutement;
 
-            /*Nom*/
-            console.log(temp1)
-            jsonRetour.nom = temp1.nom;
+        /* Description */
+        if (temp1.description_equipe == null) {
+            jsonRetour.profilRecherche = "";
+        } else {
+            jsonRetour.profilRecherche = temp1.description_equipe;
+        }
 
-            /*Nombre de membres de l'équipe */
-            const membres = await ListeMembre(idEquipe);
-            jsonRetour.nombre_membres = membres.length;
+        let temp;
+        /* Infos capitaine */
+        jsonRetour.capitaine = {};
 
-            /*Nombre max de l'event*/
-            const projet = await projetModel.chercherProjetId(temp1.idprojet);
-            let idevent = projet[0].idevent;
+        let capitaine = await userModel.chercherUserID(temp1.idcapitaine);
+        jsonRetour.capitaine.id = temp1.idcapitaine;
 
-            const event = await chercherEvenement(idevent);
-            jsonRetour.nombre_max_membres = event[0].nombre_max_equipe;
+        jsonRetour.capitaine.pseudo = capitaine[0].pseudo;
+        jsonRetour.capitaine.email = capitaine[0].email;
 
-            const minimum = event[0].nombre_min_equipe;
-            console.log(minimum, membres.length, event[0])
+        /* Infos des membres, id et pseudo */
+        jsonRetour.membres = [];
 
-            if (membres.length >= minimum) {
-                jsonRetour.valide = true;
-            } else {
-                jsonRetour.valide = false;
-            }
+        for (i = 0; i < membres.length; i++) {
 
-            /* Equipe ouverte ou fermée */
-            jsonRetour.statutRecrutement = temp1.statut_recrutement;
+            membreCourant = membres[i];
 
-            /* Description */
-            if (temp1.description_equipe == null) {
-                jsonRetour.profilRecherche = "";
-            } else {
-                jsonRetour.profilRecherche = temp1.description_equipe;
-            }
-
-            let temp;
-            /* Infos capitaine */
-            jsonRetour.capitaine = {};
-
-            let capitaine = await userModel.chercherUserID(temp1.idcapitaine);
-            jsonRetour.capitaine.id = temp1.idcapitaine;
-
-            jsonRetour.capitaine.pseudo = capitaine[0].pseudo;
-            jsonRetour.capitaine.email = capitaine[0].email;
-
-            /* Infos des membres, id et pseudo */
-            jsonRetour.membres = [];
-
-            for (i = 0; i < membres.length; i++) {
-
-                membreCourant = membres[i];
-
-                if (membreCourant.iduser != temp1.idcapitaine) {
-                    temp = {};
-                    temp.id = membreCourant.iduser;
-
-                    let user = await userModel.chercherUserID(membreCourant.iduser);
-
-                    temp.pseudo = user[0].pseudo;
-
-                    jsonRetour.membres.push(temp);
-                }
-
-            }
-
-            /* Infos projet */
-            jsonRetour.sujet = {};
-
-            jsonRetour.sujet.titre = projet[0].nom;
-            jsonRetour.sujet.id_projet = projet[0].idprojet;
-            jsonRetour.sujet.description = projet[0].description_projet;
-            jsonRetour.sujet.lien_sujet = projet[0].sujet;
-            jsonRetour.sujet.mots = [];
-
-            let listeMots = await motCleModel.recupererMot(projet[0].idprojet);
-
-            for (j = 0; j < listeMots.length; j++) {
-
-                let motCourant = listeMots[j];
-                jsonRetour.sujet.mots.push(motCourant.mot);
-            }
-
-            /*L'étudiant fait parti de l'équipe*/
-            //Amélioration, rajouter si profil = etudiant regarder si fait partie de l'quipe, pour ne pas le faire
-            //pour l'admin
-
-            const etudiant = await appartenirEquipe(req.id, idEquipe);
-
-            if (etudiant.length === 0) {
-                jsonRetour.dansEquipe = false;
-                return jsonRetour;
-            }
-            jsonRetour.dansEquipe = true;
-
-            if (jsonRetour.capitaine.id === req.id) {
-                jsonRetour.estCapitaine = true;
-
-            } else {
-                jsonRetour.estCapitaine = false;
-            }
-
-            jsonRetour.reponseQuestionAll = temp1.preferencequestionnaire;
-
-            if (temp1.lien_github == null) {
-                jsonRetour.git = '';
-            } else {
-                jsonRetour.git = temp1.lien_github;
-            }
-
-            if (temp1.liendiscussion == null) {
-                jsonRetour.lien_discussion = '';
-            } else {
-                jsonRetour.lien_discussion = temp1.liendiscussion;
-            }
-
-            /*liste projet event pour modifier le choix*/
-            jsonRetour.liste_projets_event = [];
-
-            const listeProjetEvent = await projetModel.recuperer_projets(idevent);
-
-            for (i = 0; i < listeProjetEvent.length; i++) {
-
+            if (membreCourant.iduser != temp1.idcapitaine) {
                 temp = {};
+                temp.id = membreCourant.iduser;
 
-                if (temp1.idprojet != listeProjetEvent[i].idProjet) {
-                    temp = {};
-                    temp.id_projet = listeProjetEvent[i].idprojet;
-                    temp.titre = listeProjetEvent[i].nom;
-                    temp.description = listeProjetEvent[i].description_projet;
-                    temp.lien_sujet = listeProjetEvent[i].sujet;
-                    temp.mots = [];
-
-                    listeMots = await motCleModel.recupererMot(listeProjetEvent[i].idprojet);
-
-                    for (j = 0; j < listeMots.length; j++) {
-
-                        let motCourant = listeMots[j];
-                        temp.mots.push(motCourant.mot);
-                    }
-
-                    jsonRetour.liste_projets_event.push(temp);
-
-                }
-            }
-
-            //Liste user en attente, id, pseudo, message
-            const demande = await recupererDemande(idEquipe);
-
-            jsonRetour.liste_user_attente = [];
-
-            for (i = 0; i < demande.length; i++) {
-
-                temp = {};
-                temp.id = demande[i].iduser;
-
-                user = await userModel.chercherUserID(demande[i].iduser);
+                let user = await userModel.chercherUserID(membreCourant.iduser);
 
                 temp.pseudo = user[0].pseudo;
 
-                if (demande[i].messagedemande == null) {
-                    temp.message = '';
-                } else {
-                    temp.message = demande[i].messagedemande;
-                }
-                jsonRetour.liste_user_attente.push(temp);
+                jsonRetour.membres.push(temp);
             }
-
-            return jsonRetour;
         }
 
-    } catch (error) {
+        /* Infos projet */
+        jsonRetour.sujet = {};
+
+        jsonRetour.sujet.titre = projet[0].nom;
+        jsonRetour.sujet.id_projet = projet[0].idprojet;
+        jsonRetour.sujet.description = projet[0].description_projet;
+        jsonRetour.sujet.lien_sujet = projet[0].sujet;
+        jsonRetour.sujet.mots = [];
+
+        let listeMots = await motCleModel.recupererMot(projet[0].idprojet);
+
+        for (j = 0; j < listeMots.length; j++) {
+
+            let motCourant = listeMots[j];
+            jsonRetour.sujet.mots.push(motCourant.mot);
+        }
+
+        /*L'étudiant fait parti de l'équipe*/
+        //Amélioration, rajouter si profil = etudiant regarder si fait partie de l'quipe, pour ne pas le faire
+        //pour l'admin
+
+        if (req.userProfile === 'gestionnaire') {
+            const gerer_ia = await gererProjet.chercherGestionnaireIA(id, req.id);
+            const gerer_ext = await gererProjet.chercherGestionnaireExtID(id, req.id);
+
+            if (gerer_ia.length > 0) {
+                next();
+            } else if (gerer_ext > 0) {
+                next();
+            } else {
+                return res.status(400).json({ erreur: `Mauvais profil, il faut gérer l'événement.` });
+            }
+        }
+
+        if (req.userProfile === 'admin') { //ou gestionnaire qui gere
+            jsonRetour.superUser = true;
+        } else {
+            jsonRetour.superUser = false;
+        }
+
+        const etudiant = await appartenirEquipe(req.id, idEquipe);
+
+        if (etudiant.length === 0) {
+            jsonRetour.dansEquipe = false;
+            return jsonRetour;
+        }
+        jsonRetour.dansEquipe = true;
+
+        if (jsonRetour.capitaine.id === req.id) {
+            jsonRetour.estCapitaine = true;
+
+        } else {
+            jsonRetour.estCapitaine = false;
+        }
+
+        jsonRetour.reponseQuestionAll = temp1.preferencequestionnaire;
+
+        if (temp1.lien_github == null) {
+            jsonRetour.git = '';
+        } else {
+            jsonRetour.git = temp1.lien_github;
+        }
+
+        if (temp1.liendiscussion == null) {
+            jsonRetour.lien_discussion = '';
+        } else {
+            jsonRetour.lien_discussion = temp1.liendiscussion;
+        }
+
+        /*liste projet event pour modifier le choix*/
+        jsonRetour.liste_projets_event = [];
+
+        const listeProjetEvent = await projetModel.recuperer_projets(idevent);
+
+        for (i = 0; i < listeProjetEvent.length; i++) {
+
+            temp = {};
+
+            if (temp1.idprojet != listeProjetEvent[i].idProjet) {
+                temp = {};
+                temp.id_projet = listeProjetEvent[i].idprojet;
+                temp.titre = listeProjetEvent[i].nom;
+                temp.description = listeProjetEvent[i].description_projet;
+                temp.lien_sujet = listeProjetEvent[i].sujet;
+                temp.mots = [];
+
+                listeMots = await motCleModel.recupererMot(listeProjetEvent[i].idprojet);
+
+                for (j = 0; j < listeMots.length; j++) {
+
+                    let motCourant = listeMots[j];
+                    temp.mots.push(motCourant.mot);
+                }
+
+                jsonRetour.liste_projets_event.push(temp);
+            }
+        }
+
+        //Liste user en attente, id, pseudo, message
+        const demande = await recupererDemande(idEquipe);
+
+        jsonRetour.liste_user_attente = [];
+
+        for (i = 0; i < demande.length; i++) {
+
+            temp = {};
+            temp.id = demande[i].iduser;
+
+            user = await userModel.chercherUserID(demande[i].iduser);
+
+            temp.pseudo = user[0].pseudo;
+
+            if (demande[i].messagedemande == null) {
+                temp.message = '';
+            } else {
+                temp.message = demande[i].messagedemande;
+            }
+            jsonRetour.liste_user_attente.push(temp);
+        }
+        return jsonRetour;
+    }
+
+    catch (error) {
         throw error;
     }
 }
