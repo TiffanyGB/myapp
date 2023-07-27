@@ -131,16 +131,11 @@ async function insererUser(values, password, values2, type) {
             const existeM = await verif.existeMail(values2[1]);
 
             if (existeM && existeP) {
-                console.log('2')
                 return "les2";
             }
             else if (existeP) {
-                console.log('pseudo')
-
                 return "pseudo";
             } else if (existeM) {
-                console.log('mail')
-
                 return "mail";
             }
         }

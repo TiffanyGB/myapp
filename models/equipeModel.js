@@ -422,16 +422,14 @@ async function jsonInformationsEquipe(idEquipe, req) {
             const gerer_ia = await gererProjet.chercherGestionnaireIA(id, req.id);
             const gerer_ext = await gererProjet.chercherGestionnaireExtID(id, req.id);
 
-            if (gerer_ia.length > 0) {
-                next();
-            } else if (gerer_ext > 0) {
-                next();
+            if ((gerer_ia.length > 0) || (gerer_ext > 0)) {
+                jsonRetour.superUser = true;
             } else {
-                return res.status(400).json({ erreur: `Mauvais profil, il faut gérer l'événement.` });
+                jsonRetour.superUser = false;
             }
         }
 
-        if (req.userProfile === 'admin') { //ou gestionnaire qui gere
+        if (req.userProfile === 'admin') {
             jsonRetour.superUser = true;
         } else {
             jsonRetour.superUser = false;
@@ -564,7 +562,7 @@ async function jsonListeEquipeProjet(idProjet) {
             temp.nombreMaxEquipe = event.nombre_max_equipe;
             temp.nomEvent = event.nom;
             temp.idEvent = event.idevent;
-            temp.dernierSuivi = equipeCourante.date_creation;
+            temp.dernierSuivi = '';
 
             /*Capitaine */
             temp.idCapitaine = equipeCourante.idcapitaine;
