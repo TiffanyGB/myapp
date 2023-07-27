@@ -18,7 +18,7 @@ const generateSecretKey = () => {
 };
 const secretKey = generateSecretKey();
 
-// Middleware de vérification du token
+/* Middleware de vérification du token*/
 function verifyToken(req, res, next) {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
@@ -99,6 +99,15 @@ async function inscriptionEleve(req, res) {
       userMail,
     ];
 
+    /*Vérifier les données des étudiants */
+    await etudiantModel.validerEtudiant(req);
+
+    /**Exécute la requete de validation adapté */
+    let errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
     userModel.insererUser(values, password, values_id, 'etudiant')
       .then((insertion) => {
         if (typeof insertion === 'number') {
@@ -113,7 +122,6 @@ async function inscriptionEleve(req, res) {
 
               /**  Générer le JWT */
               const token = jwt.sign(payload, secretKey, { expiresIn: '24h' });
-
               res.status(200).json({ token: token, id: insertion, prenom: userPrenom, nom: userNom, pseudo: userPseudo, role: 'etudiant' });
             })
             .catch(() => {
@@ -130,14 +138,11 @@ async function inscriptionEleve(req, res) {
 
         } else if (insertion === 'mail') {
           res.status(400).json({ Existe: 'Mail' });
-
         }
       })
-      .catch((error) => {
-        console.error('Erreur lors de l\'insertion de l\'utilisateur:', error);
+      .catch(() => {
         res.status(400).json({ message: 'Erreur lors de l\'insertion de l\'utilisateur.' });
       });
-
   }
 }
 

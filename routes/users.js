@@ -50,8 +50,9 @@ router.get('/',
  */
 router.all(
   '/create',
-  userModel.validateUser,
   indexController.verifyToken,
+  checkAdminProfile,
+  userModel.validateUser,
   validationDonnees.validatePasswordCreation,
   userController.createUser,
 
@@ -60,12 +61,12 @@ router.all(
 /**
  * @route ALL /users/edit/:id
  * @description Endpoint pour modifier un utilisateur.
- * @access Seuls les administrateurs peuvent utiliser cette route.
+ * @access Seuls ceux avec un compte.
  * @authentication Requiert un token JWT valide dans l'en-tête Authorization.
  */
 router.all('/edit/:id', (req, res, next) => {
   res.locals.userId = req.params.id;
-  verifIdNombre(req.params.id, res, next)
+  // verifIdNombre(req.params.id, res, next)
 
   next();
 }, indexController.verifyToken,
@@ -82,7 +83,7 @@ router.all('/edit/:id', (req, res, next) => {
  */
 router.all('/delete/:id', (req, res, next) => {
   res.locals.userId = req.params.id;
-  verifIdNombre(req.params.id, res, next)
+  // verifIdNombre(req.params.id, res, next)
 
   next();
 }, indexController.verifyToken,

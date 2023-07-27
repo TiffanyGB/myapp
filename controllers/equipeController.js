@@ -445,9 +445,11 @@ async function declinerDemande(req, res) {
 
 
     /*Vérif existence équipe */
-    if (equipeModel.equipeExiste) {
-      return res.status(404).json({ erreur: 'L\'id de cette équipe n\'existe pas.' });
+    const equipe = await equipeModel.chercherEquipeID(idEquipe);
+    if (equipe.length === 0) {
+      return res.status(404).json({ erreur: 'L\'id n\'existe pas' });
     }
+
 
     /* Vérifier si l'étudiant a bien envoyé une demande */
     const envoyee = await equipeModel.demandeDejaEnvoyee(idUser, idEquipe);

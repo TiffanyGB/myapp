@@ -1,6 +1,9 @@
 var express = require('express');
 var router = express.Router();
 const { verifIdNombre } = require('../verifications/verifierDonnéesGénérales');
+const userModel = require('../models/userModel');
+const validationDonnees = require('../middleware/validationDonnees');
+
 let verifID = require('../middleware/verifExistenceIdRoute');
 // verifID = verifID.verifId(res, next, req.params.id, 'idEvent', 'Evenement');
 
@@ -15,24 +18,27 @@ router.use(express.urlencoded({ extended: false }));
 // router.use(cors());
 
 
-router.all('/inscription', indexController.inscriptionEleve);
+router.all('/inscription',
+  userModel.validateUser,
+  validationDonnees.validatePasswordCreation,
+  indexController.inscriptionEleve);
 
 router.all('/connexion', indexController.connexion);
 
 
 router.all('/voir_tous_events', indexController.voirTousEvents);
 
-router.all('/voir_event/:id', async(req, res, next) => {
-    res.locals.eventID = req.params.id;
+router.all('/voir_event/:id', async (req, res, next) => {
+  res.locals.eventID = req.params.id;
 
-    try{
-      if(verifIdNombre(res.locals.eventID, res) === -1){
-        return res.status(400).json({ erreur: 'L\'id doit être un nombre.' })
-      }
-    }catch{
-      return res.status(400).json('Problème');
+  try {
+    if (verifIdNombre(res.locals.eventID, res) === -1) {
+      return res.status(400).json({ erreur: 'L\'id doit être un nombre.' })
     }
-    next();
-  }, indexController.verifyToken, indexController.voirEvent);
+  } catch {
+    return res.status(400).json('Problème');
+  }
+  next();
+}, indexController.verifyToken, indexController.voirEvent);
 
 module.exports = router;

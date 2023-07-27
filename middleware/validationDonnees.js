@@ -17,7 +17,6 @@ function validateUserData(req, res, next) {
 const validatePasswordCreation = [
 
     body('password')
-        .optional({ nullable: true, checkFalsy: true })
         .isLength({ min: 8, max: 100 }).withMessage('Le mot de passe doit avoir une longueur comprise entre 8 et 100 caractères.')
         .matches(/[A-Z]/).withMessage('Le mot de passe doit contenir au moins une lettre majuscule.')
         .matches(/[0-9]/).withMessage('Le mot de passe doit contenir au moins un chiffre.')
