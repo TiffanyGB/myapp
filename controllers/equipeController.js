@@ -6,7 +6,6 @@ const { body, validationResult } = require('express-validator');
 
 /**A mettre dans un dossier autre que controller */
 async function retournerEquipeProjet(req, res) {
-  if (req.userProfile === 'admin') {
     if (req.method === 'OPTIONS') {
       res.status(200).json({ sucess: 'Agress granted' });
     }
@@ -28,16 +27,6 @@ async function retournerEquipeProjet(req, res) {
         res.status(400).json({ erreur: "Erreur lors de la récupération des équipes" });
       }
     }
-  } else if (req.userProfile === 'etudiant') {
-
-    res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "etudiant" });
-  } else if (req.userProfile === 'gestionnaire') {
-
-    res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "gestionnaire" });
-  } else if (req.userProfile === 'aucun') {
-
-    res.status(400).json({ erreur: "Mauvais profil, il faut être administrateur", profil: "Aucun" });
-  }
 }
 
 async function creerEquipe(req, res) {

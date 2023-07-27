@@ -50,7 +50,7 @@ router.all('/:id/teams', (req, res, next) => {
     verifIdNombre(req.params.id, res, next)
 
     next();
-}, indexController.verifyToken, equipeController.retournerEquipeProjet);
+}, indexController.verifyToken, checkAdminProfile,equipeController.retournerEquipeProjet);
 
 
 

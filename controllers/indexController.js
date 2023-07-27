@@ -1,14 +1,9 @@
-// /**
-//  * Contrôleur pour gérer les pages sans nécessité de compte.
-//  * @controller Index
-//  */
-
 const passwordModel = require('../models/passwordModel');
 const eventModel = require('../models/eventModel');
 const userModel = require('../models/userModel');
 const etudiantModel = require('../models/etudiantModel');
 
-const { body, validationResult } = require('express-validator');
+const { validationResult } = require('express-validator');
 const pool = require('../database/configDB');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
@@ -163,41 +158,10 @@ async function connexion(req, res) {
     const identifiant = req.body.identifiant;
     const password = req.body.password;
 
-    await body('identifiant')
-      .matches(/^[a-zA-Z0-9!&#(~)_^%?]+$/)
-      .isLength({ min: 3, max: 60 })
-      .custom((value) => {
-        if (value.trim() !== value) {
-          throw new Error('Le nom ne doit pas contenir d\'espaces entre les lettres.');
-        }
-        return true;
-      })
-      .not().isEmpty()
-      .withMessage('Le nom doit contenir uniquement des lettres et avoir une longueur comprise entre 3 et 25 caractères.')
-      .run(req);
-
-    await body('password')
-      .isLength({ min: 8, max: 40 })
-      .withMessage('Le mot de passe doit contenir au moins 8 caractères')
-      .not().isEmpty()
-      .matches(/[A-Z]/)
-      .withMessage('Le mot de passe doit contenir au moins une lettre majuscule')
-      .matches(/[0-9]/)
-      .withMessage('Le mot de passe doit contenir au moins un chiffre')
-      .matches(/[\W!@#$%^&*]/)
-      .withMessage('Le mot de passe doit contenir au moins un caractère spécial')
-      .run(req);
-
-
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-
-    const requeteChercher = `SELECT * FROM Utilisateur WHERE (email='${identifiant}') OR (pseudo='${identifiant}')`;
+    const requeteChercher = `SELECT * FROM Utilisateur WHERE (email=$1) OR (pseudo=$1)`;
 
     try {
-      const result = await pool.query(requeteChercher);
+      const result = await pool.query(requeteChercher, [identifiant]);
 
       /** Aucun email ou pseudo ne correspond*/
       if (result.rowCount === 0) {
@@ -223,7 +187,6 @@ async function connexion(req, res) {
         }
       }
     } catch (error) {
-      console.error('Erreur lors de l\'exécution de la requête:', error);
       res.status(400).json('Erreur lors de l\'exécution de la requête');
     }
   }
@@ -259,8 +222,7 @@ async function voirEvent(req, res) {
           res.status(200).json(result);
         })
 
-        .catch((error) => {
-          console.error('Une erreur s\'est produite :', error);
+        .catch(() => {
           res.status(500).json({ message: 'Une erreur s\'est produite lors de la récupération de l\'événement.' });
         });
     }
@@ -270,7 +232,7 @@ async function voirEvent(req, res) {
         .then((result) => {
           res.status(200).json(result);
         })
-        .catch((error) => {
+        .catch(() => {
           res.status(500).json({ message: 'Une erreur s\'est produite lors de la récupération de l\'événement.' });
         });
     }
@@ -280,8 +242,7 @@ async function voirEvent(req, res) {
         .then((result) => {
           res.status(200).json(result);
         })
-        .catch((error) => {
-          console.error('Une erreur s\'est produite :', error);
+        .catch(() => {
           res.status(500).json({ message: 'Une erreur s\'est produite lors de la récupération de l\'événement.' });
         });
     }
@@ -301,14 +262,9 @@ function voirTousEvents(req, res) {
   if (req.method === 'GET') {
     eventModel.creerJsonTousEvents()
       .then((result) => {
-        if (result === false) {
-          res.status(200).json([]);
-        } else {
-          res.status(200).json(result);
-        }
+        res.status(200).json(result);
       })
       .catch((error) => {
-        console.error('Une erreur s\'est produite :', error);
         res.status(500).json({ message: 'Une erreur s\'est produite lors de la récupération des événements.' });
       });
   }

@@ -42,7 +42,7 @@ CREATE TABLE Utilisateur(
     lien_github VARCHAR (300) DEFAULT NULL,
     ville VARCHAR (100),
     lastCheckedNotif TIMESTAMP DEFAULT NULL,
-    date_inscription TIMESTAMP NOT NULL,
+    date_inscription TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     derniereModif TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     hashMdp VARCHAR(255),
     typeUser VARCHAR(30) CHECK (typeUser IN ('etudiant', 'gestionnaireIA', 'gestionnaireExterne', 'administrateur'))
@@ -82,6 +82,7 @@ CREATE TABLE Evenement(
     nombre_max_equipe INTEGER,
     message_fin TEXT DEFAULT NULL,
     derniereModif TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    date_creation TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     type_event VARCHAR(30) CHECK (type_event IN ('battle', 'challenge'))
 );
 
@@ -93,6 +94,7 @@ CREATE TABLE Projet(
     imgProjet VARCHAR(100), -- NOT NULL,
     sujet VARCHAR(500) NOT NULL,
     derniereModif TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    date_creation TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     idEvent INT REFERENCES Evenement(idEvent) ON DELETE SET NULL
 );
 
@@ -107,6 +109,7 @@ CREATE TABLE Equipe(
     preferenceQuestionnaire BOOLEAN DEFAULT false,
     idProjet INT REFERENCES Projet(idProjet) ON DELETE CASCADE,
     idCapitaine INT REFERENCES Etudiant(idEtudiant) ON DELETE CASCADE,
+    date_creation TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     finaliste INT REFERENCES Evenement(idEvent) ON DELETE CASCADE
 );
 

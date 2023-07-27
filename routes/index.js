@@ -23,7 +23,9 @@ router.all('/inscription',
   validationDonnees.validatePasswordCreation,
   indexController.inscriptionEleve);
 
-router.all('/connexion', indexController.connexion);
+router.all('/connexion',
+  validationDonnees.connexion,
+  indexController.connexion);
 
 
 router.all('/voir_tous_events', indexController.voirTousEvents);
