@@ -335,7 +335,6 @@ async function jsonInformationsEquipe(idEquipe, req) {
         let temp1 = chercher[0];
 
         /*Nom*/
-        console.log(temp1)
         jsonRetour.nom = temp1.nom;
 
         /*Nombre de membres de l'équipe */
@@ -350,7 +349,6 @@ async function jsonInformationsEquipe(idEquipe, req) {
         jsonRetour.nombre_max_membres = event[0].nombre_max_equipe;
 
         const minimum = event[0].nombre_min_equipe;
-        console.log(minimum, membres.length, event[0])
 
         if (membres.length >= minimum) {
             jsonRetour.valide = true;
@@ -419,17 +417,17 @@ async function jsonInformationsEquipe(idEquipe, req) {
         //pour l'admin
 
         if (req.userProfile === 'gestionnaire') {
-            const gerer_ia = await gererProjet.chercherGestionnaireIA(id, req.id);
-            const gerer_ext = await gererProjet.chercherGestionnaireExtID(id, req.id);
+            const gerer_ia = await gererProjet.chercherGestionnaireIA(projet[0].idprojet, req.id);
+            const gerer_ext = await gererProjet.chercherGestionnaireExtID(projet[0].idprojet, req.id);
 
-            if ((gerer_ia.length > 0) || (gerer_ext > 0)) {
+            
+            if ((gerer_ia.length > 0) || (gerer_ext.length > 0)) {
+                console.log('oui', gerer_ext.length)
                 jsonRetour.superUser = true;
             } else {
                 jsonRetour.superUser = false;
             }
-        }
-
-        if (req.userProfile === 'admin') {
+        } else if (req.userProfile === 'admin') {
             jsonRetour.superUser = true;
         } else {
             jsonRetour.superUser = false;

@@ -6,8 +6,7 @@ const equipeModel = require('../models/equipeModel');
 const profil = require('../middleware/verifProfil');
 
 const etudiantProfil = profil.checkProfile('etudiant');
-const adminProfil = profil.checkProfile('admin');
-const profilMultiple = profil.checkAEG();
+const capitaineAdminGes = profil.checkACG;
 const capitaine = profil.checkCapitaine;
 const aucunProfil = profil.interdireAucunProfil;
 
@@ -34,7 +33,7 @@ router.all('/edit/:id', (req, res, next) => {
     }
     next();
 }, indexController.verifyToken,
-    capitaine,
+    capitaineAdminGes,
     equipeModel.validerEquipe,
     equipeController.modifierEquipe);
 
@@ -51,7 +50,7 @@ router.all('/delete/:id', (req, res, next) => {
     }
     next();
 }, indexController.verifyToken,
-    capitaine,
+    capitaineAdminGes,
     equipeController.supprimerEquipe);
 
 router.all('/:id/ouvertes', (req, res, next) => {
@@ -82,7 +81,7 @@ router.all('/:id/promouvoir', (req, res, next) => {
     }
     next();
 }, indexController.verifyToken,
-    capitaine,
+    capitaineAdminGes,
     equipeController.promouvoir);
 
 /* Supprimer un membre */
@@ -97,7 +96,7 @@ router.all('/:id/supprimerMembre', (req, res, next) => {
     }
     next();
 }, indexController.verifyToken,
-    capitaine,
+    capitaineAdminGes,
     equipeController.supprimerMembre);
 
 router.all('/:id/quitterEquipe', (req, res, next) => {
@@ -151,15 +150,15 @@ router.all('/:id/AccepterDemande', (req, res, next) => {
 
     try {
         if (verifIdNombre(res.locals.idEquipe, res) === -1) {
-          return res.status(400).json({ erreur: 'L\'id doit être un nombre.' })
+            return res.status(400).json({ erreur: 'L\'id doit être un nombre.' })
         }
-      } catch {
+    } catch {
         return res.status(400).json('Problème lors de la vérification du numéro de l\'équipe');
-      }
-      
+    }
+
     next();
 }, indexController.verifyToken,
-    capitaine,
+    capitaineAdminGes,
     equipeController.accepterDemande);
 
 router.all('/:id/declinerDemande', (req, res, next) => {
@@ -167,39 +166,20 @@ router.all('/:id/declinerDemande', (req, res, next) => {
 
     try {
         if (verifIdNombre(res.locals.idEquipe, res) === -1) {
-          return res.status(400).json({ erreur: 'L\'id doit être un nombre.' })
+            return res.status(400).json({ erreur: 'L\'id doit être un nombre.' })
         }
-      } catch {
+    } catch {
         return res.status(400).json('Problème lors de la vérification du numéro de l\'équipe');
-      }
+    }
     next();
 }, indexController.verifyToken,
-    capitaine,
+    capitaineAdminGes,
     equipeController.declinerDemande);
 
 router.all('/mesEquipes',
     indexController.verifyToken,
     etudiantProfil,
     equipeController.voirMesEquipes);
-
-router.all('/:id/declinerDemande', (req, res, next) => {
-    res.locals.idEquipe = req.params.id;
-
-    try {
-        if (verifIdNombre(res.locals.idEquipe, res) === -1) {
-          return res.status(400).json({ erreur: 'L\'id doit être un nombre.' })
-        }
-      } catch {
-        return res.status(400).json('Problème lors de la vérification du numéro de l\'équipe');
-      }
-    next();
-}, indexController.verifyToken,
-    capitaine,
-    equipeController.declinerDemande);
-
-
-
-
 
 
 
