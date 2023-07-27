@@ -57,7 +57,7 @@ router.all('/:id/ouvertes', (req, res, next) => {
     res.locals.idEvent = req.params.id;
 
     try {
-        if (verifIdNombre(res.locals.idEquipe, res) === -1) {
+        if (verifIdNombre(res.locals.idEvent, res) === -1) {
             return res.status(400).json({ erreur: 'L\'id doit être un nombre.' })
         }
     } catch {

@@ -227,6 +227,11 @@ CREATE TABLE MessageGestionnaireAdmin(
     
 )
 
+CREATE TABLE MessageEquipe(
+    idEquipe INT PRIMARY KEY REFERENCES Equipe(idEquipe) ON DELETE CASCADE,
+
+)
+
 CREATE TABLE Message
 
 INSERT INTO Evenement (nom, debut_inscription, date_debut, date_fin, description_event, nombre_min_equipe, nombre_max_equipe, type_event)
