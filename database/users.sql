@@ -223,6 +223,12 @@ CREATE TABLE Preferences(
     metier BOOLEAN DEFAULT true
 );
 
+CREATE TABLE MessageGestionnaireAdmin(
+    
+)
+
+CREATE TABLE Message
+
 INSERT INTO Evenement (nom, debut_inscription, date_debut, date_fin, description_event, nombre_min_equipe, nombre_max_equipe, type_event)
 VALUES ('Événement 1', '2023-07-15', '2023-08-01', '2023-08-31', 'Ceci est la description de l''événement 1', 2, 5, 'battle');
 

@@ -331,6 +331,7 @@ async function jsonInformationsEquipe(idEquipe, req) {
         const chercher = await chercherEquipeID(idEquipe);
 
         jsonRetour = {}
+        let voirTout;
 
         let temp1 = chercher[0];
 
@@ -412,34 +413,39 @@ async function jsonInformationsEquipe(idEquipe, req) {
             jsonRetour.sujet.mots.push(motCourant.mot);
         }
 
-        /*L'étudiant fait parti de l'équipe*/
-        //Amélioration, rajouter si profil = etudiant regarder si fait partie de l'quipe, pour ne pas le faire
-        //pour l'admin
-
         if (req.userProfile === 'gestionnaire') {
             const gerer_ia = await gererProjet.chercherGestionnaireIA(projet[0].idprojet, req.id);
             const gerer_ext = await gererProjet.chercherGestionnaireExtID(projet[0].idprojet, req.id);
 
-            
             if ((gerer_ia.length > 0) || (gerer_ext.length > 0)) {
                 console.log('oui', gerer_ext.length)
                 jsonRetour.superUser = true;
+                voirTout = true;
+
             } else {
                 jsonRetour.superUser = false;
             }
         } else if (req.userProfile === 'admin') {
             jsonRetour.superUser = true;
+            voirTout = true;
         } else {
             jsonRetour.superUser = false;
         }
 
-        const etudiant = await appartenirEquipe(req.id, idEquipe);
+        if (req.userProfile === 'etudiant') {
+            const etudiant = await appartenirEquipe(req.id, idEquipe);
 
-        if (etudiant.length === 0) {
-            jsonRetour.dansEquipe = false;
+            if (etudiant.length === 0) {
+                jsonRetour.dansEquipe = false;
+                return jsonRetour;
+            }
+            jsonRetour.dansEquipe = true;
+            voirTout = true;
+        }
+
+        if(!voirTout){
             return jsonRetour;
         }
-        jsonRetour.dansEquipe = true;
 
         if (jsonRetour.capitaine.id === req.id) {
             jsonRetour.estCapitaine = true;
