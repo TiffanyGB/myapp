@@ -52,7 +52,6 @@ async function checkACG(req, res, next) {
 
 /*ASG --> Admin, etudiant(doit être dans l'équipe), gestionnaire  en charge de l'équipe*/
 async function checkAEG(req, res, next) {
-
   const id = res.locals.idEquipe;
 
   /*Vérifier que l'id de l'équipe existe */
@@ -65,30 +64,28 @@ async function checkAEG(req, res, next) {
   if (req.userProfile === 'admin') {
     next();
   } else if (req.userProfile === 'gestionnaire') {
-
     const gerer_ia = await gererProjet.chercherGestionnaireIA(id, req.id);
     const gerer_ext = await gererProjet.chercherGestionnaireExtID(id, req.id);
 
-    if ((gerer_ia.length > 0) || (gerer_ext.length > 0)) {
+    if (gerer_ia.length > 0 || gerer_ext.length > 0) {
       next();
     } else {
       return res.status(400).json({ erreur: `Mauvais profil, il faut gérer le projet.` });
     }
-
   } else if (req.userProfile === 'etudiant') {
-
     const appartient = await equipeModel.appartenirEquipe(req.id, id);
     if (appartient.length > 0) {
       next();
     } else {
-      return res.status(400).json({ erreur: `Il faut faire partie de l'équipe `+ id + ` pour envoyer des messages.`  });
+      return res.status(400).json({ erreur: `Il faut faire partie de l'équipe ` + id + ` pour envoyer des messages.`  });
     }
-
-    next();
   } else {
-    res.status(400).json({ erreur: `Mauvais profil, il faut être admin, gestionnaire du projet ou faire partie de l\'équipe.` });
+    return res.status(400).json({ erreur: `Mauvais profil, il faut être admin, gestionnaire du projet ou faire partie de l'équipe.` });
   }
-};
+}
+
+module.exports = checkAEG;
+
 
 //Que le capitaine
 async function checkCapitaine(req, res, next) {

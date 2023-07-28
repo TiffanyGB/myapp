@@ -29,7 +29,7 @@ router.all('/teams/:id/envoyerMessage', async (req, res, next) => {
         return res.status(400).json('Problème lors de la vérification du numéro de l\'event');
     }
     next();
-}, indexController.verifyToken, verifProfil.checkAEG, messageController.envoyerMessage);
+}, indexController.verifyToken, verifProfil.checkAEG,messageController.envoyerMessage);
 
 
 
