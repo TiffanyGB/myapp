@@ -71,13 +71,12 @@ async function jsonGetMessegaeEquipe(idEquipe, req) {
         }
         
         temp.content = messageCourant.contenu;
-        temp.range = messageCourant.typeMessage;
+        temp.range = messageCourant.typemessage;
 
         jsonRetour.message.push(temp);
     }
     return jsonRetour;
 }
-
 
 
 module.exports = {

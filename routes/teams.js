@@ -3,6 +3,7 @@ var router = express.Router();
 const indexController = require('../controllers/indexController');
 const equipeController = require('../controllers/equipeController');
 const equipeModel = require('../models/equipeModel');
+const messageController = require('../controllers/messageController');
 const profil = require('../middleware/verifProfil');
 
 const etudiantProfil = profil.checkProfile('etudiant');
@@ -181,7 +182,18 @@ router.all('/mesEquipes',
     etudiantProfil,
     equipeController.voirMesEquipes);
 
-
+router.all('/:id/message', async (req, res, next) => {
+    res.locals.idEquipe = req.params.id;
+    
+    try {
+        if (verifIdNombre(res.locals.idEquipe, res) === -1) {
+            return res.status(400).json({ erreur: 'L\'id doit être un nombre.' })
+        }
+    } catch {
+        return res.status(400).json('Problème lors de la vérification du numéro de l\'event');
+    }
+    next();
+}, indexController.verifyToken, messageController.recupererMessageEquipe);
 
 /************************J'enleve cette methode pour voir si ça casse coté front, si non, alors supprimer */
 /**Voir une équipe */

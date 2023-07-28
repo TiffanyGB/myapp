@@ -42,12 +42,10 @@ async function recupererMessageEquipe(req, res) {
             const jsonRetour = await messageModel.jsonGetMessegaeEquipe(idEquipe, req);
             return res.status(200).json(jsonRetour);
         } catch (error) {
-            console.error('Error while retrieving messages:', error);
             return res.status(400).json({ erreur: "Erreur lors de la récupération des messages" });
         }
     }
 }
-
 
 
 module.exports = {
