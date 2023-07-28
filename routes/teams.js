@@ -183,11 +183,6 @@ router.all('/mesEquipes',
 
 
 
-
-
-
-
-
 /************************J'enleve cette methode pour voir si ça casse coté front, si non, alors supprimer */
 /**Voir une équipe */
 // router.all('/:id', (req, res, next) => {

@@ -17,6 +17,7 @@ var usersRouter = require('./routes/users');
 var gestionnaireRouter = require('./routes/gestionnaire');
 var teamsRouter = require('./routes/teams');
 var imagesRouter = require('./routes/image');
+var messageRouter = require('./routes/message');
 
 /**crée une instance de l'application Express */
 var app = express();
@@ -52,6 +53,7 @@ app.use('/projet', projetRouter);
 app.use('/users', usersRouter);
 app.use('/gestionnaire', gestionnaireRouter);
 app.use('/teams', teamsRouter);
+app.use('/message', messageRouter);
 
 
 // Configuration du middleware body-parser

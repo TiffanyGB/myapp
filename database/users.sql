@@ -30,6 +30,9 @@ DROP TABLE IF EXISTS Gerer_externe CASCADE;
 DROP TABLE IF EXISTS Gerer_ia_pau CASCADE;
 DROP TABLE IF EXISTS DemandeEquipe CASCADE;
 DROP TABLE IF EXISTS Preferences CASCADE;
+DROP TABLE IF EXISTS MessageEquipe CASCADE;
+DROP TABLE IF EXISTS MessageGestionnaireAdmin CASCADE;
+
 
 
 CREATE TABLE Utilisateur(
@@ -224,15 +227,22 @@ CREATE TABLE Preferences(
 );
 
 CREATE TABLE MessageGestionnaireAdmin(
-    
-)
+    idMessage SERIAL PRIMARY KEY,
+    idEquipe INT REFERENCES Equipe(idEquipe) ON DELETE CASCADE,
+    idExpediteur INT REFERENCES Utilisateur(idUser),
+    contenu TEXT NOT NULL,
+    estLu BOOLEAN DEFAULT FALSE,
+    date_envoie TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
 CREATE TABLE MessageEquipe(
-    idEquipe INT PRIMARY KEY REFERENCES Equipe(idEquipe) ON DELETE CASCADE,
-
-)
-
-CREATE TABLE Message
+    idMessage SERIAL PRIMARY KEY,
+    idEquipe INT REFERENCES Equipe(idEquipe) ON DELETE CASCADE,
+    idExpediteur INT REFERENCES Etudiant(idEtudiant),
+    contenu TEXT NOT NULL,
+    estLu BOOLEAN DEFAULT FALSE,
+    date_envoie TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
 INSERT INTO Evenement (nom, debut_inscription, date_debut, date_fin, description_event, nombre_min_equipe, nombre_max_equipe, type_event)
 VALUES ('Événement 1', '2023-07-15', '2023-08-01', '2023-08-31', 'Ceci est la description de l''événement 1', 2, 5, 'battle');
