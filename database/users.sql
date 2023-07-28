@@ -232,6 +232,7 @@ CREATE TABLE MessageGestionnaireAdmin(
     idExpediteur INT REFERENCES Utilisateur(idUser),
     contenu TEXT NOT NULL,
     estLu BOOLEAN DEFAULT FALSE,
+    typeMessage VARCHAR(30) CHECK (typeMessage IN ('team', 'projet', 'event')) DEFAULT 'team',
     date_envoie TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -241,6 +242,7 @@ CREATE TABLE MessageEquipe(
     idExpediteur INT REFERENCES Etudiant(idEtudiant),
     contenu TEXT NOT NULL,
     estLu BOOLEAN DEFAULT FALSE,
+    typeMessage VARCHAR(30) DEFAULT 'team' CHECK (typeMessage = 'team'),
     date_envoie TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

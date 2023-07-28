@@ -1,11 +1,9 @@
 const messageModel = require('../models/messageModel')
 
-function envoyerMessage(req, res) {
+async function envoyerMessage(req, res) {
     if (req.method === 'OPTIONS') {
-        res.status(200).json({ sucess: 'Agress granted' });
-    }
-    else if (req.method === 'POST') {
-
+        res.status(200).json({ sucess: 'Access granted' });
+    } else if (req.method === 'POST') {
         const idUser = req.id;
         const idEquipe = res.locals.idEquipe;
 
@@ -17,29 +15,42 @@ function envoyerMessage(req, res) {
             idEquipe,
             contenu,
             idUser
-        ]
+        ];
 
-        if(req.userProfile === 'etudiant'){
-            //Vérifier equipe
-            try{
+        try {
+            if (req.userProfile === 'etudiant') {
                 messageModel.envoyerMessageEquipe(valeurs);
-                res.status(200).json({message: 'Message envoyé à l\'équipe '+ idEquipe});
-            }catch{
-                res.status(400).json({erreur: 'Erreur lors de l\'envoi du message'});
-            }
-        }
-
-        if(req.userProfile === 'admin' || req.userProfile === 'gestionnaire'){
-            try{
+            } else if (req.userProfile === 'admin' || req.userProfile === 'gestionnaire') {
                 messageModel.envoyerMessageGerant(valeurs);
-                res.status(200).json({message: 'Message envoyé à l\'équipe ' + idEquipe});
-            }catch{
-                res.status(400).json({erreur: 'Erreur lors de l\'envoi du message'});
             }
+
+            return res.status(200).json({ message: 'Message envoyé à l\'équipe ' + idEquipe });
+        } catch (error) {
+            return res.status(400).json({ erreur: 'Erreur lors de l\'envoi du message' });
         }
     }
 }
 
+
+async function recupererMessageEquipe(req, res) {
+    if (req.method === 'OPTIONS') {
+        res.status(200).json({ sucess: 'Access granted' });
+    } else if (req.method === 'GET') {
+        const idEquipe = res.locals.idEquipe;
+
+        try {
+            const jsonRetour = await messageModel.jsonGetMessegaeEquipe(idEquipe, req);
+            return res.status(200).json(jsonRetour);
+        } catch (error) {
+            console.error('Error while retrieving messages:', error);
+            return res.status(400).json({ erreur: "Erreur lors de la récupération des messages" });
+        }
+    }
+}
+
+
+
 module.exports = {
-    envoyerMessage
+    envoyerMessage,
+    recupererMessageEquipe
 }

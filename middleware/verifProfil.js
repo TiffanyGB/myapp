@@ -72,7 +72,7 @@ async function checkAEG(req, res, next) {
     if ((gerer_ia.length > 0) || (gerer_ext.length > 0)) {
       next();
     } else {
-      return res.status(400).json({ erreur: `Mauvais profil, il faut gérer l'événement.` });
+      return res.status(400).json({ erreur: `Mauvais profil, il faut gérer le projet.` });
     }
 
   } else if (req.userProfile === 'etudiant') {
@@ -86,7 +86,7 @@ async function checkAEG(req, res, next) {
 
     next();
   } else {
-    res.status(400).json({ erreur: `Mauvais profil, il faut être admin, capitaine ou gestionnaire du projet.` });
+    res.status(400).json({ erreur: `Mauvais profil, il faut être admin, gestionnaire du projet ou faire partie de l\'équipe.` });
   }
 };
 
