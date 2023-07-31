@@ -1,4 +1,5 @@
-const messageModel = require('../models/messageModel')
+const messageModel = require('../models/messageModel');
+const eventModel = require('../models/eventModel');
 
 async function envoyerMessage(req, res) {
     if (req.method === 'OPTIONS') {
@@ -31,7 +32,6 @@ async function envoyerMessage(req, res) {
     }
 }
 
-
 async function recupererMessageEquipe(req, res) {
     if (req.method === 'OPTIONS') {
         res.status(200).json({ sucess: 'Access granted' });
@@ -47,8 +47,57 @@ async function recupererMessageEquipe(req, res) {
     }
 }
 
+async function messageGlobalProjet(req, res) {
+    if (req.method === 'OPTIONS') {
+        res.status(200).json({ sucess: 'Access granted' });
+    } else if (req.method === 'POST') {
+        const idUser = req.id;
+        const idProjet = res.locals.idProjet;
+
+        const {
+            contenu
+        } = req.body;
+
+        try {
+
+            messageModel.envoyerMessageGlobalProjet(contenu, idProjet, idUser);
+            return res.status(200).json({ message: 'Message envoyé aux équipes' });
+        } catch (error) {
+            return res.status(400).json({ erreur: 'Erreur lors de l\'envoi du message' });
+        }
+    }
+}
+
+async function messageGlobalEvent(req, res) {
+    if (req.method === 'OPTIONS') {
+        res.status(200).json({ sucess: 'Access granted' });
+    } else if (req.method === 'POST') {
+        const idUser = req.id;
+        const idEvent = res.locals.idEvent;
+
+        const {
+            contenu
+        } = req.body;
+
+        /*Vérifier si l'id de l'event existe */
+        const event = await eventModel.chercherEvenement(idEvent);
+
+        if (event.length === 0) {
+            return res.status(400).json({ erreur: 'L\'id de l\'événement n\'existe pas' });
+        }
+
+        try {
+            messageModel.envoyerMessageGlobalEvent(contenu, idEvent, idUser);
+            return res.status(200).json({ message: 'Message envoyé aux équipes de l\'évènement.' });
+        } catch (error) {
+            return res.status(400).json({ erreur: 'Erreur lors de l\'envoi du message' });
+        }
+    }
+}
 
 module.exports = {
     envoyerMessage,
-    recupererMessageEquipe
+    recupererMessageEquipe,
+    messageGlobalProjet,
+    messageGlobalEvent
 }

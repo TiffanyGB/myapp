@@ -7,7 +7,6 @@ const profil = require('../middleware/verifProfil');
 
 const etudiantProfil = profil.checkProfile('etudiant');
 const capitaineAdminGes = profil.checkACG;
-const capitaine = profil.checkCapitaine;
 const aucunProfil = profil.interdireAucunProfil;
 
 const { verifIdNombre } = require('../verifications/verifierDonnéesGénérales');
@@ -180,16 +179,5 @@ router.all('/mesEquipes',
     indexController.verifyToken,
     etudiantProfil,
     equipeController.voirMesEquipes);
-
-
-
-/************************J'enleve cette methode pour voir si ça casse coté front, si non, alors supprimer */
-/**Voir une équipe */
-// router.all('/:id', (req, res, next) => {
-//     res.locals.idEquipe = req.params.id;
-//     next();
-// }, indexController.verifyToken,
-//     adminProfil,
-//     equipeController.informationsEquipeAdmin);
 
 module.exports = router;

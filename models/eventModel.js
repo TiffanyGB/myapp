@@ -143,7 +143,6 @@ async function modifierEvent(valeurs) {
     try {
         await pool.query(modifier, valeurs);
     } catch (error) {
-        console.error("Erreur lors de la mise à jour de l'événement", error);
         throw error;
     }
 }
@@ -301,7 +300,6 @@ async function jsonEventChoisi(idEvent, typeUser, req) {
 
         /*Classement */
         let classementFinal = await classementModel.chercherClassement(idEvent);
-        console.log(classementFinal)
         if (classementFinal.length === 0) {
             tabRetour.classement = [];
         } else {

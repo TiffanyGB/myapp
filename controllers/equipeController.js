@@ -6,27 +6,27 @@ const { body, validationResult } = require('express-validator');
 
 /**A mettre dans un dossier autre que controller */
 async function retournerEquipeProjet(req, res) {
-    if (req.method === 'OPTIONS') {
-      res.status(200).json({ sucess: 'Agress granted' });
-    }
-    else if (req.method === 'GET') {
-      const idProjet = res.locals.projetId;
+  if (req.method === 'OPTIONS') {
+    res.status(200).json({ sucess: 'Agress granted' });
+  }
+  else if (req.method === 'GET') {
+    const idProjet = res.locals.projetId;
 
-      /**Vérifier si l'id existe dans la bdd, sinon 404 error */
-      projetModel.chercherProjetId(idProjet)
-        .then((result) => {
-          if (result.length === 0) {
-            return res.status(404).json({ erreur: "L'id n'existe pas" });
-          }
-        });
+    /**Vérifier si l'id existe dans la bdd, sinon 404 error */
+    projetModel.chercherProjetId(idProjet)
+      .then((result) => {
+        if (result.length === 0) {
+          return res.status(404).json({ erreur: "L'id n'existe pas" });
+        }
+      });
 
-      try {
-        const equipeList = await equipeModel.jsonListeEquipeProjet(idProjet);
-        res.status(200).json(equipeList);
-      } catch (error) {
-        res.status(400).json({ erreur: "Erreur lors de la récupération des équipes" });
-      }
+    try {
+      const equipeList = await equipeModel.jsonListeEquipeProjet(idProjet);
+      res.status(200).json(equipeList);
+    } catch (error) {
+      res.status(400).json({ erreur: "Erreur lors de la récupération des équipes" });
     }
+  }
 }
 
 async function creerEquipe(req, res) {
@@ -336,6 +336,11 @@ async function demandeEquipe(req, res) {
       return res.status(404).json({ erreur: 'L\'id n\'existe pas' });
     }
 
+    /*Vérifier que l'équipe est ouverte */
+    if(equipe[0].statut_recrutement === 'fermé'){
+      return res.status(404).json({ erreur: 'L\'équipe est fermée' });
+    }
+
     /* L'étudiant ne doit pas avoir d'équipe dans l'event*/
 
     /*Récupérer l'event de l'équipe*/
@@ -403,15 +408,11 @@ async function accepterDemande(req, res) {
       return res.status(400).json({ erreur: 'Aucune demande provenant de cet id' });
     }
 
-    /* Supprimer les demandes de l'étudiant des autres equipes */
-    try {
-      demandeModel.supprimerDemandes(idUser);
-    } catch {
-      return res.status(404).json({ erreur: 'Erreur lors de la suppression des anciennes demandes de l\'étudiant' });
-    }
-
     try {
       equipeModel.ajouterMembre(idUser, idEquipe);
+
+      /* Supprimer les demandes de l'étudiant des autres equipes */
+      demandeModel.supprimerDemandes(idUser);
       res.status(200).json({ message: "Etudiant accepté" });
 
     } catch {
@@ -471,34 +472,6 @@ async function voirMesEquipes(req, res) {
     }
   }
 }
-
-
-
-/* Admin, inutile je crois, peut etre à supprimer plus tard */
-// async function informationsEquipeAdmin(req, res) {
-//   if (req.method === 'OPTIONS') {
-//     res.status(200).json({ sucess: 'Agress granted' });
-//   } else if (req.method === 'GET') {
-//     const idEquipe = res.locals.idEquipe;
-
-//     try {
-
-//       const equipeInfos = await equipeModel.chercherEquipeID(idEquipe);
-
-//       if (equipeInfos.length === 0) {
-//         return res.status(404).json({ erreur: "L'id de l'équipe n'existe pas" });
-//       } else {
-
-//         const equipeList = await equipeModel.jsonInfosEquipe(idEquipe);
-//         res.status(200).json(equipeList);
-//       }
-//     } catch (error) {
-
-//       res.status(500).json({ erreur: "Erreur lors de la récupération de l'équipe" });
-//     }
-//   }
-// }
-
 
 module.exports = {
   retournerEquipeProjet,

@@ -723,50 +723,6 @@ async function demandeDejaEnvoyee(idUser, idEquipe) {
     });
 }
 
-/*A supprimer peut etre*/
-// async function jsonInfosEquipe(idEquipe) {
-
-//     try {
-
-//         const chercher = await chercherEquipeID(idEquipe);
-
-//         jsonRetour = {}
-
-//         if (chercher === 0) {
-//             return 'aucun';
-//         } else {
-
-//             temp = chercher[0];
-
-//             jsonRetour.id = temp.idequipe;
-//             jsonRetour.nom = temp.nom;
-//             jsonRetour.description = temp.description_equipe;
-//             jsonRetour.statut = temp.statut_recrutement;
-//             jsonRetour.idProjet = temp.idprojet;
-//             jsonRetour.idCapitaine = temp.idcapitaine;
-
-//             if (temp.lien_github == null) {
-//                 jsonRetour.github = '';
-//             } else {
-//                 jsonRetour.github = temp.lien_github;
-//             }
-
-//             if (temp.finaliste == null) {
-//                 jsonRetour.finaliste = '';
-
-//             } else {
-//                 jsonRetour.finaliste = temp.finaliste;
-//             }
-
-
-//             return jsonRetour;
-//         }
-
-//     } catch (error) {
-//         throw error;
-//     }
-// }
-
 module.exports = {
     aUneEquipe,
     jsonListeEquipeProjet,

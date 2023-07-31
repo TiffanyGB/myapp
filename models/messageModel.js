@@ -1,5 +1,7 @@
 const pool = require("../database/configDB");
 const userModel = require('./userModel');
+const equipeModel = require('./equipeModel');
+const projetModel = require('../models/projetModel');
 
 // Envoyer message en tant qu'etudiant
 function envoyerMessageEquipe(valeurs) {
@@ -25,6 +27,51 @@ function envoyerMessageGerant(valeurs) {
     }
 }
 
+async function envoyerMessageGlobalProjet(contenu, idProjet, idUser) {
+
+    const envoyer = `INSERT INTO MessageGestionnaireAdmin
+    (idEquipe, contenu, idExpediteur, typeMessage)
+    VALUES ($1, $2, $3, $4)`;
+
+    const equipesProjet = await equipeModel.listeEquipeProjet(idProjet);
+
+    for (i = 0; i < equipesProjet.length; i++) {
+
+        let equipesCourantes = equipesProjet[i];
+        let donnees = [equipesCourantes.idequipe, contenu, idUser, 'projet'];
+
+        try{
+            pool.query(envoyer, donnees);
+        }catch (error){
+            throw (error);
+        }
+    }
+}
+
+async function envoyerMessageGlobalEvent(contenu, idEvent, idUser) {
+
+    const envoyer = `INSERT INTO MessageGestionnaireAdmin
+    (idEquipe, contenu, idExpediteur, typeMessage)
+    VALUES ($1, $2, $3, $4)`;
+
+    const projets = await projetModel.recuperer_projets(idEvent);
+
+    for(i = 0; i < projets.length; i++){
+        const equipesProjet = await equipeModel.listeEquipeProjet(projets[i].idprojet);
+
+        for (j = 0; j < equipesProjet.length; j++) {
+
+            let equipesCourantes = equipesProjet[i];
+            let donnees = [equipesCourantes.idequipe, contenu, idUser, 'event'];
+    
+            try{
+                pool.query(envoyer, donnees);
+            }catch (error){
+                throw (error);
+            }
+        }
+    }
+}
 
 //Recuperer tous les messages de l'equipe
 async function getMessageEquipe(idEquipe) {
@@ -45,14 +92,13 @@ async function getMessageEquipe(idEquipe) {
     }
 }
 
-
 async function jsonGetMessegaeEquipe(idEquipe, req) {
 
     const equipe = await getMessageEquipe(idEquipe);
     jsonRetour = {};
     jsonRetour.message = [];
 
-    for(i = 0; i < equipe.length; i++){
+    for (i = 0; i < equipe.length; i++) {
 
         temp = {};
         let messageCourant = equipe[i];
@@ -64,12 +110,12 @@ async function jsonGetMessegaeEquipe(idEquipe, req) {
 
         temp.dateMessage = messageCourant.date_envoie;
 
-        if(req.id === temp.idSender){
+        if (req.id === temp.idSender) {
             temp.userIsSender = true;
-        }else{
+        } else {
             temp.userIsSender = false;
         }
-        
+
         temp.content = messageCourant.contenu;
         temp.range = messageCourant.typemessage;
 
@@ -82,5 +128,8 @@ async function jsonGetMessegaeEquipe(idEquipe, req) {
 module.exports = {
     envoyerMessageEquipe,
     envoyerMessageGerant,
-    jsonGetMessegaeEquipe
+    jsonGetMessegaeEquipe,
+    envoyerMessageGlobalProjet,
+    getMessageEquipe,
+    envoyerMessageGlobalEvent
 }
