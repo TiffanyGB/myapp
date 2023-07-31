@@ -283,9 +283,10 @@ async function jsonEventChoisi(idEvent, typeUser, req) {
                 let ressourceCourante = listeRessource[j];
                 let ressourcesInfos = {};
                 let statut = ressourceCourante.statut;
+                let date = ressourceCourante.date_apparition;
 
                 /*Les ressources privées nécessient d'être connecté  */
-                if((statut === 'public') || (statut === 'privé' && typeUser != 'aucun')){
+                if(((statut === 'public' ) || (statut === 'privé' && typeUser != 'aucun')) && (date < new Date())){
                     ressourcesInfos.titre = ressourceCourante.titre;
                     ressourcesInfos.type = ressourceCourante.type_ressource;
                     ressourcesInfos.lien = ressourceCourante.lien;

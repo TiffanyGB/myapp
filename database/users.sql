@@ -129,10 +129,10 @@ ADD COLUMN idEquipeGagnante INT REFERENCES Equipe(idEquipe) ON DELETE CASCADE;
 
 CREATE TABLE Ressource(
     idRessource SERIAL PRIMARY KEY,
-    titre VARCHAR(100),
+    titre VARCHAR(100) NOT NULL,
     type_ressource VARCHAR(100) CHECK (type_ressource IN ('drive', 'téléchargement', 'lien', 'video')),
     lien VARCHAR(1000), 
-    date_apparition TIMESTAMP,
+    date_apparition TIMESTAMP NOT NULL,
     statut VARCHAR(30) CHECK (statut IN ('public', 'privé')),
     description_ressource TEXT NOT NULL,
     idProjet INT REFERENCES Projet(idProjet) ON DELETE CASCADE

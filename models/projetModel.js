@@ -5,6 +5,7 @@ const gerer = require('./gererProjet');
 const { body } = require('express-validator');
 const { json } = require('body-parser');
 const validationDonnees = require('../middleware/validationDonnees');
+const gererProjet = require('../models/gererProjet');
 
 const validateProjet = [
     body('nom')
@@ -121,20 +122,15 @@ async function supprimerProjet(idProjet) {
 
     const supprimer = `DELETE FROM Projet WHERE idProjet = $1`;
 
-    return new Promise((resolve, reject) => {
-
-        pool.query(supprimer, [idProjet])
-            .then(() => {
-                resolve('ok');
-            })
-            .catch((error) => {
-                reject(error);
-            });
-    });
+    try {
+        pool.query(supprimer, [idProjet]);
+    } catch (error) {
+        throw error;
+    }
 }
 
 /**JSON avec tous les projets */
-async function listeProjetsJson() {
+async function listeProjetsJson(req) {
 
     try {
         let projetsListe = await tousLesProjets();
@@ -147,48 +143,56 @@ async function listeProjetsJson() {
 
             projetCourant = projetsListe[i];
 
-            temp = {}
+            if (req.userProfile === 'gestionnaire') {
+                const gerer_ia = await gererProjet.chercherGestionnaireIA(projetCourant.idprojet, req.id);
+                const gerer_ext = await gererProjet.chercherGestionnaireExtID(projetCourant.idprojet, req.id);
 
-            temp.idProjet = projetCourant.idprojet;
-            temp.nom = projetCourant.nom;
+                if (gerer_ia.length > 0 || gerer_ext.length > 0) {
 
-            if (projetCourant.idevent == null) {
-                temp.idevent = '';
-            } else {
-                temp.idevent = projetCourant.idevent;
+                    temp = {};
+
+                    temp.idProjet = projetCourant.idprojet;
+                    temp.nom = projetCourant.nom;
+
+                    if (projetCourant.idevent == null) {
+                        temp.idevent = '';
+                    } else {
+                        temp.idevent = projetCourant.idevent;
+                    }
+                    temp.description = projetCourant.description_projet;
+                    temp.derniereModif = projetCourant.dernieremodif;
+                    temp.recompense = projetCourant.recompense;
+                    temp.image = projetCourant.imgprojet;
+                    temp.sujet = projetCourant.sujet;
+                    temp.themes = [];
+
+                    const listeMots = await motcleModel.recupererMot(projetCourant.idprojet);
+
+                    for (j = 0; j < listeMots.length; j++) {
+
+                        let motCourant = listeMots[j];
+                        temp.themes.push(motCourant.mot);
+                    }
+
+                    temp.ressources = [];
+
+                    let listeRessource = await ressourceModel.recuperer_toutes_ressources(projetCourant.idprojet);
+                    for (j = 0; j < listeRessource.length; j++) {
+
+                        let ressourceCourante = listeRessource[j];
+                        let ressourcesInfos = {};
+
+                        ressourcesInfos.titre = ressourceCourante.titre;
+                        ressourcesInfos.type = ressourceCourante.type_ressource;
+                        ressourcesInfos.lien = ressourceCourante.lien;
+                        ressourcesInfos.description = ressourceCourante.description_ressource;
+                        ressourcesInfos.statut = ressourceCourante.statut;
+
+                        temp.ressources.push(ressourcesInfos);
+                    }
+                    jsonRetour.projets.push(temp);
+                }
             }
-            temp.description = projetCourant.description_projet;
-            temp.derniereModif = projetCourant.dernieremodif;
-            temp.recompense = projetCourant.recompense;
-            temp.image = projetCourant.imgprojet;
-            temp.sujet = projetCourant.sujet;
-            temp.themes = [];
-
-            const listeMots = await motcleModel.recupererMot(projetCourant.idprojet);
-
-            for (j = 0; j < listeMots.length; j++) {
-
-                let motCourant = listeMots[j];
-                temp.themes.push(motCourant.mot);
-            }
-
-            temp.ressources = [];
-
-            let listeRessource = await ressourceModel.recuperer_toutes_ressources(projetCourant.idprojet);
-            for (j = 0; j < listeRessource.length; j++) {
-
-                let ressourceCourante = listeRessource[j];
-                let ressourcesInfos = {};
-
-                ressourcesInfos.titre = ressourceCourante.titre;
-                ressourcesInfos.type = ressourceCourante.type_ressource;
-                ressourcesInfos.lien = ressourceCourante.lien;
-                ressourcesInfos.description = ressourceCourante.description_ressource;
-                ressourcesInfos.statut = ressourceCourante.statut;
-
-                temp.ressources.push(ressourcesInfos);
-            }
-            jsonRetour.projets.push(temp);
         }
         return jsonRetour;
     }

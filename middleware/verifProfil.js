@@ -80,6 +80,26 @@ async function checkAEG(req, res, next) {
   }
 }
 
+async function checkAEG2222(req, res, next) {
+  const id = res.locals.projetId;
+
+  if (req.userProfile === 'admin') {
+    next();
+  } else if (req.userProfile === 'gestionnaire') {
+    const gerer_ia = await gererProjet.chercherGestionnaireIA(id, req.id);
+    const gerer_ext = await gererProjet.chercherGestionnaireExtID(id, req.id);
+
+    console.log(gerer_ia, gerer_ext)
+    if (gerer_ia.length > 0 || gerer_ext.length > 0) {
+      next();
+    } else {
+      return res.status(400).json({ erreur: `Mauvais profil, il faut gérer le projet.` });
+    }
+  } else {
+    return res.status(400).json({ erreur: `Mauvais profil, il faut être admin, gestionnaire du projet ou faire partie de l'équipe.` });
+  }
+}
+
 
 /*Que l'admin et le gestionnaire du projet */
 async function checkAG(req, res, next) {
@@ -108,6 +128,14 @@ async function checkAG(req, res, next) {
   }
 }
 
+async function checkATousGestionnaires(req, res, next) {
+
+  if (req.userProfile === 'admin' || req.userProfile === 'gestionnaire') {
+    next();
+  } else {
+    return res.status(400).json({ erreur: `Mauvais profil, il faut être admin ou gestionnaire` });
+  }
+}
 
 /*Doit etre connecté */
 async function interdireAucunProfil(req, res, next) {
@@ -119,4 +147,4 @@ async function interdireAucunProfil(req, res, next) {
 }
 
 
-module.exports = { checkProfile, checkACG, interdireAucunProfil, checkAEG, checkAG };
+module.exports = { checkProfile, checkACG, interdireAucunProfil, checkAEG, checkAG, checkATousGestionnaires, checkAEG2222 };

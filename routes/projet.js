@@ -3,54 +3,88 @@ var router = express.Router();
 
 const indexController = require('../controllers/indexController');
 const projetController = require('../controllers/projetController');
-const projetModel = require('../models/projetModel');
 const equipeController = require('../controllers/equipeController');
-const adminProfile = require('../middleware/verifProfil');
-const checkAdminProfile = adminProfile.checkProfile('admin');
+const profile = require('../middleware/verifProfil');
+const checkAdminProfile = profile.checkProfile('admin');
+const gestionnaireAdmin = profile.checkATousGestionnaires;
+const gestionnaireProjetAdmin = profile.checkAEG2222;
 const { verifIdNombre } = require('../verifications/verifierDonnéesGénérales');
 
 
 /**Voir la liste des projets*/
 router.all('/',
     indexController.verifyToken,
-    checkAdminProfile,
+    gestionnaireAdmin,
     projetController.voirListeProjets);
 
-router.all('/creerProjets', indexController.verifyToken, projetController.creationProjet);
+router.all('/creerProjets',
+    indexController.verifyToken,
+    checkAdminProfile,
+    projetController.creationProjet);
 
 
 /**voir informations d'un projet */
 router.all('/:id', (req, res, next) => {
     res.locals.projetId = req.params.id;
-    verifIdNombre(req.params.id, res, next)
+
+    try {
+        if (verifIdNombre(res.locals.projetId, res) === -1) {
+            return res.status(400).json({ erreur: 'L\'id doit être un nombre.' })
+        }
+    } catch {
+        return res.status(400).json('Problème lors de la vérification du numéro du projet');
+    }
 
     next();
-}, indexController.verifyToken, projetController.infosProjet);
+}, indexController.verifyToken, gestionnaireProjetAdmin, projetController.infosProjet);
 
 
 /**Modifier projet */
 router.all('/edit/:id', (req, res, next) => {
     res.locals.projetId = req.params.id;
-    verifIdNombre(req.params.id, res, next)
+
+    try {
+        if (verifIdNombre(res.locals.projetId, res) === -1) {
+            return res.status(400).json({ erreur: 'L\'id doit être un nombre.' })
+        }
+    } catch {
+        return res.status(400).json('Problème lors de la vérification du numéro du projet');
+    }
 
     next();
-}, indexController.verifyToken, projetController.modifierProjet);
+}, indexController.verifyToken,
+    checkAdminProfile,
+    projetController.modifierProjet);
 
 /**Supprimer un projet */
 router.all('/delete/:id', (req, res, next) => {
     res.locals.projetId = req.params.id;
-    verifIdNombre(req.params.id, res, next)
+
+    try {
+        if (verifIdNombre(res.locals.projetId, res) === -1) {
+            return res.status(400).json({ erreur: 'L\'id doit être un nombre.' })
+        }
+    } catch {
+        return res.status(400).json('Problème lors de la vérification du numéro du projet');
+    }
 
     next();
-}, indexController.verifyToken, projetController.supprimerProjet);
+}, indexController.verifyToken, checkAdminProfile, projetController.supprimerProjet);
 
 /**Voir équipes du projet */
 router.all('/:id/teams', (req, res, next) => {
     res.locals.projetId = req.params.id;
-    verifIdNombre(req.params.id, res, next)
+
+    try {
+        if (verifIdNombre(res.locals.projetId, res) === -1) {
+            return res.status(400).json({ erreur: 'L\'id doit être un nombre.' })
+        }
+    } catch {
+        return res.status(400).json('Problème lors de la vérification du numéro du projet');
+    }
 
     next();
-}, indexController.verifyToken, checkAdminProfile,equipeController.retournerEquipeProjet);
+}, indexController.verifyToken, checkAdminProfile, equipeController.retournerEquipeProjet);
 
 
 
