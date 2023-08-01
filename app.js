@@ -9,13 +9,14 @@ var logger = require('morgan');
 const cors = require('cors');
 const multerMiddleware = require('./middleware/multer-config');
 
-/**Routes */
+/*Routes */
 var eventsRouter = require('./routes/events');
 var indexRouter = require('./routes/index');
 var projetRouter = require('./routes/projet');
 var usersRouter = require('./routes/users');
 var gestionnaireRouter = require('./routes/gestionnaire');
 var teamsRouter = require('./routes/teams');
+var tokenRouter = require('./routes/token');
 var imagesRouter = require('./routes/image');
 var messageRouter = require('./routes/message');
 
@@ -54,7 +55,7 @@ app.use('/users', usersRouter);
 app.use('/gestionnaire', gestionnaireRouter);
 app.use('/teams', teamsRouter);
 app.use('/message', messageRouter);
-
+app.use('/token', tokenRouter);
 
 // Configuration du middleware body-parser
 app.use(bodyParser.urlencoded({ extended: false }));

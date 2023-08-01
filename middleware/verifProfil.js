@@ -89,7 +89,6 @@ async function checkAEG2222(req, res, next) {
     const gerer_ia = await gererProjet.chercherGestionnaireIA(id, req.id);
     const gerer_ext = await gererProjet.chercherGestionnaireExtID(id, req.id);
 
-    console.log(gerer_ia, gerer_ext)
     if (gerer_ia.length > 0 || gerer_ext.length > 0) {
       next();
     } else {
@@ -99,7 +98,6 @@ async function checkAEG2222(req, res, next) {
     return res.status(400).json({ erreur: `Mauvais profil, il faut être admin, gestionnaire du projet ou faire partie de l'équipe.` });
   }
 }
-
 
 /*Que l'admin et le gestionnaire du projet */
 async function checkAG(req, res, next) {

@@ -23,8 +23,8 @@
 var express = require('express');
 var router = express.Router();
 const userController = require('../controllers/userController');
-const indexController = require('../controllers/indexController');
 const userModel = require('../models/userModel');
+const tokenModel = require('../models/tokenModel');
 const profil = require('../middleware/verifProfil');
 const checkAdminProfile = profil.checkProfile('admin');
 const validationDonnees = require('../middleware/validationDonnees');
@@ -38,7 +38,7 @@ const { verifIdNombre } = require('../verifications/verifierDonnéesGénérales'
  * @authentication Requiert un token JWT valide dans l'en-tête Authorization.
  */
 router.get('/',
-  indexController.verifyToken,
+  tokenModel.verifyToken,
   checkAdminProfile,
   userController.voirUtilisateurs);
 
@@ -50,7 +50,7 @@ router.get('/',
  */
 router.all(
   '/create',
-  indexController.verifyToken,
+  tokenModel.verifyToken,
   checkAdminProfile,
   userModel.validateUser,
   validationDonnees.validatePasswordCreation,
@@ -66,10 +66,16 @@ router.all(
  */
 router.all('/edit/:id', (req, res, next) => {
   res.locals.userId = req.params.id;
-  // verifIdNombre(req.params.id, res, next)
 
+  try {
+    if (verifIdNombre(res.locals.userId, res) === -1) {
+      return res.status(400).json({ erreur: 'L\'id doit être un nombre.' })
+    }
+  } catch {
+    return res.status(400).json('Problème lors de la vérification du numéro de l\'équipe');
+  }
   next();
-}, indexController.verifyToken,
+}, tokenModel.verifyToken,
   aucunProfil,
   validationDonnees.validatePasswordModif,
   userController.modifierUser);
@@ -83,10 +89,17 @@ router.all('/edit/:id', (req, res, next) => {
  */
 router.all('/delete/:id', (req, res, next) => {
   res.locals.userId = req.params.id;
-  // verifIdNombre(req.params.id, res, next)
+
+  try {
+    if (verifIdNombre(res.locals.userId, res) === -1) {
+      return res.status(400).json({ erreur: 'L\'id doit être un nombre.' })
+    }
+  } catch {
+    return res.status(400).json('Problème lors de la vérification du numéro de l\'équipe');
+  }
 
   next();
-}, indexController.verifyToken,
+}, tokenModel.verifyToken,
   checkAdminProfile,
   userController.supprimerUser);
 

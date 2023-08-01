@@ -7,43 +7,13 @@ const { validationResult } = require('express-validator');
 const pool = require('../database/configDB');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
+const tokenModel = require('../models/tokenModel');
 
 const generateSecretKey = () => {
   return crypto.randomBytes(64).toString('hex');
 };
 const secretKey = generateSecretKey();
 
-/* Middleware de vérification du token*/
-function verifyToken(req, res, next) {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1];
-
-  if (!token) {
-    req.userProfile = 'aucun';
-    return next();
-  }
-
-  jwt.verify(token, secretKey, (err, decoded) => {
-    if (err) {
-      return res.status(403).json({ message: 'Token invalide ou expiré.' });
-    }
-
-    if (decoded.utilisateurType === 'administrateur') {
-      req.userProfile = 'admin';
-
-    } else if (decoded.utilisateurType === 'etudiant') {
-
-      req.userProfile = 'etudiant';
-
-    } else if ((decoded.utilisateurType === 'gestionnaireIA') || (decoded.utilisateurType === 'gestionnaireExterne')) {
-      req.userProfile = 'gestionnaire';
-    }
-    req.decodedToken = decoded;
-    req.id = decoded.utilisateurId;
-
-    next();
-  });
-}
 
 /**
  * Inscription d'un élève.
@@ -116,7 +86,8 @@ async function inscriptionEleve(req, res) {
               };
 
               /**  Générer le JWT */
-              const token = jwt.sign(payload, secretKey, { expiresIn: '24h' });
+              const token = jwt.sign(payload, secretKey, { expiresIn: '30d' });
+              tokenModel.stockerJWT(token, secretKey);
               res.status(200).json({ token: token, id: insertion, prenom: userPrenom, nom: userNom, pseudo: userPseudo, role: 'etudiant' });
             })
             .catch(() => {
@@ -157,6 +128,7 @@ async function connexion(req, res) {
 
     const identifiant = req.body.identifiant;
     const password = req.body.password;
+    const seSouvenir = req.body.seSouvenir;
 
     const requeteChercher = `SELECT * FROM Utilisateur WHERE (email=$1) OR (pseudo=$1)`;
 
@@ -179,7 +151,14 @@ async function connexion(req, res) {
           };
 
           /**  Générer le JWT */
-          const token = jwt.sign(payload, secretKey, { expiresIn: '24h' });
+          let temps;
+          if (seSouvenir) {
+            temps = '30d'
+          } else {
+            temps = '24h';
+          }
+          const token = jwt.sign(payload, secretKey, { expiresIn: temps });
+          tokenModel.stockerJWT(token, secretKey);
 
           res.status(200).json({ token: token, id: user.iduser, prenom: user.prenom, nom: user.nom, pseudo: user.pseudo, role: user.typeuser });
         } else {
@@ -270,10 +249,10 @@ function voirTousEvents(req, res) {
   }
 }
 
+
 module.exports = {
   inscriptionEleve,
   connexion,
   voirEvent,
   voirTousEvents,
-  verifyToken
 };

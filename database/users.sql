@@ -1,6 +1,6 @@
 \c postgres;
-DROP DATABASE IF EXISTS iapau;
-CREATE DATABASE iapau;
+-- DROP DATABASE IF EXISTS iapau;
+-- CREATE DATABASE iapau;
 
 -- Se connecter à la base de données
 \c iapau;
@@ -32,7 +32,13 @@ DROP TABLE IF EXISTS DemandeEquipe CASCADE;
 DROP TABLE IF EXISTS Preferences CASCADE;
 DROP TABLE IF EXISTS MessageEquipe CASCADE;
 DROP TABLE IF EXISTS MessageGestionnaireAdmin CASCADE;
+DROP TABLE IF EXISTS jwt;
+DROP TABLE IF EXISTS Annotation;
 
+CREATE TABLE jwt(
+    token TEXT NOT NULL PRIMARY KEY,
+    cleScrete TEXT NOT NULL
+);
 
 
 CREATE TABLE Utilisateur(
@@ -245,6 +251,15 @@ CREATE TABLE MessageEquipe(
     typeMessage VARCHAR(30) DEFAULT 'team' CHECK (typeMessage = 'team'),
     date_envoie TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE Annotation(
+    idAnnotation SERIAL PRIMARY KEY,
+    idEquipe INT REFERENCES Equipe(idEquipe) ON DELETE CASCADE NOT NULL,
+    auteur INT REFERENCES Utilisateur(idUser) NOT NULL,
+    contenu TEXT NOT NULL,
+    date_annotation TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 
 INSERT INTO Evenement (nom, debut_inscription, date_debut, date_fin, description_event, nombre_min_equipe, nombre_max_equipe, type_event)
 VALUES ('Événement 1', '2023-07-15', '2023-08-01', '2023-08-31', 'Ceci est la description de l''événement 1', 2, 5, 'battle');

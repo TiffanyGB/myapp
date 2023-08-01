@@ -8,6 +8,6 @@ const uploadMiddleware = multerConfig.configurerMiddleware();
 
 router.all('/upload', uploadMiddleware, imagesController.upload);
 
-router.all('/image/:id', indexController.verifyToken);
+// router.all('/image/:id', indexController.verifyToken);
 
 module.exports = router;
