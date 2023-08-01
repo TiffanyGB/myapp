@@ -50,7 +50,6 @@ async function verifyToken(req, res, next) {
           if (err) {
             return res.status(403).json({ message: 'Token invalide ou expiré.' });
           }
-          console.log(decoded)
   
           if (decoded.utilisateurType === 'administrateur') {
             req.userProfile = 'admin';

@@ -11,6 +11,7 @@ const capitaineAdminGes = profil.checkACG;
 const aucunProfil = profil.interdireAucunProfil;
 
 const { verifIdNombre } = require('../verifications/verifierDonnéesGénérales');
+const { verifIdEquipe } = require('../middleware/verifExistenceIdRoute');
 
 /**Créer une équipe */
 router.all('/creationEquipe',
@@ -33,6 +34,7 @@ router.all('/edit/:id', (req, res, next) => {
     }
     next();
 }, tokenModel.verifyToken,
+    verifIdEquipe,
     capitaineAdminGes,
     equipeModel.validerEquipe,
     equipeController.modifierEquipe);
@@ -50,6 +52,7 @@ router.all('/delete/:id', (req, res, next) => {
     }
     next();
 }, tokenModel.verifyToken,
+    verifIdEquipe,
     capitaineAdminGes,
     equipeController.supprimerEquipe);
 
@@ -66,6 +69,7 @@ router.all('/:id/ouvertes', (req, res, next) => {
     next();
 }, tokenModel.verifyToken,
     etudiantProfil,
+    //idEvent verif
     equipeController.listeOuvertes);
 
 /* Promouvoir un membre --> capitaine*/
@@ -81,6 +85,7 @@ router.all('/:id/promouvoir', (req, res, next) => {
     }
     next();
 }, tokenModel.verifyToken,
+    verifIdEquipe,
     capitaineAdminGes,
     equipeController.promouvoir);
 
@@ -96,6 +101,7 @@ router.all('/:id/supprimerMembre', (req, res, next) => {
     }
     next();
 }, tokenModel.verifyToken,
+    verifIdEquipe,
     capitaineAdminGes,
     equipeController.supprimerMembre);
 
@@ -110,6 +116,7 @@ router.all('/:id/quitterEquipe', (req, res, next) => {
     }
     next();
 }, tokenModel.verifyToken,
+    verifIdEquipe,
     etudiantProfil,
     equipeController.quitterEquipe);
 
@@ -125,6 +132,7 @@ router.all('/:id/infos', (req, res, next) => {
     }
     next();
 }, tokenModel.verifyToken,
+    verifIdEquipe,
     aucunProfil,
     equipeController.getInfosEquipe);
 
@@ -141,6 +149,7 @@ router.all('/:id/demandeAdmission', (req, res, next) => {
     }
     next();
 }, tokenModel.verifyToken,
+    verifIdEquipe,
     etudiantProfil,
     equipeController.demandeEquipe);
 
@@ -158,6 +167,7 @@ router.all('/:id/AccepterDemande', (req, res, next) => {
 
     next();
 }, tokenModel.verifyToken,
+    verifIdEquipe,
     capitaineAdminGes,
     equipeController.accepterDemande);
 
@@ -173,6 +183,7 @@ router.all('/:id/declinerDemande', (req, res, next) => {
     }
     next();
 }, tokenModel.verifyToken,
+    verifIdEquipe,
     capitaineAdminGes,
     equipeController.declinerDemande);
 
@@ -194,6 +205,7 @@ router.all('/:id/annoter',
         }
         next();
     }, tokenModel.verifyToken,
+    verifIdEquipe,
     //GestionnaireEquipeAdmin,
     annotationController.ecrireAnnotation);
 
@@ -210,6 +222,7 @@ router.all('/:id/getAnnotation',
         }
         next();
     }, tokenModel.verifyToken,
+    verifIdEquipe,
     //GestionnaireEquipeAdmin,
     annotationController.getAnnotationEquipe);
 

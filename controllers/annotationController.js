@@ -21,7 +21,7 @@ function ecrireAnnotation(req, res){
     }
 }
 
-/**Pas bon */
+/**Pas bon, pas sûre d'avoir besoin*/
 function modifierAnnotation(req, res){
     if(req.method === 'OPTIONS'){
 
@@ -48,6 +48,9 @@ async function getAnnotationEquipe(req, res){
 
         try{
             const annotation = await annotationModel.getAnnotationEquipes(idEquipe);
+            for(i = 0; i < annotation.length; i++){
+                delete annotation[i].idannotation;
+            }
             res.status(200).json(annotation);
         }catch{
             res.status(400).json({error: 'Echec lors de la création de l\'annotation.'});

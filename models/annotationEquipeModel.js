@@ -31,7 +31,6 @@ async function getAnnotationEquipes(idEquipe) {
     });
 }
 
-console.log(getAnnotationEquipes(1))
 
 module.exports = {
     creerAnnotation,

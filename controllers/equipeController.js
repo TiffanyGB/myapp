@@ -35,7 +35,6 @@ async function creerEquipe(req, res) {
   }
   else if (req.method === 'POST') {
 
-    //Si admin ou gestionnaire, ne pas recuperer l'id capitaine dans le token
     const idCapitaine = req.id;
 
     /*Récupération données du body */
@@ -73,7 +72,7 @@ async function creerEquipe(req, res) {
       equipeModel.ajouterMembre(idCapitaine, idEquipe);
 
       return res.status(200).json(idEquipe);
-    } catch (error) {
+    } catch{
       return res.status(400).json({ erreur: 'Erreur création équipe.' });
     }
   }

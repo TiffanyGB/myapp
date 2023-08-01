@@ -138,61 +138,63 @@ async function listeProjetsJson(req) {
         /*Json contenant les projets existants à renvoyé*/
         let jsonRetour = {};
         jsonRetour.projets = [];
+        let gerer_ia = []
+        let gerer_ext = [];
 
         for (i = 0; i < projetsListe.length; i++) {
 
             projetCourant = projetsListe[i];
 
             if (req.userProfile === 'gestionnaire') {
-                const gerer_ia = await gererProjet.chercherGestionnaireIA(projetCourant.idprojet, req.id);
-                const gerer_ext = await gererProjet.chercherGestionnaireExtID(projetCourant.idprojet, req.id);
-
-                if (gerer_ia.length > 0 || gerer_ext.length > 0) {
-
-                    temp = {};
-
-                    temp.idProjet = projetCourant.idprojet;
-                    temp.nom = projetCourant.nom;
-
-                    if (projetCourant.idevent == null) {
-                        temp.idevent = '';
-                    } else {
-                        temp.idevent = projetCourant.idevent;
-                    }
-                    temp.description = projetCourant.description_projet;
-                    temp.derniereModif = projetCourant.dernieremodif;
-                    temp.recompense = projetCourant.recompense;
-                    temp.image = projetCourant.imgprojet;
-                    temp.sujet = projetCourant.sujet;
-                    temp.themes = [];
-
-                    const listeMots = await motcleModel.recupererMot(projetCourant.idprojet);
-
-                    for (j = 0; j < listeMots.length; j++) {
-
-                        let motCourant = listeMots[j];
-                        temp.themes.push(motCourant.mot);
-                    }
-
-                    temp.ressources = [];
-
-                    let listeRessource = await ressourceModel.recuperer_toutes_ressources(projetCourant.idprojet);
-                    for (j = 0; j < listeRessource.length; j++) {
-
-                        let ressourceCourante = listeRessource[j];
-                        let ressourcesInfos = {};
-
-                        ressourcesInfos.titre = ressourceCourante.titre;
-                        ressourcesInfos.type = ressourceCourante.type_ressource;
-                        ressourcesInfos.lien = ressourceCourante.lien;
-                        ressourcesInfos.description = ressourceCourante.description_ressource;
-                        ressourcesInfos.statut = ressourceCourante.statut;
-
-                        temp.ressources.push(ressourcesInfos);
-                    }
-                    jsonRetour.projets.push(temp);
-                }
+                gerer_ia = await gererProjet.chercherGestionnaireIA(projetCourant.idprojet, req.id);
+                gerer_ext = await gererProjet.chercherGestionnaireExtID(projetCourant.idprojet, req.id);
             }
+            if ((gerer_ia.length > 0 || gerer_ext.length > 0) || req.userProfile === 'admin') {
+
+                temp = {};
+
+                temp.idProjet = projetCourant.idprojet;
+                temp.nom = projetCourant.nom;
+
+                if (projetCourant.idevent == null) {
+                    temp.idevent = '';
+                } else {
+                    temp.idevent = projetCourant.idevent;
+                }
+                temp.description = projetCourant.description_projet;
+                temp.derniereModif = projetCourant.dernieremodif;
+                temp.recompense = projetCourant.recompense;
+                temp.image = projetCourant.imgprojet;
+                temp.sujet = projetCourant.sujet;
+                temp.themes = [];
+
+                const listeMots = await motcleModel.recupererMot(projetCourant.idprojet);
+
+                for (j = 0; j < listeMots.length; j++) {
+
+                    let motCourant = listeMots[j];
+                    temp.themes.push(motCourant.mot);
+                }
+
+                temp.ressources = [];
+
+                let listeRessource = await ressourceModel.recuperer_toutes_ressources(projetCourant.idprojet);
+                for (j = 0; j < listeRessource.length; j++) {
+
+                    let ressourceCourante = listeRessource[j];
+                    let ressourcesInfos = {};
+
+                    ressourcesInfos.titre = ressourceCourante.titre;
+                    ressourcesInfos.type = ressourceCourante.type_ressource;
+                    ressourcesInfos.lien = ressourceCourante.lien;
+                    ressourcesInfos.description = ressourceCourante.description_ressource;
+                    ressourcesInfos.statut = ressourceCourante.statut;
+
+                    temp.ressources.push(ressourcesInfos);
+                }
+                jsonRetour.projets.push(temp);
+            }
+
         }
         return jsonRetour;
     }
