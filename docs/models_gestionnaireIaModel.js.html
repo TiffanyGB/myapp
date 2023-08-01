@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: database/hachage_admin.js</title>
+    <title>JSDoc: Source: models/gestionnaireIaModel.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: database/hachage_admin.js</h1>
+    <h1 class="page-title">Source: models/gestionnaireIaModel.js</h1>
 
     
 
@@ -26,88 +26,155 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>const pool = require('./configDB');
-const passwordModel = require('../models/passwordModel');
-const verificationExistence = require('../controllers/Auth/verificationExistenceController');
-const userModel = require('../models/userModel');
+            <pre class="prettyprint source linenums"><code>const pool = require('../database/configDB');
+const userModel = require('./userModel');
+const { body, validationResult } = require('express-validator');
 
 
-const valeurs = ['admin', 'admin@admin.fr'];
-
-
-const createDefaultUser = async () => {
-    try {
-        const password = 'Admin2023!';
-
-        /**Aucun utilisateur ne possède le même pseudo ou email */
-        const nonExiste = await verificationExistence.verifExistence(valeurs);
-
-        if (!nonExiste) {
-
-            const idUser = await userModel.chercherUserPseudo(valeurs[0]);
-            userModel.supprimerUser(idUser);
+async function validerGestionnaireIA(req) {
+    await body('role_asso')
+      .notEmpty().withMessage("Le rôle ne doit pas être vide.")
+      .matches(/^[A-Za-z0-9\W]+$/)
+      .isLength({ min: 2, max: 100 }).withMessage("Le rôle doit avoir une longueur comprise entre 2 et 100 caractères.")
+      .custom((value, { req }) => {
+        if (/&lt;|>/.test(value)) {
+          throw new Error("Le rôle ne doit pas contenir les caractères '&lt;' ou '>'");
         }
+        return true;
+      })
+      .run(req);
+  }
 
-        const hashedPassword = await passwordModel.salageMdp(password);
+// const validateUser = [
+//     body('role_asso')
+//     .notEmpty().withMessage("Le métier ne doit pas être vide.")
+//     .matches(/^[A-Za-z0-9]+$/).withMessage("Le métier doit contenir uniquement des lettres et des chiffres.")
+//     .isLength({ min: 2, max: 40 }).withMessage("Le métier doit avoir une longueur comprise entre 2 et 40 caractères.")
+//     .custom((value, { req }) => {
+//       if (/&lt;|>/.test(value)) {
+//         throw new Error("Le métier ne doit pas contenir les caractères '&lt;' ou '>'");
+//       }
+//       return true;
+//     }),
+//     /**Appel du validateur */
+//     validateUserData,
+// ];
 
-        const query = `
-                INSERT INTO Utilisateur (nom, prenom, pseudo, email, date_inscription, hashMdp, typeUser)
-                VALUES ('admin', 'admin', 'admin', 'admin@admin.fr', CURRENT_TIMESTAMP, $1, 'administrateur')
-            `;
+/**Liste des gestionnaires ia pau */
+function chercherListeGestionnaireIapau() {
 
-        const params = [hashedPassword];
+    const users = `SELECT * FROM Gestionnaire_iapau`;
 
-        /**Insertion dans la bdd */
-        await pool.query(query, params);
+    return new Promise((resolve, reject) => {
+        pool.query(users)
+            .then((res) => {
+                resolve(res.rows);
+            })
+            .catch((error) => {
+                reject(error);
+            });
+    });
+}
 
-        console.log('Utilisateur par défaut créé avec succès');
+
+/**Chercher un gestionnaire ia pau par son id*/
+function chercherGestionnaireIapau(idUser) {
+
+    const users = `SELECT * FROM Gestionnaire_iapau WHERE id_g_iapau = $1`;
+    const params = [idUser];
+
+    return new Promise((resolve, reject) => {
+        pool.query(users, params)
+            .then((res) => {
+                resolve(res.rows);
+            })
+            .catch((error) => {
+                reject(error);
+            });
+    });
+}
 
 
-    } catch (error) {
-        console.error('Erreur lors de la création de l\'utilisateur par défaut:', error);
-    }
-};
+/**Créer un gestionnaire ia pau */
+/**
+ * Crée un nouveau gestionnaire IA.
+ * @async
+ * @param {Array} values_user - Les valeurs des champs utilisateur.
+ * @param {Array} values_id - Les valeurs des champs identifiant (pseudo et email).
+ * @param {string} role - Le rôle du gestionnaire IA au sein de l'association.
+ * @returns {string} - Résultat de la création du gestionnaire IA.
+ * - 'true' si le gestionnaire IA a été créé avec succès.
+ * - 'erreur' en cas d'échec de l'insertion dans la table gestionnaire ia.
+ * - 'les2' si à la fois le pseudo et l'email existent déjà.
+ * - 'pseudo' si le pseudo existe déjà.
+ * - 'mail' si l'email existe déjà.
+ */
+async function creerGestionnaireIA(id, role_asso) {
 
-const createDefaultAdmin = async (pseudo) => {
+    const valeurs_ges = [id, role_asso];
+    const requet = `INSERT INTO Gestionnaire_iapau (id_g_iapau, role_asso) VALUES ($1, $2)`;
+
     try {
-        const idUser = await userModel.chercherUserPseudo(pseudo);
-        const query = `
-            INSERT INTO Admini (idAdmin)
-            VALUES ($1)
-        `;
-
-        const mdp = [idUser];
-
-        await pool.query(query, mdp);
-
-        console.log('Admin par défaut créé avec succès');
-    } catch (error) {
-        console.error('Erreur lors de la création de l\'admin par défaut:', error);
+        return new Promise((resolve, reject) => {
+            pool.query(requet, valeurs_ges)
+                .then(() => {
+                    resolve('true');
+                })
+                .catch((error) => {
+                    reject(error);
+                });
+        });
+    }
+    catch (error) {
+        throw error;
     }
 }
 
-(async () => {
-    let errorOccurred = false;
-    try {
-        await createDefaultUser();
-    } catch (error) {
-        console.error('Erreur lors de la création de l\'utilisateur par défaut:', error);
-        errorOccurred = true;
-    }
 
-    if (!errorOccurred) {
-        try {
-            await createDefaultAdmin('admin');
-        } catch (error) {
-            console.error('Erreur lors de la création de l\'admin par défaut:', error);
-        }
-    }
 
-    pool.end();
+/**Modifier un gestionnaire ia pau */
+async function modifierIapau(idUser, valeurs, role_asso, password) {
+    // try {
+    //     userModel.modifierUser(idUser, valeurs, password)
+    //         .then(() => {
 
-    process.exit();
-})();
-</code></pre>
+    //             const student = `UPDATE Gestionnaire_iapau
+    //             SET role_asso = '${role_asso}'
+    //             WHERE id_g_iapau = ${idUser}`;
+
+    //             console.log()
+    //             try {
+    //                 pool.query(student);
+    //                 console.log("reussi");
+    //             }
+    //             catch (error) {
+    //                 console.error("Erreur lors de la mise à jour du gestionnaire iapau", error);
+    //             }
+
+    //         })
+    //         .catch((error) => {
+    //             console.error("Erreur lors de la mise à jour du gestionnaire iapau", error);
+    //         });
+
+    // } catch (error) {
+    //     console.error("Erreur lors de la mise à jour du gestionnaire iapau", error);
+    //     throw error;
+    // }
+}
+
+
+/**Supprimer un gestionnaire ia pau */
+
+
+
+
+module.exports = {
+    chercherGestionnaireIapau,
+    chercherListeGestionnaireIapau,
+    creerGestionnaireIA,
+    modifierIapau,
+    validerGestionnaireIA,
+}</code></pre>
         </article>
     </section>
 

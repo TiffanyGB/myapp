@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: database/hachage_admin.js</title>
+    <title>JSDoc: Source: models/gestionnaireModel.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: database/hachage_admin.js</h1>
+    <h1 class="page-title">Source: models/gestionnaireModel.js</h1>
 
     
 
@@ -26,88 +26,106 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>const pool = require('./configDB');
-const passwordModel = require('../models/passwordModel');
-const verificationExistence = require('../controllers/Auth/verificationExistenceController');
-const userModel = require('../models/userModel');
+            <pre class="prettyprint source linenums"><code>const gestionnaireExterneModel = require('./gestionnaireExterneModel');
+const gestionnaireIaModel = require('./gestionnaireIaModel');
+const userModel = require('./userModel');
 
 
-const valeurs = ['admin', 'admin@admin.fr'];
+/*JSON de la liste des gestionnaires externes et internes
+ * Pour la gestion des projets
+ */
+async function envoyer_json_liste_gestionnaires() {
 
-
-const createDefaultUser = async () => {
     try {
-        const password = 'Admin2023!';
 
-        /**Aucun utilisateur ne possède le même pseudo ou email */
-        const nonExiste = await verificationExistence.verifExistence(valeurs);
+        let jsonRetour = {};
+        jsonRetour.gestionnairesExternes = [];
+        jsonRetour.gestionnairesIa = [];
 
-        if (!nonExiste) {
+        /*Liste des gestionnaires externes et internes */
+        const listeGExt = await gestionnaireExterneModel.chercherListeGestionnairesExt();
+        const listeGIa = await gestionnaireIaModel.chercherListeGestionnaireIapau();
 
-            const idUser = await userModel.chercherUserPseudo(valeurs[0]);
-            userModel.supprimerUser(idUser);
+        if (listeGExt.length === 0 &amp;&amp; listeGIa.length === 0) {
+            return 'aucun_gestionnaires';
         }
 
-        const hashedPassword = await passwordModel.salageMdp(password);
+        /*Externes */
+        if (listeGExt.length > 0) {
 
-        const query = `
-                INSERT INTO Utilisateur (nom, prenom, pseudo, email, date_inscription, hashMdp, typeUser)
-                VALUES ('admin', 'admin', 'admin', 'admin@admin.fr', CURRENT_TIMESTAMP, $1, 'administrateur')
-            `;
+            for (i = 0; i &lt; listeGExt.length; i++) {
 
-        const params = [hashedPassword];
+                tempInfo = {};
 
-        /**Insertion dans la bdd */
-        await pool.query(query, params);
+                let gestionnaireCourant = listeGExt[i];
+                let idCourant = gestionnaireCourant.id_g_externe;
 
-        console.log('Utilisateur par défaut créé avec succès');
+                /**Chercher les infos du gestionnaire externe dans la table utilisateur */
+                let userCourant = await userModel.chercherUserID(idCourant);
 
+                /**Erreur pas d'utilisateur associé*/
+                if (userCourant.length === 0) {
+                    return 'error_no_user';
+                }
+
+                for (j = 0; j &lt; userCourant.length; j++) {
+
+                    tempInfo.Nom = userCourant[0].nom;
+                    tempInfo.Prenom = userCourant[0].prenom;
+                    tempInfo.Mail = userCourant[0].email;
+                }
+
+                tempInfo.id = gestionnaireCourant.id_g_externe;
+                tempInfo.Entreprise = gestionnaireCourant.entreprise;
+                tempInfo.Metier = gestionnaireCourant.metier;
+
+                jsonRetour.gestionnairesExternes.push(tempInfo);
+            }
+        }
+
+        /*IA Pau*/
+        if (listeGIa.length > 0) {
+
+            for (i = 0; i &lt; listeGIa.length; i++) {
+
+                tempInfo = {};
+
+                let gestionnaireCourant = listeGIa[i];
+                let idCourant = gestionnaireCourant.id_g_iapau;
+
+                /**Chercher les infos du gestionnaire externe dans la table utilisateur */
+                let userCourant = await userModel.chercherUserID(idCourant);
+
+                /**Erreur pas d'utilisateur associé*/
+                if (userCourant.length === 0) {
+                    return 'error_no_user';
+                }
+
+                for (j = 0; j &lt; userCourant.length; j++) {
+
+                    tempInfo.Nom = userCourant[0].nom;
+                    tempInfo.Prenom = userCourant[0].prenom;
+                    tempInfo.Mail = userCourant[0].email;
+
+                }
+
+                tempInfo.id = gestionnaireCourant.id_g_iapau;
+                tempInfo.Entreprise = 'IA-Pau';
+                tempInfo.Metier = gestionnaireCourant.role_asso;
+
+                jsonRetour.gestionnairesIa.push(tempInfo);
+            }
+        }
+        return jsonRetour;
 
     } catch (error) {
-        console.error('Erreur lors de la création de l\'utilisateur par défaut:', error);
-    }
-};
-
-const createDefaultAdmin = async (pseudo) => {
-    try {
-        const idUser = await userModel.chercherUserPseudo(pseudo);
-        const query = `
-            INSERT INTO Admini (idAdmin)
-            VALUES ($1)
-        `;
-
-        const mdp = [idUser];
-
-        await pool.query(query, mdp);
-
-        console.log('Admin par défaut créé avec succès');
-    } catch (error) {
-        console.error('Erreur lors de la création de l\'admin par défaut:', error);
+        throw error;
     }
 }
 
-(async () => {
-    let errorOccurred = false;
-    try {
-        await createDefaultUser();
-    } catch (error) {
-        console.error('Erreur lors de la création de l\'utilisateur par défaut:', error);
-        errorOccurred = true;
-    }
-
-    if (!errorOccurred) {
-        try {
-            await createDefaultAdmin('admin');
-        } catch (error) {
-            console.error('Erreur lors de la création de l\'admin par défaut:', error);
-        }
-    }
-
-    pool.end();
-
-    process.exit();
-})();
-</code></pre>
+module.exports = {
+    envoyer_json_liste_gestionnaires
+}</code></pre>
         </article>
     </section>
 

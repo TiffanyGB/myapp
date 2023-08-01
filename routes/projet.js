@@ -8,7 +8,7 @@ const tokenModel = require('../models/tokenModel');
 
 const checkAdminProfile = profile.checkProfile('admin');
 const gestionnaireAdmin = profile.checkATousGestionnaires;
-const gestionnaireProjetAdmin = profile.checkAEG2222;
+const gestionnaireProjetAdmin = profile.checkAG;
 const { verifIdNombre } = require('../verifications/verifierDonnéesGénérales');
 
 

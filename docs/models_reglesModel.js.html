@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: database/hachage_admin.js</title>
+    <title>JSDoc: Source: models/reglesModel.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: database/hachage_admin.js</h1>
+    <h1 class="page-title">Source: models/reglesModel.js</h1>
 
     
 
@@ -26,88 +26,75 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>const pool = require('./configDB');
-const passwordModel = require('../models/passwordModel');
-const verificationExistence = require('../controllers/Auth/verificationExistenceController');
-const userModel = require('../models/userModel');
+            <pre class="prettyprint source linenums"><code>const pool = require('../database/configDB');
+const { body } = require('express-validator');
 
+async function validerRegles(req) {
+    body('titre')
+        .notEmpty().withMessage('Le nom ne doit pas être vide.')
+        .isLength({ min: 2, max: 50 }).withMessage('Le prénom doit avoir une longueur comprise entre 2 et 50 caractères.')
+        .run(req);
 
-const valeurs = ['admin', 'admin@admin.fr'];
+    body('contenu')
+        .notEmpty().withMessage('Le lien ne doit pas être vide.')
+        .isLength({ min: 2, max: 1000 }).withMessage('Le lien doit avoir une longueur comprise entre 3 et 1000 caractères.')
+        .run(req);
+}
 
+/**Récupérer une regle à partir de l'id de l'event */
+function recuperer_regles(idEvent) {
 
-const createDefaultUser = async () => {
+    const chercherProjets = `SELECT * FROM Regle WHERE idevent = $1`
+
+    return new Promise((resolve, reject) => {
+        pool.query(chercherProjets, [idEvent])
+            .then((res) => {
+                resolve(res.rows);
+            })
+            .catch((error) => {
+                reject(error);
+            });
+    });
+}
+
+/**Ajouter une regle à un event */
+function ajouterRegle(idEvent, titre, contenu) {
+
+    const valeur = [titre, contenu, idEvent];
+
+    const ajouter = `INSERT INTO Regle (titre, contenu, idevent)
+    VALUES ($1, $2, $3)`;
+
+    return new Promise((resolve, reject) => {
+        pool.query(ajouter, valeur)
+            .then(() => {
+                resolve('true');
+            })
+            .catch((error) => {
+                reject(error);
+            });
+    });
+}
+
+async function supprimerRegles(idEvent) {
+
+    const supprimer = `DELETE FROM Regle 
+    WHERE idEvent = $1`;
+
     try {
-        const password = 'Admin2023!';
-
-        /**Aucun utilisateur ne possède le même pseudo ou email */
-        const nonExiste = await verificationExistence.verifExistence(valeurs);
-
-        if (!nonExiste) {
-
-            const idUser = await userModel.chercherUserPseudo(valeurs[0]);
-            userModel.supprimerUser(idUser);
-        }
-
-        const hashedPassword = await passwordModel.salageMdp(password);
-
-        const query = `
-                INSERT INTO Utilisateur (nom, prenom, pseudo, email, date_inscription, hashMdp, typeUser)
-                VALUES ('admin', 'admin', 'admin', 'admin@admin.fr', CURRENT_TIMESTAMP, $1, 'administrateur')
-            `;
-
-        const params = [hashedPassword];
-
-        /**Insertion dans la bdd */
-        await pool.query(query, params);
-
-        console.log('Utilisateur par défaut créé avec succès');
-
-
+        pool.query(supprimer, [idEvent]);
     } catch (error) {
-        console.error('Erreur lors de la création de l\'utilisateur par défaut:', error);
-    }
-};
-
-const createDefaultAdmin = async (pseudo) => {
-    try {
-        const idUser = await userModel.chercherUserPseudo(pseudo);
-        const query = `
-            INSERT INTO Admini (idAdmin)
-            VALUES ($1)
-        `;
-
-        const mdp = [idUser];
-
-        await pool.query(query, mdp);
-
-        console.log('Admin par défaut créé avec succès');
-    } catch (error) {
-        console.error('Erreur lors de la création de l\'admin par défaut:', error);
+        throw error;
     }
 }
 
-(async () => {
-    let errorOccurred = false;
-    try {
-        await createDefaultUser();
-    } catch (error) {
-        console.error('Erreur lors de la création de l\'utilisateur par défaut:', error);
-        errorOccurred = true;
-    }
 
-    if (!errorOccurred) {
-        try {
-            await createDefaultAdmin('admin');
-        } catch (error) {
-            console.error('Erreur lors de la création de l\'admin par défaut:', error);
-        }
-    }
-
-    pool.end();
-
-    process.exit();
-})();
-</code></pre>
+module.exports = {
+    recuperer_regles,
+    ajouterRegle,
+    supprimerRegles,
+    validerRegles,
+}</code></pre>
         </article>
     </section>
 

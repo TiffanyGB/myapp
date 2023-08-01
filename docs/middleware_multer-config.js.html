@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: database/hachage_admin.js</title>
+    <title>JSDoc: Source: middleware/multer-config.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: database/hachage_admin.js</h1>
+    <h1 class="page-title">Source: middleware/multer-config.js</h1>
 
     
 
@@ -26,87 +26,47 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>const pool = require('./configDB');
-const passwordModel = require('../models/passwordModel');
-const verificationExistence = require('../controllers/Auth/verificationExistenceController');
-const userModel = require('../models/userModel');
+            <pre class="prettyprint source linenums"><code>const multer = require('multer');
 
+function generateRandomLettersNumber(length) {
+  let result = '';
+  const characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ123456789';
 
-const valeurs = ['admin', 'admin@admin.fr'];
+  for (let i = 0; i &lt; length; i++) {
+    const randomIndex = Math.floor(Math.random() * characters.length);
+    const randomLetter = characters.charAt(randomIndex);
+    result += randomLetter;
+  }
 
-
-const createDefaultUser = async () => {
-    try {
-        const password = 'Admin2023!';
-
-        /**Aucun utilisateur ne possède le même pseudo ou email */
-        const nonExiste = await verificationExistence.verifExistence(valeurs);
-
-        if (!nonExiste) {
-
-            const idUser = await userModel.chercherUserPseudo(valeurs[0]);
-            userModel.supprimerUser(idUser);
-        }
-
-        const hashedPassword = await passwordModel.salageMdp(password);
-
-        const query = `
-                INSERT INTO Utilisateur (nom, prenom, pseudo, email, date_inscription, hashMdp, typeUser)
-                VALUES ('admin', 'admin', 'admin', 'admin@admin.fr', CURRENT_TIMESTAMP, $1, 'administrateur')
-            `;
-
-        const params = [hashedPassword];
-
-        /**Insertion dans la bdd */
-        await pool.query(query, params);
-
-        console.log('Utilisateur par défaut créé avec succès');
-
-
-    } catch (error) {
-        console.error('Erreur lors de la création de l\'utilisateur par défaut:', error);
-    }
-};
-
-const createDefaultAdmin = async (pseudo) => {
-    try {
-        const idUser = await userModel.chercherUserPseudo(pseudo);
-        const query = `
-            INSERT INTO Admini (idAdmin)
-            VALUES ($1)
-        `;
-
-        const mdp = [idUser];
-
-        await pool.query(query, mdp);
-
-        console.log('Admin par défaut créé avec succès');
-    } catch (error) {
-        console.error('Erreur lors de la création de l\'admin par défaut:', error);
-    }
+  return result;
 }
 
-(async () => {
-    let errorOccurred = false;
-    try {
-        await createDefaultUser();
-    } catch (error) {
-        console.error('Erreur lors de la création de l\'utilisateur par défaut:', error);
-        errorOccurred = true;
+const configurerMiddleware = () => {
+  const MIME_TYPES = {
+    'image/jpg': 'jpg',
+    'image/jpeg': 'jpg',
+    'image/png': 'png'
+  };
+  const storage = multer.diskStorage({
+    destination: function(req, file, callback) {
+      callback(null, path.join(__dirname, 'images'));
+
+    },
+
+    filename: function(req, file, callback) {
+      /**Créer un nouveau nom */
+      const name = file.originalname.split(' ').join('_');
+      const extension = MIME_TYPES[file.mimetype];
+      callback(null, name + generateRandomLettersNumber(30) + '.' + extension);
+      console.log("nom", name);
     }
+  });
 
-    if (!errorOccurred) {
-        try {
-            await createDefaultAdmin('admin');
-        } catch (error) {
-            console.error('Erreur lors de la création de l\'admin par défaut:', error);
-        }
-    }
 
-    pool.end();
+  return multer({ storage: storage }).single('file');
+};
 
-    process.exit();
-})();
+module.exports = { configurerMiddleware };
 </code></pre>
         </article>
     </section>

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: database/hachage_admin.js</title>
+    <title>JSDoc: Source: models/ressourceModel.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: database/hachage_admin.js</h1>
+    <h1 class="page-title">Source: models/ressourceModel.js</h1>
 
     
 
@@ -26,88 +26,90 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>const pool = require('./configDB');
-const passwordModel = require('../models/passwordModel');
-const verificationExistence = require('../controllers/Auth/verificationExistenceController');
-const userModel = require('../models/userModel');
+            <pre class="prettyprint source linenums"><code>const { func } = require('joi');
+const pool = require('../database/configDB');
 
 
-const valeurs = ['admin', 'admin@admin.fr'];
+function ajouterRessources(valeurs) {
 
+    const ajouter = `INSERT INTO Ressource (titre, type_ressource, lien, date_apparition, statut, description_ressource, idProjet)
+    VALUES ($1,$2,$3,$4,$5,$6, $7) `;
 
-const createDefaultUser = async () => {
     try {
-        const password = 'Admin2023!';
+        pool.query(ajouter, valeurs);
 
-        /**Aucun utilisateur ne possède le même pseudo ou email */
-        const nonExiste = await verificationExistence.verifExistence(valeurs);
-
-        if (!nonExiste) {
-
-            const idUser = await userModel.chercherUserPseudo(valeurs[0]);
-            userModel.supprimerUser(idUser);
-        }
-
-        const hashedPassword = await passwordModel.salageMdp(password);
-
-        const query = `
-                INSERT INTO Utilisateur (nom, prenom, pseudo, email, date_inscription, hashMdp, typeUser)
-                VALUES ('admin', 'admin', 'admin', 'admin@admin.fr', CURRENT_TIMESTAMP, $1, 'administrateur')
-            `;
-
-        const params = [hashedPassword];
-
-        /**Insertion dans la bdd */
-        await pool.query(query, params);
-
-        console.log('Utilisateur par défaut créé avec succès');
-
-
-    } catch (error) {
-        console.error('Erreur lors de la création de l\'utilisateur par défaut:', error);
-    }
-};
-
-const createDefaultAdmin = async (pseudo) => {
-    try {
-        const idUser = await userModel.chercherUserPseudo(pseudo);
-        const query = `
-            INSERT INTO Admini (idAdmin)
-            VALUES ($1)
-        `;
-
-        const mdp = [idUser];
-
-        await pool.query(query, mdp);
-
-        console.log('Admin par défaut créé avec succès');
-    } catch (error) {
-        console.error('Erreur lors de la création de l\'admin par défaut:', error);
+    } catch(error) {
+        throw error;
     }
 }
 
-(async () => {
-    let errorOccurred = false;
-    try {
-        await createDefaultUser();
-    } catch (error) {
-        console.error('Erreur lors de la création de l\'utilisateur par défaut:', error);
-        errorOccurred = true;
+/**Ressources publiques */
+function recuperer_ressourcesPubliques(idProjet) {
+
+    const chercherRessources = `SELECT * FROM Ressource WHERE idprojet = $1 AND statut = 'public'`;
+
+    return new Promise((resolve, reject) => {
+        pool.query(chercherRessources, [idProjet])
+            .then((res) => {
+                resolve(res.rows);
+            })
+            .catch((error) => {
+                reject(error);
+            });
+    });
+}
+
+/**Ressources privées */
+function recuperer_ressourcesPrivees(idProjet) {
+
+    const chercherRessources = `SELECT * FROM Ressource WHERE idprojet = $1 and statut= 'privé'`;
+
+    return new Promise((resolve, reject) => {
+        pool.query(chercherRessources, [idProjet])
+            .then((res) => {
+                resolve(res.rows);
+            })
+            .catch((error) => {
+                reject(error);
+            });
+    });
+}
+
+/**toutes les ressources d'un projet */
+function recuperer_toutes_ressources(idProjet) {
+
+    const chercherRessources = `SELECT * FROM Ressource WHERE idprojet = $1`;
+
+    return new Promise((resolve, reject) => {
+        pool.query(chercherRessources, [idProjet])
+            .then((res) => {
+                resolve(res.rows);
+            })
+            .catch((error) => {
+                reject(error);
+            });
+    });
+}
+
+function supprimerRessources(idProjet){
+    const supprimer = `DELETE FROM Ressource
+    WHERE idProjet = $1`;
+
+    try{
+        pool.query(supprimer, [idProjet]);
+
+    }catch(error){
+        throw error;
     }
+}
 
-    if (!errorOccurred) {
-        try {
-            await createDefaultAdmin('admin');
-        } catch (error) {
-            console.error('Erreur lors de la création de l\'admin par défaut:', error);
-        }
-    }
-
-    pool.end();
-
-    process.exit();
-})();
-</code></pre>
+module.exports = {
+    recuperer_ressourcesPubliques,
+    recuperer_toutes_ressources,
+    recuperer_ressourcesPrivees,
+    ajouterRessources,
+    supprimerRessources
+}</code></pre>
         </article>
     </section>
 

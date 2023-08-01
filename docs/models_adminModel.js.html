@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: database/hachage_admin.js</title>
+    <title>JSDoc: Source: models/adminModel.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: database/hachage_admin.js</h1>
+    <h1 class="page-title">Source: models/adminModel.js</h1>
 
     
 
@@ -26,88 +26,89 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>const pool = require('./configDB');
-const passwordModel = require('../models/passwordModel');
-const verificationExistence = require('../controllers/Auth/verificationExistenceController');
-const userModel = require('../models/userModel');
+            <pre class="prettyprint source linenums"><code>const pool = require('../database/configDB');
+const userModel = require('./userModel');
 
+/**Liste des admins */
+function chercherListeAdmins() {
+    const users = 'SELECT * FROM Admini';
 
-const valeurs = ['admin', 'admin@admin.fr'];
+    return new Promise((resolve, reject) => {
+        pool.query(users)
+            .then((res) => {
+                resolve(res.rows);
+            })
+            .catch((error) => {
+                reject(error);
+            });
+    });
+}
 
+/**Chercher un admin par son id*/
+function chercherAdminID(idUser) {
+    const users = 'SELECT * FROM Admini WHERE idAdmin = $1';
 
-const createDefaultUser = async () => {
+    return new Promise((resolve, reject) => {
+        pool.query(users, [idUser])
+            .then((res) => {
+                resolve(res.rows);
+            })
+            .catch((error) => {
+                reject(error);
+            });
+    });
+}
+
+/**
+ * Création d'un administrateur
+ * @async
+ * @param {Array} values_user - Les valeurs des champs utilisateur.
+ * @param {Array} values_id - Les valeurs des champs identifiant (pseudo et email).
+ * @returns {string} - Résultat de la création de l'administrateur.
+ * - 'true' si l'administrateur a été créé avec succès.
+ * - 'erreur' en cas d'échec de l'insertion dans la table admin.
+ * - 'les2' si à la fois le pseudo et l'email existent déjà.
+ * - 'pseudo' si le pseudo existe déjà.
+ * - 'mail' si l'email existe déjà.
+ */
+async function creerAdmin(id) {
+    const requet = `INSERT INTO Admini (idAdmin) VALUES ($1)`;
+
     try {
-        const password = 'Admin2023!';
-
-        /**Aucun utilisateur ne possède le même pseudo ou email */
-        const nonExiste = await verificationExistence.verifExistence(valeurs);
-
-        if (!nonExiste) {
-
-            const idUser = await userModel.chercherUserPseudo(valeurs[0]);
-            userModel.supprimerUser(idUser);
-        }
-
-        const hashedPassword = await passwordModel.salageMdp(password);
-
-        const query = `
-                INSERT INTO Utilisateur (nom, prenom, pseudo, email, date_inscription, hashMdp, typeUser)
-                VALUES ('admin', 'admin', 'admin', 'admin@admin.fr', CURRENT_TIMESTAMP, $1, 'administrateur')
-            `;
-
-        const params = [hashedPassword];
-
-        /**Insertion dans la bdd */
-        await pool.query(query, params);
-
-        console.log('Utilisateur par défaut créé avec succès');
-
-
-    } catch (error) {
-        console.error('Erreur lors de la création de l\'utilisateur par défaut:', error);
+        return new Promise((resolve, reject) => {
+            pool.query(requet, [id])
+                .then(() => {
+                    resolve('true');
+                })
+                .catch((error) => {
+                    reject(error);
+                });
+        });
     }
-};
-
-const createDefaultAdmin = async (pseudo) => {
-    try {
-        const idUser = await userModel.chercherUserPseudo(pseudo);
-        const query = `
-            INSERT INTO Admini (idAdmin)
-            VALUES ($1)
-        `;
-
-        const mdp = [idUser];
-
-        await pool.query(query, mdp);
-
-        console.log('Admin par défaut créé avec succès');
-    } catch (error) {
-        console.error('Erreur lors de la création de l\'admin par défaut:', error);
+    catch (error) {
+        throw error;
     }
 }
 
-(async () => {
-    let errorOccurred = false;
+
+/**Modifier un admin */
+async function modifierAdministrateur(idUser, valeurs, password) {
+
     try {
-        await createDefaultUser();
+        userModel.modifierUser(idUser, valeurs, password);
+
     } catch (error) {
-        console.error('Erreur lors de la création de l\'utilisateur par défaut:', error);
-        errorOccurred = true;
+        throw error;
     }
+}
 
-    if (!errorOccurred) {
-        try {
-            await createDefaultAdmin('admin');
-        } catch (error) {
-            console.error('Erreur lors de la création de l\'admin par défaut:', error);
-        }
-    }
 
-    pool.end();
-
-    process.exit();
-})();
-</code></pre>
+module.exports = {
+    creerAdmin,
+    chercherAdminID,
+    chercherListeAdmins,
+    modifierAdministrateur
+}</code></pre>
         </article>
     </section>
 

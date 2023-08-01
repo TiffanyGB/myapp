@@ -1,6 +1,6 @@
 {
     "source": {
-      "include": ["controllers", "database", "public", "routes"],
+      "include": ["controllers", "database", "public", "routes", "middleware", "models"],
       "exclude": ["node_modules"] 
     },
     "opts": {

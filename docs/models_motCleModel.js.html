@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: database/hachage_admin.js</title>
+    <title>JSDoc: Source: models/motCleModel.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: database/hachage_admin.js</h1>
+    <h1 class="page-title">Source: models/motCleModel.js</h1>
 
     
 
@@ -26,88 +26,57 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>const pool = require('./configDB');
-const passwordModel = require('../models/passwordModel');
-const verificationExistence = require('../controllers/Auth/verificationExistenceController');
-const userModel = require('../models/userModel');
+            <pre class="prettyprint source linenums"><code>const pool = require('../database/configDB');
 
 
-const valeurs = ['admin', 'admin@admin.fr'];
+function recupererMot(idProjet) {
 
+    const chercherMots = `SELECT * FROM mot_cle WHERE idProjet = $1`
 
-const createDefaultUser = async () => {
+    return new Promise((resolve, reject) => {
+        pool.query(chercherMots, [idProjet])
+            .then((res) => {
+                resolve(res.rows);
+            })
+            .catch((error) => {
+                reject(error);
+            });
+    });
+}
+
+/**Insérer mot clé */
+async function insererMot(valeurs) {
+    const inserer = `INSERT INTO Mot_cle (mot, idProjet)
+    VALUES ($1, $2)`;
+
     try {
-        const password = 'Admin2023!';
-
-        /**Aucun utilisateur ne possède le même pseudo ou email */
-        const nonExiste = await verificationExistence.verifExistence(valeurs);
-
-        if (!nonExiste) {
-
-            const idUser = await userModel.chercherUserPseudo(valeurs[0]);
-            userModel.supprimerUser(idUser);
-        }
-
-        const hashedPassword = await passwordModel.salageMdp(password);
-
-        const query = `
-                INSERT INTO Utilisateur (nom, prenom, pseudo, email, date_inscription, hashMdp, typeUser)
-                VALUES ('admin', 'admin', 'admin', 'admin@admin.fr', CURRENT_TIMESTAMP, $1, 'administrateur')
-            `;
-
-        const params = [hashedPassword];
-
-        /**Insertion dans la bdd */
-        await pool.query(query, params);
-
-        console.log('Utilisateur par défaut créé avec succès');
-
-
-    } catch (error) {
-        console.error('Erreur lors de la création de l\'utilisateur par défaut:', error);
+        await pool.query(inserer, valeurs);
+        return 'ok';
     }
-};
-
-const createDefaultAdmin = async (pseudo) => {
-    try {
-        const idUser = await userModel.chercherUserPseudo(pseudo);
-        const query = `
-            INSERT INTO Admini (idAdmin)
-            VALUES ($1)
-        `;
-
-        const mdp = [idUser];
-
-        await pool.query(query, mdp);
-
-        console.log('Admin par défaut créé avec succès');
-    } catch (error) {
-        console.error('Erreur lors de la création de l\'admin par défaut:', error);
+    catch (error) {
+        console.error('Erreur lors de l\'insertion des données côté etudiant :', error);
+        throw error;
     }
 }
 
-(async () => {
-    let errorOccurred = false;
+async function supprimerMot(idProjet) {
+
+    const supprimer = `DELETE FROM Mot_cle 
+    WHERE idProjet = $1`;
+
     try {
-        await createDefaultUser();
+        pool.query(supprimer, [idProjet]);
     } catch (error) {
-        console.error('Erreur lors de la création de l\'utilisateur par défaut:', error);
-        errorOccurred = true;
+        throw error;
     }
+}
 
-    if (!errorOccurred) {
-        try {
-            await createDefaultAdmin('admin');
-        } catch (error) {
-            console.error('Erreur lors de la création de l\'admin par défaut:', error);
-        }
-    }
 
-    pool.end();
-
-    process.exit();
-})();
-</code></pre>
+module.exports = {
+    recupererMot,
+    insererMot,
+    supprimerMot
+}</code></pre>
         </article>
     </section>
 

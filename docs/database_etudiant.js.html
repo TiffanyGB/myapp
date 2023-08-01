@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: database/hachage_admin.js</title>
+    <title>JSDoc: Source: database/etudiant.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: database/hachage_admin.js</h1>
+    <h1 class="page-title">Source: database/etudiant.js</h1>
 
     
 
@@ -32,10 +32,11 @@ const verificationExistence = require('../controllers/Auth/verificationExistence
 const userModel = require('../models/userModel');
 
 
-const valeurs = ['admin', 'admin@admin.fr'];
+const valeurs = ['test1', 'test1@etudiant.fr'];
+const valeurs2 = ['test2', 'test2@etudiant.fr'];
 
 
-const createDefaultUser = async () => {
+const createDefaultUser1 = async () => {
     try {
         const password = 'Admin2023!';
 
@@ -52,7 +53,40 @@ const createDefaultUser = async () => {
 
         const query = `
                 INSERT INTO Utilisateur (nom, prenom, pseudo, email, date_inscription, hashMdp, typeUser)
-                VALUES ('admin', 'admin', 'admin', 'admin@admin.fr', CURRENT_TIMESTAMP, $1, 'administrateur')
+                VALUES ('test1', 'test1', 'test1', 'test1@etudiant.fr', CURRENT_TIMESTAMP, $1, 'etudiant')
+            `;
+
+        const params = [hashedPassword];
+
+        /**Insertion dans la bdd */
+        await pool.query(query, params);
+
+        console.log('Utilisateur par défaut créé avec succès');
+
+
+    } catch (error) {
+        console.error('Erreur lors de la création de l\'utilisateur par défaut:', error);
+    }
+};
+
+const createDefaultUser2 = async () => {
+    try {
+        const password = 'Admin2023!';
+
+        /**Aucun utilisateur ne possède le même pseudo ou email */
+        const nonExiste = await verificationExistence.verifExistence(valeurs2);
+
+        if (!nonExiste) {
+
+            const idUser = await userModel.chercherUserPseudo(valeurs2[0]);
+            userModel.supprimerUser(idUser);
+        }
+
+        const hashedPassword = await passwordModel.salageMdp(password);
+
+        const query = `
+                INSERT INTO Utilisateur (nom, prenom, pseudo, email, date_inscription, hashMdp, typeUser)
+                VALUES ('test2', 'test2', 'test2', 'test2@etudiant.fr', CURRENT_TIMESTAMP, $1, 'etudiant')
             `;
 
         const params = [hashedPassword];
@@ -72,15 +106,14 @@ const createDefaultAdmin = async (pseudo) => {
     try {
         const idUser = await userModel.chercherUserPseudo(pseudo);
         const query = `
-            INSERT INTO Admini (idAdmin)
-            VALUES ($1)
-        `;
+            INSERT INTO Etudiant (idEtudiant, ecole, niveau_etude)
+            VALUES ($1, 'CY TECH', 'L1')`;
 
-        const mdp = [idUser];
+        const id = [idUser];
 
-        await pool.query(query, mdp);
+        await pool.query(query, id);
 
-        console.log('Admin par défaut créé avec succès');
+        console.log('Etudiant 1 ok par défaut créé avec succès');
     } catch (error) {
         console.error('Erreur lors de la création de l\'admin par défaut:', error);
     }
@@ -89,7 +122,8 @@ const createDefaultAdmin = async (pseudo) => {
 (async () => {
     let errorOccurred = false;
     try {
-        await createDefaultUser();
+        await createDefaultUser1();
+        await createDefaultUser2();
     } catch (error) {
         console.error('Erreur lors de la création de l\'utilisateur par défaut:', error);
         errorOccurred = true;
@@ -97,7 +131,8 @@ const createDefaultAdmin = async (pseudo) => {
 
     if (!errorOccurred) {
         try {
-            await createDefaultAdmin('admin');
+            await createDefaultAdmin('test1');
+            await createDefaultAdmin('test2');
         } catch (error) {
             console.error('Erreur lors de la création de l\'admin par défaut:', error);
         }
