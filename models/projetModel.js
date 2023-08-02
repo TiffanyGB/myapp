@@ -6,6 +6,9 @@ const { body } = require('express-validator');
 const { json } = require('body-parser');
 const validationDonnees = require('../middleware/validationDonnees');
 const gererProjet = require('../models/gererProjet');
+const userModel = require('./userModel');
+const { chercherGestionnaireExtID } = require('./gestionnaireExterneModel');
+const { chercherGestionnaireIapau } = require('./gestionnaireIaModel');
 
 const validateProjet = [
     body('nom')
@@ -284,7 +287,19 @@ async function infosProjet(idProjet) {
             jsonRetour.gestionnairesExternes = [];
 
             for (i = 0; i < gestionnaires.length; i++) {
-                jsonRetour.gestionnairesExternes.push(gestionnaires[i].id_g_externe);
+
+                let user = (await userModel.chercherUserID(gestionnaires[i].id_g_externe))[0];
+                temp = {};
+
+                temp.nom = user.nom;
+                temp.prenom = user.prenom;
+                temp.mail = user.email;
+
+                user = (await chercherGestionnaireExtID(gestionnaires[i].id_g_externe))[0];
+                temp.entreprise = user.entreprise;
+                temp.metier = user.metier;
+
+                jsonRetour.gestionnairesExternes.push(temp);
             }
 
             gestionnaires = await gerer.chercherGestionnaireIA(idProjet);
@@ -292,7 +307,19 @@ async function infosProjet(idProjet) {
             jsonRetour.gestionnairesIA = [];
 
             for (i = 0; i < gestionnaires.length; i++) {
-                jsonRetour.gestionnairesIA.push(gestionnaires[i].id_g_iapau);
+
+                let user = (await userModel.chercherUserID(gestionnaires[i].id_g_iapau))[0];
+                temp = {};
+
+                temp.nom = user.nom;
+                temp.prenom = user.prenom;
+                temp.mail = user.email;
+
+                user = (await chercherGestionnaireIapau(gestionnaires[i].id_g_iapau))[0];
+                temp.entreprise = 'IA-Pau';
+                temp.metier = user.role_asso;
+
+                jsonRetour.gestionnairesIA.push(temp);
             }
 
 
