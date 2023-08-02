@@ -76,8 +76,7 @@ async function jsonGetAnnotation(idEquipe){
         
             let user = (await userModel.chercherUserID(annotationCourante.auteur))[0];
 
-            temp.nom = user.nom;
-            temp.prenom = user.prenom;
+            temp.auteur = '' + user.nom + ' ' + user.prenom;
             
             jsonRetour.annotations.push(temp)
         }
