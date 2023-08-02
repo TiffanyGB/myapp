@@ -20,7 +20,7 @@ function verifierToken(req, res) {
 
 async function supprimerToken(req, res) {
   if (req.method === 'OPTIONS') {
-
+    res.status(200).json({ sucess: 'Agress granted' });
   } else if (req.method === 'DELETE') {
 
     try {
@@ -28,7 +28,7 @@ async function supprimerToken(req, res) {
 
       const existe = await tokenModel.chercherToken(token);
 
-      if(existe.length === 0){
+      if (existe.length === 0) {
         return res.status(200).json({ message: "Le token n'existe pas." });
       }
 
