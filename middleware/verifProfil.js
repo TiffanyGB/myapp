@@ -107,7 +107,7 @@ async function checkACG(req, res, next) {
         break;
       case 'gestionnaire':
         /*Vérifier la gestion du projet */
-        const gerer_ia = await gererProjet.chercherGestionnaireIA(id, req.id);
+        const gerer_ia = await gererProjet.chercherGestionnaireIAID(id, req.id);
         const gerer_ext = await gererProjet.chercherGestionnaireExtID(id, req.id);
 
         if (gerer_ia.length > 0 || gerer_ext.length > 0) {
@@ -171,7 +171,7 @@ async function checkAGEtudiantEquipe(req, res, next) {
         break;
       case 'gestionnaire':
         /*Vérifier la gestion du projet */
-        const gerer_ia = await gererProjet.chercherGestionnaireIA(equipe.idprojet, req.id);
+        const gerer_ia = await gererProjet.chercherGestionnaireIAID(equipe.idprojet, req.id);
         const gerer_ext = await gererProjet.chercherGestionnaireExtID(equipe.idprojet, req.id);
 
         if (gerer_ia.length > 0 || gerer_ext.length > 0) {
@@ -193,7 +193,6 @@ async function checkAGEtudiantEquipe(req, res, next) {
         return res.status(400).json({ erreur: `Mauvais profil, il faut être admin, gestionnaire du projet ou faire partie de l'équipe.` });
     }
   } catch (error) {
-    console.error(error);
     return res.status(500).json({ erreur: 'Erreur interne du serveur.' });
   }
 }
@@ -234,7 +233,7 @@ async function checkAG(req, res, next) {
     if (req.userProfile === 'admin') {
       next();
     } else if (req.userProfile === 'gestionnaire') {
-      const gerer_ia = await gererProjet.chercherGestionnaireIA(id, req.id);
+      const gerer_ia = await gererProjet.chercherGestionnaireIAID(id, req.id);
       const gerer_ext = await gererProjet.chercherGestionnaireExtID(id, req.id);
 
       if (gerer_ia.length > 0 || gerer_ext.length > 0) {

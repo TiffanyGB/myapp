@@ -5,8 +5,6 @@ const projetModel = require('./projetModel')
 const { body } = require('express-validator');
 const motCleModel = require('../models/motCleModel');
 const gererProjet = require('./gererProjet');
-const modelsInterface = require('../interfaces/EventInterface');
-// const { chercherEvenement } = modelsInterface;
 
 const validerEquipe = [
     body('nom')
@@ -566,6 +564,7 @@ async function jsonListeEquipeProjet(idProjet) {
             temp.nombreMaxEquipe = event.nombre_max_equipe;
             temp.nomEvent = event.nom;
             temp.idEvent = event.idevent;
+
             temp.dernierSuivi = event.date_creation;
 
             /*Capitaine */
@@ -693,6 +692,8 @@ async function jsonEquipesOuvertes(idEvent, req) {
     return jsonRetour;
 }
 
+
+/*Déplacer les duex fonctions là */
 function envoyerDemande(valeurs) {
 
     const envoyer = `INSERT INTO DemandeEquipe

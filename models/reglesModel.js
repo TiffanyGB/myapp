@@ -8,7 +8,7 @@ async function validerRegles(req) {
         .run(req);
 
     body('contenu')
-        .notEmpty().withMessage('Le lien ne doit pas être vide.')
+        .notEmpty().withMessage('La règle ne doit pas être vide.')
         .isLength({ min: 2, max: 1000 }).withMessage('Le lien doit avoir une longueur comprise entre 3 et 1000 caractères.')
         .run(req);
 }

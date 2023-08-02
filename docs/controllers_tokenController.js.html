@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: models/motCleModel.js</title>
+    <title>JSDoc: Source: controllers/tokenController.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: models/motCleModel.js</h1>
+    <h1 class="page-title">Source: controllers/tokenController.js</h1>
 
     
 
@@ -26,57 +26,54 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>const pool = require('../database/configDB');
+            <pre class="prettyprint source linenums"><code>/**
+ * @fileoverview Fonctions liées aux token.
+ * @module Token
+ */
 
+const jwt = require('jsonwebtoken');
+const tokenModel = require('../models/tokenModel');
 
-function recupererMot(idProjet) {
+function verifierToken(req, res) {
+  if (req.method === 'OPTIONS') {
 
-    const chercherMots = `SELECT * FROM mot_cle WHERE idProjet = $1`
+  } else if (req.method === 'POST') {
 
-    return new Promise((resolve, reject) => {
-        pool.query(chercherMots, [idProjet])
-            .then((res) => {
-                resolve(res.rows);
-            })
-            .catch((error) => {
-                reject(error);
-            });
-    });
+    const token = req.body.token;
+
+    res.status(200).json(token)
+  }
 }
 
-/**Insérer mot clé */
-async function insererMot(valeurs) {
-    const inserer = `INSERT INTO Mot_cle (mot, idProjet)
-    VALUES ($1, $2)`;
+
+async function supprimerToken(req, res) {
+  if (req.method === 'OPTIONS') {
+
+  } else if (req.method === 'DELETE') {
 
     try {
-        await pool.query(inserer, valeurs);
-        return 'ok';
-    }
-    catch (error) {
-        console.error('Erreur lors de l\'insertion des données côté etudiant :', error);
-        throw error;
-    }
-}
+      const token = req.body.token;
 
-async function supprimerMot(idProjet) {
+      const existe = await tokenModel.chercherToken(token);
 
-    const supprimer = `DELETE FROM Mot_cle 
-    WHERE idProjet = $1`;
+      if(existe.length === 0){
+        return res.status(200).json({ message: "Le token n'existe pas." });
+      }
 
-    try {
-        pool.query(supprimer, [idProjet]);
-    } catch (error) {
-        throw error;
+      tokenModel.supprimerJWT(token);
+
+      return res.status(200).json({ message: "JWT supprimé." });
+    } catch {
+      res.status(400).json({ error: "Erreur lors de la suppression du JWT." });
     }
+  }
 }
 
 
 module.exports = {
-    recupererMot,
-    insererMot,
-    supprimerMot
-}</code></pre>
+  verifierToken,
+  supprimerToken
+};</code></pre>
         </article>
     </section>
 

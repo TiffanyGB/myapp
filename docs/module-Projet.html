@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Module: Annotation_équipes</title>
+    <title>JSDoc: Module: Projet</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Module: Annotation_équipes</h1>
+    <h1 class="page-title">Module: Projet</h1>
 
     
 
@@ -34,7 +34,7 @@
     <div class="container-overview">
     
         
-            <div class="description">Controllers des annotations d'une équipes.</div>
+            <div class="description">Fonctions intéragissant avec la BDD pour la gestion des projets des gestionnaires.</div>
         
 
         
@@ -69,7 +69,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="controllers_annotationController.js.html">controllers/annotationController.js</a>, <a href="controllers_annotationController.js.html#line1">line 1</a>
+        <a href="models_gererProjet.js.html">models/gererProjet.js</a>, <a href="models_gererProjet.js.html#line1">line 1</a>
     </li></ul></dd>
     
 
@@ -108,7 +108,7 @@
     
 
     
-    <h4 class="name" id="~creerAnnotation"><span class="type-signature">(inner) </span>creerAnnotation<span class="signature">(valeurs)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="~attribuerProjetExterne"><span class="type-signature">(async, inner) </span>attribuerProjetExterne<span class="signature">(idProjet, idGestionnaire)</span><span class="type-signature"> &rarr; {Promise.&lt;string>}</span></h4>
     
 
     
@@ -116,10 +116,9 @@
 
 
 <div class="description">
-    Créer une nouvelle annotation associée à une équipe.
+    Attribuer un projet à un gestionnaire externe.
 
-Le controller lui passe en paramètres les informations à rentrer dans la table
-Annotation.
+Cette fonction effectue une requête SQL pour attribuer un projet à un gestionnaire externe en insérant une entrée dans la table Gerer_externe.
 </div>
 
 
@@ -155,620 +154,7 @@ Annotation.
 
         <tr>
             
-                <td class="name"><code>valeurs</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Array</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Un tableau contenant les valeurs à insérer :
-                        [idEquipe, auteur, contenu]</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="models_annotationEquipeModel.js.html">models/annotationEquipeModel.js</a>, <a href="models_annotationEquipeModel.js.html#line20">line 20</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Throws:</h5>
-
-        
-
-<dl>
-    <dt>
-        <div class="param-desc">
-        Une erreur si la création de l'annotation échoue.
-        </div>
-    </dt>
-    <dd></dd>
-    <dt>
-        <dl>
-            <dt>
-                Type
-            </dt>
-            <dd>
-                
-<span class="param-type">Error</span>
-
-
-            </dd>
-        </dl>
-    </dt>
-    <dd></dd>
-</dl>
-
-
-    
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="~ecrireAnnotation"><span class="type-signature">(inner) </span>ecrireAnnotation<span class="signature">(req, res)</span><span class="type-signature"> &rarr; {Object}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Controller pour créer une nouvelle annotation associée à une équipe.
-
-Récupère les informations utiles à l'insertion dans la base de données:
-
-Le contenu de l'annotation: Récupéré du body, message que laisse l'administrateur
-ou le gestionnaire du projet,
-L'id de l'équipe: Directement depuis l'url de la route,
-L'id de l'auteur de l'annotation depuis son token.
-
-L'appel du controller dans la route , se fait après l'appel de ces middlewares
-la vérification du token, la vérification de l'existence de l'équipe et (*)la vérification
-du profil (dans cet ordre, les middlewares dépendants les uns des autres).
-
-Accès à ce controller: Gestionnaires du projet et les administrateurs ((*)verifProfil/checkAG).
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>req</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">L'objet de la requête (express request object).</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>res</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">L'objet de la réponse (express response object).</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="controllers_annotationController.js.html">controllers/annotationController.js</a>, <a href="controllers_annotationController.js.html#line31">line 31</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Throws:</h5>
-
-        
-
-<dl>
-    <dt>
-        <div class="param-desc">
-        Une erreur si la création de l'annotation échoue.
-        </div>
-    </dt>
-    <dd></dd>
-    <dt>
-        <dl>
-            <dt>
-                Type
-            </dt>
-            <dd>
-                
-<span class="param-type">Error</span>
-
-
-            </dd>
-        </dl>
-    </dt>
-    <dd></dd>
-</dl>
-
-
-    
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    - Retourne un objet JSON avec un message indiquant si l'annotation a été créée
-avec succès ou une erreur en cas d'échec.
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Object</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="~getAnnotationEquipe"><span class="type-signature">(async, inner) </span>getAnnotationEquipe<span class="signature">(req, res)</span><span class="type-signature"> &rarr; {Object}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Controller pour récupérer toutes les annotations associées à une équipe.
-
-L'id de l'équipe voulue est directement depuis l'url de la route,
-
-L'appel du controller dans la route , se fait après l'appel de ces middlewares
-la vérification du token, la vérification de l'existence de l'équipe et (*)la vérification
-du profil (dans cet ordre, les middlewares dépendants les uns des autres).
-
-Accès à ce controller: Gestionnaires du projet et les administrateurs ((*)verifProfil/checkAG).
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>req</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">L'objet de la requête (express request object).</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>res</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">L'objet de la réponse (express response object).</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="controllers_annotationController.js.html">controllers/annotationController.js</a>, <a href="controllers_annotationController.js.html#line67">line 67</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Throws:</h5>
-
-        
-
-<dl>
-    <dt>
-        <div class="param-desc">
-        Une erreur si la récupération des annotations échoue.
-        </div>
-    </dt>
-    <dd></dd>
-    <dt>
-        <dl>
-            <dt>
-                Type
-            </dt>
-            <dd>
-                
-<span class="param-type">Error</span>
-
-
-            </dd>
-        </dl>
-    </dt>
-    <dd></dd>
-</dl>
-
-
-    
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    - Retourne un objet JSON contenant l'ensemble des annotations de l'équipe.
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Object</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="~getAnnotationEquipes"><span class="type-signature">(async, inner) </span>getAnnotationEquipes<span class="signature">(idEquipe)</span><span class="type-signature"> &rarr; {Promise.&lt;Array>}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Récupérer les annotations associées à une équipe.
-
-L'id de l'équipe souhaitée est récupéré du controller
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>idEquipe</code></td>
+                <td class="name"><code>idProjet</code></td>
             
 
             <td class="type">
@@ -784,7 +170,30 @@ L'id de l'équipe souhaitée est récupéré du controller
 
             
 
-            <td class="description last">L'identifiant de l'équipe pour laquelle récupérer les annotations.</td>
+            <td class="description last">L'identifiant du projet à attribuer.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>idGestionnaire</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">L'identifiant du gestionnaire externe auquel attribuer le projet.</td>
         </tr>
 
     
@@ -825,7 +234,7 @@ L'id de l'équipe souhaitée est récupéré du controller
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="models_annotationEquipeModel.js.html">models/annotationEquipeModel.js</a>, <a href="models_annotationEquipeModel.js.html#line43">line 43</a>
+        <a href="models_gererProjet.js.html">models/gererProjet.js</a>, <a href="models_gererProjet.js.html#line190">line 190</a>
     </li></ul></dd>
     
 
@@ -855,7 +264,7 @@ L'id de l'équipe souhaitée est récupéré du controller
 <dl>
     <dt>
         <div class="param-desc">
-        Une erreur si la récupération des annotations échoue.
+        Une erreur si l'attribution échoue.
         </div>
     </dt>
     <dd></dd>
@@ -883,7 +292,412 @@ L'id de l'équipe souhaitée est récupéré du controller
 
         
 <div class="param-desc">
-    - Une promesse résolue avec un tableau d'annotations associées à l'équipe.
+    - Une promesse résolue avec la chaîne de caractères 'ok' si l'attribution réussit.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;string></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="~attribuerProjetIA"><span class="type-signature">(async, inner) </span>attribuerProjetIA<span class="signature">(idProjet, idGestionnaire)</span><span class="type-signature"> &rarr; {Promise.&lt;string>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Attribuer un projet à un gestionnaire IA.
+
+Cette fonction effectue une requête SQL pour attribuer un projet à un gestionnaire IA en insérant une entrée dans la table Gerer_ia_pau.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>idProjet</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">L'identifiant du projet à attribuer.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>idGestionnaire</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">L'identifiant du gestionnaire IA auquel attribuer le projet.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="models_gererProjet.js.html">models/gererProjet.js</a>, <a href="models_gererProjet.js.html#line160">line 160</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Throws:</h5>
+
+        
+
+<dl>
+    <dt>
+        <div class="param-desc">
+        Une erreur si l'attribution échoue.
+        </div>
+    </dt>
+    <dd></dd>
+    <dt>
+        <dl>
+            <dt>
+                Type
+            </dt>
+            <dd>
+                
+<span class="param-type">Error</span>
+
+
+            </dd>
+        </dl>
+    </dt>
+    <dd></dd>
+</dl>
+
+
+    
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    - Une promesse résolue avec la chaîne de caractères 'ok' si l'attribution réussit.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;string></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="~chercherGestionnaireExt"><span class="type-signature">(async, inner) </span>chercherGestionnaireExt<span class="signature">(idProjet)</span><span class="type-signature"> &rarr; {Promise.&lt;Array>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Chercher les gestionnaires externes associés à un projet.
+
+Cette fonction effectue une requête SQL pour récupérer les gestionnaires externes à partir de la table Gerer_externe
+en fonction de l'identifiant du projet.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>idProjet</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">L'identifiant du projet pour lequel chercher les gestionnaires externes.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="models_gererProjet.js.html">models/gererProjet.js</a>, <a href="models_gererProjet.js.html#line127">line 127</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Throws:</h5>
+
+        
+
+<dl>
+    <dt>
+        <div class="param-desc">
+        Une erreur si la requête de récupération échoue.
+        </div>
+    </dt>
+    <dd></dd>
+    <dt>
+        <dl>
+            <dt>
+                Type
+            </dt>
+            <dd>
+                
+<span class="param-type">Error</span>
+
+
+            </dd>
+        </dl>
+    </dt>
+    <dd></dd>
+</dl>
+
+
+    
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    - Une promesse résolue avec un tableau contenant les informations des gestionnaires externes associés au projet.
+                          - Si aucun gestionnaire externe n'est trouvé, la promesse est résolue avec un tableau vide.
 </div>
 
 
@@ -912,7 +726,7 @@ L'id de l'équipe souhaitée est récupéré du controller
     
 
     
-    <h4 class="name" id="~jsonGetAnnotation"><span class="type-signature">(async, inner) </span>jsonGetAnnotation<span class="signature">(idEquipe)</span><span class="type-signature"> &rarr; {Promise.&lt;Object>}</span></h4>
+    <h4 class="name" id="~chercherGestionnaireExtID"><span class="type-signature">(async, inner) </span>chercherGestionnaireExtID<span class="signature">(idProjet, idGestionnaire)</span><span class="type-signature"> &rarr; {Promise.&lt;Array>}</span></h4>
     
 
     
@@ -920,10 +734,10 @@ L'id de l'équipe souhaitée est récupéré du controller
 
 
 <div class="description">
-    Récupérer les annotations associées à une équipe au format JSON.
+    Chercher les gestionnaires externes associés à un projet en fonction de leur identifiant.
 
-Cette fonction permet de récupérer les annotations associées à une équipe spécifiée et de les
-retourner au format JSON avec des détails sur le contenu, la date et l'auteur.
+Cette fonction effectue une requête SQL pour récupérer les gestionnaires externes à partir de la table Gerer_externe
+en fonction de l'identifiant du projet et de l'identifiant du gestionnaire externe.
 </div>
 
 
@@ -959,7 +773,7 @@ retourner au format JSON avec des détails sur le contenu, la date et l'auteur.
 
         <tr>
             
-                <td class="name"><code>idEquipe</code></td>
+                <td class="name"><code>idProjet</code></td>
             
 
             <td class="type">
@@ -975,889 +789,14 @@ retourner au format JSON avec des détails sur le contenu, la date et l'auteur.
 
             
 
-            <td class="description last">L'identifiant de l'équipe pour laquelle récupérer les annotations.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="models_annotationEquipeModel.js.html">models/annotationEquipeModel.js</a>, <a href="models_annotationEquipeModel.js.html#line72">line 72</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Throws:</h5>
-
-        
-
-<dl>
-    <dt>
-        <div class="param-desc">
-        Une erreur si la récupération des annotations échoue.
-        </div>
-    </dt>
-    <dd></dd>
-    <dt>
-        <dl>
-            <dt>
-                Type
-            </dt>
-            <dd>
-                
-<span class="param-type">Error</span>
-
-
-            </dd>
-        </dl>
-    </dt>
-    <dd></dd>
-</dl>
-
-
-    
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    - Une promesse résolue avec un objet JSON contenant les annotations au format détaillé.
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Promise.&lt;Object></span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-
-        
-    
-
-    
-
-    
-</article>
-
-</section>
-
-
-
-
-
-
-
-<section>
-
-<header>
-    
-</header>
-
-<article>
-    <div class="container-overview">
-    
-        
-            <div class="description">Models des annotations d'une équipes.</div>
-        
-
-        
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="models_annotationEquipeModel.js.html">models/annotationEquipeModel.js</a>, <a href="models_annotationEquipeModel.js.html#line1">line 1</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-        
-    
-    </div>
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-        <h3 class="subsection-title">Methods</h3>
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="~creerAnnotation"><span class="type-signature">(inner) </span>creerAnnotation<span class="signature">(valeurs)</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Créer une nouvelle annotation associée à une équipe.
-
-Le controller lui passe en paramètres les informations à rentrer dans la table
-Annotation.
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>valeurs</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Array</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Un tableau contenant les valeurs à insérer :
-                        [idEquipe, auteur, contenu]</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="models_annotationEquipeModel.js.html">models/annotationEquipeModel.js</a>, <a href="models_annotationEquipeModel.js.html#line20">line 20</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Throws:</h5>
-
-        
-
-<dl>
-    <dt>
-        <div class="param-desc">
-        Une erreur si la création de l'annotation échoue.
-        </div>
-    </dt>
-    <dd></dd>
-    <dt>
-        <dl>
-            <dt>
-                Type
-            </dt>
-            <dd>
-                
-<span class="param-type">Error</span>
-
-
-            </dd>
-        </dl>
-    </dt>
-    <dd></dd>
-</dl>
-
-
-    
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="~ecrireAnnotation"><span class="type-signature">(inner) </span>ecrireAnnotation<span class="signature">(req, res)</span><span class="type-signature"> &rarr; {Object}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Controller pour créer une nouvelle annotation associée à une équipe.
-
-Récupère les informations utiles à l'insertion dans la base de données:
-
-Le contenu de l'annotation: Récupéré du body, message que laisse l'administrateur
-ou le gestionnaire du projet,
-L'id de l'équipe: Directement depuis l'url de la route,
-L'id de l'auteur de l'annotation depuis son token.
-
-L'appel du controller dans la route , se fait après l'appel de ces middlewares
-la vérification du token, la vérification de l'existence de l'équipe et (*)la vérification
-du profil (dans cet ordre, les middlewares dépendants les uns des autres).
-
-Accès à ce controller: Gestionnaires du projet et les administrateurs ((*)verifProfil/checkAG).
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>req</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">L'objet de la requête (express request object).</td>
+            <td class="description last">L'identifiant du projet pour lequel chercher les gestionnaires externes.</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>res</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">L'objet de la réponse (express response object).</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="controllers_annotationController.js.html">controllers/annotationController.js</a>, <a href="controllers_annotationController.js.html#line31">line 31</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Throws:</h5>
-
-        
-
-<dl>
-    <dt>
-        <div class="param-desc">
-        Une erreur si la création de l'annotation échoue.
-        </div>
-    </dt>
-    <dd></dd>
-    <dt>
-        <dl>
-            <dt>
-                Type
-            </dt>
-            <dd>
-                
-<span class="param-type">Error</span>
-
-
-            </dd>
-        </dl>
-    </dt>
-    <dd></dd>
-</dl>
-
-
-    
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    - Retourne un objet JSON avec un message indiquant si l'annotation a été créée
-avec succès ou une erreur en cas d'échec.
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Object</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="~getAnnotationEquipe"><span class="type-signature">(async, inner) </span>getAnnotationEquipe<span class="signature">(req, res)</span><span class="type-signature"> &rarr; {Object}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Controller pour récupérer toutes les annotations associées à une équipe.
-
-L'id de l'équipe voulue est directement depuis l'url de la route,
-
-L'appel du controller dans la route , se fait après l'appel de ces middlewares
-la vérification du token, la vérification de l'existence de l'équipe et (*)la vérification
-du profil (dans cet ordre, les middlewares dépendants les uns des autres).
-
-Accès à ce controller: Gestionnaires du projet et les administrateurs ((*)verifProfil/checkAG).
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>req</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">L'objet de la requête (express request object).</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>res</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">L'objet de la réponse (express response object).</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="controllers_annotationController.js.html">controllers/annotationController.js</a>, <a href="controllers_annotationController.js.html#line67">line 67</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Throws:</h5>
-
-        
-
-<dl>
-    <dt>
-        <div class="param-desc">
-        Une erreur si la récupération des annotations échoue.
-        </div>
-    </dt>
-    <dd></dd>
-    <dt>
-        <dl>
-            <dt>
-                Type
-            </dt>
-            <dd>
-                
-<span class="param-type">Error</span>
-
-
-            </dd>
-        </dl>
-    </dt>
-    <dd></dd>
-</dl>
-
-
-    
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    - Retourne un objet JSON contenant l'ensemble des annotations de l'équipe.
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Object</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="~getAnnotationEquipes"><span class="type-signature">(async, inner) </span>getAnnotationEquipes<span class="signature">(idEquipe)</span><span class="type-signature"> &rarr; {Promise.&lt;Array>}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Récupérer les annotations associées à une équipe.
-
-L'id de l'équipe souhaitée est récupéré du controller
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>idEquipe</code></td>
+                <td class="name"><code>idGestionnaire</code></td>
             
 
             <td class="type">
@@ -1873,7 +812,7 @@ L'id de l'équipe souhaitée est récupéré du controller
 
             
 
-            <td class="description last">L'identifiant de l'équipe pour laquelle récupérer les annotations.</td>
+            <td class="description last">L'identifiant du gestionnaire externe à chercher.</td>
         </tr>
 
     
@@ -1914,7 +853,7 @@ L'id de l'équipe souhaitée est récupéré du controller
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="models_annotationEquipeModel.js.html">models/annotationEquipeModel.js</a>, <a href="models_annotationEquipeModel.js.html#line43">line 43</a>
+        <a href="models_gererProjet.js.html">models/gererProjet.js</a>, <a href="models_gererProjet.js.html#line57">line 57</a>
     </li></ul></dd>
     
 
@@ -1944,7 +883,7 @@ L'id de l'équipe souhaitée est récupéré du controller
 <dl>
     <dt>
         <div class="param-desc">
-        Une erreur si la récupération des annotations échoue.
+        Une erreur si la requête de récupération échoue.
         </div>
     </dt>
     <dd></dd>
@@ -1972,7 +911,8 @@ L'id de l'équipe souhaitée est récupéré du controller
 
         
 <div class="param-desc">
-    - Une promesse résolue avec un tableau d'annotations associées à l'équipe.
+    - Une promesse résolue avec un tableau contenant les informations des gestionnaires externes associés au projet.
+                          - Si aucun gestionnaire externe n'est trouvé, la promesse est résolue avec un tableau vide.
 </div>
 
 
@@ -2001,7 +941,7 @@ L'id de l'équipe souhaitée est récupéré du controller
     
 
     
-    <h4 class="name" id="~jsonGetAnnotation"><span class="type-signature">(async, inner) </span>jsonGetAnnotation<span class="signature">(idEquipe)</span><span class="type-signature"> &rarr; {Promise.&lt;Object>}</span></h4>
+    <h4 class="name" id="~chercherGestionnaireIA"><span class="type-signature">(async, inner) </span>chercherGestionnaireIA<span class="signature">(idProjet)</span><span class="type-signature"> &rarr; {Promise.&lt;Array>}</span></h4>
     
 
     
@@ -2009,10 +949,10 @@ L'id de l'équipe souhaitée est récupéré du controller
 
 
 <div class="description">
-    Récupérer les annotations associées à une équipe au format JSON.
+    Chercher les gestionnaires IA associés à un projet.
 
-Cette fonction permet de récupérer les annotations associées à une équipe spécifiée et de les
-retourner au format JSON avec des détails sur le contenu, la date et l'auteur.
+Cette fonction effectue une requête SQL pour récupérer les gestionnaires IA à partir de la table Gerer_ia_pau
+en fonction de l'identifiant du projet.
 </div>
 
 
@@ -2048,7 +988,7 @@ retourner au format JSON avec des détails sur le contenu, la date et l'auteur.
 
         <tr>
             
-                <td class="name"><code>idEquipe</code></td>
+                <td class="name"><code>idProjet</code></td>
             
 
             <td class="type">
@@ -2064,7 +1004,7 @@ retourner au format JSON avec des détails sur le contenu, la date et l'auteur.
 
             
 
-            <td class="description last">L'identifiant de l'équipe pour laquelle récupérer les annotations.</td>
+            <td class="description last">L'identifiant du projet pour lequel chercher les gestionnaires IA.</td>
         </tr>
 
     
@@ -2105,7 +1045,7 @@ retourner au format JSON avec des détails sur le contenu, la date et l'auteur.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="models_annotationEquipeModel.js.html">models/annotationEquipeModel.js</a>, <a href="models_annotationEquipeModel.js.html#line72">line 72</a>
+        <a href="models_gererProjet.js.html">models/gererProjet.js</a>, <a href="models_gererProjet.js.html#line21">line 21</a>
     </li></ul></dd>
     
 
@@ -2135,7 +1075,7 @@ retourner au format JSON avec des détails sur le contenu, la date et l'auteur.
 <dl>
     <dt>
         <div class="param-desc">
-        Une erreur si la récupération des annotations échoue.
+        Une erreur si la requête de récupération échoue.
         </div>
     </dt>
     <dd></dd>
@@ -2163,7 +1103,8 @@ retourner au format JSON avec des détails sur le contenu, la date et l'auteur.
 
         
 <div class="param-desc">
-    - Une promesse résolue avec un objet JSON contenant les annotations au format détaillé.
+    - Une promesse résolue avec un tableau contenant les informations des gestionnaires IA associés au projet.
+                          - Si aucun gestionnaire IA n'est trouvé, la promesse est résolue avec un tableau vide.
 </div>
 
 
@@ -2174,13 +1115,564 @@ retourner au format JSON avec des détails sur le contenu, la date et l'auteur.
     </dt>
     <dd>
         
-<span class="param-type">Promise.&lt;Object></span>
+<span class="param-type">Promise.&lt;Array></span>
 
 
     </dd>
 </dl>
 
     
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="~chercherGestionnaireIAID"><span class="type-signature">(async, inner) </span>chercherGestionnaireIAID<span class="signature">(idProjet, idGestionnaire)</span><span class="type-signature"> &rarr; {Promise.&lt;Array>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Chercher les gestionnaires IA associés à un projet en fonction de leur identifiant.
+
+Cette fonction effectue une requête SQL pour récupérer les gestionnaires IA à partir de la table Gerer_ia_pau
+en fonction de l'identifiant du projet et de l'identifiant du gestionnaire IA.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>idProjet</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">L'identifiant du projet pour lequel chercher les gestionnaires IA.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>idGestionnaire</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">L'identifiant du gestionnaire IA à chercher.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="models_gererProjet.js.html">models/gererProjet.js</a>, <a href="models_gererProjet.js.html#line93">line 93</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Throws:</h5>
+
+        
+
+<dl>
+    <dt>
+        <div class="param-desc">
+        Une erreur si la requête de récupération échoue.
+        </div>
+    </dt>
+    <dd></dd>
+    <dt>
+        <dl>
+            <dt>
+                Type
+            </dt>
+            <dd>
+                
+<span class="param-type">Error</span>
+
+
+            </dd>
+        </dl>
+    </dt>
+    <dd></dd>
+</dl>
+
+
+    
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    - Une promesse résolue avec un tableau contenant les informations des gestionnaires IA associés au projet.
+                          - Si aucun gestionnaire IA n'est trouvé, la promesse est résolue avec un tableau vide.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;Array></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="~destituerProjetExterne"><span class="type-signature">(async, inner) </span>destituerProjetExterne<span class="signature">(idProjet)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Destituer un projet d'un gestionnaire externe.
+
+Cette fonction effectue une requête SQL pour destituer un projet d'un gestionnaire externe en supprimant l'entrée correspondante de la table Gerer_externe.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>idProjet</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">L'identifiant du projet à destituer.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="models_gererProjet.js.html">models/gererProjet.js</a>, <a href="models_gererProjet.js.html#line218">line 218</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Throws:</h5>
+
+        
+
+<dl>
+    <dt>
+        <div class="param-desc">
+        Une erreur si la destitution échoue.
+        </div>
+    </dt>
+    <dd></dd>
+    <dt>
+        <dl>
+            <dt>
+                Type
+            </dt>
+            <dd>
+                
+<span class="param-type">Error</span>
+
+
+            </dd>
+        </dl>
+    </dt>
+    <dd></dd>
+</dl>
+
+
+    
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="~destituerProjetIa"><span class="type-signature">(async, inner) </span>destituerProjetIa<span class="signature">(idProjet)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Destituer un projet d'un gestionnaire IA.
+
+Cette fonction effectue une requête SQL pour destituer un projet d'un gestionnaire IA en supprimant l'entrée correspondante de la table Gerer_ia_pau.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>idProjet</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">L'identifiant du projet à destituer.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="models_gererProjet.js.html">models/gererProjet.js</a>, <a href="models_gererProjet.js.html#line242">line 242</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Throws:</h5>
+
+        
+
+<dl>
+    <dt>
+        <div class="param-desc">
+        Une erreur si la destitution échoue.
+        </div>
+    </dt>
+    <dd></dd>
+    <dt>
+        <dl>
+            <dt>
+                Type
+            </dt>
+            <dd>
+                
+<span class="param-type">Error</span>
+
+
+            </dd>
+        </dl>
+    </dt>
+    <dd></dd>
+</dl>
+
+
+    
+
+
 
 
 

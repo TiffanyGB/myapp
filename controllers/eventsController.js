@@ -33,7 +33,18 @@ async function createEvent(req, res) {
       nombreMaxEquipe
     ];
 
+    /*Vérifier données des règles */
+    for (const regle of regles) {
+      await regleModel.validerRegles(regle); // Valider chaque règle individuellement
+
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+      }
+    }
+
     try {
+
       const idevent = await eventModel.creerEvent(valeurs_event, regles);
 
       /* l'id de l'event doit être un nombre, sinon erreur */
@@ -50,12 +61,11 @@ async function createEvent(req, res) {
           }
           await projetModel.rattacherProjetEvent(idevent, projets[i].idProjet);
         }
-        res.status(200).json({ message: 'Evenement créé' });
-      } else {
-        res.status(400).json({ error: 'Failed to insert' });
+        return res.status(200).json({ message: 'Evenement créé' });
       }
+      return res.status(400).json({ error: 'Failed to insert' });
     } catch (error) {
-      res.status(400).json({ error: 'Failed to insert' });
+      return res.status(400).json({ error: 'Failed to insert' });
     }
   }
 }

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: models/motCleModel.js</title>
+    <title>JSDoc: Source: models/demandeModel.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: models/motCleModel.js</h1>
+    <h1 class="page-title">Source: models/demandeModel.js</h1>
 
     
 
@@ -26,56 +26,58 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>const pool = require('../database/configDB');
+            <pre class="prettyprint source linenums"><code>/**
+ * @fileoverview Models des annotations d'une équipes.
+ * @module Gestion_demandes_admission
+ */
 
+const pool = require('../database/configDB');
 
-function recupererMot(idProjet) {
+/**
+ * Supprimer toutes les demandes d'admission d'un utilisteur.
+ * 
+ * Cette fonction est utilisée lorsque qu'un étudiant est accepté dans une équipe.
+ * Les autres équipes qu'il a sollicitées ne verront plus ses demandes.
+ * 
+ * @function
+ * @param {number} idUser - L'identifiant de l'utilisateur.
+ * @throws {Error} Une erreur si la suppression des demandes échoue.
+*/
+function supprimerDemandes(idUser) {
 
-    const chercherMots = `SELECT * FROM mot_cle WHERE idProjet = $1`
-
-    return new Promise((resolve, reject) => {
-        pool.query(chercherMots, [idProjet])
-            .then((res) => {
-                resolve(res.rows);
-            })
-            .catch((error) => {
-                reject(error);
-            });
-    });
-}
-
-/**Insérer mot clé */
-async function insererMot(valeurs) {
-    const inserer = `INSERT INTO Mot_cle (mot, idProjet)
-    VALUES ($1, $2)`;
-
-    try {
-        await pool.query(inserer, valeurs);
-        return 'ok';
-    }
-    catch (error) {
-        console.error('Erreur lors de l\'insertion des données côté etudiant :', error);
-        throw error;
-    }
-}
-
-async function supprimerMot(idProjet) {
-
-    const supprimer = `DELETE FROM Mot_cle 
-    WHERE idProjet = $1`;
+    const supprimer = `DELETE FROM DemandeEquipe
+    WHERE idUser = $1`;
 
     try {
-        pool.query(supprimer, [idProjet]);
+        pool.query(supprimer, [idUser]);
     } catch (error) {
-        throw error;
+        throw (error);
     }
 }
 
+/**
+ * Décliner une demande d'admission d'un utilisteur.
+ * 
+ * @function
+ * @param {number} idUser - L'identifiant de l'utilisateur.
+ * @param {number} idEquipe - L'identifiant de l'équipe.
+ * @throws {Error} Une erreur si la suppression de la demande échoue.
+*/
+function declinerDemande(idUser, idEquipe) {
+
+    const supprimer = `DELETE FROM DemandeEquipe
+    WHERE idUser = $1 AND idEquipe = $2`;
+
+    try {
+        pool.query(supprimer, [idUser, idEquipe]);
+    } catch (error) {
+        throw (error);
+    }
+}
 
 module.exports = {
-    recupererMot,
-    insererMot,
-    supprimerMot
+    supprimerDemandes,
+    declinerDemande
 }</code></pre>
         </article>
     </section>

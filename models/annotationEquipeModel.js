@@ -58,6 +58,17 @@ async function getAnnotationEquipes(idEquipe) {
     });
 }
 
+/**
+ * Récupérer les annotations associées à une équipe au format JSON.
+ * 
+ * Cette fonction permet de récupérer les annotations associées à une équipe spécifiée et de les
+ * retourner au format JSON avec des détails sur le contenu, la date et l'auteur.
+ * 
+ * @function
+ * @param {number} idEquipe - L'identifiant de l'équipe pour laquelle récupérer les annotations.
+ * @returns {Promise<Object>} - Une promesse résolue avec un objet JSON contenant les annotations au format détaillé.
+ * @throws {Error} Une erreur si la récupération des annotations échoue.
+ */
 async function jsonGetAnnotation(idEquipe){
 
     try{
@@ -77,7 +88,7 @@ async function jsonGetAnnotation(idEquipe){
             let user = (await userModel.chercherUserID(annotationCourante.auteur))[0];
 
             temp.auteur = '' + user.nom + ' ' + user.prenom;
-            
+
             jsonRetour.annotations.push(temp)
         }
 

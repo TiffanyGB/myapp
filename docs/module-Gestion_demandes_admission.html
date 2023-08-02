@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: models/motCleModel.js</title>
+    <title>JSDoc: Module: Gestion_demandes_admission</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,68 +17,458 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: models/motCleModel.js</h1>
+    <h1 class="page-title">Module: Gestion_demandes_admission</h1>
 
     
 
 
 
+
+<section>
+
+<header>
     
-    <section>
-        <article>
-            <pre class="prettyprint source linenums"><code>const pool = require('../database/configDB');
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+            <div class="description">Models des annotations d'une équipes.</div>
+        
+
+        
 
 
-function recupererMot(idProjet) {
+<dl class="details">
 
-    const chercherMots = `SELECT * FROM mot_cle WHERE idProjet = $1`
+    
 
-    return new Promise((resolve, reject) => {
-        pool.query(chercherMots, [idProjet])
-            .then((res) => {
-                resolve(res.rows);
-            })
-            .catch((error) => {
-                reject(error);
-            });
-    });
-}
+    
 
-/**Insérer mot clé */
-async function insererMot(valeurs) {
-    const inserer = `INSERT INTO Mot_cle (mot, idProjet)
-    VALUES ($1, $2)`;
+    
 
-    try {
-        await pool.query(inserer, valeurs);
-        return 'ok';
-    }
-    catch (error) {
-        console.error('Erreur lors de l\'insertion des données côté etudiant :', error);
-        throw error;
-    }
-}
+    
 
-async function supprimerMot(idProjet) {
+    
 
-    const supprimer = `DELETE FROM Mot_cle 
-    WHERE idProjet = $1`;
+    
 
-    try {
-        pool.query(supprimer, [idProjet]);
-    } catch (error) {
-        throw error;
-    }
-}
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="models_demandeModel.js.html">models/demandeModel.js</a>, <a href="models_demandeModel.js.html#line1">line 1</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
 
 
-module.exports = {
-    recupererMot,
-    insererMot,
-    supprimerMot
-}</code></pre>
-        </article>
-    </section>
+        
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="~declinerDemande"><span class="type-signature">(inner) </span>declinerDemande<span class="signature">(idUser, idEquipe)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Décliner une demande d'admission d'un utilisteur.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>idUser</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">L'identifiant de l'utilisateur.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>idEquipe</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">L'identifiant de l'équipe.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="models_demandeModel.js.html">models/demandeModel.js</a>, <a href="models_demandeModel.js.html#line38">line 38</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Throws:</h5>
+
+        
+
+<dl>
+    <dt>
+        <div class="param-desc">
+        Une erreur si la suppression de la demande échoue.
+        </div>
+    </dt>
+    <dd></dd>
+    <dt>
+        <dl>
+            <dt>
+                Type
+            </dt>
+            <dd>
+                
+<span class="param-type">Error</span>
+
+
+            </dd>
+        </dl>
+    </dt>
+    <dd></dd>
+</dl>
+
+
+    
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="~supprimerDemandes"><span class="type-signature">(inner) </span>supprimerDemandes<span class="signature">(idUser)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Supprimer toutes les demandes d'admission d'un utilisteur.
+
+Cette fonction est utilisée lorsque qu'un étudiant est accepté dans une équipe.
+Les autres équipes qu'il a sollicitées ne verront plus ses demandes.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>idUser</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">L'identifiant de l'utilisateur.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="models_demandeModel.js.html">models/demandeModel.js</a>, <a href="models_demandeModel.js.html#line18">line 18</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Throws:</h5>
+
+        
+
+<dl>
+    <dt>
+        <div class="param-desc">
+        Une erreur si la suppression des demandes échoue.
+        </div>
+    </dt>
+    <dd></dd>
+    <dt>
+        <dl>
+            <dt>
+                Type
+            </dt>
+            <dd>
+                
+<span class="param-type">Error</span>
+
+
+            </dd>
+        </dl>
+    </dt>
+    <dd></dd>
+</dl>
+
+
+    
+
+
+
+
+
+
+
+        
+    
+
+    
+
+    
+</article>
+
+</section>
 
 
 

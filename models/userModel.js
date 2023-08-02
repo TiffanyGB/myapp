@@ -20,7 +20,7 @@ const validateUser = [
     body('pseudo')
         .notEmpty().withMessage('Le pseudo ne doit pas être vide.')
         .isLength({ min: 2, max: 30 }).withMessage('Le pseudo doit avoir une longueur comprise entre 3 et 30 caractères.')
-        .matches(/^[^\s<>]+$/).withMessage('Le pseudo ne doit contenir que des lettres, des chiffres et des caractères spéciaux, sauf les espaces et les symboles "<>".')
+        .matches(/^[^\s]+$/).withMessage('Le pseudo ne doit contenir que des lettres, des chiffres et des caractères spéciaux, sauf des espaces.')
     ,
     body('email')
         .notEmpty().withMessage('L\'email ne doit pas être vide.')
