@@ -200,7 +200,6 @@ async function checkAGEtudiantEquipe(req, res, next) {
 }
 
 
-
 /**
  * Middleware pour vérifier les autorisations de l'utilisateur.
  * Les profils autorisés sont: les administrateurs et les gestionnaires en charge du projet.

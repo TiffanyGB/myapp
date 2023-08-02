@@ -291,13 +291,14 @@ async function infosProjet(idProjet) {
                 let user = (await userModel.chercherUserID(gestionnaires[i].id_g_externe))[0];
                 temp = {};
 
-                temp.nom = user.nom;
-                temp.prenom = user.prenom;
-                temp.mail = user.email;
+                temp.id = gestionnaires[i].id_g_externe;
+                temp.Nom = user.Nom;
+                temp.Prenom = user.prenom;
+                temp.Mail = user.email;
 
                 user = (await chercherGestionnaireExtID(gestionnaires[i].id_g_externe))[0];
-                temp.entreprise = user.entreprise;
-                temp.metier = user.metier;
+                temp.Entreprise = user.entreprise;
+                temp.Metier = user.metier;
 
                 jsonRetour.gestionnairesExternes.push(temp);
             }
@@ -311,13 +312,14 @@ async function infosProjet(idProjet) {
                 let user = (await userModel.chercherUserID(gestionnaires[i].id_g_iapau))[0];
                 temp = {};
 
-                temp.nom = user.nom;
-                temp.prenom = user.prenom;
-                temp.mail = user.email;
+                temp.id = gestionnaires[i].id_g_iapau;
+                temp.Nom = user.nom;
+                temp.Prenom = user.prenom;
+                temp.Mail = user.email;
 
                 user = (await chercherGestionnaireIapau(gestionnaires[i].id_g_iapau))[0];
-                temp.entreprise = 'IA-Pau';
-                temp.metier = user.role_asso;
+                temp.Entreprise = 'IA-Pau';
+                temp.Metier = user.role_asso;
 
                 jsonRetour.gestionnairesIA.push(temp);
             }
