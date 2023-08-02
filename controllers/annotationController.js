@@ -1,6 +1,7 @@
 /**
- * @fileoverview Controllers des anno.
+ * @fileoverview Controllers des annotations d'une équipes.
  * @module Annotation_équipes
+ * @requires module:annotationModel
  */
 
 const annotationModel = require('../models/annotationEquipeModel');
@@ -17,10 +18,10 @@ const annotationModel = require('../models/annotationEquipeModel');
  * L'id de l'auteur de l'annotation depuis son token.
  * 
  * L'appel du controller dans la route , se fait après l'appel de ces middlewares
- * la vérification du token, la vérification de l'existence de l'équipe et la vérification
+ * la vérification du token, la vérification de l'existence de l'équipe et (*)la vérification
  * du profil (dans cet ordre, les middlewares dépendants les uns des autres).
  * 
- * Accès à ce controller: Gestionnaires du projet et les administrateurs (verifProfil/)
+ * Accès à ce controller: Gestionnaires du projet et les administrateurs ((*)verifProfil/checkAG).
  * @function
  * @param {Object} req - L'objet de la requête (express request object).
  * @param {Object} res - L'objet de la réponse (express response object).
@@ -31,6 +32,7 @@ const annotationModel = require('../models/annotationEquipeModel');
 function ecrireAnnotation(req, res) {
 
     if (req.method === 'OPTIONS') {
+        res.status(200).json({ sucess: 'Access granted' });
 
     } else if (req.method === 'POST') {
         const idEquipe = res.locals.idEquipe;
@@ -47,15 +49,34 @@ function ecrireAnnotation(req, res) {
     }
 }
 
-
+/**
+ * Controller pour récupérer toutes les annotations associées à une équipe.
+ * 
+ * L'id de l'équipe voulue est directement depuis l'url de la route,
+ * 
+ * L'appel du controller dans la route , se fait après l'appel de ces middlewares
+ * la vérification du token, la vérification de l'existence de l'équipe et (*)la vérification
+ * du profil (dans cet ordre, les middlewares dépendants les uns des autres).
+ * 
+ * Accès à ce controller: Gestionnaires du projet et les administrateurs ((*)verifProfil/checkAG).
+ * @function
+ * @param {Object} req - L'objet de la requête (express request object).
+ * @param {Object} res - L'objet de la réponse (express response object).
+ * @returns {Object} - Retourne un objet JSON contenant l'ensemble des annotations de l'équipe.
+ * @throws {Error} Une erreur si la récupération des annotations échoue.
+*/
 async function getAnnotationEquipe(req, res) {
     if (req.method === 'OPTIONS') {
+        res.status(200).json({ sucess: 'Access granted' });
 
     } else if (req.method === 'GET') {
         const idEquipe = res.locals.idEquipe;
 
         try {
             const annotation = await annotationModel.getAnnotationEquipes(idEquipe);
+
+            /*On enlève le champs idAnnotation du json avant de le envoyer au client,
+            inutile pour lui */
             for (i = 0; i < annotation.length; i++) {
                 delete annotation[i].idannotation;
             }

@@ -66,6 +66,8 @@ async function verifyToken(req, res, next) {
   
           next();
         });
+      }else{
+        return res.status(403).json({ message: 'Token invalide ou expiré.' });
       }
     } catch {
       return res.status(403).json({ message: 'Problème au niveau du token.' });
