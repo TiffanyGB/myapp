@@ -1,7 +1,6 @@
 /**
  * @fileoverview Controllers des annotations d'une équipes.
  * @module Annotation_équipes
- * @requires module:annotationModel
  */
 
 const annotationModel = require('../models/annotationEquipeModel');
@@ -73,7 +72,7 @@ async function getAnnotationEquipe(req, res) {
         const idEquipe = res.locals.idEquipe;
 
         try {
-            const annotation = await annotationModel.getAnnotationEquipes(idEquipe);
+            const annotation = await annotationModel.jsonGetAnnotation(idEquipe);
 
             /*On enlève le champs idAnnotation du json avant de le envoyer au client,
             inutile pour lui */

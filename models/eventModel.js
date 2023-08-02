@@ -232,7 +232,6 @@ async function jsonEventChoisi(idEvent, typeUser, req) {
     let tabRetour = {};
 
     try {
-
         /*Récupérer toutes les infos liés à l'event*/
         toutesInfosEvent(idEvent, tabRetour);
 

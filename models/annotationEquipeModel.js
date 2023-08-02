@@ -4,9 +4,19 @@
  */
 
 const pool = require('../database/configDB');
+const userModel = require('../models/userModel');
 
-// * Elle récupère les informations du body récupérées par le controller et les insère
-// * dans la table Annotation
+/**
+ * Créer une nouvelle annotation associée à une équipe.
+ * 
+ * Le controller lui passe en paramètres les informations à rentrer dans la table
+ * Annotation.
+ * 
+ * @function
+ * @param {Array} valeurs - Un tableau contenant les valeurs à insérer :
+ *                         [idEquipe, auteur, contenu]
+ * @throws {Error} Une erreur si la création de l'annotation échoue.
+*/
 function creerAnnotation(valeurs) {
 
     const inserer = `INSERT INTO Annotation
@@ -20,6 +30,16 @@ function creerAnnotation(valeurs) {
     }
 }
 
+/**
+ * Récupérer les annotations associées à une équipe.
+ * 
+ * L'id de l'équipe souhaitée est récupéré du controller
+ * 
+ * @function
+ * @param {number} idEquipe - L'identifiant de l'équipe pour laquelle récupérer les annotations.
+ * @returns {Promise<Array>} - Une promesse résolue avec un tableau d'annotations associées à l'équipe.
+ * @throws {Error} Une erreur si la récupération des annotations échoue.
+*/
 async function getAnnotationEquipes(idEquipe) {
 
     const chercher = `SELECT * FROM Annotation
@@ -38,8 +58,38 @@ async function getAnnotationEquipes(idEquipe) {
     });
 }
 
+async function jsonGetAnnotation(idEquipe){
+
+    try{
+        const liste = await getAnnotationEquipes(idEquipe);
+
+        const jsonRetour = {};
+        jsonRetour.annotations = [];
+
+        for(i = 0; i <liste.length; i++){
+
+            let annotationCourante = liste[i];
+            let temp = {};
+
+            temp.contenu = annotationCourante.contenu;
+            temp.date = annotationCourante.date_annotation;
+        
+            let user = (await userModel.chercherUserID(annotationCourante.auteur))[0];
+
+            temp.nom = user.nom;
+            temp.prenom = user.prenom;
+            
+            jsonRetour.annotations.push(temp)
+        }
+
+        return jsonRetour;
+    }catch{
+
+    }
+}
+
 
 module.exports = {
     creerAnnotation,
-    getAnnotationEquipes
+    jsonGetAnnotation
 }

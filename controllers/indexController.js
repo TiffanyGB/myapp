@@ -193,38 +193,29 @@ async function voirEvent(req, res) {
       return res.status(404).json({ erreur: 'L\'id n\'existe pas' });
     }
 
-    /**Si c'est un admin, afficher les infos de l'admin */
-    if (req.userProfile === 'admin' || req.userProfile === 'gestionnaire') {
+    let jsonRetour;
 
-      eventModel.jsonEventChoisi(eventID, 'admin', req)
-        .then((result) => {
-          res.status(200).json(result);
-        })
+    try {
+      if (req.userProfile === 'admin' || req.userProfile === 'gestionnaire') {
 
-        .catch(() => {
-          res.status(500).json({ message: 'Une erreur s\'est produite lors de la récupération de l\'événement.' });
-        });
+        jsonRetour = await eventModel.jsonEventChoisi(eventID, 'admin', req)
+      }
+      
+      /**Si c'est un etudiant, afficher les infos de l'etudiant en plus, (equipe) */
+      else if (req.userProfile === 'etudiant') {
+        jsonRetour = await eventModel.jsonEventChoisi(eventID, 'etudiant', req)
+      }
+
+      /**Si non connecté ne pas envoyer les infos des ressources privées */
+      else if (req.userProfile === 'aucun') {
+        jsonRetour = await eventModel.jsonEventChoisi(eventID, 'aucun', req)
+      }
+      res.status(200).json(jsonRetour);
+
+    } catch {
+      res.status(500).json({ message: 'Une erreur s\'est produite lors de la récupération de l\'événement.' });
     }
-    /**Si c'est un etudiant, afficher les infos de l'etudiant en plus, (equipe) */
-    else if (req.userProfile === 'etudiant') {
-      eventModel.jsonEventChoisi(eventID, 'etudiant', req)
-        .then((result) => {
-          res.status(200).json(result);
-        })
-        .catch(() => {
-          res.status(500).json({ message: 'Une erreur s\'est produite lors de la récupération de l\'événement.' });
-        });
-    }
-    /**Si non connecté ne pas envoyer les infos des ressources privées */
-    else if (req.userProfile === 'aucun') {
-      eventModel.jsonEventChoisi(eventID, 'aucun', req)
-        .then((result) => {
-          res.status(200).json(result);
-        })
-        .catch(() => {
-          res.status(500).json({ message: 'Une erreur s\'est produite lors de la récupération de l\'événement.' });
-        });
-    }
+
   }
 }
 

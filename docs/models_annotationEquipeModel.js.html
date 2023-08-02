@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: database/hachage_admin.js</title>
+    <title>JSDoc: Source: models/annotationEquipeModel.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: database/hachage_admin.js</h1>
+    <h1 class="page-title">Source: models/annotationEquipeModel.js</h1>
 
     
 
@@ -26,88 +26,72 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>const pool = require('./configDB');
-const passwordModel = require('../models/passwordModel');
-const verificationExistence = require('../controllers/Auth/verificationExistenceController');
-const userModel = require('../models/userModel');
+            <pre class="prettyprint source linenums"><code>/**
+ * @fileoverview Models des annotations d'une équipes.
+ * @module Annotation_équipes
+ */
 
+const pool = require('../database/configDB');
 
-const valeurs = ['admin', 'admin@admin.fr'];
+/**
+ * Créer une nouvelle annotation associée à une équipe.
+ * 
+ * Le controller lui passe en paramètres les informations à rentrer dans la table
+ * Annotation.
+ * 
+ * @function
+ * @param {Array} valeurs - Un tableau contenant les valeurs à insérer :
+ *                         [idEquipe, auteur, contenu]
+ * @throws {Error} Une erreur si la création de l'annotation échoue.
+*/
+function creerAnnotation(valeurs) {
 
+    const inserer = `INSERT INTO Annotation
+    (idEquipe, auteur, contenu)
+    VALUES ($1, $2, $3)`;
 
-const createDefaultUser = async () => {
     try {
-        const password = 'Admin2023!';
-
-        /**Aucun utilisateur ne possède le même pseudo ou email */
-        const nonExiste = await verificationExistence.verifExistence(valeurs);
-
-        if (!nonExiste) {
-
-            const idUser = await userModel.chercherUserPseudo(valeurs[0]);
-            userModel.supprimerUser(idUser);
-        }
-
-        const hashedPassword = await passwordModel.salageMdp(password);
-
-        const query = `
-                INSERT INTO Utilisateur (nom, prenom, pseudo, email, date_inscription, hashMdp, typeUser)
-                VALUES ('admin', 'admin', 'admin', 'admin@admin.fr', CURRENT_TIMESTAMP, $1, 'administrateur')
-            `;
-
-        const params = [hashedPassword];
-
-        /**Insertion dans la bdd */
-        await pool.query(query, params);
-
-        console.log('Utilisateur par défaut créé avec succès');
-
-
+        pool.query(inserer, valeurs);
     } catch (error) {
-        console.error('Erreur lors de la création de l\'utilisateur par défaut:', error);
-    }
-};
-
-const createDefaultAdmin = async (pseudo) => {
-    try {
-        const idUser = await userModel.chercherUserPseudo(pseudo);
-        const query = `
-            INSERT INTO Admini (idAdmin)
-            VALUES ($1)
-        `;
-
-        const mdp = [idUser];
-
-        await pool.query(query, mdp);
-
-        console.log('Admin par défaut créé avec succès');
-    } catch (error) {
-        console.error('Erreur lors de la création de l\'admin par défaut:', error);
+        throw error;
     }
 }
 
-(async () => {
-    let errorOccurred = false;
-    try {
-        await createDefaultUser();
-    } catch (error) {
-        console.error('Erreur lors de la création de l\'utilisateur par défaut:', error);
-        errorOccurred = true;
-    }
+/**
+ * Récupérer les annotations associées à une équipe.
+ * 
+ * L'id de l'équipe souhaitée est récupéré du controller
+ * 
+ * @function
+ * @param {Object} req - L'objet de la requête (express request object).
+ * @param {Object} res - L'objet de la réponse (express response object).
+ * @returns {Object} - Retourne un objet JSON avec un message indiquant si l'annotation a été créée
+ * avec succès ou une erreur en cas d'échec.
+ * @throws {Error} Une erreur si la création de l'annotation échoue.
+*/
+async function getAnnotationEquipes(idEquipe) {
 
-    if (!errorOccurred) {
+    const chercher = `SELECT * FROM Annotation
+    WHERE idEquipe = $1`;
+
+    return new Promise((resolve) => {
         try {
-            await createDefaultAdmin('admin');
+            pool.query(chercher, [idEquipe])
+                .then((res) => {
+                    resolve(res.rows);
+                })
+
         } catch (error) {
-            console.error('Erreur lors de la création de l\'admin par défaut:', error);
+            throw error;
         }
-    }
+    });
+}
 
-    pool.end();
 
-    process.exit();
-})();
-</code></pre>
+module.exports = {
+    creerAnnotation,
+    getAnnotationEquipes
+}</code></pre>
         </article>
     </section>
 
