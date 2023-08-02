@@ -26,10 +26,10 @@ router.all('/creerProjets',
 
 /**voir informations d'un projet */
 router.all('/:id', (req, res, next) => {
-    res.locals.projetId = req.params.id;
+    res.locals.idProjet = req.params.id;
 
     try {
-        if (verifIdNombre(res.locals.projetId, res) === -1) {
+        if (verifIdNombre(res.locals.idProjet, res) === -1) {
             return res.status(400).json({ erreur: 'L\'id doit être un nombre.' })
         }
     } catch {
@@ -42,10 +42,10 @@ router.all('/:id', (req, res, next) => {
 
 /**Modifier projet */
 router.all('/edit/:id', (req, res, next) => {
-    res.locals.projetId = req.params.id;
+    res.locals.idProjet = req.params.id;
 
     try {
-        if (verifIdNombre(res.locals.projetId, res) === -1) {
+        if (verifIdNombre(res.locals.idProjet, res) === -1) {
             return res.status(400).json({ erreur: 'L\'id doit être un nombre.' })
         }
     } catch {
@@ -59,10 +59,10 @@ router.all('/edit/:id', (req, res, next) => {
 
 /**Supprimer un projet */
 router.all('/delete/:id', (req, res, next) => {
-    res.locals.projetId = req.params.id;
+    res.locals.idProjet = req.params.id;
 
     try {
-        if (verifIdNombre(res.locals.projetId, res) === -1) {
+        if (verifIdNombre(res.locals.idProjet, res) === -1) {
             return res.status(400).json({ erreur: 'L\'id doit être un nombre.' })
         }
     } catch {
@@ -74,10 +74,10 @@ router.all('/delete/:id', (req, res, next) => {
 
 /**Voir équipes du projet */
 router.all('/:id/teams', (req, res, next) => {
-    res.locals.projetId = req.params.id;
+    res.locals.idProjet = req.params.id;
 
     try {
-        if (verifIdNombre(res.locals.projetId, res) === -1) {
+        if (verifIdNombre(res.locals.idProjet, res) === -1) {
             return res.status(400).json({ erreur: 'L\'id doit être un nombre.' })
         }
     } catch {

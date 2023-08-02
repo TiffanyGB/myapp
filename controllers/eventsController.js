@@ -1,7 +1,7 @@
 const projetModel = require('../models/projetModel');
 const eventModel = require('../models/eventModel');
 const regleModel = require('../models/reglesModel');
-const { validationResult } = require('express-validator');
+const { body, validationResult } = require('express-validator');
 
 async function createEvent(req, res) {
   if (req.method === 'OPTIONS') {
@@ -19,7 +19,7 @@ async function createEvent(req, res) {
       nombreMinEquipe,
       nombreMaxEquipe,
       regles,
-      projets
+      projets, oui
     } = req.body;
 
     const valeurs_event = [
@@ -34,13 +34,22 @@ async function createEvent(req, res) {
     ];
 
     /*Vérifier données des règles */
-    for (const regle of regles) {
-      await regleModel.validerRegles(regle); // Valider chaque règle individuellement
+    for (const regle of req.body.regles) {
+      await body(regle.titre)
+        .notEmpty().withMessage('Le titre ne doit pas être vide.')
+        .isLength({ min: 2, max: 50 }).withMessage('Le titre doit avoir une longueur comprise entre 2 et 50 caractères.')
+        .run(req);
 
+      await body(regle.contenu)
+        .notEmpty().withMessage('La règle ne doit pas être vide.')
+        .isLength({ min: 2, max: 1000 }).withMessage('La règle doit avoir une longueur comprise entre 3 et 1000 caractères.')
+        .run(req);
+      // Exécute la requête de validation adaptée
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
       }
+
     }
 
     try {

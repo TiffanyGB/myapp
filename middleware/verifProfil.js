@@ -236,6 +236,8 @@ async function checkAG(req, res, next) {
       const gerer_ia = await gererProjet.chercherGestionnaireIAID(id, req.id);
       const gerer_ext = await gererProjet.chercherGestionnaireExtID(id, req.id);
 
+      console.log(gerer_ext, gerer_ia, req.id, res.locals.idEquipe)
+
       if (gerer_ia.length > 0 || gerer_ext.length > 0) {
         next();
       } else {

@@ -121,7 +121,7 @@ async function modifierProjet(req, res) {
     }
     else if (req.method === 'PATCH') {
 
-        const projetId = res.locals.projetId;
+        const projetId = res.locals.idProjet;
 
         try {
             // Vérifier que l'id existe dans la bdd, sinon 404 error
@@ -217,7 +217,7 @@ async function supprimerProjet(req, res) {
     }
     else if (req.method === 'DELETE') {
 
-        const projetId = res.locals.projetId;
+        const projetId = res.locals.idProjet;
 
         try {
             /* Vérifier que l'id existe dans la bdd, sinon 404 error*/

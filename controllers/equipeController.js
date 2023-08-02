@@ -10,7 +10,7 @@ async function retournerEquipeProjet(req, res) {
     res.status(200).json({ sucess: 'Agress granted' });
   }
   else if (req.method === 'GET') {
-    const idProjet = res.locals.projetId;
+    const idProjet = res.locals.idProjet;
 
     /**Vérifier si l'id existe dans la bdd, sinon 404 error */
     projetModel.chercherProjetId(idProjet)
