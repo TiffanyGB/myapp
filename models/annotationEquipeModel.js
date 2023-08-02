@@ -1,5 +1,7 @@
 const pool = require('../database/configDB');
 
+// * Elle récupère les informations du body récupérées par le controller et les insère
+// * dans la table Annotation
 function creerAnnotation(valeurs) {
 
     const inserer = `INSERT INTO Annotation

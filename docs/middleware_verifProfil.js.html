@@ -26,21 +26,17 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>const gererProjet = require('../models/gererProjet');
-const equipeModel = require('../models/equipeModel');
-
-//Toutes les fonctions ici doivent être placée après le verif token car en 
-// ont besoin: req.id et req.userProfile.
-
-/**
+            <pre class="prettyprint source linenums"><code>/**
  * Ce fichier contient les middlewares servant à la vérification du profil des utilisateurs.
- * @fileoverview Middlewares de vérification de profil des utilisateurs.
- * @module VerifierProfil
- * @description Ces middlewares sont à placés dans les routes après le middleware de vérification
+ * Ces middlewares sont à placés dans les routes après le middleware de vérification
  * et de décodage du token (tokenModel/verifyToken). Les fonctions de ce fichier ont besoin de cette 
  * étape pour récupérer certains champs du token, req.userProfile et req.id. 
+ * @fileoverview Middlewares de vérification de profil des utilisateurs.
+ * @module VerifierProfil
  */
 
+const gererProjet = require('../models/gererProjet');
+const equipeModel = require('../models/equipeModel');
 
 /**
  * Vérifie le type de profil de l'utilisateur avant de poursuivre.
@@ -256,7 +252,11 @@ async function checkAGEtudiantEquipe(req, res, next) {
  * d'état HTTP approprié.
  */
 async function checkAG(req, res, next) {
-  const id = res.locals.idProjet;
+  let id = res.locals.idProjet;
+
+  if(id === undefined){
+    id = res.locals.idEquipe;
+  }
 
   try {
     if (req.userProfile === 'admin') {
@@ -271,10 +271,9 @@ async function checkAG(req, res, next) {
         return res.status(400).json({ erreur: `Mauvais profil, il faut gérer le projet.` });
       }
     } else {
-      return res.status(400).json({ erreur: `Mauvais profil, il faut être admin, gestionnaire du projet ou faire partie de l'équipe.` });
+      return res.status(400).json({ erreur: `Mauvais profil, il faut être admin ou gestionnaire du projet.` });
     }
   } catch (error) {
-    console.error(error);
     return res.status(500).json({ erreur: 'Erreur interne du serveur.' });
   }
 }
@@ -320,13 +319,13 @@ module.exports = { checkProfile, checkACG, interdireAucunProfil, checkAGEtudiant
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-UserController.html">UserController</a></li><li><a href="module-UserRouter.html">UserRouter</a></li><li><a href="module-VerifierProfil.html">VerifierProfil</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-UserRouter-UserRouter.html">UserRouter</a></li></ul><h3>Global</h3><ul><li><a href="global.html#ajouterRegle">ajouterRegle</a></li><li><a href="global.html#chercherAdminID">chercherAdminID</a></li><li><a href="global.html#chercherGestionnaireExtID">chercherGestionnaireExtID</a></li><li><a href="global.html#chercherGestionnaireIapau">chercherGestionnaireIapau</a></li><li><a href="global.html#chercherListeAdmins">chercherListeAdmins</a></li><li><a href="global.html#chercherListeGestionnaireIapau">chercherListeGestionnaireIapau</a></li><li><a href="global.html#chercherListeGestionnairesExt">chercherListeGestionnairesExt</a></li><li><a href="global.html#chercherListeStudents">chercherListeStudents</a></li><li><a href="global.html#chercherListeUtilisateurs">chercherListeUtilisateurs</a></li><li><a href="global.html#chercherProjetId">chercherProjetId</a></li><li><a href="global.html#chercherStudent">chercherStudent</a></li><li><a href="global.html#chercherUserID">chercherUserID</a></li><li><a href="global.html#chercherUserPseudo">chercherUserPseudo</a></li><li><a href="global.html#comparerMdp">comparerMdp</a></li><li><a href="global.html#connexion">connexion</a></li><li><a href="global.html#creationProjet">creationProjet</a></li><li><a href="global.html#creerAdmin">creerAdmin</a></li><li><a href="global.html#creerEtudiant">creerEtudiant</a></li><li><a href="global.html#creerGestionnaireExterne">creerGestionnaireExterne</a></li><li><a href="global.html#creerGestionnaireIA">creerGestionnaireIA</a></li><li><a href="global.html#creerProjet">creerProjet</a></li><li><a href="global.html#equipeExiste">equipeExiste</a></li><li><a href="global.html#infosProjet">infosProjet</a></li><li><a href="global.html#inscriptionEleve">inscriptionEleve</a></li><li><a href="global.html#insererMot">insererMot</a></li><li><a href="global.html#insererUser">insererUser</a></li><li><a href="global.html#listeProjetsJson">listeProjetsJson</a></li><li><a href="global.html#modifierAdministrateur">modifierAdministrateur</a></li><li><a href="global.html#modifierAnnotation">modifierAnnotation</a></li><li><a href="global.html#modifierEtudiant">modifierEtudiant</a></li><li><a href="global.html#modifierExterne">modifierExterne</a></li><li><a href="global.html#modifierIapau">modifierIapau</a></li><li><a href="global.html#modifierProjet">modifierProjet</a></li><li><a href="global.html#modifierUser">modifierUser</a></li><li><a href="global.html#recupInfoEvent">recupInfoEvent</a></li><li><a href="global.html#recupererAncienEvents">recupererAncienEvents</a></li><li><a href="global.html#recupererEventActuel">recupererEventActuel</a></li><li><a href="global.html#recuperer_projets">recuperer_projets</a></li><li><a href="global.html#recuperer_regles">recuperer_regles</a></li><li><a href="global.html#recuperer_ressourcesPrivees">recuperer_ressourcesPrivees</a></li><li><a href="global.html#recuperer_ressourcesPubliques">recuperer_ressourcesPubliques</a></li><li><a href="global.html#recuperer_toutes_ressources">recuperer_toutes_ressources</a></li><li><a href="global.html#retournerEquipeProjet">retournerEquipeProjet</a></li><li><a href="global.html#salageMdp">salageMdp</a></li><li><a href="global.html#supprimerProjet">supprimerProjet</a></li><li><a href="global.html#supprimerUser">supprimerUser</a></li><li><a href="global.html#tousLesProjets">tousLesProjets</a></li><li><a href="global.html#updateMdp">updateMdp</a></li><li><a href="global.html#validerEtudiant">validerEtudiant</a></li><li><a href="global.html#voirEvent">voirEvent</a></li><li><a href="global.html#voirListeGestionnaires">voirListeGestionnaires</a></li><li><a href="global.html#voirListeProjets">voirListeProjets</a></li><li><a href="global.html#voirTousEvents">voirTousEvents</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Annotation_%25C3%25A9quipes.html">Annotation_équipes</a></li><li><a href="module-UserController.html">UserController</a></li><li><a href="module-UserRouter.html">UserRouter</a></li><li><a href="module-VerifierProfil.html">VerifierProfil</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-UserRouter-UserRouter.html">UserRouter</a></li></ul><h3>Global</h3><ul><li><a href="global.html#ajouterRegle">ajouterRegle</a></li><li><a href="global.html#chercherAdminID">chercherAdminID</a></li><li><a href="global.html#chercherGestionnaireExtID">chercherGestionnaireExtID</a></li><li><a href="global.html#chercherGestionnaireIapau">chercherGestionnaireIapau</a></li><li><a href="global.html#chercherListeAdmins">chercherListeAdmins</a></li><li><a href="global.html#chercherListeGestionnaireIapau">chercherListeGestionnaireIapau</a></li><li><a href="global.html#chercherListeGestionnairesExt">chercherListeGestionnairesExt</a></li><li><a href="global.html#chercherListeStudents">chercherListeStudents</a></li><li><a href="global.html#chercherListeUtilisateurs">chercherListeUtilisateurs</a></li><li><a href="global.html#chercherProjetId">chercherProjetId</a></li><li><a href="global.html#chercherStudent">chercherStudent</a></li><li><a href="global.html#chercherUserID">chercherUserID</a></li><li><a href="global.html#chercherUserPseudo">chercherUserPseudo</a></li><li><a href="global.html#comparerMdp">comparerMdp</a></li><li><a href="global.html#connexion">connexion</a></li><li><a href="global.html#creationProjet">creationProjet</a></li><li><a href="global.html#creerAdmin">creerAdmin</a></li><li><a href="global.html#creerEtudiant">creerEtudiant</a></li><li><a href="global.html#creerGestionnaireExterne">creerGestionnaireExterne</a></li><li><a href="global.html#creerGestionnaireIA">creerGestionnaireIA</a></li><li><a href="global.html#creerProjet">creerProjet</a></li><li><a href="global.html#equipeExiste">equipeExiste</a></li><li><a href="global.html#infosProjet">infosProjet</a></li><li><a href="global.html#inscriptionEleve">inscriptionEleve</a></li><li><a href="global.html#insererMot">insererMot</a></li><li><a href="global.html#insererUser">insererUser</a></li><li><a href="global.html#listeProjetsJson">listeProjetsJson</a></li><li><a href="global.html#modifierAdministrateur">modifierAdministrateur</a></li><li><a href="global.html#modifierEtudiant">modifierEtudiant</a></li><li><a href="global.html#modifierExterne">modifierExterne</a></li><li><a href="global.html#modifierIapau">modifierIapau</a></li><li><a href="global.html#modifierProjet">modifierProjet</a></li><li><a href="global.html#modifierUser">modifierUser</a></li><li><a href="global.html#recupInfoEvent">recupInfoEvent</a></li><li><a href="global.html#recupererAncienEvents">recupererAncienEvents</a></li><li><a href="global.html#recupererEventActuel">recupererEventActuel</a></li><li><a href="global.html#recuperer_projets">recuperer_projets</a></li><li><a href="global.html#recuperer_regles">recuperer_regles</a></li><li><a href="global.html#recuperer_ressourcesPrivees">recuperer_ressourcesPrivees</a></li><li><a href="global.html#recuperer_ressourcesPubliques">recuperer_ressourcesPubliques</a></li><li><a href="global.html#recuperer_toutes_ressources">recuperer_toutes_ressources</a></li><li><a href="global.html#retournerEquipeProjet">retournerEquipeProjet</a></li><li><a href="global.html#salageMdp">salageMdp</a></li><li><a href="global.html#supprimerProjet">supprimerProjet</a></li><li><a href="global.html#supprimerUser">supprimerUser</a></li><li><a href="global.html#tousLesProjets">tousLesProjets</a></li><li><a href="global.html#updateMdp">updateMdp</a></li><li><a href="global.html#validerEtudiant">validerEtudiant</a></li><li><a href="global.html#verifIdEquipe">verifIdEquipe</a></li><li><a href="global.html#verifIdEvent">verifIdEvent</a></li><li><a href="global.html#verifIdProjet">verifIdProjet</a></li><li><a href="global.html#voirEvent">voirEvent</a></li><li><a href="global.html#voirListeGestionnaires">voirListeGestionnaires</a></li><li><a href="global.html#voirListeProjets">voirListeProjets</a></li><li><a href="global.html#voirTousEvents">voirTousEvents</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.2</a> on Tue Aug 01 2023 16:37:01 GMT+0200 (Central European Summer Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.2</a> on Wed Aug 02 2023 10:15:34 GMT+0200 (Central European Summer Time)
 </footer>
 
 <script> prettyPrint(); </script>

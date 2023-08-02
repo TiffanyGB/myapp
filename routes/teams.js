@@ -9,7 +9,7 @@ const annotationController = require('../controllers/annotationController');
 const etudiantProfil = profil.checkProfile('etudiant');
 const capitaineAdminGes = profil.checkACG;
 const aucunProfil = profil.interdireAucunProfil;
-
+const gestionnairesEquipeAdmin = profil.checkAG
 const { verifIdNombre } = require('../verifications/verifierDonnéesGénérales');
 const { verifIdEquipe } = require('../middleware/verifExistenceIdRoute');
 
@@ -206,7 +206,7 @@ router.all('/:id/annoter',
         next();
     }, tokenModel.verifyToken,
     verifIdEquipe,
-    //GestionnaireEquipeAdmin,
+    gestionnairesEquipeAdmin,
     annotationController.ecrireAnnotation);
 
 router.all('/:id/getAnnotation',
@@ -223,7 +223,7 @@ router.all('/:id/getAnnotation',
         next();
     }, tokenModel.verifyToken,
     verifIdEquipe,
-    //GestionnaireEquipeAdmin,
+    gestionnairesEquipeAdmin,
     annotationController.getAnnotationEquipe);
 
 module.exports = router;

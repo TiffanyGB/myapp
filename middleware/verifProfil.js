@@ -1,18 +1,14 @@
-const gererProjet = require('../models/gererProjet');
-const equipeModel = require('../models/equipeModel');
-
-//Toutes les fonctions ici doivent être placée après le verif token car en 
-// ont besoin: req.id et req.userProfile.
-
 /**
  * Ce fichier contient les middlewares servant à la vérification du profil des utilisateurs.
- * @fileoverview Middlewares de vérification de profil des utilisateurs.
- * @module VerifierProfil
- * @description Ces middlewares sont à placés dans les routes après le middleware de vérification
+ * Ces middlewares sont à placés dans les routes après le middleware de vérification
  * et de décodage du token (tokenModel/verifyToken). Les fonctions de ce fichier ont besoin de cette 
  * étape pour récupérer certains champs du token, req.userProfile et req.id. 
+ * @fileoverview Middlewares de vérification de profil des utilisateurs.
+ * @module VerifierProfil
  */
 
+const gererProjet = require('../models/gererProjet');
+const equipeModel = require('../models/equipeModel');
 
 /**
  * Vérifie le type de profil de l'utilisateur avant de poursuivre.
@@ -228,7 +224,11 @@ async function checkAGEtudiantEquipe(req, res, next) {
  * d'état HTTP approprié.
  */
 async function checkAG(req, res, next) {
-  const id = res.locals.idProjet;
+  let id = res.locals.idProjet;
+
+  if(id === undefined){
+    id = res.locals.idEquipe;
+  }
 
   try {
     if (req.userProfile === 'admin') {
@@ -243,10 +243,9 @@ async function checkAG(req, res, next) {
         return res.status(400).json({ erreur: `Mauvais profil, il faut gérer le projet.` });
       }
     } else {
-      return res.status(400).json({ erreur: `Mauvais profil, il faut être admin, gestionnaire du projet ou faire partie de l'équipe.` });
+      return res.status(400).json({ erreur: `Mauvais profil, il faut être admin ou gestionnaire du projet.` });
     }
   } catch (error) {
-    console.error(error);
     return res.status(500).json({ erreur: 'Erreur interne du serveur.' });
   }
 }

@@ -337,13 +337,13 @@ async function jsonEventChoisi(idEvent, typeUser, req) {
             tabRetour.userIsInterested = false;
 
             if (idEquipe > 0) {
-                tabRetour.team = idEquipe;
+                tabRetour.teamId = idEquipe;
             } else {
-                tabRetour.team = -1;
+                tabRetour.teamId = -1;
             }
         } else {
             tabRetour.userIsInterested = false;
-            tabRetour.team = -1;
+            tabRetour.teamId = -1;
         }
         return tabRetour;
     } catch (error) {

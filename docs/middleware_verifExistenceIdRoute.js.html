@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: models/passwordModel.js</title>
+    <title>JSDoc: Source: middleware/verifExistenceIdRoute.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: models/passwordModel.js</h1>
+    <h1 class="page-title">Source: middleware/verifExistenceIdRoute.js</h1>
 
     
 
@@ -27,61 +27,82 @@
     <section>
         <article>
             <pre class="prettyprint source linenums"><code>const pool = require('../database/configDB');
-const bcrypt = require('bcrypt');
 
+async function verifId(res, next, id, nomId, table) {
+  const chercher = `SELECT * FROM ${table} WHERE ${nomId} = $1`;
 
-/**Insérer un mot de passe */
+  try {
+    const result = await pool.query(chercher, [id]);
 
-
-/**Changer le mot de passe */
-function updateMdp(mdp, id) {
-
-    const inserer = `UPDATE utilisateur
-        SET hashMdp = $1
-        WHERE idUser= $2`;
-
-    try {
-        pool.query(inserer, [mdp, id]);
-    }catch{
-        throw error;
+    if (result.rows.length === 0) {
+      return res.status(404).json({ erreur: 'L\'id n\'existe pas' });
     }
+  } catch (error) {
+    throw error;
+  }
 }
+/**Vérifier si existe equipe */
+async function verifIdEquipe(req, res, next) {
+  const id = req.params.id;
 
-/**Crypter le mot de passe */
-function salageMdp(password) {
-    return new Promise((resolve, reject) => {
-        bcrypt.genSalt(10, function (err, salt) {
-            if (err) {
-                reject(err);
-            } else {
-                bcrypt.hash(password, salt, function (err, hash) {
-                    if (err) {
-                        reject(err);
-                    } else {
-                        resolve(hash);
-                    }
-                });
-            }
-        });
-    });
-}
+  const chercher = `SELECT * FROM Equipe WHERE idEquipe = $1`;
 
-/**ComparerMdp */
-async function comparerMdp(mdpClair, mdpCrypte) {
-    try {
-        const match = await bcrypt.compare(mdpClair, mdpCrypte);
-        return match;
-    } catch (error) {
-        throw error;
+  try {
+    const result = await pool.query(chercher, [id]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ erreur: 'L\'id de cette équipe n\'existe pas' });
     }
+
+    next();
+  } catch (error) {
+    next(error); 
+  }
 }
 
+/**Vérifier si existe event */
+async function verifIdEvent(req, res, next) {
+  const id = req.params.id;
 
-module.exports = {
-    updateMdp,
-    salageMdp,
-    comparerMdp
-}</code></pre>
+  const chercher = `SELECT * FROM Evenement WHERE idEvent = $1`;
+
+  try {
+    const result = await pool.query(chercher, [id]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ erreur: 'L\'id de cet événement n\'existe pas' });
+    }
+
+    next();
+  } catch (error) {
+    next(error); 
+  }
+}
+/**Vérifier si existe projet */
+async function verifIdProjet(req, res, next) {
+  const id = req.params.id;
+
+  const chercher = `SELECT * FROM Projet WHERE idProjet = $1`;
+
+  try {
+    const result = await pool.query(chercher, [id]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ erreur: 'L\'id de cet événement n\'existe pas' });
+    }
+
+    next();
+  } catch (error) {
+    next(error); 
+  }
+}
+
+/*Demande deja envoyée */
+
+module.exports = { verifId,verifIdEquipe, verifIdEvent, verifIdProjet };
+
+
+</code></pre>
         </article>
     </section>
 

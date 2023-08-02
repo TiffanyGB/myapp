@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: models/passwordModel.js</title>
+    <title>JSDoc: Module: Annotation_équipes</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,73 +17,323 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: models/passwordModel.js</h1>
+    <h1 class="page-title">Module: Annotation_équipes</h1>
 
     
 
 
 
+
+<section>
+
+<header>
     
-    <section>
-        <article>
-            <pre class="prettyprint source linenums"><code>const pool = require('../database/configDB');
-const bcrypt = require('bcrypt');
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+            <div class="description">Middlewares de vérification de profil des utilisateurs.</div>
+        
+
+        
 
 
-/**Insérer un mot de passe */
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="controllers_annotationController.js.html">controllers/annotationController.js</a>, <a href="controllers_annotationController.js.html#line1">line 1</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
 
 
-/**Changer le mot de passe */
-function updateMdp(mdp, id) {
+        
+    
+    </div>
 
-    const inserer = `UPDATE utilisateur
-        SET hashMdp = $1
-        WHERE idUser= $2`;
+    
 
-    try {
-        pool.query(inserer, [mdp, id]);
-    }catch{
-        throw error;
-    }
-}
+    
 
-/**Crypter le mot de passe */
-function salageMdp(password) {
-    return new Promise((resolve, reject) => {
-        bcrypt.genSalt(10, function (err, salt) {
-            if (err) {
-                reject(err);
-            } else {
-                bcrypt.hash(password, salt, function (err, hash) {
-                    if (err) {
-                        reject(err);
-                    } else {
-                        resolve(hash);
-                    }
-                });
-            }
-        });
-    });
-}
+    
 
-/**ComparerMdp */
-async function comparerMdp(mdpClair, mdpCrypte) {
-    try {
-        const match = await bcrypt.compare(mdpClair, mdpCrypte);
-        return match;
-    } catch (error) {
-        throw error;
-    }
-}
+    
+
+    
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="~ecrireAnnotation"><span class="type-signature">(inner) </span>ecrireAnnotation<span class="signature">(req, res)</span><span class="type-signature"> &rarr; {Object}</span></h4>
+    
+
+    
 
 
-module.exports = {
-    updateMdp,
-    salageMdp,
-    comparerMdp
-}</code></pre>
-        </article>
-    </section>
+
+<div class="description">
+    Controller pour créer une nouvelle annotation associée à une équipe.
+
+Récupère les informations utiles à l'insertion dans la base de données:
+
+Le contenu de l'annotation: Récupéré du body, message que laisse l'administrateur
+ou le gestionnaire du projet,
+L'id de l'équipe: Directement depuis l'url de la route,
+L'id de l'auteur de l'annotation depuis son token.
+
+L'appel du controller dans la route , se fait après l'appel de ces middlewares
+la vérification du token, la vérification de l'existence de l'équipe et la vérification
+du profil (dans cet ordre, les middlewares dépendants les uns des autres).
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>req</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">L'objet de la requête (express request object).</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>res</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">L'objet de la réponse (express response object).</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="controllers_annotationController.js.html">controllers/annotationController.js</a>, <a href="controllers_annotationController.js.html#line34">line 34</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Throws:</h5>
+
+        
+
+<dl>
+    <dt>
+        <div class="param-desc">
+        Une erreur si la création de l'annotation échoue.
+        </div>
+    </dt>
+    <dd></dd>
+    <dt>
+        <dl>
+            <dt>
+                Type
+            </dt>
+            <dd>
+                
+<span class="param-type">Error</span>
+
+
+            </dd>
+        </dl>
+    </dt>
+    <dd></dd>
+</dl>
+
+
+    
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    - Retourne un objet JSON avec un message indiquant si l'annotation a été créée
+avec succès ou une erreur en cas d'échec.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Object</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+    
+
+    
+
+    
+</article>
+
+</section>
 
 
 
