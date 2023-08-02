@@ -31,10 +31,10 @@ async function infosProjet(req, res) {
     if (req.method === 'OPTION') {
         return res.status(200).json({ success: 'Access granted' });
     } else if (req.method === 'GET') {
-        const idProjet = res.locals.projetId;
+        const idProjet = res.locals.idProjet;
 
         try {
-            const result = await projetModel.chercherProjetId(idProjet);
+            const result = await projetModel.chercheridProjet(idProjet);
             if (result.length === 0) {
                 return res.status(404).json({ erreur: "L'id n'existe pas" });
             }
@@ -121,11 +121,11 @@ async function modifierProjet(req, res) {
     }
     else if (req.method === 'PATCH') {
 
-        const projetId = res.locals.idProjet;
+        const idProjet = res.locals.idProjet;
 
         try {
             // Vérifier que l'id existe dans la bdd, sinon 404 error
-            const user = await projetModel.chercherProjetId(projetId);
+            const user = await projetModel.chercheridProjet(idProjet);
             if (user.length === 0) {
                 return res.status(404).json({ erreur: 'L\'id n\'existe pas' });
             }
@@ -147,7 +147,7 @@ async function modifierProjet(req, res) {
                 description,
                 recompense,
                 lienSujet,
-                projetId
+                idProjet
             ];
 
 
@@ -155,14 +155,14 @@ async function modifierProjet(req, res) {
                 .then(() => {
 
                     /**Supprimer anciennes données */
-                    gererProjet.destituerProjetExterne(projetId);
-                    gererProjet.destituerProjetIa(projetId);
-                    motModel.supprimerMot(projetId);
-                    ressourceModel.supprimerRessources(projetId);
+                    gererProjet.destituerProjetExterne(idProjet);
+                    gererProjet.destituerProjetIa(idProjet);
+                    motModel.supprimerMot(idProjet);
+                    ressourceModel.supprimerRessources(idProjet);
 
 
                     for (i = 0; i < motClefs.length; i++) {
-                        let motValeurs = [motClefs[i], projetId];
+                        let motValeurs = [motClefs[i], idProjet];
                         motModel.insererMot(motValeurs);
                     }
 
@@ -170,14 +170,14 @@ async function modifierProjet(req, res) {
 
                         let id = gestionnaireExterne[i].id;
 
-                        gererProjet.attribuerProjetExterne(projetId, id);
+                        gererProjet.attribuerProjetExterne(idProjet, id);
                     }
 
                     for (i = 0; i < gestionnaireIA.length; i++) {
 
                         let id2 = gestionnaireIA[i].id;
 
-                        gererProjet.attribuerProjetIA(projetId, id2);
+                        gererProjet.attribuerProjetIA(idProjet, id2);
                     }
 
                     for (i = 0; i < Ressources.length; i++) {
@@ -191,7 +191,7 @@ async function modifierProjet(req, res) {
                             courant.publication,
                             courant.consultation,
                             courant.description,
-                            projetId
+                            idProjet
                         ]
 
                         ressourceModel.ajouterRessources(valeurs_ressources);
@@ -217,17 +217,17 @@ async function supprimerProjet(req, res) {
     }
     else if (req.method === 'DELETE') {
 
-        const projetId = res.locals.idProjet;
+        const idProjet = res.locals.idProjet;
 
         try {
             /* Vérifier que l'id existe dans la bdd, sinon 404 error*/
-            const user = await projetModel.chercherProjetId(projetId);
+            const user = await projetModel.chercheridProjet(idProjet);
             if (user.length === 0) {
                 return res.status(404).json({ erreur: 'L\'id n\'existe pas' });
             }
 
             /* Supprimer projet*/
-            await projetModel.supprimerProjet(projetId);
+            await projetModel.supprimerProjet(idProjet);
             return res.status(200).json({ message: "Suppression réussie" });
 
         } catch {

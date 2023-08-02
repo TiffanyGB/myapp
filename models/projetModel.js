@@ -67,7 +67,7 @@ function recuperer_projets(idEvent) {
 }
 
 /**Chercher un projet par son id*/
-function chercherProjetId(idProjet) {
+function chercheridProjet(idProjet) {
     const users = 'SELECT * FROM Projet WHERE idProjet = $1';
 
     return new Promise((resolve, reject) => {
@@ -228,7 +228,7 @@ async function toutesInfosProjet(projetCourant, projetInfos) {
 async function infosProjet(idProjet) {
 
     try {
-        let projet = await chercherProjetId(idProjet);
+        let projet = await chercheridProjet(idProjet);
 
         jsonRetour = {};
 
@@ -367,7 +367,7 @@ module.exports = {
     creerProjet,
     validateProjet,
     supprimerProjet,
-    chercherProjetId,
+    chercheridProjet,
     modifierProjet,
     rattacherProjetEvent,
     detacherProjetEvent,

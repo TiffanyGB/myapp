@@ -13,7 +13,7 @@ async function retournerEquipeProjet(req, res) {
     const idProjet = res.locals.idProjet;
 
     /**Vérifier si l'id existe dans la bdd, sinon 404 error */
-    projetModel.chercherProjetId(idProjet)
+    projetModel.chercheridProjet(idProjet)
       .then((result) => {
         if (result.length === 0) {
           return res.status(404).json({ erreur: "L'id n'existe pas" });
@@ -56,7 +56,7 @@ async function creerEquipe(req, res) {
     /* L'étudiant ne doit pas avoir d'équipe dans l'event*/
 
     /*Récupérer l'event de l'équipe*/
-    const projet = await projetModel.chercherProjetId(idProjet);
+    const projet = await projetModel.chercheridProjet(idProjet);
     const idEvent = projet[0].idevent;
 
     const aUneEquipe = await equipeModel.aUneEquipeDansEvent(idCapitaine, idEvent);
@@ -344,7 +344,7 @@ async function demandeEquipe(req, res) {
 
     /*Récupérer l'event de l'équipe*/
     const idProjet = equipe[0].idprojet;
-    const projet = await projetModel.chercherProjetId(idProjet);
+    const projet = await projetModel.chercheridProjet(idProjet);
     const idEvent = projet[0].idevent;
 
     const aUneEquipe = await equipeModel.aUneEquipeDansEvent(idUser, idEvent);
@@ -392,7 +392,7 @@ async function accepterDemande(req, res) {
 
     /*Récupérer l'event de l'équipe*/
     const idProjet = equipe[0].idprojet;
-    const projet = await projetModel.chercherProjetId(idProjet);
+    const projet = await projetModel.chercheridProjet(idProjet);
     const idEvent = projet[0].idevent;
 
     const aUneEquipe = await equipeModel.aUneEquipeDansEvent(idUser, idEvent);

@@ -341,7 +341,7 @@ async function jsonInformationsEquipe(idEquipe, req) {
         jsonRetour.nombre_membres = membres.length;
 
         /*Nombre max de l'event*/
-        const projet = await projetModel.chercherProjetId(temp1.idprojet);
+        const projet = await projetModel.chercheridProjet(temp1.idprojet);
         let idevent = projet[0].idevent;
 
         const event = await chercherEvenement(idevent);
@@ -549,7 +549,7 @@ async function jsonListeEquipeProjet(idProjet) {
 
             /*Projet */
             temp.idProjet = idProjet;
-            const projet = (await projetModel.chercherProjetId(idProjet))[0];
+            const projet = (await projetModel.chercheridProjet(idProjet))[0];
             temp.nomProjet = projet.nom;
 
             /*Nombres de personnes suffisantes pour participer*/
@@ -602,7 +602,7 @@ async function jsonMesEquipes(idUser) {
 
         /*Projet */
         temp.idProjet = equipeCouranteInfos.idprojet;
-        const projet = (await projetModel.chercherProjetId(temp.idProjet))[0];
+        const projet = (await projetModel.chercheridProjet(temp.idProjet))[0];
         temp.nomProjet = projet.nom;
 
         /*Capitaine */
@@ -650,7 +650,7 @@ async function jsonEquipesOuvertes(idEvent, req) {
                 temp.nom = listeEquipes[i].nom;
 
                 /*Nom du proejt */
-                const nomProjet = await projetModel.chercherProjetId(listeEquipes[i].idprojet);
+                const nomProjet = await projetModel.chercheridProjet(listeEquipes[i].idprojet);
                 temp.projet = nomProjet[0].nom;
                 temp.lienProjet = nomProjet[0].sujet;
 

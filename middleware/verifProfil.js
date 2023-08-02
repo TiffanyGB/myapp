@@ -163,7 +163,7 @@ async function checkAGEtudiantEquipe(req, res, next) {
 
   try {
     /*Chercher l'équipe dans la bdd*/
-    const equipe = await equipeModel.chercherEquipeID(id);
+    const equipe = (await equipeModel.chercherEquipeID(id))[0];
 
     switch (req.userProfile) {
       case 'admin':
@@ -173,6 +173,8 @@ async function checkAGEtudiantEquipe(req, res, next) {
         /*Vérifier la gestion du projet */
         const gerer_ia = await gererProjet.chercherGestionnaireIAID(equipe.idprojet, req.id);
         const gerer_ext = await gererProjet.chercherGestionnaireExtID(equipe.idprojet, req.id);
+
+        console.log(gerer_ext, gerer_ia, equipe)
 
         if (gerer_ia.length > 0 || gerer_ext.length > 0) {
           next();

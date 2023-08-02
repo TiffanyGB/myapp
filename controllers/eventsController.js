@@ -63,7 +63,7 @@ async function createEvent(req, res) {
         for (i = 0; i < projets.length; i++) {
 
           /* Vérification de l'existence */
-          const user = await projetModel.chercherProjetId(projets[i].idProjet);
+          const user = await projetModel.chercheridProjet(projets[i].idProjet);
 
           if (user.length === 0) {
             return res.status(404).json({ erreur: 'L\'id ' + projets[i].idProjet + ' n\'existe pas dans les projets' });
@@ -135,7 +135,7 @@ async function modifierEvent(req, res) {
       /* Ajout des projets*/
       for (i = 0; i < projets.length; i++) {
 
-        const user = await projetModel.chercherProjetId(projets[i].idProjet);
+        const user = await projetModel.chercheridProjet(projets[i].idProjet);
         if (user.length === 0) {
           return res.status(404).json({ erreur: 'L\'id ' + projets[i].idProjet + ' n\'existe pas dans les projets' });
         }
