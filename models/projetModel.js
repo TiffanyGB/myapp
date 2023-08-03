@@ -246,6 +246,7 @@ async function infosProjet(idProjet) {
             jsonRetour.recompense = projet.recompense;
             jsonRetour.sujet = projet.sujet;
             jsonRetour.derniereModif = projet.dernieremodif;
+            jsonRetour.image = projet.imgprojet;
 
             if (jsonRetour.idevent == null) {
                 jsonRetour.idevent = '';
@@ -325,10 +326,7 @@ async function infosProjet(idProjet) {
                 jsonRetour.gestionnairesIA.push(temp);
             }
 
-
             return jsonRetour;
-
-
         }
     } catch (error) {
         throw error;

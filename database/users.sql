@@ -86,7 +86,7 @@ CREATE TABLE Evenement(
     date_debut TIMESTAMP NOT NULL,
     date_fin TIMESTAMP NOT NULL,
     description_event TEXT,
-    img VARCHAR(100), -- NOT NULL,
+    img VARCHAR(100),
     nombre_min_equipe INTEGER,
     nombre_max_equipe INTEGER,
     message_fin TEXT DEFAULT NULL,
@@ -100,7 +100,7 @@ CREATE TABLE Projet(
     nom VARCHAR (30) NOT NULL,
     description_projet TEXT NOT NULL,
     recompense INTEGER NOT NULL,   
-    imgProjet VARCHAR(100), -- NOT NULL,
+    imgProjet VARCHAR(100),
     sujet VARCHAR(500) NOT NULL,
     derniereModif TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     date_creation TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -261,17 +261,17 @@ CREATE TABLE Annotation(
 );
 
 
-INSERT INTO Evenement (nom, debut_inscription, date_debut, date_fin, description_event, nombre_min_equipe, nombre_max_equipe, type_event)
-VALUES ('Événement 1', '2023-07-15', '2023-08-01', '2023-08-31', 'Ceci est la description de l''événement 1', 2, 5, 'battle');
+INSERT INTO Evenement (nom, debut_inscription, date_debut, date_fin, description_event, nombre_min_equipe, nombre_max_equipe, type_event, img)
+VALUES ('Événement 1', '2023-07-15', '2023-08-01', '2023-08-31', 'Ceci est la description de l''événement 1', 2, 5, 'battle', '');
 
-INSERT INTO Evenement (nom, debut_inscription, date_debut, date_fin, description_event, nombre_min_equipe, nombre_max_equipe, message_fin, type_event)
-VALUES ('Événement 2', '2023-09-01', '2023-09-15', '2023-09-30', 'Ceci est la description de l''événement 2', 1, 3, 'Message de fin de l''événement 2', 'challenge');
+INSERT INTO Evenement (nom, debut_inscription, date_debut, date_fin, description_event, nombre_min_equipe, nombre_max_equipe, message_fin, type_event, img)
+VALUES ('Événement 2', '2023-09-01', '2023-09-15', '2023-09-30', 'Ceci est la description de l''événement 2', 1, 3, 'Message de fin de l''événement 2', 'challenge', 'img2.jpg');
 
-INSERT INTO Projet (nom, description_projet, recompense, sujet, idEvent)
-VALUES ('Projet 1', 'Ceci est la description du projet 1', 500, 'Sujet du projet 1', 1);
+INSERT INTO Projet (nom, description_projet, recompense, sujet, idEvent, imgProjet)
+VALUES ('Projet 1', 'Ceci est la description du projet 1', 500, 'Sujet du projet 1', 1, '');
 
-INSERT INTO Projet (nom, description_projet, recompense,  sujet, idEvent)
-VALUES ('Projet 2', 'Ceci est la description du projet 2', 1000,  'Sujet du projet 2', 2);
+INSERT INTO Projet (nom, description_projet, recompense,  sujet, idEvent, imgProjet)
+VALUES ('Projet 2', 'Ceci est la description du projet 2', 1000,  'Sujet du projet 2', 2, '');
 
 INSERT INTO Ressource (titre, type_ressource, lien, date_apparition, statut, description_ressource, idProjet)
 VALUES ('Ressource 1', 'drive', 'https://drive.google.com/file1', '2023-01-01', 'public', 'Description de la ressource 1', 1);

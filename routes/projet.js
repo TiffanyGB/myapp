@@ -43,7 +43,6 @@ router.all('/:id', (req, res, next) => {
 }, tokenModel.verifyToken,
     gestionnaireProjetAdmin,
     verifIdProjet,
-    validateProjet,
     projetController.infosProjet);
 
 

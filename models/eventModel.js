@@ -203,8 +203,6 @@ function recupererEventActuel() {
     });
 }
 
-/*Crée un json avec toutes les informations dans la bdd d'un evenement sauf la derniere modification */
-/*Peut etre l'ajouter? */
 async function toutesInfosEvent(idEvent, tabRetour) {
     const event = (await chercherEvenement(idEvent))[0];
 
@@ -217,6 +215,7 @@ async function toutesInfosEvent(idEvent, tabRetour) {
     tabRetour.description = event.description_event;
     tabRetour.nbMinParEquipe = event.nombre_min_equipe;
     tabRetour.nbMaxParEquipe = event.nombre_max_equipe;
+    tabRetour.image = event.img;
 
     if (event.message_fin == null) {
         tabRetour.messageFin = '';
