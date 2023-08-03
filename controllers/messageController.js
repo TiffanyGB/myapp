@@ -3,7 +3,7 @@ const eventModel = require('../models/eventModel');
 
 async function envoyerMessage(req, res) {
     if (req.method === 'OPTIONS') {
-        res.status(200).json({ sucess: 'Access granted' });
+        return res.status(200).json({ sucess: 'Access granted' });
     } else if (req.method === 'POST') {
         const idUser = req.id;
         const idEquipe = res.locals.idEquipe;
@@ -78,13 +78,6 @@ async function messageGlobalEvent(req, res) {
         const {
             contenu
         } = req.body;
-
-        /*Vérifier si l'id de l'event existe */
-        const event = await eventModel.chercherEvenement(idEvent);
-
-        if (event.length === 0) {
-            return res.status(400).json({ erreur: 'L\'id de l\'événement n\'existe pas' });
-        }
 
         try {
             messageModel.envoyerMessageGlobalEvent(contenu, idEvent, idUser);

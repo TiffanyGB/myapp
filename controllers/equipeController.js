@@ -12,14 +12,6 @@ async function retournerEquipeProjet(req, res) {
   else if (req.method === 'GET') {
     const idProjet = res.locals.idProjet;
 
-    /**Vérifier si l'id existe dans la bdd, sinon 404 error */
-    projetModel.chercheridProjet(idProjet)
-      .then((result) => {
-        if (result.length === 0) {
-          return res.status(404).json({ erreur: "L'id n'existe pas" });
-        }
-      });
-
     try {
       const equipeList = await equipeModel.jsonListeEquipeProjet(idProjet);
       res.status(200).json(equipeList);
@@ -29,6 +21,7 @@ async function retournerEquipeProjet(req, res) {
   }
 }
 
+/* aaaa Vérifier données */
 async function creerEquipe(req, res) {
   if (req.method === 'OPTIONS') {
     res.status(200).json({ sucess: 'Agress granted' });
@@ -72,7 +65,7 @@ async function creerEquipe(req, res) {
       equipeModel.ajouterMembre(idCapitaine, idEquipe);
 
       return res.status(200).json(idEquipe);
-    } catch{
+    } catch {
       return res.status(400).json({ erreur: 'Erreur création équipe.' });
     }
   }
@@ -109,9 +102,6 @@ async function modifierEquipe(req, res) {
     ]
 
     try {
-      /*La vérification de l'existence de l'id de l'équipe est faite lors de la
-      vérification de profil (ie il faut être capitaine) dans la route*/
-
       equipeModel.modifierEquipe(valeurs);
       res.status(200).json({ message: "Equipe modifiée" });
 
@@ -130,8 +120,6 @@ async function supprimerEquipe(req, res) {
     try {
       const idEquipe = res.locals.idEquipe;
 
-      /* Vérification de l'existence de l'id dans le verif profil déjà faite*/
-
       /*Suppression */
       equipeModel.supprimerEquipe(idEquipe);
       res.status(200).json({ message: "Equipe supprimée" });
@@ -141,6 +129,8 @@ async function supprimerEquipe(req, res) {
     }
   }
 }
+
+/* aaaa Vérifier données */
 
 async function promouvoir(req, res) {
   if (req.method === 'OPTIONS') {
@@ -155,8 +145,6 @@ async function promouvoir(req, res) {
       const {
         idUser
       } = req.body;
-
-      /* La verif de l'existence de l'équipe fait dans la verif de profil (middleware) */
 
       /*Vérifier si l'étudiant est dans l'équipe */
       const appartenir = await equipeModel.appartenirEquipe(idUser, idEquipe);
@@ -179,6 +167,8 @@ async function promouvoir(req, res) {
   }
 }
 
+/* aaaa Vérifier données */
+
 async function supprimerMembre(req, res) {
   if (req.method === 'OPTIONS') {
     res.status(200).json({ sucess: 'Agress granted' });
@@ -192,8 +182,6 @@ async function supprimerMembre(req, res) {
     } = req.body;
 
     try {
-      /* Vérification de l'existence de l'id dans le verif profil*/
-
       /*Vérifier si l'étudiant est dans l'équipe */
       const appartenir = await equipeModel.appartenirEquipe(idUser, idEquipe);
       if (appartenir.length === 0) {
@@ -227,11 +215,6 @@ async function getInfosEquipe(req, res) {
 
     const idEquipe = res.locals.idEquipe;
 
-    /* Vérifier l'id de l'équipe */
-    const equipe = await equipeModel.chercherEquipeID(idEquipe);
-    if (equipe.length === 0) {
-      return res.status(404).json({ erreur: 'L\'id de l\'équipe n\'existe pas' });
-    }
     const jsonRetour = await equipeModel.jsonInformationsEquipe(idEquipe, req);
 
     res.status(200).json(jsonRetour);
@@ -245,12 +228,6 @@ async function listeOuvertes(req, res) {
   else if (req.method === 'GET') {
 
     const idEvent = res.locals.idEvent;
-
-    // Vérifier que l'id existe dans la bdd, sinon 404 error
-    const event = eventModel.chercherEvenement(idEvent)
-    if (event.length === 0) {
-      return res.status(404).json({ erreur: 'L\'id de l\'événement n\'existe pas' });
-    }
 
     try {
       const equipesOuvertes = await equipeModel.jsonEquipesOuvertes(idEvent, req);
@@ -271,17 +248,12 @@ async function quitterEquipe(req, res) {
     const idUser = req.id;
     const idEquipe = res.locals.idEquipe;
 
-    /* Vérifier l'id de l'équipe */
-    const equipe = await equipeModel.chercherEquipeID(idEquipe);
-    if (equipe.length === 0) {
-      return res.status(404).json({ erreur: 'L\'id de l\'équipe n\'existe pas' });
-    }
-
     /*Doit appartenir à l'équipe */
     const appartenir = await equipeModel.appartenirEquipe(idUser, idEquipe);
     if (appartenir.length === 0) {
       return res.status(404).json({ erreur: 'L\'étudiant n\'appartient pas à l\'équipe' });
     }
+    const equipe = await equipeModel.chercherEquipeID(idEquipe);
 
     /*Ne doit pas être capitaine */
     if (equipe[0].idcapitaine === idUser) {
@@ -290,10 +262,10 @@ async function quitterEquipe(req, res) {
 
     try {
       equipeModel.quitterEquipe(idEquipe, idUser);
-      res.status(200).json({ message: "Equipe quittée" });
+      return res.status(200).json({ message: "Equipe quittée" });
 
     } catch {
-      res.status(400).json({ error: 'N\'a pas pu quitter.' });
+      return res.status(400).json({ error: 'N\'a pas pu quitter.' });
     }
   }
 }
@@ -329,14 +301,10 @@ async function demandeEquipe(req, res) {
       return res.status(400).json({ errors: errors.array() });
     }
 
-    /*Vérif existence équipe */
     const equipe = await equipeModel.chercherEquipeID(idEquipe);
-    if (equipe.length === 0) {
-      return res.status(404).json({ erreur: 'L\'id n\'existe pas' });
-    }
 
     /*Vérifier que l'équipe est ouverte */
-    if(equipe[0].statut_recrutement === 'fermé'){
+    if (equipe[0].statut_recrutement === 'fermé') {
       return res.status(404).json({ erreur: 'L\'équipe est fermée' });
     }
 
@@ -363,7 +331,7 @@ async function demandeEquipe(req, res) {
       equipeModel.envoyerDemande(valeurs);
       return res.status(200).json({ message: "Message envoyé" });
 
-    } catch {
+    } catch (error) {
       return res.status(400).json({ error: 'Erreur lors de l\'envoi du message.' });
     }
   }
@@ -377,16 +345,9 @@ async function accepterDemande(req, res) {
 
     const idEquipe = res.locals.idEquipe;
 
-    const {
-      id: idUser
-    } = req.body;
+    const idUser = req.body.id;
 
-
-    /*Vérif existence équipe */
     const equipe = await equipeModel.chercherEquipeID(idEquipe);
-    if (equipe.length === 0) {
-      return res.status(404).json({ erreur: 'L\'id n\'existe pas' });
-    }
 
     /* L'étudiant ne doit pas avoir d'équipe dans l'event*/
 
@@ -428,17 +389,7 @@ async function declinerDemande(req, res) {
 
     const idEquipe = res.locals.idEquipe;
 
-    const {
-      id: idUser
-    } = req.body;
-
-
-    /*Vérif existence équipe */
-    const equipe = await equipeModel.chercherEquipeID(idEquipe);
-    if (equipe.length === 0) {
-      return res.status(404).json({ erreur: 'L\'id n\'existe pas' });
-    }
-
+    const idUser = req.body.id;
 
     /* Vérifier si l'étudiant a bien envoyé une demande */
     const envoyee = await equipeModel.demandeDejaEnvoyee(idUser, idEquipe);
@@ -464,10 +415,10 @@ async function voirMesEquipes(req, res) {
 
     try {
       const jsonInfos = await equipeModel.jsonMesEquipes(req.id);
-      res.status(200).json(jsonInfos);
+      return res.status(200).json(jsonInfos);
 
     } catch {
-      res.status(400).json({ erreur: "Erreur lors de la récupération des données." });
+      return res.status(400).json({ erreur: "Erreur lors de la récupération des données." });
     }
   }
 }

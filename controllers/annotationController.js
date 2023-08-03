@@ -5,6 +5,7 @@
 
 const annotationModel = require('../models/annotationEquipeModel');
 
+        /**Vérifier contenu  */
 
 /**
  * Controller pour créer une nouvelle annotation associée à une équipe.

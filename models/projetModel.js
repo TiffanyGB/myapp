@@ -13,13 +13,13 @@ const { chercherGestionnaireIapau } = require('./gestionnaireIaModel');
 const validateProjet = [
     body('nom')
         .notEmpty().withMessage('Le nom ne doit pas être vide.')
-        .isLength({ min: 2, max: 40 }).withMessage('Le prénom doit avoir une longueur comprise entre 3 et 30 caractères.'),
+        .isLength({ min: 2, max: 30 }).withMessage('Le prénom doit avoir une longueur comprise entre 3 et 40 caractères.'),
 
 
     body('lienSujet')
         .notEmpty().withMessage('Le lien ne doit pas être vide.')
         .isURL().withMessage('Le lien doit être une url')
-        .isLength({ min: 2, max: 1000 }).withMessage('Le lien doit avoir une longueur comprise entre 3 et 1000 caractères.'),
+        .isLength({ min: 2, max: 500 }).withMessage('Le lien doit avoir une longueur comprise entre 3 et 500 caractères.'),
 
     body('recompense')
         .notEmpty().withMessage('La récompense ne doit pas être vide.')
@@ -84,8 +84,8 @@ function chercheridProjet(idProjet) {
 /**Créer un projet */
 async function creerProjet(valeur_projet) {
 
-    const inserer = `INSERT INTO Projet (nom, description_projet, recompense, sujet)
-      VALUES ($1, $2, $3, $4) RETURNING idProjet`;
+    const inserer = `INSERT INTO Projet (nom, description_projet, recompense, sujet, imgProjet)
+      VALUES ($1, $2, $3, $4, $5) RETURNING idProjet`;
 
     return new Promise((resolve, reject) => {
         pool.query(inserer, valeur_projet)
@@ -108,8 +108,9 @@ async function modifierProjet(valeur_projet) {
     description_projet = $2,
     recompense = $3,
     sujet = $4,
-    derniereModif = CURRENT_TIMESTAMP
-    WHERE idProjet = $5`;
+    derniereModif = CURRENT_TIMESTAMP,
+    imgProjet = $5
+    WHERE idProjet = $6`;
 
     try {
         pool.query(modifier, valeur_projet)

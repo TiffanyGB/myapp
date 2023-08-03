@@ -11,7 +11,7 @@ const capitaineAdminGes = profil.checkACG;
 const aucunProfil = profil.interdireAucunProfil;
 const gestionnairesEquipeAdmin = profil.checkAG
 const { verifIdNombre } = require('../verifications/verifierDonnéesGénérales');
-const { verifIdEquipe } = require('../middleware/verifExistenceIdRoute');
+const { verifIdEquipe, verifIdEvent } = require('../middleware/verifExistenceIdRoute');
 
 /**Créer une équipe */
 router.all('/creationEquipe',
@@ -69,7 +69,7 @@ router.all('/:id/ouvertes', (req, res, next) => {
     next();
 }, tokenModel.verifyToken,
     etudiantProfil,
-    //idEvent verif
+    verifIdEvent,
     equipeController.listeOuvertes);
 
 /* Promouvoir un membre --> capitaine*/

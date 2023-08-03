@@ -5,7 +5,7 @@ const messageController = require('../controllers/messageController');
 const verifProfil = require('../middleware/verifProfil');
 const checkAdminProfile = verifProfil.checkProfile('admin');
 const tokenModel = require('../models/tokenModel');
-const { verifIdEquipe } = require('../middleware/verifExistenceIdRoute');
+const { verifIdEquipe, verifIdEvent, verifIdProjet } = require('../middleware/verifExistenceIdRoute');
 
 
 router.all('/teams/:id', async (req, res, next) => {
@@ -32,7 +32,7 @@ router.all('/teams/:id/envoyerMessage', async (req, res, next) => {
         return res.status(400).json('Problème lors de la vérification du numéro de l\'event');
     }
     next();
-}, tokenModel.verifyToken, verifIdEquipe, verifProfil.checkAGEtudiantEquipe,messageController.envoyerMessage);
+}, tokenModel.verifyToken, verifIdEquipe, verifProfil.checkAGEtudiantEquipe, messageController.envoyerMessage);
 
 
 router.all('/envoyerMessageProjet/:id', async (req, res, next) => {
@@ -46,7 +46,10 @@ router.all('/envoyerMessageProjet/:id', async (req, res, next) => {
         return res.status(400).json('Problème lors de la vérification du numéro de l\'event');
     }
     next();
-}, tokenModel.verifyToken,verifProfil.checkAG,messageController.messageGlobalProjet);
+}, tokenModel.verifyToken,
+    verifProfil.checkAG,
+    verifIdProjet,
+    messageController.messageGlobalProjet);
 
 router.all('/envoyerMessageEvenement/:id', async (req, res, next) => {
     res.locals.idEvent = req.params.id;
@@ -59,6 +62,9 @@ router.all('/envoyerMessageEvenement/:id', async (req, res, next) => {
         return res.status(400).json('Problème lors de la vérification du numéro de l\'event');
     }
     next();
-}, tokenModel.verifyToken, checkAdminProfile, messageController.messageGlobalEvent);
+}, tokenModel.verifyToken,
+    checkAdminProfile,
+    verifIdEvent,
+    messageController.messageGlobalEvent);
 
 module.exports = router;

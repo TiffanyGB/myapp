@@ -18,6 +18,7 @@ async function createEvent(req, res) {
       description,
       nombreMinEquipe,
       nombreMaxEquipe,
+      image,
       regles,
       projets,
     } = req.body;
@@ -30,19 +31,24 @@ async function createEvent(req, res) {
       fin,
       description,
       nombreMinEquipe,
-      nombreMaxEquipe
+      nombreMaxEquipe,
+      image
     ];
 
-    /*Vérifier données des règles */
-    for (i = 0; i < regles.length; i++) {
-      await body(regles[i].titre)
-        .notEmpty().withMessage('Le titre ne doit pas être vide.')
-        .isLength({ min: 2, max: 50 }).withMessage('Le titre doit avoir une longueur comprise entre 2 et 50 caractères.')
+    for (const regle of regles) {
+      await body('regles')
+        .optional()
+        .isArray({ min: 1 }).withMessage('Le tableau des ressources ne doit pas être vide.')
         .run(req);
 
-      await body(regles[i].contenu)
+      await body('regles.*.titre')
+        .notEmpty().withMessage('Le nom ne doit pas être vide.')
+        .isLength({ min: 2, max: 50 }).withMessage('Le prénom doit avoir une longueur comprise entre 2 et 50 caractères.')
+        .run(req);
+
+      await body('regles.*.contenu')
         .notEmpty().withMessage('La règle ne doit pas être vide.')
-        .isLength({ min: 2, max: 1000 }).withMessage('La règle doit avoir une longueur comprise entre 3 et 1000 caractères.')
+        .isLength({ min: 2, max: 1000 }).withMessage('Le lien doit avoir une longueur comprise entre 3 et 1000 caractères.')
         .run(req);
 
       // Exécute la requête de validation adaptée
@@ -50,10 +56,8 @@ async function createEvent(req, res) {
       if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
       }
-
-      console.log(regle)
-
     }
+
 
     try {
 
@@ -92,15 +96,6 @@ async function modifierEvent(req, res) {
 
     const idevent = res.locals.idevent;
 
-    /**Vérifier que l'id existe dans la bdd, sinon 404 error */
-    eventModel.chercherEvenement(idevent)
-      .then((result) => {
-
-        if (result.length === 0) {
-          res.status(404).json({ erreur: 'L\'id n\'existe pas' });
-        }
-      });
-
     /*Récupération des données */
     const {
       nom,
@@ -112,7 +107,8 @@ async function modifierEvent(req, res) {
       nombreMaxEquipe,
       messageFin,
       projets,
-      regles
+      regles,
+      image
     } = req.body;
 
     const valeurs_event = [
@@ -124,8 +120,8 @@ async function modifierEvent(req, res) {
       nombreMinEquipe,
       nombreMaxEquipe,
       messageFin,
-      idevent
-
+      image,
+      idevent, 
     ];
 
     try {
@@ -166,11 +162,6 @@ async function supprimerEvent(req, res) {
     const idevent = res.locals.idevent;
 
     try {
-      // Vérifier que l'id existe dans la bdd, sinon 404 error
-      const user = await eventModel.chercherEvenement(idevent);
-      if (user.length === 0) {
-        return res.status(404).json({ erreur: 'L\'id n\'existe pas' });
-      }
 
       const result = await eventModel.supprimerEvent(idevent);
       if (result === 'ok') {
@@ -179,7 +170,6 @@ async function supprimerEvent(req, res) {
         return res.status(400).json({ erreur: 'Echec de la suppression' });
       }
     } catch (error) {
-      console.error("Erreur lors de la suppression de l'utilisateur", error);
       return res.status(500).json({ erreur: 'Erreur lors de la suppression de l\'utilisateur' });
     }
   }
@@ -196,12 +186,7 @@ async function listeEquipes(req, res) {
 
     try {
       const event = await eventModel.jsonlisteEquipeEvent(idevent);
-      const existe = await eventModel.chercherEvenement(idevent);
-      // Vérifier que l'id existe dans la bdd, sinon 404 error
-      if (existe === 0) {
-        return res.status(404).json({ erreur: 'L\'id n\'existe pas' });
-      }
-      res.status(200).json(event)
+      return res.status(200).json(event)
 
     }
     catch {
@@ -210,22 +195,19 @@ async function listeEquipes(req, res) {
   }
 }
 
-/**Probleme pofil, requete infinie */
 async function recupInfoEvent(req, res) {
-  if (req.userProfile === 'admin') {
-    if (req.method === 'OPTIONS') {
-      res.status(200).json({ sucess: 'Agress granted' });
-    }
-    else if (req.method === 'GET') {
+  if (req.method === 'OPTIONS') {
+    return res.status(200).json({ sucess: 'Agress granted' });
+  }
+  else if (req.method === 'GET') {
 
-      const idevent = res.locals.idevent;
+    const idevent = res.locals.idevent;
 
-      const a = await eventModel.recup_Infos_Modif_Event(idevent);
+    const json = await eventModel.recup_Infos_Modif_Event(idevent);
 
 
-      res.status(200).json(a);
+    res.status(200).json(json);
 
-    }
   }
 }
 

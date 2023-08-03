@@ -187,12 +187,6 @@ async function voirEvent(req, res) {
 
     const eventID = res.locals.eventID;
 
-    // Vérifier que l'id existe dans la bdd, sinon 404 error
-    const user = await eventModel.chercherEvenement(eventID);
-    if (user.length === 0) {
-      return res.status(404).json({ erreur: 'L\'id n\'existe pas' });
-    }
-
     let jsonRetour;
 
     try {
@@ -210,10 +204,10 @@ async function voirEvent(req, res) {
       else if (req.userProfile === 'aucun') {
         jsonRetour = await eventModel.jsonEventChoisi(eventID, 'aucun', req)
       }
-      res.status(200).json(jsonRetour);
+      return res.status(200).json(jsonRetour);
 
     } catch {
-      res.status(500).json({ message: 'Une erreur s\'est produite lors de la récupération de l\'événement.' });
+      return res.status(500).json({ message: 'Une erreur s\'est produite lors de la récupération de l\'événement.' });
     }
 
   }

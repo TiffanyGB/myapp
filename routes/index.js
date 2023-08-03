@@ -4,7 +4,7 @@ const { verifIdNombre } = require('../verifications/verifierDonnéesGénérales'
 const userModel = require('../models/userModel');
 const validationDonnees = require('../middleware/validationDonnees');
 const tokenModel = require('../models/tokenModel');
-
+const { verifIdEvent } = require('../middleware/verifExistenceIdRoute');
 const bodyParser = require('body-parser');
 const indexController = require('../controllers/indexController');
 
@@ -35,6 +35,8 @@ router.all('/voir_event/:id', async (req, res, next) => {
     return res.status(400).json('Problème lors de la vérification du numéro de l\'event');
   }
   next();
-}, tokenModel.verifyToken, indexController.voirEvent);
+}, tokenModel.verifyToken,
+  verifIdEvent,
+  indexController.voirEvent);
 
 module.exports = router;

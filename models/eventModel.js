@@ -104,8 +104,8 @@ function chercherEvenement(idEvent) {
 /*Création d'événement */
 async function creerEvent(valeurs_event, regles) {
     const inserer = `
-      INSERT INTO Evenement (type_event, nom, debut_inscription, date_debut, date_fin, description_event, nombre_min_equipe, nombre_max_equipe)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING idevent`;
+      INSERT INTO Evenement (type_event, nom, debut_inscription, date_debut, date_fin, description_event, nombre_min_equipe, nombre_max_equipe, img)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING idevent`;
 
     try {
         const result = await pool.query(inserer, valeurs_event);
@@ -137,8 +137,9 @@ async function modifierEvent(valeurs) {
           nombre_min_equipe = $6,
           nombre_max_equipe = $7,
           message_fin = $8,
-          derniereModif = CURRENT_TIMESTAMP
-        WHERE idEvent = $9`;
+          derniereModif = CURRENT_TIMESTAMP,
+          img = $9
+        WHERE idEvent = $10`;
 
     try {
         await pool.query(modifier, valeurs);

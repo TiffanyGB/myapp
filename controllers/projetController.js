@@ -1,7 +1,10 @@
 const projetModel = require('../models/projetModel');
 const motModel = require('../models/motCleModel');
 const gererProjet = require('../models/gererProjet');
+const gestionnaireExterneModel = require('../models/gestionnaireExterneModel');
+const gestionnaireIaModel = require('../models/gestionnaireIaModel');
 const ressourceModel = require('../models/ressourceModel');
+const { body, validationResult } = require('express-validator');
 
 
 /**Liste des projets */
@@ -34,10 +37,6 @@ async function infosProjet(req, res) {
         const idProjet = res.locals.idProjet;
 
         try {
-            const result = await projetModel.chercheridProjet(idProjet);
-            if (result.length === 0) {
-                return res.status(404).json({ erreur: "L'id n'existe pas" });
-            }
 
             const projetInfos = await projetModel.infosProjet(idProjet);
             return res.status(200).json(projetInfos);
@@ -52,7 +51,6 @@ async function infosProjet(req, res) {
 async function creationProjet(req, res) {
     if (req.method === 'OPTION') {
         res.status(200).json({ sucess: 'Agress granted' });
-
     }
     else if (req.method === 'POST') {
 
@@ -65,31 +63,131 @@ async function creationProjet(req, res) {
             gestionnaireExterne,
             gestionnaireIA,
             recompense,
-            description
+            description,
+            image
         } = req.body;
         const valeurs_projets = [
             nom,
             description,
             recompense,
-            lienSujet
+            lienSujet,
+            image
         ];
+
+        /*Vérification des données des mots-clés */
+        if (motClefs.length > 0) {
+            for (const mot of motClefs) {
+                await body('motClefs')
+                    .optional()
+                    .notEmpty().withMessage('Le mot-clé ne doit pas être vide.')
+                    .isLength({ min: 2, max: 25 }).withMessage('Le mot-clé doit avoir une longueur comprise entre 2 et 25 caractères.')
+                    .run(req);
+
+                // Exécute la requête de validation adaptée
+                const errors = validationResult(req);
+                if (!errors.isEmpty()) {
+                    return res.status(400).json({ errors: errors.array() });
+                }
+            }
+        }
+
+        for (const ressource of Ressources) {
+            await body('Ressources')
+                .optional()
+                .isArray({ min: 1 }).withMessage('Le tableau des ressources ne doit pas être vide.')
+                .run(req);
+
+            await body('Ressources.*.nom')
+                .notEmpty().withMessage('Le nom ne doit pas être vide.')
+                .isLength({ min: 2, max: 100 }).withMessage('Le prénom doit avoir une longueur comprise entre 3 et 100 caractères.')
+                .run(req);
+
+            await body('Ressources.*.type')
+                .notEmpty().withMessage('Le type ne doit pas être vide.')
+                .matches(/^(video|lien|drive|téléchargment)$/).withMessage('Le type doit avoir "video", "lien", "drive" ou "téléchargement".')
+                .isLength({ min: 2, max: 18 })
+                .run(req);
+
+            await body('Ressources.*.lien')
+                .notEmpty().withMessage('Le nom ne doit pas être vide.')
+                .isURL()
+                .isLength({ min: 3, max: 1000 }).withMessage('Le prénom doit avoir une longueur comprise entre 3 et 1000 caractères.')
+                .run(req);
+            await body('Ressources.*.description')
+                .notEmpty().withMessage('La description est obligatoire.')
+                .isLength({ min: 10, max: 10000 }).withMessage('La description doit avoir une longueur comprise entre 10 et 10000 caractères.')
+                .run(req);
+            await body('Ressources.*.consultation')
+                .notEmpty().withMessage('La consultation ne doit pas être vide.')
+                .matches(/^(privé|public)$/).withMessage('Le type doit avoir "privé", "public".')
+                .isLength({ min: 2, max: 6 })
+                .run(req);
+
+            await body('Ressources.*.publication')
+                .notEmpty().withMessage('La date ne doit pas être vide.')
+                .isLength({ min: 10, max: 30 }).withMessage('La date doit avoir une longueur comprise entre 3 et 30 caractères.')
+                .matches(/^[0-9a-zA-Z\-\ :.]+$/).withMessage('La date ne doit contenir que des lettres et des chiffres.')
+                .run(req);
+
+            // Exécute la requête de validation adaptée
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                return res.status(400).json({ errors: errors.array() });
+            }
+        }
+
+        /*Vérification des données des gestionnaires, les id doivent être des entiers
+        et doivent correspondre à des gestionnaires */
+        for (const element of gestionnaireExterne) {
+            if (!Number.isInteger(element)) {
+                return res.status(400).json({ message: "Un élément du tableau des gestionnaires n'est pas un entier." })
+            }
+
+            let user = await gestionnaireExterneModel.chercherGestionnaireExtID(element);
+
+            if (user.length === 0) {
+                return res.status(400).json({ erreur: "Aucun gestionnaire externe ne possède l'id " + element + "." })
+            }
+        }
+
+        for (const element of gestionnaireIA) {
+            if (!Number.isInteger(element)) {
+                return res.status(400).json({ message: "Un élément du tableau des gestionnaires n'est pas un entier." })
+            }
+
+            let user = await gestionnaireIaModel.chercherGestionnaireIapau(element);
+
+            if (user.length === 0) {
+                return res.status(400).json({ erreur: "Aucun gestionnaire externe ne possède l'id " + element + "." })
+            }
+        }
+
+
 
 
         try {
+            /*On crée le projet et on récupère son id dans la bdd */
             const projetInsertion = await projetModel.creerProjet(valeurs_projets);
+
             if (typeof projetInsertion === 'number') {
+
+                /*Insertion des mots-clés */
                 for (let i = 0; i < motClefs.length; i++) {
                     let motValeurs = [motClefs[i], projetInsertion];
                     await motModel.insererMot(motValeurs);
                 }
+
+                /*Attribution du projet aux gestionnaires */
                 for (let i = 0; i < gestionnaireExterne.length; i++) {
-                    let id = gestionnaireExterne[i].id;
+                    let id = gestionnaireExterne[i];
                     await gererProjet.attribuerProjetExterne(projetInsertion, id);
                 }
                 for (let i = 0; i < gestionnaireIA.length; i++) {
-                    let id2 = gestionnaireIA[i].id;
+                    let id2 = gestionnaireIA[i];
                     await gererProjet.attribuerProjetIA(projetInsertion, id2);
                 }
+
+                /*Insertion des ressources */
                 for (let i = 0; i < Ressources.length; i++) {
                     let courant = Ressources[i];
                     let valeurs_ressources = [
@@ -101,19 +199,19 @@ async function creationProjet(req, res) {
                         courant.description,
                         projetInsertion
                     ];
-                    await ressourceModel.ajouterRessources(valeurs_ressources);
+                    ressourceModel.ajouterRessources(valeurs_ressources);
                 }
 
-                res.status(200).json({ message: "Projet créé" });
-            } else {
-                res.status(400).json({ message: "Problème lors de la récupération de l'id du projet" });
+                return res.status(200).json({ message: "Projet créé" });
             }
+            return res.status(400).json({ message: "Problème lors de la récupération de l'id du projet" });
         } catch (error) {
-            res.status(400).json({ erreur: "Erreur lors de la création du projet" });
+            return res.status(400).json({ erreur: "Erreur lors de la création du projet" });
         }
 
     }
 }
+
 /**Modifier */
 async function modifierProjet(req, res) {
     if (req.method === 'OPTION') {
@@ -138,7 +236,8 @@ async function modifierProjet(req, res) {
                 gestionnaireExterne,
                 gestionnaireIA,
                 recompense,
-                description
+                description,
+                image
             } = req.body;
 
 
@@ -147,10 +246,97 @@ async function modifierProjet(req, res) {
                 description,
                 recompense,
                 lienSujet,
+                image,
                 idProjet
             ];
 
 
+            if (motClefs.length > 0) {
+                for (const mot of motClefs) {
+                    await body('motClefs')
+                        .optional()
+                        .notEmpty().withMessage('Le mot-clé ne doit pas être vide.')
+                        .isLength({ min: 2, max: 25 }).withMessage('Le mot-clé doit avoir une longueur comprise entre 2 et 25 caractères.')
+                        .run(req);
+
+                    // Exécute la requête de validation adaptée
+                    const errors = validationResult(req);
+                    if (!errors.isEmpty()) {
+                        return res.status(400).json({ errors: errors.array() });
+                    }
+                }
+            }
+
+            for (const ressource of Ressources) {
+                await body('Ressources')
+                    .optional()
+                    .isArray({ min: 1 }).withMessage('Le tableau des ressources ne doit pas être vide.')
+                    .run(req);
+
+                await body('Ressources.*.nom')
+                    .notEmpty().withMessage('Le nom ne doit pas être vide.')
+                    .isLength({ min: 2, max: 100 }).withMessage('Le prénom doit avoir une longueur comprise entre 3 et 100 caractères.')
+                    .run(req);
+
+                await body('Ressources.*.type')
+                    .notEmpty().withMessage('Le type ne doit pas être vide.')
+                    .matches(/^(video|lien|drive|téléchargment)$/).withMessage('Le type doit avoir "video", "lien", "drive" ou "téléchargement".')
+                    .isLength({ min: 2, max: 18 })
+                    .run(req);
+
+                await body('Ressources.*.lien')
+                    .notEmpty().withMessage('Le nom ne doit pas être vide.')
+                    .isURL()
+                    .isLength({ min: 3, max: 1000 }).withMessage('Le prénom doit avoir une longueur comprise entre 3 et 1000 caractères.')
+                    .run(req);
+                await body('Ressources.*.description')
+                    .notEmpty().withMessage('La description est obligatoire.')
+                    .isLength({ min: 10, max: 10000 }).withMessage('La description doit avoir une longueur comprise entre 10 et 10000 caractères.')
+                    .run(req);
+                await body('Ressources.*.consultation')
+                    .notEmpty().withMessage('La consultation ne doit pas être vide.')
+                    .matches(/^(privé|public)$/).withMessage('Le type doit avoir "privé", "public".')
+                    .isLength({ min: 2, max: 6 })
+                    .run(req);
+
+                await body('Ressources.*.publication')
+                    .notEmpty().withMessage('La date ne doit pas être vide.')
+                    .isLength({ min: 10, max: 30 }).withMessage('La date doit avoir une longueur comprise entre 3 et 30 caractères.')
+                    .matches(/^[0-9a-zA-Z\-\ :.]+$/).withMessage('La date ne doit contenir que des lettres et des chiffres.')
+                    .run(req);
+
+                // Exécute la requête de validation adaptée
+                const errors = validationResult(req);
+                if (!errors.isEmpty()) {
+                    return res.status(400).json({ errors: errors.array() });
+                }
+            }
+
+            /*Vérification des données des gestionnaires, les id doivent être des entiers
+            et doivent correspondre à des gestionnaires */
+            for (const element of gestionnaireExterne) {
+                if (!Number.isInteger(element)) {
+                    return res.status(400).json({ message: "Un élément du tableau des gestionnaires n'est pas un entier." })
+                }
+
+                let user = await gestionnaireExterneModel.chercherGestionnaireExtID(element);
+
+                if (user.length === 0) {
+                    return res.status(400).json({ erreur: "Aucun gestionnaire externe ne possède l'id " + element + "." })
+                }
+            }
+
+            for (const element of gestionnaireIA) {
+                if (!Number.isInteger(element)) {
+                    return res.status(400).json({ message: "Un élément du tableau des gestionnaires n'est pas un entier." })
+                }
+
+                let user = await gestionnaireIaModel.chercherGestionnaireIapau(element);
+
+                if (user.length === 0) {
+                    return res.status(400).json({ erreur: "Aucun gestionnaire externe ne possède l'id " + element + "." })
+                }
+            }
             projetModel.modifierProjet(valeurs_projets)
                 .then(() => {
 
@@ -205,7 +391,7 @@ async function modifierProjet(req, res) {
                 });
 
         } catch {
-            return res.status(400).json({ erreur: "erreur", idErreur: "1" });
+            return res.status(400).json({ erreur: "erreur" });
         }
     }
 }
@@ -220,13 +406,6 @@ async function supprimerProjet(req, res) {
         const idProjet = res.locals.idProjet;
 
         try {
-            /* Vérifier que l'id existe dans la bdd, sinon 404 error*/
-            const user = await projetModel.chercheridProjet(idProjet);
-            if (user.length === 0) {
-                return res.status(404).json({ erreur: 'L\'id n\'existe pas' });
-            }
-
-            /* Supprimer projet*/
             await projetModel.supprimerProjet(idProjet);
             return res.status(200).json({ message: "Suppression réussie" });
 
