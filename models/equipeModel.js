@@ -40,7 +40,7 @@ const validerEquipe = [
         .isLength({ max: 5 }),
 
     body('idProjet')
-        .notEmpty().withMessage('Le prénom ne doit pas être vide.')
+        .notEmpty().withMessage('L\'id du projet ne doit pas être vide.')
         .matches(/^[0-9]*$/).withMessage("L\'id ne doit avoir que des chiffres.")
         .isLength({ min: 1, max: 1000 }),
 

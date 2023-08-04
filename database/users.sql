@@ -1,6 +1,6 @@
 \c postgres;
--- DROP DATABASE IF EXISTS iapau;
--- CREATE DATABASE iapau;
+DROP DATABASE IF EXISTS iapau;
+CREATE DATABASE iapau;
 
 -- Se connecter à la base de données
 \c iapau;

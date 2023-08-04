@@ -12,14 +12,21 @@ const aucunProfil = profil.interdireAucunProfil;
 const gestionnairesEquipeAdmin = profil.checkAG
 const { verifIdNombre } = require('../verifications/verifierDonnéesGénérales');
 const { verifIdEquipe, verifIdEvent } = require('../middleware/verifExistenceIdRoute');
+const fs = require('fs');
+
 
 /**Créer une équipe */
 router.all('/creationEquipe',
     tokenModel.verifyToken,
     etudiantProfil,
     equipeModel.validerEquipe,
-    equipeController.creerEquipe
-);
+    async (req, res, next) => {
+        try {
+            await equipeController.creerEquipe(req, res, next);
+        } catch (error) {
+            next(error); // Passez l'erreur au middleware d'erreur global
+        }
+    });
 
 /* Modifier une équipe */
 router.all('/edit/:id', (req, res, next) => {

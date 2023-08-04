@@ -13,9 +13,9 @@ const validateUser = [
         .isLength({ min: 2, max: 30 }).withMessage('Le prénom doit avoir une longueur comprise entre 2 et 30 caractères.'),
 
     body('nom')
-        .notEmpty().withMessage('Le prénom ne doit pas être vide.')
-        .matches(/^[a-zA-ZÀ-ÿ \-']*$/).withMessage("Le prénom doit contenir uniquement des lettres, des espaces, des tirets '-', des apostrophes ''', ou des lettres avec accents.")
-        .isLength({ min: 2, max: 50 }).withMessage('Le prénom doit avoir une longueur comprise entre 3 et 50 caractères.'),
+        .notEmpty().withMessage('Le nom ne doit pas être vide.')
+        .matches(/^[a-zA-ZÀ-ÿ \-']*$/).withMessage("Le nom doit contenir uniquement des lettres, des espaces, des tirets '-', des apostrophes ''', ou des lettres avec accents.")
+        .isLength({ min: 2, max: 50 }).withMessage('Le nom doit avoir une longueur comprise entre 3 et 50 caractères.'),
 
     body('pseudo')
         .notEmpty().withMessage('Le pseudo ne doit pas être vide.')

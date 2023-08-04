@@ -18,9 +18,16 @@ router.all('/inscription',
   validationDonnees.validatePasswordCreation,
   indexController.inscriptionEleve);
 
-router.all('/connexion',
-  validationDonnees.connexion,
-  indexController.connexion);
+router.all('/connexion', async (req, res, next) => {
+  validationDonnees.connexion;
+  try {
+    await indexController.connexion(req, res, next);
+
+  } catch {
+    return res.status(400).json('Problème');
+  }
+});
+
 
 router.all('/voir_tous_events', indexController.voirTousEvents);
 

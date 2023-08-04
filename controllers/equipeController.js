@@ -46,27 +46,34 @@ async function creerEquipe(req, res) {
       idProjet
     ]
 
-    /* L'étudiant ne doit pas avoir d'équipe dans l'event*/
 
-    /*Récupérer l'event de l'équipe*/
-    const projet = await projetModel.chercheridProjet(idProjet);
-    const idEvent = projet[0].idevent;
-
-    const aUneEquipe = await equipeModel.aUneEquipeDansEvent(idCapitaine, idEvent);
-
-    if (aUneEquipe != -1) {
-      return res.status(400).json({ erreur: 'Vous avez déjà une équipe dans cet évènement' });
-    }
 
     /* Création de l'équipe */
     try {
+      /* L'étudiant ne doit pas avoir d'équipe dans l'event*/
+
+      /*Récupérer l'event de l'équipe*/
+      const projet = await projetModel.chercheridProjet(idProjet);
+      if(projet.length === 0){
+        return res.status(400).json({erreur: 'L\'id du projet n\'existe pas.'})
+      }
+
+
+      const idEvent = projet[0].idevent;
+
+      const aUneEquipe = await equipeModel.aUneEquipeDansEvent(idCapitaine, idEvent);
+
+      if (aUneEquipe != -1) {
+        return res.status(400).json({ erreur: 'Vous avez déjà une équipe dans cet évènement' });
+      }
       let idEquipe = await equipeModel.creerEquipe(infos);
 
       equipeModel.ajouterMembre(idCapitaine, idEquipe);
 
       return res.status(200).json(idEquipe);
-    } catch {
-      return res.status(400).json({ erreur: 'Erreur création équipe.' });
+    } catch (error) {
+      throw (error)
+      //return res.status(400).json({ erreur: 'Erreur création équipe.' });
     }
   }
 }
