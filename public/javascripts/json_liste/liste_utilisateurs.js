@@ -63,7 +63,6 @@ async function envoyer_json_liste_user() {
                 } else {
                 
                     etudiantCourant = chercherStudent[0];
-                    console.log(etudiantCourant.niveau_etude)
                     userInfos.niveauEtude = etudiantCourant.niveau_etude;
                     userInfos.ecole = etudiantCourant.ecole;
                 }
@@ -101,8 +100,6 @@ async function envoyer_json_liste_user() {
             }
             jsonRetour.utilisateurs.push(userInfos);
         }
-        console.log(jsonRetour.utilisateurs)
-
         return jsonRetour;
 
     } catch (error) {
