@@ -110,6 +110,7 @@ async function insererUser(values, password, values2, type) {
       INSERT INTO Utilisateur (nom, prenom, pseudo, email, lien_linkedin, lien_github, ville, date_inscription, typeUser, hashMdp)
       VALUES ($1, $2, $3, $4, $5, $6, $7, CURRENT_TIMESTAMP, $8, $9)  RETURNING iduser`;
 
+      console.log(values)
     try {
         values.push(type, mdp)
         const nonExiste = await verif.verifExistence(values2);

@@ -43,9 +43,10 @@ async function inscriptionEleve(req, res) {
       github: userGitHub,
       ville: userVille,
       ecole: userEcole,
-      niveauEtude: userNiveauEtude,
+      niveau_etude: userNiveauEtude,
       password
     } = req.body;
+
 
     /** Informations spécifique à un utilisateur */
     const values = [
