@@ -61,12 +61,15 @@ async function envoyer_json_liste_user() {
                 if (chercherStudent === 0) {
                     return 'erreur_user'
                 } else {
+                
                     etudiantCourant = chercherStudent[0];
-
+                    console.log(etudiantCourant.niveau_etude)
                     userInfos.niveauEtude = etudiantCourant.niveau_etude;
                     userInfos.ecole = etudiantCourant.ecole;
                 }
             }
+
+
 
             /**Infos d'un gestionnaire externe */
             if (userCourant.typeuser === 'gestionnaireExterne') {
@@ -98,6 +101,8 @@ async function envoyer_json_liste_user() {
             }
             jsonRetour.utilisateurs.push(userInfos);
         }
+        console.log(jsonRetour.utilisateurs)
+
         return jsonRetour;
 
     } catch (error) {

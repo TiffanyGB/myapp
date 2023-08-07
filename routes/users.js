@@ -77,6 +77,7 @@ router.all('/edit/:id', (req, res, next) => {
   next();
 }, tokenModel.verifyToken,
   aucunProfil,
+  userModel.validateUser,
   validationDonnees.validatePasswordModif,
   userController.modifierUser);
 

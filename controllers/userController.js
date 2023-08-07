@@ -255,7 +255,6 @@ async function modifierUser(req, res) {
       linkedin,
       github,
       ville,
-      codeEcole: userCodeEcole,
       niveau_etude: userNiveauEtude,
       entreprise: userEntreprise,
       metier: userMetier,
@@ -274,7 +273,6 @@ async function modifierUser(req, res) {
     ]
 
     const valeurs_etudiant = [
-      userCodeEcole,
       userEcole,
       userNiveauEtude
     ]
