@@ -54,6 +54,5 @@ async function modifierAdministrateur(idUser, valeurs, password) {
 module.exports = {
     creerAdmin,
     chercherAdminID,
-    chercherListeAdmins,
     modifierAdministrateur
 }
