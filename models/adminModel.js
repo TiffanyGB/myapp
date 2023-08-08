@@ -1,21 +1,6 @@
 const pool = require('../database/configDB');
 const userModel = require('./userModel');
 
-/**Liste des admins */
-function chercherListeAdmins() {
-    const users = 'SELECT * FROM Admini';
-
-    return new Promise((resolve, reject) => {
-        pool.query(users)
-            .then((res) => {
-                resolve(res.rows);
-            })
-            .catch((error) => {
-                reject(error);
-            });
-    });
-}
-
 /**Chercher un admin par son id*/
 function chercherAdminID(idUser) {
     const users = 'SELECT * FROM Admini WHERE idAdmin = $1';
@@ -47,15 +32,7 @@ async function creerAdmin(id) {
     const requet = `INSERT INTO Admini (idAdmin) VALUES ($1)`;
 
     try {
-        return new Promise((resolve, reject) => {
-            pool.query(requet, [id])
-                .then(() => {
-                    resolve('true');
-                })
-                .catch((error) => {
-                    reject(error);
-                });
-        });
+        pool.query(requet, [id]);
     }
     catch (error) {
         throw error;
@@ -68,7 +45,6 @@ async function modifierAdministrateur(idUser, valeurs, password) {
 
     try {
         userModel.modifierUser(idUser, valeurs, password);
-
     } catch (error) {
         throw error;
     }

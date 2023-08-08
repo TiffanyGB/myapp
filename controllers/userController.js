@@ -74,7 +74,6 @@ async function createUser(req, res) {
     res.status(200).json({ sucess: 'Agress granted' });
   } else if (req.method === 'POST') {
 
-
     /* Récupération des données */
     const {
       type: type,
@@ -143,7 +142,6 @@ async function createUser(req, res) {
 
               etudiantModel.creerEtudiant(userEcole, userNiveauEtude, insertion)
                 .then(() => {
-
                   res.status(200).json({ message: 'Inscription réussie' });
                 })
                 .catch(() => {
@@ -196,24 +194,23 @@ async function createUser(req, res) {
             default:
               userModel.supprimerUserID(insertion);
               res.status(400).json({ message: 'Le type est incorrect.' });
-
               break;
           }
         }
 
         /**Pseudo et/ou email déjà pris */
          if (insertion === 'les2') {
-          res.status(400).json({ Existe: 'Mail et pseudo' });
+          return res.status(400).json({ Existe: 'Mail et pseudo' });
 
         } else if (insertion === 'pseudo') {
-          res.status(400).json({ Existe: 'Pseudo' });
+          return res.status(400).json({ Existe: 'Pseudo' });
 
         } else if (insertion === 'mail') {
-          res.status(400).json({ Existe: 'Mail' });
+          return res.status(400).json({ Existe: 'Mail' });
         }
 
       }).catch(() => {
-        res.status(400).json({ message: 'Erreur lors de l\'insertion de l\'utilisateur' });
+        return res.status(400).json({ message: 'Erreur lors de l\'insertion de l\'utilisateur' });
       });
   }
 }

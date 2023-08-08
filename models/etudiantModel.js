@@ -72,18 +72,9 @@ async function creerEtudiant(ecole, niveau, id) {
     const requet = `INSERT INTO Etudiant (idEtudiant, ecole, niveau_etude) VALUES ($1, $2, $3)`;
 
     try {
-        return new Promise((resolve, reject) => {
-            pool.query(requet, values_etudiant)
-                .then(() => {
-                    resolve('true');
-                })
-                .catch((error) => {
-                    reject(error);
-                });
-        });
+        pool.query(requet, values_etudiant)
     }
     catch (error) {
-        console.error('Erreur lors de l\'insertion des données côté etudiant :', error);
         throw error;
     }
 

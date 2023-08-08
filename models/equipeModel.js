@@ -17,22 +17,14 @@ const validerEquipe = [
         .matches(/^(ouvert|fermé)$/).withMessage('Le statut doit être soit "ouvert" soit "fermé".')
         .isLength({ min: 5, max: 6 }).withMessage('Le statut doit avoir une longueur de 6 caractères.'),
 
-
     body('description')
         .optional({ nullable: true, checkFalsy: true })
         .isLength({ min: 3, max: 2000 }).withMessage('La description doit avoir une longueur comprise entre 3 et 2000 caractères.'),
 
-    //Doit être controllé si le profil est admin ou gestionnaire
-    // body('idCapitaine')
-    //     .optional() // Le champ est optionnel, s'il n'est pas présent, il sera ignoré
-    //     .notEmpty().withMessage("L'id ne doit pas être vide.")
-    //     .matches(/^[0-9]*$/).withMessage("L'id ne doit contenir que des chiffres.")
-    //     .isInt({ min: 1, max: 10000 }).withMessage("L'id doit contenir entre 1 et 10000 chiffres."),
-
     body('lien_discussion')
         .optional({ nullable: true, checkFalsy: true })
         .isURL().withMessage('Doit être un lien')
-        .isLength({ max: 300 }),
+        .isLength({ max: 400 }).withMessage('La taille maximum est de 400 caractères.'),
 
     body('preferenceQuestionnaire')
         .optional()
@@ -42,7 +34,7 @@ const validerEquipe = [
     body('idProjet')
         .notEmpty().withMessage('L\'id du projet ne doit pas être vide.')
         .matches(/^[0-9]*$/).withMessage("L\'id ne doit avoir que des chiffres.")
-        .isLength({ min: 1, max: 1000 }),
+        .isLength({ min: 1, max: 1000 }).withMessage('L\'id est trop long.'),
 
     /**Appel du validateur */
     validationDonnees.validateUserData,
@@ -416,7 +408,6 @@ async function jsonInformationsEquipe(idEquipe, req) {
             const gerer_ext = await gererProjet.chercherGestionnaireExtID(projet[0].idprojet, req.id);
 
             if ((gerer_ia.length > 0) || (gerer_ext.length > 0)) {
-                console.log('oui', gerer_ext.length)
                 jsonRetour.superUser = true;
                 voirTout = true;
 
@@ -531,7 +522,7 @@ async function jsonListeEquipeProjet(idProjet) {
         const equipeList = await listeEquipeProjet(idProjet);
 
         jsonRetour = {};
-        jsonRetour.equipe = []
+        jsonRetour.equipe = [];
 
         for (i = 0; i < equipeList.length; i++) {
 
@@ -539,7 +530,7 @@ async function jsonListeEquipeProjet(idProjet) {
 
             temp = {};
 
-            /*Equipe */
+            /*Equipe*/
             temp.id = equipeCourante.idequipe;
             temp.nom = equipeCourante.nom;
 
@@ -565,6 +556,7 @@ async function jsonListeEquipeProjet(idProjet) {
             temp.nomEvent = event.nom;
             temp.idEvent = event.idevent;
 
+            /*Dernier suivi mettre à jour */
             temp.dernierSuivi = event.date_creation;
 
             /*Capitaine */
@@ -638,30 +630,32 @@ async function jsonEquipesOuvertes(idEvent, req) {
     jsonRetour.equipes = [];
 
     const projet_event = await projetModel.recuperer_projets(idEvent);
+
     let listeEquipes;
+
     for (i = 0; i < projet_event.length; i++) {
 
         listeEquipes = await listeEquipeProjet(projet_event[i].idprojet);
 
-        for (i = 0; i < listeEquipes.length; i++) {
-            if (listeEquipes[i].statut_recrutement === 'ouvert') {
+        for (j = 0; j < listeEquipes.length; j++) {
+            if (listeEquipes[j].statut_recrutement === 'ouvert') {
                 temp = {};
-                temp.idEquipe = listeEquipes[i].idequipe;
-                temp.nom = listeEquipes[i].nom;
+                temp.idEquipe = listeEquipes[j].idequipe;
+                temp.nom = listeEquipes[j].nom;
 
                 /*Nom du proejt */
-                const nomProjet = await projetModel.chercheridProjet(listeEquipes[i].idprojet);
+                const nomProjet = await projetModel.chercheridProjet(listeEquipes[j].idprojet);
                 temp.projet = nomProjet[0].nom;
                 temp.lienProjet = nomProjet[0].sujet;
 
                 /*Infos du capitaine */
                 temp.capitaine = {};
-                const capitaine = await userModel.chercherUserID(listeEquipes[i].idcapitaine);
+                const capitaine = await userModel.chercherUserID(listeEquipes[j].idcapitaine);
                 temp.capitaine.pseudo = capitaine[0].pseudo;
                 temp.capitaine.idCapitaine = capitaine[0].iduser;
 
                 /*Nombre de membres de l'équipe */
-                const membres = await ListeMembre(listeEquipes[i].idequipe);
+                const membres = await ListeMembre(listeEquipes[j].idequipe);
                 temp.nbMembres = membres.length;
 
                 /*Nombre de membres max */

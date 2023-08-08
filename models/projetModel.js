@@ -19,7 +19,7 @@ const validateProjet = [
     body('lienSujet')
         .notEmpty().withMessage('Le lien ne doit pas être vide.')
         .isURL().withMessage('Le lien doit être une url')
-        .isLength({ min: 2, max: 500 }).withMessage('Le lien doit avoir une longueur comprise entre 3 et 500 caractères.'),
+        .isLength({ min: 3, max: 500 }).withMessage('Le lien doit avoir une longueur comprise entre 3 et 500 caractères.'),
 
     body('recompense')
         .notEmpty().withMessage('La récompense ne doit pas être vide.')
@@ -28,7 +28,7 @@ const validateProjet = [
 
     body('description')
         .notEmpty().withMessage('La description est obligatoire.')
-        .isLength({ min: 10, max: 10000 }).withMessage('La description doit avoir une longueur comprise entre 10 et 10000 caractères.'),
+        .isLength({ min: 5, max: 10000 }).withMessage('La description doit avoir une longueur comprise entre 5 et 10000 caractères.'),
 
     /**Appel du validateur */
     validationDonnees.validateUserData,

@@ -3,7 +3,7 @@ const { body } = require('express-validator');
 
 async function validerRegles(req) {
     body('titre')
-        .notEmpty().withMessage('Le nom ne doit pas être vide.')
+        .notEmpty().withMessage('Le titre ne doit pas être vide.')
         .isLength({ min: 2, max: 50 }).withMessage('Le prénom doit avoir une longueur comprise entre 2 et 50 caractères.')
         .run(req);
 

@@ -61,7 +61,7 @@ async function envoyerMessageGlobalEvent(contenu, idEvent, idUser) {
 
         for (j = 0; j < equipesProjet.length; j++) {
 
-            let equipesCourantes = equipesProjet[i];
+            let equipesCourantes = equipesProjet[j];
             let donnees = [equipesCourantes.idequipe, contenu, idUser, 'event'];
     
             try{

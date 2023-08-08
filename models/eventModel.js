@@ -26,21 +26,21 @@ const validateEvent = [
     body('inscription')
         .notEmpty().withMessage('La date ne doit pas être vide.')
         .isLength({ min: 10, max: 30 }).withMessage('La date doit avoir une longueur comprise entre 3 et 30 caractères.')
-        .matches(/^[0-9a-zA-Z\-\ :.]+$/).withMessage('Le pseudo ne doit contenir que des lettres et des chiffres.'),
+        .matches(/^[0-9a-zA-Z\-\ :.]+$/).withMessage('La date ne doit contenir que des lettres et des chiffres.'),
 
     body('debut')
         .notEmpty().withMessage('La date ne doit pas être vide.')
         .isLength({ min: 10, max: 30 }).withMessage('La date doit avoir une longueur comprise entre 3 et 30 caractères.')
-        .matches(/^[0-9a-zA-Z\-\ :.]+$/).withMessage('Le pseudo ne doit contenir que des lettres et des chiffres.'),
+        .matches(/^[0-9a-zA-Z\-\ :.]+$/).withMessage('La date ne doit contenir que des lettres et des chiffres.'),
 
     body('fin')
         .notEmpty().withMessage('La date ne doit pas être vide.')
         .isLength({ min: 10, max: 30 }).withMessage('La date doit avoir une longueur comprise entre 3 et 30 caractères.')
-        .matches(/^[0-9a-zA-Z\-\ :.]+$/).withMessage('Le pseudo ne doit contenir que des lettres et des chiffres.'),
+        .matches(/^[0-9a-zA-Z\-\ :.]+$/).withMessage('La date ne doit contenir que des lettres et des chiffres.'),
 
     body('description')
         .optional({ nullable: true, checkFalsy: true })
-        .isLength({ min: 0, max: 5000 }).withMessage('Le lien GitHub doit avoir une longueur comprise entre 0 et 5000 caractères.'),
+        .isLength({ min: 0, max: 5000 }).withMessage('La description doit avoir une longueur comprise entre 0 et 5000 caractères.'),
 
 
     body('nombreMinEquipe')
@@ -63,7 +63,7 @@ const validateEvent = [
 
     body('messageFin')
         .optional({ nullable: true, checkFalsy: true })
-        .isLength({ min: 2, max: 3000 }).withMessage('Le lien GitHub doit avoir une longueur comprise entre 2 et 3000 caractères.'),
+        .isLength({ min: 2, max: 3000 }).withMessage('Le message de fin doit avoir une longueur comprise entre 2 et 3000 caractères.'),
 
     /**Appel du validateur */
     validationDonnees.validateUserData,

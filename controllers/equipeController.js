@@ -1,6 +1,5 @@
 const equipeModel = require('../models/equipeModel');
 const projetModel = require('../models/projetModel');
-const eventModel = require('../models/eventModel');
 const demandeModel = require('../models/demandeModel')
 const { body, validationResult } = require('express-validator');
 
@@ -46,16 +45,14 @@ async function creerEquipe(req, res) {
       idProjet
     ]
 
-
-
     /* Création de l'équipe */
     try {
       /* L'étudiant ne doit pas avoir d'équipe dans l'event*/
 
       /*Récupérer l'event de l'équipe*/
       const projet = await projetModel.chercheridProjet(idProjet);
-      if(projet.length === 0){
-        return res.status(400).json({erreur: 'L\'id du projet n\'existe pas.'})
+      if (projet.length === 0) {
+        return res.status(400).json({ erreur: 'L\'id du projet n\'existe pas.' })
       }
 
 
@@ -69,6 +66,9 @@ async function creerEquipe(req, res) {
       let idEquipe = await equipeModel.creerEquipe(infos);
 
       equipeModel.ajouterMembre(idCapitaine, idEquipe);
+
+      /* Supprimer les demandes de l'étudiant des autres equipes */
+      demandeModel.supprimerDemandes(idUser);
 
       return res.status(200).json(idEquipe);
     } catch (error) {

@@ -162,9 +162,6 @@ async function creationProjet(req, res) {
             }
         }
 
-
-
-
         try {
             /*On crée le projet et on récupère son id dans la bdd */
             const projetInsertion = await projetModel.creerProjet(valeurs_projets);
@@ -275,7 +272,7 @@ async function modifierProjet(req, res) {
 
                 await body('Ressources.*.nom')
                     .notEmpty().withMessage('Le nom ne doit pas être vide.')
-                    .isLength({ min: 2, max: 100 }).withMessage('Le prénom doit avoir une longueur comprise entre 3 et 100 caractères.')
+                    .isLength({ min: 2, max: 100 }).withMessage('Le nom doit avoir une longueur comprise entre 3 et 100 caractères.')
                     .run(req);
 
                 await body('Ressources.*.type')
@@ -285,9 +282,9 @@ async function modifierProjet(req, res) {
                     .run(req);
 
                 await body('Ressources.*.lien')
-                    .notEmpty().withMessage('Le nom ne doit pas être vide.')
-                    .isURL()
-                    .isLength({ min: 3, max: 1000 }).withMessage('Le prénom doit avoir une longueur comprise entre 3 et 1000 caractères.')
+                    .notEmpty().withMessage('Le lien ne doit pas être vide.')
+                    .isURL().withMessage('Le lien de chaque ressource doit être un lien valide.')
+                    .isLength({ min: 3, max: 1000 }).withMessage('Le lien doit avoir une longueur comprise entre 3 et 1000 caractères.')
                     .run(req);
                 await body('Ressources.*.description')
                     .notEmpty().withMessage('La description est obligatoire.')

@@ -165,11 +165,7 @@ async function attribuerProjetIA(idProjet, idGestionnaire) {
         const attribuer = `INSERT INTO Gerer_ia_pau (id_g_iapau, idProjet)
         VALUES ($1, $2)`;
 
-        pool.query(attribuer, valeurs)
-            .then(() => {
-                return 'ok';
-            })
-
+        pool.query(attribuer, valeurs);
     } catch (error) {
         throw error;
     }
@@ -195,11 +191,7 @@ async function attribuerProjetExterne(idProjet, idGestionnaire) {
         const attribuer = `INSERT INTO Gerer_externe (id_g_externe, idProjet)
         VALUES ($1, $2)`;
 
-        pool.query(attribuer, valeurs)
-            .then(() => {
-                return 'ok';
-            })
-
+        pool.query(attribuer, valeurs);
     } catch (error) {
         throw error;
     }

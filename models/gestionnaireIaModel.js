@@ -17,21 +17,6 @@ async function validerGestionnaireIA(req) {
       .run(req);
   }
 
-// const validateUser = [
-//     body('role_asso')
-//     .notEmpty().withMessage("Le métier ne doit pas être vide.")
-//     .matches(/^[A-Za-z0-9]+$/).withMessage("Le métier doit contenir uniquement des lettres et des chiffres.")
-//     .isLength({ min: 2, max: 40 }).withMessage("Le métier doit avoir une longueur comprise entre 2 et 40 caractères.")
-//     .custom((value, { req }) => {
-//       if (/<|>/.test(value)) {
-//         throw new Error("Le métier ne doit pas contenir les caractères '<' ou '>'");
-//       }
-//       return true;
-//     }),
-//     /**Appel du validateur */
-//     validateUserData,
-// ];
-
 /**Liste des gestionnaires ia pau */
 function chercherListeGestionnaireIapau() {
 
@@ -103,7 +88,6 @@ async function creerGestionnaireIA(id, role_asso) {
 }
 
 
-
 /**Modifier un gestionnaire ia pau */
 async function modifierIapau(idUser, valeurs, role_asso, password) {
     // try {
@@ -133,11 +117,6 @@ async function modifierIapau(idUser, valeurs, role_asso, password) {
     //     throw error;
     // }
 }
-
-
-/**Supprimer un gestionnaire ia pau */
-
-
 
 
 module.exports = {

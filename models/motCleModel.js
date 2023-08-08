@@ -23,10 +23,8 @@ async function insererMot(valeurs) {
 
     try {
         await pool.query(inserer, valeurs);
-        return 'ok';
     }
     catch (error) {
-        console.error('Erreur lors de l\'insertion des données côté etudiant :', error);
         throw error;
     }
 }

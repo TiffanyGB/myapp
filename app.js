@@ -13,8 +13,6 @@ var app = express();
 
 app.use(async (req, res, next) => {
   try {
-    // Exécution du reste de l'application
-    console.log('ok')
     next();
   } catch (error) {
 
