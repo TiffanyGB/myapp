@@ -4,7 +4,7 @@
  * Ce fichier contient les controllers servant à la manipulation des
  * utilisateurs.
  * 
- * @module UserController
+ * @module Gestion_des_utilisateurs
  * @version 1.0.0 
  * @author Tiffany GAY-BELLILE
  * 
@@ -192,7 +192,7 @@ async function createUser(req, res) {
               break;
 
             default:
-              userModel.supprimerUserID(insertion);
+              userModel.supprimerUser(insertion);
               res.status(400).json({ message: 'Le type est incorrect.' });
               break;
           }

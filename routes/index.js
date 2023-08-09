@@ -6,7 +6,9 @@ const validationDonnees = require('../middleware/validationDonnees');
 const tokenModel = require('../models/tokenModel');
 const { verifIdEvent } = require('../middleware/verifExistenceIdRoute');
 const bodyParser = require('body-parser');
-const indexController = require('../controllers/indexController');
+const inscriptionController = require('../controllers/Auth/inscriptionController');
+const { connexion } = require('../controllers/Auth/connexionController');
+const {voirTousEvents, voirEvent} = require('../controllers/eventsController');
 
 router.use(bodyParser.json());
 router.use(express.json());
@@ -16,20 +18,15 @@ router.use(express.urlencoded({ extended: false }));
 router.all('/inscription',
   userModel.validateUser,
   validationDonnees.validatePasswordCreation,
-  indexController.inscriptionEleve);
+  inscriptionController.inscriptionEleve);
 
-router.all('/connexion', async (req, res, next) => {
-  validationDonnees.connexion;
-  try {
-    await indexController.connexion(req, res, next);
-
-  } catch {
-    return res.status(400).json('Problème');
-  }
-});
+router.all('/connexion',
+  validationDonnees.connexion,
+  connexion
+);
 
 
-router.all('/voir_tous_events', indexController.voirTousEvents);
+router.all('/voir_tous_events', voirTousEvents);
 
 router.all('/voir_event/:id', async (req, res, next) => {
   res.locals.eventID = req.params.id;
@@ -44,6 +41,6 @@ router.all('/voir_event/:id', async (req, res, next) => {
   next();
 }, tokenModel.verifyToken,
   verifIdEvent,
-  indexController.voirEvent);
+  voirEvent);
 
 module.exports = router;

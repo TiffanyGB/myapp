@@ -45,22 +45,14 @@ const validerEquipe = [
         .matches(/^(ouvert|fermé)$/).withMessage('Le statut doit être soit "ouvert" soit "fermé".')
         .isLength({ min: 5, max: 6 }).withMessage('Le statut doit avoir une longueur de 6 caractères.'),
 
-
     body('description')
         .optional({ nullable: true, checkFalsy: true })
         .isLength({ min: 3, max: 2000 }).withMessage('La description doit avoir une longueur comprise entre 3 et 2000 caractères.'),
 
-    //Doit être controllé si le profil est admin ou gestionnaire
-    // body('idCapitaine')
-    //     .optional() // Le champ est optionnel, s'il n'est pas présent, il sera ignoré
-    //     .notEmpty().withMessage("L'id ne doit pas être vide.")
-    //     .matches(/^[0-9]*$/).withMessage("L'id ne doit contenir que des chiffres.")
-    //     .isInt({ min: 1, max: 10000 }).withMessage("L'id doit contenir entre 1 et 10000 chiffres."),
-
     body('lien_discussion')
         .optional({ nullable: true, checkFalsy: true })
         .isURL().withMessage('Doit être un lien')
-        .isLength({ max: 300 }),
+        .isLength({ max: 400 }).withMessage('La taille maximum est de 400 caractères.'),
 
     body('preferenceQuestionnaire')
         .optional()
@@ -68,9 +60,9 @@ const validerEquipe = [
         .isLength({ max: 5 }),
 
     body('idProjet')
-        .notEmpty().withMessage('Le prénom ne doit pas être vide.')
+        .notEmpty().withMessage('L\'id du projet ne doit pas être vide.')
         .matches(/^[0-9]*$/).withMessage("L\'id ne doit avoir que des chiffres.")
-        .isLength({ min: 1, max: 1000 }),
+        .isLength({ min: 1, max: 1000 }).withMessage('L\'id est trop long.'),
 
     /**Appel du validateur */
     validationDonnees.validateUserData,
@@ -369,7 +361,7 @@ async function jsonInformationsEquipe(idEquipe, req) {
         jsonRetour.nombre_membres = membres.length;
 
         /*Nombre max de l'event*/
-        const projet = await projetModel.chercherProjetId(temp1.idprojet);
+        const projet = await projetModel.chercheridProjet(temp1.idprojet);
         let idevent = projet[0].idevent;
 
         const event = await chercherEvenement(idevent);
@@ -444,7 +436,6 @@ async function jsonInformationsEquipe(idEquipe, req) {
             const gerer_ext = await gererProjet.chercherGestionnaireExtID(projet[0].idprojet, req.id);
 
             if ((gerer_ia.length > 0) || (gerer_ext.length > 0)) {
-                console.log('oui', gerer_ext.length)
                 jsonRetour.superUser = true;
                 voirTout = true;
 
@@ -559,7 +550,7 @@ async function jsonListeEquipeProjet(idProjet) {
         const equipeList = await listeEquipeProjet(idProjet);
 
         jsonRetour = {};
-        jsonRetour.equipe = []
+        jsonRetour.equipe = [];
 
         for (i = 0; i &lt; equipeList.length; i++) {
 
@@ -567,7 +558,7 @@ async function jsonListeEquipeProjet(idProjet) {
 
             temp = {};
 
-            /*Equipe */
+            /*Equipe*/
             temp.id = equipeCourante.idequipe;
             temp.nom = equipeCourante.nom;
 
@@ -577,7 +568,7 @@ async function jsonListeEquipeProjet(idProjet) {
 
             /*Projet */
             temp.idProjet = idProjet;
-            const projet = (await projetModel.chercherProjetId(idProjet))[0];
+            const projet = (await projetModel.chercheridProjet(idProjet))[0];
             temp.nomProjet = projet.nom;
 
             /*Nombres de personnes suffisantes pour participer*/
@@ -593,6 +584,7 @@ async function jsonListeEquipeProjet(idProjet) {
             temp.nomEvent = event.nom;
             temp.idEvent = event.idevent;
 
+            /*Dernier suivi mettre à jour */
             temp.dernierSuivi = event.date_creation;
 
             /*Capitaine */
@@ -630,7 +622,7 @@ async function jsonMesEquipes(idUser) {
 
         /*Projet */
         temp.idProjet = equipeCouranteInfos.idprojet;
-        const projet = (await projetModel.chercherProjetId(temp.idProjet))[0];
+        const projet = (await projetModel.chercheridProjet(temp.idProjet))[0];
         temp.nomProjet = projet.nom;
 
         /*Capitaine */
@@ -666,30 +658,32 @@ async function jsonEquipesOuvertes(idEvent, req) {
     jsonRetour.equipes = [];
 
     const projet_event = await projetModel.recuperer_projets(idEvent);
+
     let listeEquipes;
+
     for (i = 0; i &lt; projet_event.length; i++) {
 
         listeEquipes = await listeEquipeProjet(projet_event[i].idprojet);
 
-        for (i = 0; i &lt; listeEquipes.length; i++) {
-            if (listeEquipes[i].statut_recrutement === 'ouvert') {
+        for (j = 0; j &lt; listeEquipes.length; j++) {
+            if (listeEquipes[j].statut_recrutement === 'ouvert') {
                 temp = {};
-                temp.idEquipe = listeEquipes[i].idequipe;
-                temp.nom = listeEquipes[i].nom;
+                temp.idEquipe = listeEquipes[j].idequipe;
+                temp.nom = listeEquipes[j].nom;
 
                 /*Nom du proejt */
-                const nomProjet = await projetModel.chercherProjetId(listeEquipes[i].idprojet);
+                const nomProjet = await projetModel.chercheridProjet(listeEquipes[j].idprojet);
                 temp.projet = nomProjet[0].nom;
                 temp.lienProjet = nomProjet[0].sujet;
 
                 /*Infos du capitaine */
                 temp.capitaine = {};
-                const capitaine = await userModel.chercherUserID(listeEquipes[i].idcapitaine);
+                const capitaine = await userModel.chercherUserID(listeEquipes[j].idcapitaine);
                 temp.capitaine.pseudo = capitaine[0].pseudo;
                 temp.capitaine.idCapitaine = capitaine[0].iduser;
 
                 /*Nombre de membres de l'équipe */
-                const membres = await ListeMembre(listeEquipes[i].idequipe);
+                const membres = await ListeMembre(listeEquipes[j].idequipe);
                 temp.nbMembres = membres.length;
 
                 /*Nombre de membres max */
@@ -785,13 +779,13 @@ module.exports = {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Annotation_%2525C3%2525A9quipes.html">Annotation_équipes</a></li><li><a href="module-Evenement.html">Evenement</a></li><li><a href="module-Gestion_demandes_admission.html">Gestion_demandes_admission</a></li><li><a href="module-Projet.html">Projet</a></li><li><a href="module-Token.html">Token</a></li><li><a href="module-UserController.html">UserController</a></li><li><a href="module-UserRouter.html">UserRouter</a></li><li><a href="module-VerifierProfil.html">VerifierProfil</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-UserRouter-UserRouter.html">UserRouter</a></li></ul><h3>Global</h3><ul><li><a href="global.html#ajouterRegle">ajouterRegle</a></li><li><a href="global.html#chercherAdminID">chercherAdminID</a></li><li><a href="global.html#chercherGestionnaireExtID">chercherGestionnaireExtID</a></li><li><a href="global.html#chercherGestionnaireIapau">chercherGestionnaireIapau</a></li><li><a href="global.html#chercherListeAdmins">chercherListeAdmins</a></li><li><a href="global.html#chercherListeGestionnaireIapau">chercherListeGestionnaireIapau</a></li><li><a href="global.html#chercherListeGestionnairesExt">chercherListeGestionnairesExt</a></li><li><a href="global.html#chercherListeStudents">chercherListeStudents</a></li><li><a href="global.html#chercherListeUtilisateurs">chercherListeUtilisateurs</a></li><li><a href="global.html#chercherProjetId">chercherProjetId</a></li><li><a href="global.html#chercherStudent">chercherStudent</a></li><li><a href="global.html#chercherUserID">chercherUserID</a></li><li><a href="global.html#chercherUserPseudo">chercherUserPseudo</a></li><li><a href="global.html#comparerMdp">comparerMdp</a></li><li><a href="global.html#connexion">connexion</a></li><li><a href="global.html#creationProjet">creationProjet</a></li><li><a href="global.html#creerAdmin">creerAdmin</a></li><li><a href="global.html#creerEtudiant">creerEtudiant</a></li><li><a href="global.html#creerGestionnaireExterne">creerGestionnaireExterne</a></li><li><a href="global.html#creerGestionnaireIA">creerGestionnaireIA</a></li><li><a href="global.html#creerProjet">creerProjet</a></li><li><a href="global.html#equipeExiste">equipeExiste</a></li><li><a href="global.html#infosProjet">infosProjet</a></li><li><a href="global.html#inscriptionEleve">inscriptionEleve</a></li><li><a href="global.html#insererMot">insererMot</a></li><li><a href="global.html#insererUser">insererUser</a></li><li><a href="global.html#listeProjetsJson">listeProjetsJson</a></li><li><a href="global.html#modifierAdministrateur">modifierAdministrateur</a></li><li><a href="global.html#modifierEtudiant">modifierEtudiant</a></li><li><a href="global.html#modifierExterne">modifierExterne</a></li><li><a href="global.html#modifierIapau">modifierIapau</a></li><li><a href="global.html#modifierProjet">modifierProjet</a></li><li><a href="global.html#modifierUser">modifierUser</a></li><li><a href="global.html#recupInfoEvent">recupInfoEvent</a></li><li><a href="global.html#recupererAncienEvents">recupererAncienEvents</a></li><li><a href="global.html#recupererEventActuel">recupererEventActuel</a></li><li><a href="global.html#recuperer_projets">recuperer_projets</a></li><li><a href="global.html#recuperer_regles">recuperer_regles</a></li><li><a href="global.html#recuperer_ressourcesPrivees">recuperer_ressourcesPrivees</a></li><li><a href="global.html#recuperer_ressourcesPubliques">recuperer_ressourcesPubliques</a></li><li><a href="global.html#recuperer_toutes_ressources">recuperer_toutes_ressources</a></li><li><a href="global.html#retournerEquipeProjet">retournerEquipeProjet</a></li><li><a href="global.html#salageMdp">salageMdp</a></li><li><a href="global.html#supprimerProjet">supprimerProjet</a></li><li><a href="global.html#supprimerUser">supprimerUser</a></li><li><a href="global.html#tousLesProjets">tousLesProjets</a></li><li><a href="global.html#updateMdp">updateMdp</a></li><li><a href="global.html#validerEtudiant">validerEtudiant</a></li><li><a href="global.html#verifIdEquipe">verifIdEquipe</a></li><li><a href="global.html#verifIdEvent">verifIdEvent</a></li><li><a href="global.html#verifIdProjet">verifIdProjet</a></li><li><a href="global.html#voirEvent">voirEvent</a></li><li><a href="global.html#voirListeGestionnaires">voirListeGestionnaires</a></li><li><a href="global.html#voirListeProjets">voirListeProjets</a></li><li><a href="global.html#voirTousEvents">voirTousEvents</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Annotation_%2525C3%2525A9quipes.html">Annotation_équipes</a></li><li><a href="module-Evenement.html">Evenement</a></li><li><a href="module-Gestion_demandes_admission.html">Gestion_demandes_admission</a></li><li><a href="module-Gestion_des_utilisateurs.html">Gestion_des_utilisateurs</a></li><li><a href="module-Projet.html">Projet</a></li><li><a href="module-Token.html">Token</a></li><li><a href="module-UserRouter.html">UserRouter</a></li><li><a href="module-VerifierProfil.html">VerifierProfil</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-UserRouter-UserRouter.html">UserRouter</a></li></ul><h3>Global</h3><ul><li><a href="global.html#ajouterRegle">ajouterRegle</a></li><li><a href="global.html#chercherGestionnaireExtID">chercherGestionnaireExtID</a></li><li><a href="global.html#chercherGestionnaireIapau">chercherGestionnaireIapau</a></li><li><a href="global.html#chercherListeGestionnaireIapau">chercherListeGestionnaireIapau</a></li><li><a href="global.html#chercherListeGestionnairesExt">chercherListeGestionnairesExt</a></li><li><a href="global.html#chercherListeStudents">chercherListeStudents</a></li><li><a href="global.html#chercherStudent">chercherStudent</a></li><li><a href="global.html#chercheridProjet">chercheridProjet</a></li><li><a href="global.html#comparerMdp">comparerMdp</a></li><li><a href="global.html#connexion">connexion</a></li><li><a href="global.html#creationProjet">creationProjet</a></li><li><a href="global.html#creerEtudiant">creerEtudiant</a></li><li><a href="global.html#creerGestionnaireExterne">creerGestionnaireExterne</a></li><li><a href="global.html#creerGestionnaireIA">creerGestionnaireIA</a></li><li><a href="global.html#creerProjet">creerProjet</a></li><li><a href="global.html#equipeExiste">equipeExiste</a></li><li><a href="global.html#infosProjet">infosProjet</a></li><li><a href="global.html#inscriptionEleve">inscriptionEleve</a></li><li><a href="global.html#insererMot">insererMot</a></li><li><a href="global.html#listeProjetsJson">listeProjetsJson</a></li><li><a href="global.html#modifierEtudiant">modifierEtudiant</a></li><li><a href="global.html#modifierExterne">modifierExterne</a></li><li><a href="global.html#modifierIapau">modifierIapau</a></li><li><a href="global.html#modifierProjet">modifierProjet</a></li><li><a href="global.html#recupererAncienEvents">recupererAncienEvents</a></li><li><a href="global.html#recupererEventActuel">recupererEventActuel</a></li><li><a href="global.html#recuperer_projets">recuperer_projets</a></li><li><a href="global.html#recuperer_regles">recuperer_regles</a></li><li><a href="global.html#recuperer_ressourcesPrivees">recuperer_ressourcesPrivees</a></li><li><a href="global.html#recuperer_ressourcesPubliques">recuperer_ressourcesPubliques</a></li><li><a href="global.html#recuperer_toutes_ressources">recuperer_toutes_ressources</a></li><li><a href="global.html#retournerEquipeProjet">retournerEquipeProjet</a></li><li><a href="global.html#salageMdp">salageMdp</a></li><li><a href="global.html#supprimerProjet">supprimerProjet</a></li><li><a href="global.html#tousLesProjets">tousLesProjets</a></li><li><a href="global.html#updateMdp">updateMdp</a></li><li><a href="global.html#validerEtudiant">validerEtudiant</a></li><li><a href="global.html#verifIdEquipe">verifIdEquipe</a></li><li><a href="global.html#verifIdEvent">verifIdEvent</a></li><li><a href="global.html#verifIdProjet">verifIdProjet</a></li><li><a href="global.html#voirEvent">voirEvent</a></li><li><a href="global.html#voirListeGestionnaires">voirListeGestionnaires</a></li><li><a href="global.html#voirListeProjets">voirListeProjets</a></li><li><a href="global.html#voirTousEvents">voirTousEvents</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.2</a> on Wed Aug 02 2023 13:29:57 GMT+0200 (Central European Summer Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.2</a> on Tue Aug 08 2023 15:10:09 GMT+0200 (Central European Summer Time)
 </footer>
 
 <script> prettyPrint(); </script>

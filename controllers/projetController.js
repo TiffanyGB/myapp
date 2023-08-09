@@ -139,19 +139,24 @@ async function creationProjet(req, res) {
         /*Vérification des données des gestionnaires, les id doivent être des entiers
         et doivent correspondre à des gestionnaires */
         for (const element of gestionnaireExterne) {
-            if (!Number.isInteger(element)) {
+            const parsedElement = parseInt(element, 10);
+
+            if (!Number.isInteger(parsedElement)) {
                 return res.status(400).json({ message: "Un élément du tableau des gestionnaires n'est pas un entier." })
             }
-
-            let user = await gestionnaireExterneModel.chercherGestionnaireExtID(element);
-
+        
+            let user = await gestionnaireExterneModel.chercherGestionnaireExtID(parsedElement);
+        
             if (user.length === 0) {
-                return res.status(400).json({ erreur: "Aucun gestionnaire externe ne possède l'id " + element + "." })
+                return res.status(400).json({ erreur: "Aucun gestionnaire externe ne possède l'id " + parsedElement + "." })
             }
         }
+        
 
         for (const element of gestionnaireIA) {
-            if (!Number.isInteger(element)) {
+            const parsedElement = parseInt(element, 10);
+
+            if (!Number.isInteger(parsedElement)) {
                 return res.status(400).json({ message: "Un élément du tableau des gestionnaires n'est pas un entier." })
             }
 
@@ -277,7 +282,7 @@ async function modifierProjet(req, res) {
 
                 await body('Ressources.*.type')
                     .notEmpty().withMessage('Le type ne doit pas être vide.')
-                    .matches(/^(video|lien|drive|téléchargment)$/).withMessage('Le type doit avoir "video", "lien", "drive" ou "téléchargement".')
+                    .matches(/^(video|lien|drive|téléchargement)$/).withMessage('Le type doit avoir "vidéo", "lien", "drive" ou "téléchargement".')
                     .isLength({ min: 2, max: 18 })
                     .run(req);
 
@@ -312,24 +317,28 @@ async function modifierProjet(req, res) {
             /*Vérification des données des gestionnaires, les id doivent être des entiers
             et doivent correspondre à des gestionnaires */
             for (const element of gestionnaireExterne) {
-                if (!Number.isInteger(element)) {
+                const parsedElement = parseInt(element, 10);
+    
+                if (!Number.isInteger(parsedElement)) {
                     return res.status(400).json({ message: "Un élément du tableau des gestionnaires n'est pas un entier." })
                 }
-
-                let user = await gestionnaireExterneModel.chercherGestionnaireExtID(element);
-
+            
+                let user = await gestionnaireExterneModel.chercherGestionnaireExtID(parsedElement);
+            
                 if (user.length === 0) {
-                    return res.status(400).json({ erreur: "Aucun gestionnaire externe ne possède l'id " + element + "." })
+                    return res.status(400).json({ erreur: "Aucun gestionnaire externe ne possède l'id " + parsedElement + "." })
                 }
             }
-
+            
             for (const element of gestionnaireIA) {
-                if (!Number.isInteger(element)) {
+                const parsedElement = parseInt(element, 10);
+    
+                if (!Number.isInteger(parsedElement)) {
                     return res.status(400).json({ message: "Un élément du tableau des gestionnaires n'est pas un entier." })
                 }
-
+    
                 let user = await gestionnaireIaModel.chercherGestionnaireIapau(element);
-
+    
                 if (user.length === 0) {
                     return res.status(400).json({ erreur: "Aucun gestionnaire externe ne possède l'id " + element + "." })
                 }

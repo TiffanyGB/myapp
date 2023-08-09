@@ -93,13 +93,14 @@ async function jsonGetAnnotation(idEquipe){
         }
 
         return jsonRetour;
-    }catch{
-
+    }catch (error){
+        throw error;
     }
 }
 
 
 module.exports = {
     creerAnnotation,
-    jsonGetAnnotation
+    jsonGetAnnotation,
+    getAnnotationEquipes
 }

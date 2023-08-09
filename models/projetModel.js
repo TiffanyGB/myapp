@@ -23,7 +23,7 @@ const validateProjet = [
 
     body('recompense')
         .notEmpty().withMessage('La récompense ne doit pas être vide.')
-        .isInt({ min: 0, max: 100000 }).withMessage('La récompense doit être un nombre entre 0 et 100 000.'),
+        .isLength({ min: 0, max: 100000 }).withMessage('La récompense doit être un nombre entre 0 et 100 000.'),
 
 
     body('description')

@@ -28,7 +28,6 @@
         <article>
             <pre class="prettyprint source linenums"><code>const equipeModel = require('../models/equipeModel');
 const projetModel = require('../models/projetModel');
-const eventModel = require('../models/eventModel');
 const demandeModel = require('../models/demandeModel')
 const { body, validationResult } = require('express-validator');
 
@@ -38,15 +37,7 @@ async function retournerEquipeProjet(req, res) {
     res.status(200).json({ sucess: 'Agress granted' });
   }
   else if (req.method === 'GET') {
-    const idProjet = res.locals.projetId;
-
-    /**Vérifier si l'id existe dans la bdd, sinon 404 error */
-    projetModel.chercherProjetId(idProjet)
-      .then((result) => {
-        if (result.length === 0) {
-          return res.status(404).json({ erreur: "L'id n'existe pas" });
-        }
-      });
+    const idProjet = res.locals.idProjet;
 
     try {
       const equipeList = await equipeModel.jsonListeEquipeProjet(idProjet);
@@ -57,6 +48,7 @@ async function retournerEquipeProjet(req, res) {
   }
 }
 
+/* aaaa Vérifier données */
 async function creerEquipe(req, res) {
   if (req.method === 'OPTIONS') {
     res.status(200).json({ sucess: 'Agress granted' });
@@ -81,27 +73,35 @@ async function creerEquipe(req, res) {
       idProjet
     ]
 
-    /* L'étudiant ne doit pas avoir d'équipe dans l'event*/
-
-    /*Récupérer l'event de l'équipe*/
-    const projet = await projetModel.chercherProjetId(idProjet);
-    const idEvent = projet[0].idevent;
-
-    const aUneEquipe = await equipeModel.aUneEquipeDansEvent(idCapitaine, idEvent);
-
-    if (aUneEquipe != -1) {
-      return res.status(400).json({ erreur: 'Vous avez déjà une équipe dans cet évènement' });
-    }
-
     /* Création de l'équipe */
     try {
+      /* L'étudiant ne doit pas avoir d'équipe dans l'event*/
+
+      /*Récupérer l'event de l'équipe*/
+      const projet = await projetModel.chercheridProjet(idProjet);
+      if (projet.length === 0) {
+        return res.status(400).json({ erreur: 'L\'id du projet n\'existe pas.' })
+      }
+
+
+      const idEvent = projet[0].idevent;
+
+      const aUneEquipe = await equipeModel.aUneEquipeDansEvent(idCapitaine, idEvent);
+
+      if (aUneEquipe != -1) {
+        return res.status(400).json({ erreur: 'Vous avez déjà une équipe dans cet évènement' });
+      }
       let idEquipe = await equipeModel.creerEquipe(infos);
 
       equipeModel.ajouterMembre(idCapitaine, idEquipe);
 
+      /* Supprimer les demandes de l'étudiant des autres equipes */
+      demandeModel.supprimerDemandes(idUser);
+
       return res.status(200).json(idEquipe);
-    } catch{
-      return res.status(400).json({ erreur: 'Erreur création équipe.' });
+    } catch (error) {
+      throw (error)
+      //return res.status(400).json({ erreur: 'Erreur création équipe.' });
     }
   }
 }
@@ -137,9 +137,6 @@ async function modifierEquipe(req, res) {
     ]
 
     try {
-      /*La vérification de l'existence de l'id de l'équipe est faite lors de la
-      vérification de profil (ie il faut être capitaine) dans la route*/
-
       equipeModel.modifierEquipe(valeurs);
       res.status(200).json({ message: "Equipe modifiée" });
 
@@ -158,8 +155,6 @@ async function supprimerEquipe(req, res) {
     try {
       const idEquipe = res.locals.idEquipe;
 
-      /* Vérification de l'existence de l'id dans le verif profil déjà faite*/
-
       /*Suppression */
       equipeModel.supprimerEquipe(idEquipe);
       res.status(200).json({ message: "Equipe supprimée" });
@@ -169,6 +164,8 @@ async function supprimerEquipe(req, res) {
     }
   }
 }
+
+/* aaaa Vérifier données */
 
 async function promouvoir(req, res) {
   if (req.method === 'OPTIONS') {
@@ -183,8 +180,6 @@ async function promouvoir(req, res) {
       const {
         idUser
       } = req.body;
-
-      /* La verif de l'existence de l'équipe fait dans la verif de profil (middleware) */
 
       /*Vérifier si l'étudiant est dans l'équipe */
       const appartenir = await equipeModel.appartenirEquipe(idUser, idEquipe);
@@ -207,6 +202,8 @@ async function promouvoir(req, res) {
   }
 }
 
+/* aaaa Vérifier données */
+
 async function supprimerMembre(req, res) {
   if (req.method === 'OPTIONS') {
     res.status(200).json({ sucess: 'Agress granted' });
@@ -220,8 +217,6 @@ async function supprimerMembre(req, res) {
     } = req.body;
 
     try {
-      /* Vérification de l'existence de l'id dans le verif profil*/
-
       /*Vérifier si l'étudiant est dans l'équipe */
       const appartenir = await equipeModel.appartenirEquipe(idUser, idEquipe);
       if (appartenir.length === 0) {
@@ -255,11 +250,6 @@ async function getInfosEquipe(req, res) {
 
     const idEquipe = res.locals.idEquipe;
 
-    /* Vérifier l'id de l'équipe */
-    const equipe = await equipeModel.chercherEquipeID(idEquipe);
-    if (equipe.length === 0) {
-      return res.status(404).json({ erreur: 'L\'id de l\'équipe n\'existe pas' });
-    }
     const jsonRetour = await equipeModel.jsonInformationsEquipe(idEquipe, req);
 
     res.status(200).json(jsonRetour);
@@ -273,12 +263,6 @@ async function listeOuvertes(req, res) {
   else if (req.method === 'GET') {
 
     const idEvent = res.locals.idEvent;
-
-    // Vérifier que l'id existe dans la bdd, sinon 404 error
-    const event = eventModel.chercherEvenement(idEvent)
-    if (event.length === 0) {
-      return res.status(404).json({ erreur: 'L\'id de l\'événement n\'existe pas' });
-    }
 
     try {
       const equipesOuvertes = await equipeModel.jsonEquipesOuvertes(idEvent, req);
@@ -299,17 +283,12 @@ async function quitterEquipe(req, res) {
     const idUser = req.id;
     const idEquipe = res.locals.idEquipe;
 
-    /* Vérifier l'id de l'équipe */
-    const equipe = await equipeModel.chercherEquipeID(idEquipe);
-    if (equipe.length === 0) {
-      return res.status(404).json({ erreur: 'L\'id de l\'équipe n\'existe pas' });
-    }
-
     /*Doit appartenir à l'équipe */
     const appartenir = await equipeModel.appartenirEquipe(idUser, idEquipe);
     if (appartenir.length === 0) {
       return res.status(404).json({ erreur: 'L\'étudiant n\'appartient pas à l\'équipe' });
     }
+    const equipe = await equipeModel.chercherEquipeID(idEquipe);
 
     /*Ne doit pas être capitaine */
     if (equipe[0].idcapitaine === idUser) {
@@ -318,10 +297,10 @@ async function quitterEquipe(req, res) {
 
     try {
       equipeModel.quitterEquipe(idEquipe, idUser);
-      res.status(200).json({ message: "Equipe quittée" });
+      return res.status(200).json({ message: "Equipe quittée" });
 
     } catch {
-      res.status(400).json({ error: 'N\'a pas pu quitter.' });
+      return res.status(400).json({ error: 'N\'a pas pu quitter.' });
     }
   }
 }
@@ -357,14 +336,10 @@ async function demandeEquipe(req, res) {
       return res.status(400).json({ errors: errors.array() });
     }
 
-    /*Vérif existence équipe */
     const equipe = await equipeModel.chercherEquipeID(idEquipe);
-    if (equipe.length === 0) {
-      return res.status(404).json({ erreur: 'L\'id n\'existe pas' });
-    }
 
     /*Vérifier que l'équipe est ouverte */
-    if(equipe[0].statut_recrutement === 'fermé'){
+    if (equipe[0].statut_recrutement === 'fermé') {
       return res.status(404).json({ erreur: 'L\'équipe est fermée' });
     }
 
@@ -372,7 +347,7 @@ async function demandeEquipe(req, res) {
 
     /*Récupérer l'event de l'équipe*/
     const idProjet = equipe[0].idprojet;
-    const projet = await projetModel.chercherProjetId(idProjet);
+    const projet = await projetModel.chercheridProjet(idProjet);
     const idEvent = projet[0].idevent;
 
     const aUneEquipe = await equipeModel.aUneEquipeDansEvent(idUser, idEvent);
@@ -391,7 +366,7 @@ async function demandeEquipe(req, res) {
       equipeModel.envoyerDemande(valeurs);
       return res.status(200).json({ message: "Message envoyé" });
 
-    } catch {
+    } catch (error) {
       return res.status(400).json({ error: 'Erreur lors de l\'envoi du message.' });
     }
   }
@@ -405,22 +380,15 @@ async function accepterDemande(req, res) {
 
     const idEquipe = res.locals.idEquipe;
 
-    const {
-      id: idUser
-    } = req.body;
+    const idUser = req.body.id;
 
-
-    /*Vérif existence équipe */
     const equipe = await equipeModel.chercherEquipeID(idEquipe);
-    if (equipe.length === 0) {
-      return res.status(404).json({ erreur: 'L\'id n\'existe pas' });
-    }
 
     /* L'étudiant ne doit pas avoir d'équipe dans l'event*/
 
     /*Récupérer l'event de l'équipe*/
     const idProjet = equipe[0].idprojet;
-    const projet = await projetModel.chercherProjetId(idProjet);
+    const projet = await projetModel.chercheridProjet(idProjet);
     const idEvent = projet[0].idevent;
 
     const aUneEquipe = await equipeModel.aUneEquipeDansEvent(idUser, idEvent);
@@ -456,17 +424,7 @@ async function declinerDemande(req, res) {
 
     const idEquipe = res.locals.idEquipe;
 
-    const {
-      id: idUser
-    } = req.body;
-
-
-    /*Vérif existence équipe */
-    const equipe = await equipeModel.chercherEquipeID(idEquipe);
-    if (equipe.length === 0) {
-      return res.status(404).json({ erreur: 'L\'id n\'existe pas' });
-    }
-
+    const idUser = req.body.id;
 
     /* Vérifier si l'étudiant a bien envoyé une demande */
     const envoyee = await equipeModel.demandeDejaEnvoyee(idUser, idEquipe);
@@ -492,10 +450,10 @@ async function voirMesEquipes(req, res) {
 
     try {
       const jsonInfos = await equipeModel.jsonMesEquipes(req.id);
-      res.status(200).json(jsonInfos);
+      return res.status(200).json(jsonInfos);
 
     } catch {
-      res.status(400).json({ erreur: "Erreur lors de la récupération des données." });
+      return res.status(400).json({ erreur: "Erreur lors de la récupération des données." });
     }
   }
 }
@@ -524,13 +482,13 @@ module.exports = {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Annotation_%2525C3%2525A9quipes.html">Annotation_équipes</a></li><li><a href="module-Evenement.html">Evenement</a></li><li><a href="module-Gestion_demandes_admission.html">Gestion_demandes_admission</a></li><li><a href="module-Projet.html">Projet</a></li><li><a href="module-Token.html">Token</a></li><li><a href="module-UserController.html">UserController</a></li><li><a href="module-UserRouter.html">UserRouter</a></li><li><a href="module-VerifierProfil.html">VerifierProfil</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-UserRouter-UserRouter.html">UserRouter</a></li></ul><h3>Global</h3><ul><li><a href="global.html#ajouterRegle">ajouterRegle</a></li><li><a href="global.html#chercherAdminID">chercherAdminID</a></li><li><a href="global.html#chercherGestionnaireExtID">chercherGestionnaireExtID</a></li><li><a href="global.html#chercherGestionnaireIapau">chercherGestionnaireIapau</a></li><li><a href="global.html#chercherListeAdmins">chercherListeAdmins</a></li><li><a href="global.html#chercherListeGestionnaireIapau">chercherListeGestionnaireIapau</a></li><li><a href="global.html#chercherListeGestionnairesExt">chercherListeGestionnairesExt</a></li><li><a href="global.html#chercherListeStudents">chercherListeStudents</a></li><li><a href="global.html#chercherListeUtilisateurs">chercherListeUtilisateurs</a></li><li><a href="global.html#chercherProjetId">chercherProjetId</a></li><li><a href="global.html#chercherStudent">chercherStudent</a></li><li><a href="global.html#chercherUserID">chercherUserID</a></li><li><a href="global.html#chercherUserPseudo">chercherUserPseudo</a></li><li><a href="global.html#comparerMdp">comparerMdp</a></li><li><a href="global.html#connexion">connexion</a></li><li><a href="global.html#creationProjet">creationProjet</a></li><li><a href="global.html#creerAdmin">creerAdmin</a></li><li><a href="global.html#creerEtudiant">creerEtudiant</a></li><li><a href="global.html#creerGestionnaireExterne">creerGestionnaireExterne</a></li><li><a href="global.html#creerGestionnaireIA">creerGestionnaireIA</a></li><li><a href="global.html#creerProjet">creerProjet</a></li><li><a href="global.html#equipeExiste">equipeExiste</a></li><li><a href="global.html#infosProjet">infosProjet</a></li><li><a href="global.html#inscriptionEleve">inscriptionEleve</a></li><li><a href="global.html#insererMot">insererMot</a></li><li><a href="global.html#insererUser">insererUser</a></li><li><a href="global.html#listeProjetsJson">listeProjetsJson</a></li><li><a href="global.html#modifierAdministrateur">modifierAdministrateur</a></li><li><a href="global.html#modifierEtudiant">modifierEtudiant</a></li><li><a href="global.html#modifierExterne">modifierExterne</a></li><li><a href="global.html#modifierIapau">modifierIapau</a></li><li><a href="global.html#modifierProjet">modifierProjet</a></li><li><a href="global.html#modifierUser">modifierUser</a></li><li><a href="global.html#recupInfoEvent">recupInfoEvent</a></li><li><a href="global.html#recupererAncienEvents">recupererAncienEvents</a></li><li><a href="global.html#recupererEventActuel">recupererEventActuel</a></li><li><a href="global.html#recuperer_projets">recuperer_projets</a></li><li><a href="global.html#recuperer_regles">recuperer_regles</a></li><li><a href="global.html#recuperer_ressourcesPrivees">recuperer_ressourcesPrivees</a></li><li><a href="global.html#recuperer_ressourcesPubliques">recuperer_ressourcesPubliques</a></li><li><a href="global.html#recuperer_toutes_ressources">recuperer_toutes_ressources</a></li><li><a href="global.html#retournerEquipeProjet">retournerEquipeProjet</a></li><li><a href="global.html#salageMdp">salageMdp</a></li><li><a href="global.html#supprimerProjet">supprimerProjet</a></li><li><a href="global.html#supprimerUser">supprimerUser</a></li><li><a href="global.html#tousLesProjets">tousLesProjets</a></li><li><a href="global.html#updateMdp">updateMdp</a></li><li><a href="global.html#validerEtudiant">validerEtudiant</a></li><li><a href="global.html#verifIdEquipe">verifIdEquipe</a></li><li><a href="global.html#verifIdEvent">verifIdEvent</a></li><li><a href="global.html#verifIdProjet">verifIdProjet</a></li><li><a href="global.html#voirEvent">voirEvent</a></li><li><a href="global.html#voirListeGestionnaires">voirListeGestionnaires</a></li><li><a href="global.html#voirListeProjets">voirListeProjets</a></li><li><a href="global.html#voirTousEvents">voirTousEvents</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Annotation_%2525C3%2525A9quipes.html">Annotation_équipes</a></li><li><a href="module-Evenement.html">Evenement</a></li><li><a href="module-Gestion_demandes_admission.html">Gestion_demandes_admission</a></li><li><a href="module-Gestion_des_utilisateurs.html">Gestion_des_utilisateurs</a></li><li><a href="module-Projet.html">Projet</a></li><li><a href="module-Token.html">Token</a></li><li><a href="module-UserRouter.html">UserRouter</a></li><li><a href="module-VerifierProfil.html">VerifierProfil</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-UserRouter-UserRouter.html">UserRouter</a></li></ul><h3>Global</h3><ul><li><a href="global.html#ajouterRegle">ajouterRegle</a></li><li><a href="global.html#chercherGestionnaireExtID">chercherGestionnaireExtID</a></li><li><a href="global.html#chercherGestionnaireIapau">chercherGestionnaireIapau</a></li><li><a href="global.html#chercherListeGestionnaireIapau">chercherListeGestionnaireIapau</a></li><li><a href="global.html#chercherListeGestionnairesExt">chercherListeGestionnairesExt</a></li><li><a href="global.html#chercherListeStudents">chercherListeStudents</a></li><li><a href="global.html#chercherStudent">chercherStudent</a></li><li><a href="global.html#chercheridProjet">chercheridProjet</a></li><li><a href="global.html#comparerMdp">comparerMdp</a></li><li><a href="global.html#connexion">connexion</a></li><li><a href="global.html#creationProjet">creationProjet</a></li><li><a href="global.html#creerEtudiant">creerEtudiant</a></li><li><a href="global.html#creerGestionnaireExterne">creerGestionnaireExterne</a></li><li><a href="global.html#creerGestionnaireIA">creerGestionnaireIA</a></li><li><a href="global.html#creerProjet">creerProjet</a></li><li><a href="global.html#equipeExiste">equipeExiste</a></li><li><a href="global.html#infosProjet">infosProjet</a></li><li><a href="global.html#inscriptionEleve">inscriptionEleve</a></li><li><a href="global.html#insererMot">insererMot</a></li><li><a href="global.html#listeProjetsJson">listeProjetsJson</a></li><li><a href="global.html#modifierEtudiant">modifierEtudiant</a></li><li><a href="global.html#modifierExterne">modifierExterne</a></li><li><a href="global.html#modifierIapau">modifierIapau</a></li><li><a href="global.html#modifierProjet">modifierProjet</a></li><li><a href="global.html#recupererAncienEvents">recupererAncienEvents</a></li><li><a href="global.html#recupererEventActuel">recupererEventActuel</a></li><li><a href="global.html#recuperer_projets">recuperer_projets</a></li><li><a href="global.html#recuperer_regles">recuperer_regles</a></li><li><a href="global.html#recuperer_ressourcesPrivees">recuperer_ressourcesPrivees</a></li><li><a href="global.html#recuperer_ressourcesPubliques">recuperer_ressourcesPubliques</a></li><li><a href="global.html#recuperer_toutes_ressources">recuperer_toutes_ressources</a></li><li><a href="global.html#retournerEquipeProjet">retournerEquipeProjet</a></li><li><a href="global.html#salageMdp">salageMdp</a></li><li><a href="global.html#supprimerProjet">supprimerProjet</a></li><li><a href="global.html#tousLesProjets">tousLesProjets</a></li><li><a href="global.html#updateMdp">updateMdp</a></li><li><a href="global.html#validerEtudiant">validerEtudiant</a></li><li><a href="global.html#verifIdEquipe">verifIdEquipe</a></li><li><a href="global.html#verifIdEvent">verifIdEvent</a></li><li><a href="global.html#verifIdProjet">verifIdProjet</a></li><li><a href="global.html#voirEvent">voirEvent</a></li><li><a href="global.html#voirListeGestionnaires">voirListeGestionnaires</a></li><li><a href="global.html#voirListeProjets">voirListeProjets</a></li><li><a href="global.html#voirTousEvents">voirTousEvents</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.2</a> on Wed Aug 02 2023 13:29:57 GMT+0200 (Central European Summer Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.2</a> on Tue Aug 08 2023 15:10:09 GMT+0200 (Central European Summer Time)
 </footer>
 
 <script> prettyPrint(); </script>

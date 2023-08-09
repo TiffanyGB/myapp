@@ -1,3 +1,8 @@
+/**
+ * @fileoverview Model des utilisateurs.
+ * @module Gestion_des_utilisateurs
+ */
+
 const pool = require('../database/configDB');
 const passwordModel = require('../models/passwordModel');
 const profilModel = require('./profilModel');
@@ -104,14 +109,15 @@ function chercherUserPseudo(pseudo) {
 /**Création utilisateur */
 async function insererUser(values, password, values2, type) {
 
-    let mdp = await passwordModel.salageMdp(password);
-
     const insertUser = `
       INSERT INTO Utilisateur (nom, prenom, pseudo, email, lien_linkedin, lien_github, ville, date_inscription, typeUser, hashMdp)
       VALUES ($1, $2, $3, $4, $5, $6, $7, CURRENT_TIMESTAMP, $8, $9)  RETURNING iduser`;
 
     try {
-        values.push(type, mdp)
+        let mdp = await passwordModel.salageMdp(password);
+
+        values.push(type, mdp);
+
         const nonExiste = await verif.verifExistence(values2);
 
         /**Pas d'utilisateur ayant les mêmes id, on peut insérer */
@@ -121,6 +127,7 @@ async function insererUser(values, password, values2, type) {
                     .then((result) => {
 
                         let id = result.rows[0].iduser;
+                        /*Insertion des préférences pour le profil */
                         profilModel.preferences(id);
                         resolve(id);
                     });
@@ -145,13 +152,12 @@ async function insererUser(values, password, values2, type) {
 }
 
 
-/**Modifier un utilisateur */
+/**Modifier un utilisateur, injections sql */
 async function modifierUser(idUser, valeurs, password) {
 
     const temp = await chercherUserID(idUser);
 
     /**Vérifier que le nouveau pseudo et email n'existent pas */
-
     infoUser = temp[0];
 
     const id = [valeurs[2], valeurs[3]];
@@ -182,7 +188,6 @@ async function modifierUser(idUser, valeurs, password) {
         return "mail";
     }
 
-
     const modif = `
     UPDATE Utilisateur 
     SET
@@ -196,22 +201,16 @@ async function modifierUser(idUser, valeurs, password) {
       derniereModif = CURRENT_TIMESTAMP
     WHERE idUser = '${idUser}'`;
 
+    try {
+        pool.query(modif);
+        if (password != '') {
+            passwordModel.salageMdp(password)
+            passwordModel.updateMdp(hashedPassword, idUser);
+        }
 
-    pool.query(modif)
-        .then(() => {
-            if (password != '') {
-                passwordModel.salageMdp(password)
-                    .then((hashedPassword) => {
-                        passwordModel.updateMdp(hashedPassword, idUser);
-                    })
-            } else {
-                console.log('Pas de modif de mdp');
-            }
-            console.log("Mise à jour côté Utilisateur réussie");
-        })
-        .catch((error) => {
-            console.log(error);
-        })
+    } catch (error) {
+        throw error;
+    }
 }
 
 
@@ -225,24 +224,6 @@ function supprimerUser(idUser) {
     } catch {
         throw error;
     }
-}
-
-/*Sert a r */
-function supprimerUserID(idUser) {
-
-    const suppr = `DELETE FROM Utilisateur WHERE idUser = $1`;
-
-    return new Promise((resolve, reject) => {
-
-        pool.query(suppr, [idUser])
-            .then(() => {
-                resolve('ok');
-            })
-            .catch((error) => {
-                reject(error);
-            });
-
-    });
 }
 
 async function getInfosProfil(id) {
@@ -281,6 +262,5 @@ module.exports = {
     supprimerUser,
     modifierUser,
     insererUser,
-    supprimerUserID,
     validateUser,
 }

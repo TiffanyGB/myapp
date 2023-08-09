@@ -47,6 +47,7 @@ var gestionnaireRouter = require('./routes/gestionnaire');
 var teamsRouter = require('./routes/teams');
 var tokenRouter = require('./routes/token');
 var messageRouter = require('./routes/message');
+var gitLabRouter = require('./routes/gitlab');
 
 
 /** configure le moteur de rendu de vues en spécifiant le répertoire views où se trouvent les fichiers de vue et le moteur de rendu pug */
@@ -80,6 +81,7 @@ app.use('/gestionnaire', gestionnaireRouter);
 app.use('/teams', teamsRouter);
 app.use('/message', messageRouter);
 app.use('/token', tokenRouter);
+app.use('/', gitLabRouter);
 
 // Configuration du middleware body-parser
 app.use(bodyParser.urlencoded({ extended: false }));

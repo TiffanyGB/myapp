@@ -68,7 +68,7 @@ async function creerEquipe(req, res) {
       equipeModel.ajouterMembre(idCapitaine, idEquipe);
 
       /* Supprimer les demandes de l'étudiant des autres equipes */
-      demandeModel.supprimerDemandes(idUser);
+      demandeModel.supprimerDemandes(idCapitaine);
 
       return res.status(200).json(idEquipe);
     } catch (error) {

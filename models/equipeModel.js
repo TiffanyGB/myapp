@@ -5,6 +5,7 @@ const projetModel = require('./projetModel')
 const { body } = require('express-validator');
 const motCleModel = require('../models/motCleModel');
 const gererProjet = require('./gererProjet');
+const annotationModel = require('./annotationEquipeModel');
 
 const validerEquipe = [
     body('nom')
@@ -432,7 +433,7 @@ async function jsonInformationsEquipe(idEquipe, req) {
             voirTout = true;
         }
 
-        if(!voirTout){
+        if (!voirTout) {
             return jsonRetour;
         }
 
@@ -556,8 +557,14 @@ async function jsonListeEquipeProjet(idProjet) {
             temp.nomEvent = event.nom;
             temp.idEvent = event.idevent;
 
-            /*Dernier suivi mettre à jour */
-            temp.dernierSuivi = event.date_creation;
+            /*Dernier suivi de l'équipe */
+            let annotations = await annotationModel.getAnnotationEquipes(equipeCourante.idequipe);
+            if (annotations.length === 0) {
+                temp.dernierSuivi = event.date_creation;
+            } else {
+                annotations.sort((a, b) => new Date(b.date_annotation) - new Date(a.date_annotation));
+                temp.dernierSuivi = annotations[0].date_annotation;
+            }
 
             /*Capitaine */
             temp.idCapitaine = equipeCourante.idcapitaine;

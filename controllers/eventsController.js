@@ -121,7 +121,7 @@ async function modifierEvent(req, res) {
       nombreMaxEquipe,
       messageFin,
       image,
-      idevent, 
+      idevent,
     ];
 
     try {
@@ -211,10 +211,75 @@ async function recupInfoEvent(req, res) {
   }
 }
 
+/**
+ * Voir un événement spécifique.
+ * @param {object} req - L'objet de requête HTTP.
+ * @param {object} res - L'objet de réponse HTTP.
+ * @returns {object} Un JSON contenant les informations de l'événement nécessaires pour l'affichage
+ * @throws {Error}Erreur lors de la récupération des informations de l'événement.
+ * @description Cette fonction permet à un utilisateur voir les informations d'un événement selon son statut ie 
+ * gestionnaire (IA ou externe), administrateur, étudiant, non connecté.
+ * Informations en plus pour un étudiant: Numéro équipe (si existe).
+ * Informations en moins pour un non connecté: Ressources privées d'un projet.
+ */
+async function voirEvent(req, res) {
+  if (req.method === 'GET') {
+
+    const eventID = res.locals.eventID;
+
+    let jsonRetour;
+
+    try {
+      if (req.userProfile === 'admin' || req.userProfile === 'gestionnaire') {
+        jsonRetour = await eventModel.jsonEventChoisi(eventID, 'admin', req)
+      }
+
+      /**Si c'est un etudiant, afficher les infos de l'etudiant en plus, (equipe) */
+      else if (req.userProfile === 'etudiant') {
+        jsonRetour = await eventModel.jsonEventChoisi(eventID, 'etudiant', req)
+      }
+
+      /**Si non connecté ne pas envoyer les infos des ressources privées */
+      else if (req.userProfile === 'aucun') {
+        jsonRetour = await eventModel.jsonEventChoisi(eventID, 'aucun', req)
+      }
+      return res.status(200).json(jsonRetour);
+
+    } catch {
+      return res.status(500).json({ message: 'Une erreur s\'est produite lors de la récupération de l\'événement.' });
+    }
+
+  }
+}
+
+/**
+ * Voir la liste des événements (anciens et actuels).
+ * @param {object} req - L'objet de requête HTTP.
+ * @param {object} res - L'objet de réponse HTTP.
+ * @returns {object} Un JSON contenant les informations des événements ie:
+ * Titre, image, date début, fin, statut(en cours, inscription, fini), gain.
+ * @throws {Error}Erreur lors de la requete qui récupère tous les événements de la bdd.
+ * @description Cette fonction permet d'envoyer au client les informations à afficher pour tous les événements.
+ */
+async function voirTousEvents(req, res) {
+  if (req.method === 'GET') {
+
+    try {
+      const result = await eventModel.creerJsonTousEvents();
+      res.status(200).json(result);
+      
+    } catch (error) {
+      res.status(500).json({ message: 'Une erreur s\'est produite lors de la récupération des événements.' });
+    }
+  }
+}
+
 module.exports = {
   createEvent,
   modifierEvent,
   supprimerEvent,
   listeEquipes,
-  recupInfoEvent
+  recupInfoEvent,
+  voirEvent,
+  voirTousEvents
 }
