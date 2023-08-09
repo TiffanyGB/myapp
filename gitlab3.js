@@ -24,7 +24,7 @@ function creerDossier(nomEquipe) {
   const messageCommit = 'Ajout du nouveau dossier';
   const branch = 'main';
 
-  const aleatoire = genererChaineAleatoire(15);
+  const aleatoire = genererChaineAleatoire(20);
   const nomDossier = nomEquipe + aleatoire;
 
   const commitContent = {
