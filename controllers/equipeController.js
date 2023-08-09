@@ -2,6 +2,8 @@ const equipeModel = require('../models/equipeModel');
 const projetModel = require('../models/projetModel');
 const demandeModel = require('../models/demandeModel')
 const { body, validationResult } = require('express-validator');
+const {creerDossier} = require('../gitlab3');
+const eventModel = require('../models/eventModel');
 
 /**A mettre dans un dossier autre que controller */
 async function retournerEquipeProjet(req, res) {
@@ -55,7 +57,6 @@ async function creerEquipe(req, res) {
         return res.status(400).json({ erreur: 'L\'id du projet n\'existe pas.' })
       }
 
-
       const idEvent = projet[0].idevent;
 
       const aUneEquipe = await equipeModel.aUneEquipeDansEvent(idCapitaine, idEvent);
@@ -69,6 +70,9 @@ async function creerEquipe(req, res) {
 
       /* Supprimer les demandes de l'étudiant des autres equipes */
       demandeModel.supprimerDemandes(idCapitaine);
+
+      const event_nom = (await eventModel.chercherEvenement(idEvent))[0].nom;
+      const nomDossier = creerDossier(nom, event_nom);
 
       return res.status(200).json(idEquipe);
     } catch (error) {

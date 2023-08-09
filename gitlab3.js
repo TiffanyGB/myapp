@@ -14,14 +14,14 @@ function genererChaineAleatoire(longueur) {
   return chaineAleatoire;
 }
 
-function creerDossier(nomEquipe) {
+function creerDossier(nomEquipe, nom_event) {
   const gitlabBaseUrl = 'https://gitlab.com/api/v4/';
-  const idProjet = '48219512';
+  const idProjet = '48369960';
   const accessToken = 'glpat-oE7qvER3ewf4PUohzy5t';
 
   const endpoint = `/projects/${encodeURIComponent(idProjet)}/repository/commits`;
 
-  const messageCommit = 'Ajout du nouveau dossier';
+  const messageCommit = 'Ajout du dossier de l\'équipe ' + nomEquipe;
   const branch = 'main';
 
   const aleatoire = genererChaineAleatoire(20);
@@ -33,7 +33,7 @@ function creerDossier(nomEquipe) {
     actions: [
       {
         action: 'create',
-        file_path: `${nomDossier}/.gitkeep`,
+        file_path: `${nom_event}/${nomDossier}/.gitkeep`,
         content: '',
       },
     ],
@@ -50,7 +50,8 @@ function creerDossier(nomEquipe) {
     .catch(error => {
       console.error('Erreur lors de la requête API GitLab :', error);
     });
+
+  return nomDossier;
 }
 
-// Appeler la fonction pour créer le dossier
-creerDossier('ekip');
+module.exports = {creerDossier}
