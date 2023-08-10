@@ -277,37 +277,10 @@ async function modifierUser(req, res) {
     /**Trouver le type de l'user */
     let type;
 
-    await etudiantModel.chercherStudent(idUser)
-      .then((result) => {
+    const user = await userModel.chercherUserID(idUser);
 
-        if (result.length > 0) {
-          type = 'etudiant';
-        }
-      });
-
-    await gestionnaireExterneModel.chercherGestionnaireExtID(idUser)
-      .then((result) => {
-
-        if (result.length > 0) {
-          type = 'gestionnaireExterne';
-        }
-      });
-
-    await gestionnaireIaModel.chercherGestionnaireIapau(idUser)
-      .then((result) => {
-
-        if (result.length > 0) {
-          type = 'gestionnaireIA';
-        }
-      });
-
-    await adminModel.chercherAdminID(idUser)
-      .then((result) => {
-
-        if (result.length > 0) {
-          type = 'admin';
-        }
-      });
+    type = user[0].typeuser;
+    console.log(type)
 
     /* Vérification des données selon le type */
     switch (type) {
@@ -320,7 +293,7 @@ async function modifierUser(req, res) {
       case 'gestionnaireIA':
         await gestionnaireIaModel.validerGestionnaireIA(req);
         break;
-      case 'admin':
+      case 'administrateur':
         break;
       default:
         return res.status(400).json({ erreur: "Le type est incorrect" });

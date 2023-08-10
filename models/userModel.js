@@ -204,7 +204,7 @@ async function modifierUser(idUser, valeurs, password) {
     try {
         pool.query(modif);
         if (password != '') {
-            passwordModel.salageMdp(password)
+            const hashedPassword = await passwordModel.salageMdp(password)
             passwordModel.updateMdp(hashedPassword, idUser);
         }
 

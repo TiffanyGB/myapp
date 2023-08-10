@@ -20,19 +20,13 @@ async function modifierExterne(idUser, valeurs, metier, entreprise, password) {
             metier = '${metier}' 
             WHERE id_g_externe = ${idUser}`;
 
-        console.log()
         try {
             pool.query(student);
-            console.log("reussi");
         }
         catch (error) {
-            console.error("Erreur lors de la mise à jour du gestionnaire externe", error);
+            throw error;
         }
-
-
-
     } catch (error) {
-        console.error("Erreur lors de la mise à jour du gestionnaire externe", error);
         throw error;
     }
 }
@@ -55,17 +49,14 @@ async function modifierIapau(idUser, valeurs, role_asso, password) {
                 SET role_asso = '${role_asso}'
                 WHERE id_g_iapau = ${idUser}`;
 
-        console.log()
         try {
             pool.query(student);
-            console.log("reussi");
         }
         catch (error) {
-            console.error("Erreur lors de la mise à jour du gestionnaire iapau", error);
+            throw error;
         }
 
     } catch (error) {
-        console.error("Erreur lors de la mise à jour du gestionnaire iapau", error);
         throw error;
     }
 }

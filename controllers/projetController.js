@@ -144,14 +144,14 @@ async function creationProjet(req, res) {
             if (!Number.isInteger(parsedElement)) {
                 return res.status(400).json({ message: "Un élément du tableau des gestionnaires n'est pas un entier." })
             }
-        
+
             let user = await gestionnaireExterneModel.chercherGestionnaireExtID(parsedElement);
-        
+
             if (user.length === 0) {
                 return res.status(400).json({ erreur: "Aucun gestionnaire externe ne possède l'id " + parsedElement + "." })
             }
         }
-        
+
 
         for (const element of gestionnaireIA) {
             const parsedElement = parseInt(element, 10);
@@ -318,27 +318,27 @@ async function modifierProjet(req, res) {
             et doivent correspondre à des gestionnaires */
             for (const element of gestionnaireExterne) {
                 const parsedElement = parseInt(element, 10);
-    
+
                 if (!Number.isInteger(parsedElement)) {
                     return res.status(400).json({ message: "Un élément du tableau des gestionnaires n'est pas un entier." })
                 }
-            
+
                 let user = await gestionnaireExterneModel.chercherGestionnaireExtID(parsedElement);
-            
+
                 if (user.length === 0) {
                     return res.status(400).json({ erreur: "Aucun gestionnaire externe ne possède l'id " + parsedElement + "." })
                 }
             }
-            
+
             for (const element of gestionnaireIA) {
                 const parsedElement = parseInt(element, 10);
-    
+
                 if (!Number.isInteger(parsedElement)) {
                     return res.status(400).json({ message: "Un élément du tableau des gestionnaires n'est pas un entier." })
                 }
-    
+
                 let user = await gestionnaireIaModel.chercherGestionnaireIapau(element);
-    
+
                 if (user.length === 0) {
                     return res.status(400).json({ erreur: "Aucun gestionnaire externe ne possède l'id " + element + "." })
                 }
@@ -352,23 +352,17 @@ async function modifierProjet(req, res) {
                     motModel.supprimerMot(idProjet);
                     ressourceModel.supprimerRessources(idProjet);
 
-
                     for (i = 0; i < motClefs.length; i++) {
                         let motValeurs = [motClefs[i], idProjet];
                         motModel.insererMot(motValeurs);
                     }
+                    for (let i = 0; i < gestionnaireExterne.length; i++) {
 
-                    for (i = 0; i < gestionnaireExterne.length; i++) {
-
-                        let id = gestionnaireExterne[i].id;
-
+                        let id = gestionnaireExterne[i];
                         gererProjet.attribuerProjetExterne(idProjet, id);
                     }
-
-                    for (i = 0; i < gestionnaireIA.length; i++) {
-
-                        let id2 = gestionnaireIA[i].id;
-
+                    for (let i = 0; i < gestionnaireIA.length; i++) {
+                        let id2 = gestionnaireIA[i];
                         gererProjet.attribuerProjetIA(idProjet, id2);
                     }
 

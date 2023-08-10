@@ -294,7 +294,7 @@ async function infosProjet(idProjet) {
                 temp = {};
 
                 temp.id = gestionnaires[i].id_g_externe;
-                temp.Nom = user.Nom;
+                temp.Nom = user.nom;
                 temp.Prenom = user.prenom;
                 temp.Mail = user.email;
 
