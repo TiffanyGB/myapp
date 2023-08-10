@@ -233,4 +233,5 @@ router.all('/:id/getAnnotation',
     gestionnairesEquipeAdmin,
     annotationController.getAnnotationEquipe);
 
+
 module.exports = router;

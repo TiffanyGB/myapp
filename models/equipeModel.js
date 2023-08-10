@@ -6,6 +6,7 @@ const { body } = require('express-validator');
 const motCleModel = require('../models/motCleModel');
 const gererProjet = require('./gererProjet');
 const annotationModel = require('./annotationEquipeModel');
+const {recupererJSON} = require('../gitlab3');
 
 const validerEquipe = [
     body('nom')
@@ -508,6 +509,18 @@ async function jsonInformationsEquipe(idEquipe, req) {
             }
             jsonRetour.liste_user_attente.push(temp);
         }
+
+        const result = await recupererJSON(temp1.nom, event[0].nom);
+        jsonRetour.resultats = [];
+
+        for(i = 0; i < result.length; i++){
+            let temp = {};
+
+            temp.date = new Date();
+            temp.content = JSON.stringify(result[i]);
+
+            jsonRetour.resultats.push(temp)
+        }
         return jsonRetour;
     }
 
@@ -723,6 +736,10 @@ async function demandeDejaEnvoyee(idUser, idEquipe) {
                 reject(error);
             });
     });
+}
+
+async function recupererGitlabJSON(idEquipe){
+
 }
 
 module.exports = {

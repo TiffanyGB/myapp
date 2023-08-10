@@ -2,7 +2,7 @@ const equipeModel = require('../models/equipeModel');
 const projetModel = require('../models/projetModel');
 const demandeModel = require('../models/demandeModel')
 const { body, validationResult } = require('express-validator');
-const {creerDossier} = require('../gitlab3');
+const { creerDossier } = require('../gitlab3');
 const eventModel = require('../models/eventModel');
 
 /**A mettre dans un dossier autre que controller */
@@ -228,7 +228,9 @@ async function getInfosEquipe(req, res) {
 
     const jsonRetour = await equipeModel.jsonInformationsEquipe(idEquipe, req);
 
-    res.status(200).json(jsonRetour);
+    return res.status(200).json(jsonRetour);
+  } else {
+    return res.status(404).json('Page not found');
   }
 }
 
@@ -278,6 +280,9 @@ async function quitterEquipe(req, res) {
     } catch {
       return res.status(400).json({ error: 'N\'a pas pu quitter.' });
     }
+
+  } else {
+    return res.status(404).json('Page not found');
   }
 }
 
@@ -345,6 +350,8 @@ async function demandeEquipe(req, res) {
     } catch (error) {
       return res.status(400).json({ error: 'Erreur lors de l\'envoi du message.' });
     }
+  } else {
+    return res.status(404).json('Page not found');
   }
 }
 
@@ -389,6 +396,8 @@ async function accepterDemande(req, res) {
     } catch {
       res.status(400).json({ error: 'Erreur lors de l\'acceptation de l\'étudiant.' });
     }
+  } else {
+    return res.status(404).json('Page not found');
   }
 }
 
@@ -415,6 +424,8 @@ async function declinerDemande(req, res) {
     } catch {
       res.status(400).json({ error: 'Erreur lors du rejet de la demande.' });
     }
+  } else {
+    return res.status(404).json('Page not found');
   }
 }
 
@@ -431,8 +442,11 @@ async function voirMesEquipes(req, res) {
     } catch {
       return res.status(400).json({ erreur: "Erreur lors de la récupération des données." });
     }
+  } else {
+    return res.status(404).json('Page not found');
   }
 }
+
 
 module.exports = {
   retournerEquipeProjet,
@@ -447,5 +461,5 @@ module.exports = {
   demandeEquipe,
   accepterDemande,
   declinerDemande,
-  voirMesEquipes
+  voirMesEquipes,
 }
