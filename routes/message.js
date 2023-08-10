@@ -47,7 +47,7 @@ router.all('/envoyerMessageProjet/:id', async (req, res, next) => {
     }
     next();
 }, tokenModel.verifyToken,
-    verifProfil.checkAG,
+    verifProfil.checkAGidProjet,
     verifIdProjet,
     messageController.messageGlobalProjet);
 

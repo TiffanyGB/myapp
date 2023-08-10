@@ -9,7 +9,7 @@ const tokenModel = require('../models/tokenModel');
 
 const checkAdminProfile = profile.checkProfile('admin');
 const gestionnaireAdmin = profile.checkATousGestionnaires;
-const gestionnaireProjetAdmin = profile.checkAG;
+const gestionnaireProjetAdmin = profile.checkAGidProjet;
 const { verifIdNombre } = require('../verifications/verifierDonnéesGénérales');
 const { verifIdProjet } = require('../middleware/verifExistenceIdRoute');
 

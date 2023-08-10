@@ -199,7 +199,7 @@ async function createUser(req, res) {
         }
 
         /**Pseudo et/ou email déjà pris */
-         if (insertion === 'les2') {
+        if (insertion === 'les2') {
           return res.status(400).json({ Existe: 'Mail et pseudo' });
 
         } else if (insertion === 'pseudo') {
@@ -234,13 +234,11 @@ async function modifierUser(req, res) {
     }
 
     /**Vérifier que l'id existe dans la bdd, sinon 404 error */
-    userModel.chercherUserID(idUser)
-      .then((result) => {
+    const verif = await userModel.chercherUserID(idUser)
 
-        if (result.length === 0) {
-          return res.status(404).json({ erreur: 'L\'id n\'existe pas' });
-        }
-      });
+    if (verif.length === 0) {
+      return res.status(404).json({ erreur: 'L\'id n\'existe pas' });
+    }
 
     /**Récupération des données */
     const {
@@ -274,13 +272,9 @@ async function modifierUser(req, res) {
       userNiveauEtude
     ]
 
-    /**Trouver le type de l'user */
-    let type;
-
     const user = await userModel.chercherUserID(idUser);
 
-    type = user[0].typeuser;
-    console.log(type)
+    let type = user[0].typeuser;
 
     /* Vérification des données selon le type */
     switch (type) {
@@ -369,7 +363,7 @@ async function modifierUser(req, res) {
           });
         break;
 
-      case 'admin':
+      case 'administrateur':
         userModel.modifierUser(idUser, valeurs, password)
           .then((result) => {
             /* Données existantes */
@@ -390,6 +384,8 @@ async function modifierUser(req, res) {
           });
         break;
     }
+  } else {
+    return res.status(404).json('Page not found');
   }
 }
 
@@ -404,7 +400,7 @@ async function supprimerUser(req, res) {
     const userId = res.locals.userId;
 
     /*L'administrateur ne peut pas se supprimer lui même */
-    if(userId === req.id){
+    if (userId === req.id) {
       return res.status(400).json('L\'administrateur ne peut pas se supprimer lui-même');
     }
 

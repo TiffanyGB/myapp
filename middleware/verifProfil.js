@@ -174,8 +174,6 @@ async function checkAGEtudiantEquipe(req, res, next) {
         const gerer_ia = await gererProjet.chercherGestionnaireIAID(equipe.idprojet, req.id);
         const gerer_ext = await gererProjet.chercherGestionnaireExtID(equipe.idprojet, req.id);
 
-        console.log(gerer_ext, gerer_ia, equipe)
-
         if (gerer_ia.length > 0 || gerer_ext.length > 0) {
           next();
         } else {
@@ -223,21 +221,45 @@ async function checkAGEtudiantEquipe(req, res, next) {
  * au middleware suivant, soit renvoie une réponse JSON avec un message d'erreur et un code 
  * d'état HTTP approprié.
  */
-async function checkAG(req, res, next) {
+async function checkAGidProjet(req, res, next) {
   let id = res.locals.idProjet;
-
-  if(id === undefined){
-    id = res.locals.idEquipe;
-  }
 
   try {
     if (req.userProfile === 'admin') {
       next();
     } else if (req.userProfile === 'gestionnaire') {
+
+      /*Chercher l'équipe dans la bdd*/
       const gerer_ia = await gererProjet.chercherGestionnaireIAID(id, req.id);
       const gerer_ext = await gererProjet.chercherGestionnaireExtID(id, req.id);
 
-      console.log(gerer_ext, gerer_ia, req.id, res.locals.idEquipe)
+      if (gerer_ia.length > 0 || gerer_ext.length > 0) {
+        next();
+      } else {
+        return res.status(400).json({ erreur: `Mauvais profil, il faut gérer le projet.` });
+      }
+    } else {
+      return res.status(400).json({ erreur: `Mauvais profil, il faut être admin ou gestionnaire du projet.` });
+    }
+  } catch (error) {
+    return res.status(500).json({ erreur: 'Erreur interne du serveur.' });
+  }
+}
+
+async function checkAGidEquipe(req, res, next) {
+  let id = res.locals.idEquipe;
+
+  try {
+    if (req.userProfile === 'admin') {
+      next();
+    } else if (req.userProfile === 'gestionnaire') {
+      const equipe = (await equipeModel.chercherEquipeID(id))[0];
+
+      const gerer_ia = await gererProjet.chercherGestionnaireIAID(equipe.idprojet, req.id);
+      const gerer_ext = await gererProjet.chercherGestionnaireExtID(equipe.idprojet, req.id);
+
+      console.log(gerer_ext, req.id, id);
+      console.log(gerer_ia)
 
       if (gerer_ia.length > 0 || gerer_ext.length > 0) {
         next();
@@ -283,4 +305,4 @@ async function checkATousGestionnaires(req, res, next) {
 }
 
 
-module.exports = { checkProfile, checkACG, interdireAucunProfil, checkAGEtudiantEquipe, checkAG, checkATousGestionnaires };
+module.exports = { checkProfile, checkACG, interdireAucunProfil, checkAGEtudiantEquipe, checkAGidProjet, checkAGidEquipe, checkATousGestionnaires };
