@@ -92,13 +92,13 @@ async function inscriptionEleve(req, res) {
                             });
 
                     } else if (insertion === 'les2') {
-                        return res.status(400).json({ Existe: 'L\'email et le pseudo existent déjà.' });
+                        return res.status(400).json({ error: 'L\'email et le pseudo existent déjà.' });
 
                     } else if (insertion === 'pseudo') {
-                        return res.status(400).json({ Existe: 'Le pseudo existe déjà.' });
+                        return res.status(400).json({ error: 'Le pseudo existe déjà.' });
 
                     } else if (insertion === 'mail') {
-                        return res.status(400).json({ Existe: 'L\'adresse mail existe déjà.' });
+                        return res.status(400).json({ error: 'L\'adresse mail existe déjà.' });
                     }
                 });
         } catch {

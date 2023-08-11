@@ -230,6 +230,8 @@ async function toutesInfosEvent(idEvent, tabRetour) {
 async function jsonEventChoisi(idEvent, typeUser, req) {
 
     let tabRetour = {};
+    const motsDejaAjoutes = new Set(); 
+
 
     try {
         /*Récupérer toutes les infos liés à l'event*/
@@ -262,15 +264,19 @@ async function jsonEventChoisi(idEvent, typeUser, req) {
 
             /*Mots-clés*/
             const listeMots = await motCleModel.recupererMot(projetCourant.idprojet);
-
-            for (j = 0; j < listeMots.length; j++) {
-
+            
+            for (let j = 0; j < listeMots.length; j++) {
                 let motCourant = listeMots[j];
-
-                tabRetour.themes.push(motCourant.mot);
-
-                projetInfos.thematique.push(motCourant.mot);
+                let motLowerCase = motCourant.mot.toLowerCase();
+                
+                if (!motsDejaAjoutes.has(motLowerCase)) {
+                    tabRetour.themes.push(motCourant.mot);
+                    projetInfos.thematique.push(motCourant.mot);
+                    
+                    motsDejaAjoutes.add(motLowerCase);
+                }
             }
+            
 
             /**Les ressources */
             const listeRessource = await ressourceModel.recuperer_toutes_ressources(projetCourant.idprojet);

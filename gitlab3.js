@@ -1,5 +1,9 @@
 const axios = require('axios');
 
+const idProjet = '48423057';
+const gitlabBaseUrl = 'https://gitlab.com/api/v4/';
+const accessToken = 'glpat-oE7qvER3ewf4PUohzy5t';
+
 // function genererChaineAleatoire(longueur) {
 
 
@@ -14,15 +18,14 @@ const axios = require('axios');
 //   return chaineAleatoire;
 // }
 
-function creerDossier(nomEquipe, nom_event) {
-  const gitlabBaseUrl = 'https://gitlab.com/api/v4/';
-  const idProjet = '48369960';
-  const accessToken = 'glpat-oE7qvER3ewf4PUohzy5t';
+function creerDossier(idEquipe, nom_event) {
 
   const endpoint = `/projects/${encodeURIComponent(idProjet)}/repository/commits`;
 
-  const messageCommit = 'Ajout du dossier de l\'équipe ' + nomEquipe;
+  const messageCommit = 'Ajout du dossier de l\'équipe ' + idEquipe;
   const branch = 'main';
+
+  const nomEquipe = 'Equipe_' + idEquipe;
 
   const commitContent = {
     branch,
@@ -52,10 +55,8 @@ function creerDossier(nomEquipe, nom_event) {
 }
 
 
-async function recupererJSON(nomEquipe, event) {
-  const gitlabBaseUrl = 'https://gitlab.com/api/v4/';
-  const idProjet = '48369960';
-  const accessToken = 'glpat-oE7qvER3ewf4PUohzy5t';
+async function recupererJSON(idEquipe, event) {
+  const nomEquipe = 'Equip_' + idEquipe;
   const eventEquipe = '' + event + '/' + nomEquipe;
 
   const endpoint = `/projects/${idProjet}/repository/tree?path=${encodeURIComponent(eventEquipe)}`;
@@ -99,6 +100,18 @@ async function recupererJSON(nomEquipe, event) {
     return [];
   }
 }
+
+
+function supprimerDossierEquipe(nomEquipe, event){
+  const eventEquipe = '' + event + '/' + nomEquipe;
+
+  const endpoint = `/projects/${idProjet}/repository/tree?path=${encodeURIComponent(eventEquipe)}`;
+
+  const headers = {
+    'PRIVATE-TOKEN': accessToken,
+  };
+}
+
 
 // (async () => {
 //   const a = await recupererJSON('elephantelKAhvTPzjJk8KhBuogB', 'Événement 1');

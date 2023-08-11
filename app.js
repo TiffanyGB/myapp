@@ -83,6 +83,12 @@ app.use('/message', messageRouter);
 app.use('/token', tokenRouter);
 app.use('/', gitLabRouter);
 
+
+// Gestionnaire pour les routes inexistantes
+app.use((req, res, next) => {
+  res.status(404).send("Page not found");
+});
+
 // Configuration du middleware body-parser
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());

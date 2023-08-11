@@ -72,12 +72,12 @@ async function creerEquipe(req, res) {
       demandeModel.supprimerDemandes(idCapitaine);
 
       const event_nom = (await eventModel.chercherEvenement(idEvent))[0].nom;
-      const nomDossier = creerDossier(nom, event_nom);
+
+      const nomDossier = creerDossier(idEquipe, event_nom);
 
       return res.status(200).json(idEquipe);
     } catch (error) {
-      throw (error)
-      //return res.status(400).json({ erreur: 'Erreur création équipe.' });
+      return res.status(400).json({ erreur: 'Erreur création équipe.' });
     }
   }
 }

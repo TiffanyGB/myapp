@@ -510,7 +510,7 @@ async function jsonInformationsEquipe(idEquipe, req) {
             jsonRetour.liste_user_attente.push(temp);
         }
 
-        const result = await recupererJSON(temp1.nom, event[0].nom);
+        const result = await recupererJSON(idEquipe, event[0].nom);
         jsonRetour.resultats = [];
 
         for(i = 0; i < result.length; i++){
