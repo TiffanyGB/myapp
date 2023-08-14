@@ -1,7 +1,7 @@
 const userModel = require('../../models/userModel');
 const etudiantModel = require('../../models/etudiantModel');
 
-const { validationResult } = require('express-validator');
+const { validateurErreurs } = require('../../validateur');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const tokenModel = require('../../models/tokenModel');
@@ -59,11 +59,7 @@ async function inscriptionEleve(req, res) {
         /*Vérifier les données des étudiants */
         await etudiantModel.validerEtudiant(req);
 
-        /**Exécute la requete de validation adapté */
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({ errors: errors.array() });
-        }
+        validateurErreurs(req,res);
 
         try {
             userModel.insererUser(values, password, values_id, 'etudiant')

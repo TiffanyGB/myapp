@@ -1,18 +1,6 @@
-const { body, validationResult } = require('express-validator');
+const { body } = require('express-validator');
+const {validateurDonnéesMiddleware} = require('../validateur');
 
-function validateUserData(req, res, next) {
-    // Exécuter les validateurs Express Validator
-    const errors = validationResult(req);
-
-    // Vérifier s'il y a des erreurs de validation
-    if (!errors.isEmpty()) {
-        // Renvoyer les erreurs de validation au client
-        return res.status(400).json({ errors: errors.array() });
-    }
-
-    /* Si les données sont valides, passer à l'étape suivante*/
-    next();
-}
 
 const validatePasswordCreation = [
 
@@ -23,7 +11,7 @@ const validatePasswordCreation = [
         .matches(/[\W]/).withMessage('Le mot de passe doit contenir au moins un caractère spécial.'),
 
     /**Appel du validateur */
-    validateUserData,
+    validateurDonnéesMiddleware,
 ];
 
 const validatePasswordModif = [
@@ -36,7 +24,7 @@ const validatePasswordModif = [
         .matches(/[\W]/).withMessage('Le mot de passe doit contenir au moins un caractère spécial.'),
 
     /**Appel du validateur */
-    validateUserData,
+    validateurDonnéesMiddleware,
 ];
 
 const connexion = [
@@ -49,11 +37,11 @@ const connexion = [
     .isLength({ max: 255 })
     .withMessage('Le mot de passe doit avoir une longueur de maximum 255 caractères.'),
 
-    validateUserData,
+    validateurDonnéesMiddleware,
 ]
 
 module.exports = {
-    validateUserData,
+    validateurDonnéesMiddleware,
     validatePasswordCreation,
     validatePasswordModif,
     connexion

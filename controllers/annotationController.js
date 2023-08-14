@@ -4,9 +4,9 @@
  */
 
 const annotationModel = require('../models/annotationEquipeModel');
-const { body, validationResult } = require('express-validator');
+const { body } = require('express-validator');
+const {validateurErreurs} = require('../validateur');
 
-/**Vérifier contenu  */
 
 /**
  * Controller pour créer une nouvelle annotation associée à une équipe.
@@ -46,11 +46,8 @@ async function ecrireAnnotation(req, res) {
             .withMessage('Le message est trop long (maximum 2000 caractères)')
             .run(req);
 
+            validateurErreurs(req, res);
 
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({ errors: errors.array() });
-        }
 
         try {
             annotationModel.creerAnnotation([idEquipe, auteur, contenu]);
@@ -87,7 +84,7 @@ async function getAnnotationEquipe(req, res) {
         try {
             const annotation = await annotationModel.jsonGetAnnotation(idEquipe);
 
-            /*On enlève le champs idAnnotation du json avant de le envoyer au client,
+            /*On enlève le champs idAnnotation du json avant de l'envoyer au client,
             inutile pour lui */
             for (i = 0; i < annotation.length; i++) {
                 delete annotation[i].idannotation;

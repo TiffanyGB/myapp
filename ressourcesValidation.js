@@ -1,3 +1,5 @@
+const {validateurDonnéesMiddleware} = require('./validateur')
+
 const validateRessources = [
     body('nom')
         .notEmpty().withMessage('Le nom ne doit pas être vide.')
@@ -28,5 +30,5 @@ const validateRessources = [
         .matches(/^[0-9a-zA-Z\-\ :.]+$/).withMessage('La date ne doit contenir que des lettres et des chiffres.'),
 
     /**Appel du validateur */
-    validationDonnees.validateUserData,
+    validateurDonnéesMiddleware
 ];

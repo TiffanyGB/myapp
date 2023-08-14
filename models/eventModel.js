@@ -8,7 +8,7 @@ const finalisteModel = require('./finalisteModel');
 const equipeModel = require('./equipeModel');
 const { aUneEquipe, jsonListeEquipeProjet } = require('./equipeModel');
 
-const validationDonnees = require('../middleware/validationDonnees');
+const { validateurDonnéesMiddleware } = require('../validateur');
 const { body } = require('express-validator');
 
 const validateEvent = [
@@ -66,7 +66,7 @@ const validateEvent = [
         .isLength({ min: 2, max: 3000 }).withMessage('Le message de fin doit avoir une longueur comprise entre 2 et 3000 caractères.'),
 
     /**Appel du validateur */
-    validationDonnees.validateUserData,
+    validateurDonnéesMiddleware
 ];
 
 /*Liste de tous les événements */
@@ -230,7 +230,7 @@ async function toutesInfosEvent(idEvent, tabRetour) {
 async function jsonEventChoisi(idEvent, typeUser, req) {
 
     let tabRetour = {};
-    const motsDejaAjoutes = new Set(); 
+    const motsDejaAjoutes = new Set();
 
 
     try {
@@ -264,18 +264,18 @@ async function jsonEventChoisi(idEvent, typeUser, req) {
 
             /*Mots-clés*/
             const listeMots = await motCleModel.recupererMot(projetCourant.idprojet);
-            
+
             for (let j = 0; j < listeMots.length; j++) {
                 let motCourant = listeMots[j];
                 let motLowerCase = motCourant.mot.toLowerCase();
                 projetInfos.thematique.push(motCourant.mot);
 
                 if (!motsDejaAjoutes.has(motLowerCase)) {
-                    tabRetour.themes.push(motCourant.mot);                    
+                    tabRetour.themes.push(motCourant.mot);
                     motsDejaAjoutes.add(motLowerCase);
                 }
             }
-            
+
 
             /**Les ressources */
             const listeRessource = await ressourceModel.recuperer_toutes_ressources(projetCourant.idprojet);
@@ -290,13 +290,13 @@ async function jsonEventChoisi(idEvent, typeUser, req) {
                 let date = ressourceCourante.date_apparition;
 
                 /*Les ressources privées nécessient d'être connecté  */
-                if(((statut === 'public' ) || (statut === 'privé' && typeUser != 'aucun')) && (date < new Date())){
+                if (((statut === 'public') || (statut === 'privé' && typeUser != 'aucun')) && (date < new Date())) {
                     ressourcesInfos.titre = ressourceCourante.titre;
                     ressourcesInfos.type = ressourceCourante.type_ressource;
                     ressourcesInfos.lien = ressourceCourante.lien;
                     ressourcesInfos.description = ressourceCourante.description_ressource;
                     ressourcesInfos.statut = statut;
-    
+
                     projetInfos.ressources.push(ressourcesInfos);
                 }
             }
@@ -367,7 +367,7 @@ async function creerJsonTousEvents() {
 
         tabRetour.oldEvents = [];
         tabRetour.actualEvent = [];
-        const motsDejaAjoutes = new Set(); 
+        const motsDejaAjoutes = new Set();
 
         /*Infos des anciens  events*/
         for (i = 0; i < listesAnciens.rows.length; i++) {
@@ -392,18 +392,18 @@ async function creerJsonTousEvents() {
 
             for (j = 0; j < listeProjets.length; j++) {
                 gainTotal += listeProjets[j].recompense;
-            
+
                 let recupeMot = await motCleModel.recupererMot(listeProjets[j].idprojet);
-            
+
                 for (k = 0; k < recupeMot.length; k++) {
                     let mot = recupeMot[k].mot;
-            
+
                     if (!motCle.includes(mot)) {
                         motCle.push(mot);
                     }
                 }
             }
-            
+
 
 
             courantInfos.mot = motCle;
@@ -438,12 +438,12 @@ async function creerJsonTousEvents() {
 
             for (j = 0; j < listeProjets.length; j++) {
                 gainTotal += listeProjets[j].recompense;
-            
+
                 let recupeMot = await motCleModel.recupererMot(listeProjets[j].idprojet);
-            
+
                 for (k = 0; k < recupeMot.length; k++) {
                     let mot = recupeMot[k].mot;
-            
+
                     if (!motCle.includes(mot)) {
                         motCle.push(mot);
                     }
@@ -468,7 +468,7 @@ async function jsonlisteEquipeEvent(idEvent) {
         /*On récupère la liste des projets liés à l'evenement */
         const listeProjets = await projetModel.recuperer_projets(idEvent);
 
-        const jsonRetour = {}; 
+        const jsonRetour = {};
         jsonRetour.equipes = [];
 
         /*On récupère les équipes de chaques event*/

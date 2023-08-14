@@ -1,7 +1,8 @@
 const projetModel = require('../models/projetModel');
 const eventModel = require('../models/eventModel');
 const regleModel = require('../models/reglesModel');
-const { body, validationResult } = require('express-validator');
+const { body } = require('express-validator');
+const { validateurErreurs } = require('../validateur');
 
 async function createEvent(req, res) {
   if (req.method === 'OPTIONS') {
@@ -51,11 +52,7 @@ async function createEvent(req, res) {
         .isLength({ min: 2, max: 1000 }).withMessage('Le lien doit avoir une longueur comprise entre 3 et 1000 caractères.')
         .run(req);
 
-      // Exécute la requête de validation adaptée
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-      }
+      validateurErreurs(req,res);
     }
 
 

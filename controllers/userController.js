@@ -11,7 +11,6 @@
  * @requires ../public/javascripts/json_liste/liste_utilisateurs
  * @requires ../public/javascripts/modifierGestionnaires
  * @requires ../models/userModel
- * @requires ../models/adminModel
  * @requires ../models/etudiantModel
  * @requires ../models/gestionnaireIaModel
  * @requires ../models/gestionnaireExterneModel
@@ -22,11 +21,10 @@
 const listeUser = require('../public/javascripts/json_liste/liste_utilisateurs');
 const modifier = require('../public/javascripts/modifierGestionnaires');
 const userModel = require('../models/userModel');
-const adminModel = require('../models/adminModel');
 const etudiantModel = require('../models/etudiantModel');
 const gestionnaireIaModel = require('../models/gestionnaireIaModel');
 const gestionnaireExterneModel = require('../models/gestionnaireExterneModel');
-const { body, validationResult } = require('express-validator');
+const {validateurErreurs} = require('../validateur');
 
 
 /**
@@ -124,11 +122,8 @@ async function createUser(req, res) {
         return res.status(400).json({ erreur: "Le type est incorrect" });
     }
 
-    /**Exécute la requete de validation adapté */
-    let errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
+    validateurErreurs(req, res);
+
 
     /**Insertion dans la table user */
     userModel.insererUser(valeurs_communes, password, valeurs_id, type)
@@ -153,16 +148,7 @@ async function createUser(req, res) {
               break;
 
             case 'administrateur':
-              adminModel.creerAdmin(insertion)
-                .then(() => {
-                  res.status(200).json({ message: 'Inscription Admin réussie' });
-                })
-                .catch(() => {
-                  /**Supprimer l'utilisateur dans la table utilisateur s'il y a un souci */
-                  userModel.supprimerUser(insertion, 'Admini')
-                  res.status(400).json({ erreur: "erreur", Détails: "Utilisateur supprimé de la table utilisateur" });
-                });
-
+              res.status(200).json({ message: 'Inscription Admin réussie' });
               break;
 
             case 'gestionnaireExterne':
@@ -293,10 +279,8 @@ async function modifierUser(req, res) {
         return res.status(400).json({ erreur: "Le type est incorrect" });
     }
 
-    let errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
+    validateurErreurs(req, res);
+
 
     /* Modification etudiant */
     switch (type) {

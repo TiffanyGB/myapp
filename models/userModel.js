@@ -6,10 +6,10 @@
 const pool = require('../database/configDB');
 const passwordModel = require('../models/passwordModel');
 const profilModel = require('./profilModel');
-const validationDonnees = require('../middleware/validationDonnees');
 const verif = require('../controllers/Auth/verificationExistenceController');
 const preference = require('./profilModel');
 const { body } = require('express-validator');
+const { validateurDonnéesMiddleware } = require('../validateur');
 
 const validateUser = [
     body('prenom')
@@ -52,7 +52,7 @@ const validateUser = [
         .isLength({ min: 1, max: 50 }).withMessage('La ville doit avoir une longueur comprise entre 1 et 50 caractères.'),
 
     /**Appel du validateur */
-    validationDonnees.validateUserData,
+    validateurDonnéesMiddleware,
 ];
 
 /**Liste des utilisateurs  */

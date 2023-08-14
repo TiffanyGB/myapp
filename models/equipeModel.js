@@ -1,12 +1,12 @@
 const pool = require('../database/configDB');
-const validationDonnees = require('../middleware/validationDonnees');
+const { validateurDonnéesMiddleware } = require('../validateur');
 const userModel = require('./userModel');
 const projetModel = require('./projetModel')
 const { body } = require('express-validator');
 const motCleModel = require('../models/motCleModel');
 const gererProjet = require('./gererProjet');
 const annotationModel = require('./annotationEquipeModel');
-const {recupererJSON} = require('../gitlab3');
+const { recupererJSON } = require('../gitlab3');
 
 const validerEquipe = [
     body('nom')
@@ -39,7 +39,7 @@ const validerEquipe = [
         .isInt({ min: 1, max: 999999999 }).withMessage('L\'id est trop long.'),
 
     /**Appel du validateur */
-    validationDonnees.validateUserData,
+    validateurDonnéesMiddleware
 ];
 
 /************************************************** C'est à changer dans l'interface ***********/
@@ -513,7 +513,7 @@ async function jsonInformationsEquipe(idEquipe, req) {
         const result = await recupererJSON(idEquipe, event[0].nom);
         jsonRetour.resultats = [];
 
-        for(i = 0; i < result.length; i++){
+        for (i = 0; i < result.length; i++) {
             let temp = {};
 
             temp.date = new Date();
@@ -738,7 +738,7 @@ async function demandeDejaEnvoyee(idUser, idEquipe) {
     });
 }
 
-async function recupererGitlabJSON(idEquipe){
+async function recupererGitlabJSON(idEquipe) {
 
 }
 

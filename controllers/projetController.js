@@ -4,7 +4,8 @@ const gererProjet = require('../models/gererProjet');
 const gestionnaireExterneModel = require('../models/gestionnaireExterneModel');
 const gestionnaireIaModel = require('../models/gestionnaireIaModel');
 const ressourceModel = require('../models/ressourceModel');
-const { body, validationResult } = require('express-validator');
+const { body } = require('express-validator');
+const { validateurErreurs } = require('../validateur');
 
 
 /**Liste des projets */
@@ -18,7 +19,7 @@ async function voirListeProjets(req, res) {
         try {
             const jsonretour = await projetModel.listeProjetsJson(req)
             res.status(200).json(jsonretour);
-        } catch (error){
+        } catch (error) {
             res.status(400).json({ erreur: "Erreur lors de la récupération des données côté étudiant" });
         }
     }
@@ -77,11 +78,7 @@ async function creationProjet(req, res) {
                     .isLength({ min: 2, max: 25 }).withMessage('Le mot-clé doit avoir une longueur comprise entre 2 et 25 caractères.')
                     .run(req);
 
-                // Exécute la requête de validation adaptée
-                const errors = validationResult(req);
-                if (!errors.isEmpty()) {
-                    return res.status(400).json({ errors: errors.array() });
-                }
+                validateurErreurs(req, res);
             }
         }
 
@@ -123,11 +120,7 @@ async function creationProjet(req, res) {
                 .matches(/^[0-9a-zA-Z\-\ :.]+$/).withMessage('La date ne doit contenir que des lettres et des chiffres.')
                 .run(req);
 
-            // Exécute la requête de validation adaptée
-            const errors = validationResult(req);
-            if (!errors.isEmpty()) {
-                return res.status(400).json({ errors: errors.array() });
-            }
+            validateurErreurs(req, res);
         }
 
         /*Vérification des données des gestionnaires, les id doivent être des entiers
@@ -255,11 +248,7 @@ async function modifierProjet(req, res) {
                         .isLength({ min: 2, max: 25 }).withMessage('Le mot-clé doit avoir une longueur comprise entre 2 et 25 caractères.')
                         .run(req);
 
-                    // Exécute la requête de validation adaptée
-                    const errors = validationResult(req);
-                    if (!errors.isEmpty()) {
-                        return res.status(400).json({ errors: errors.array() });
-                    }
+                    validateurErreurs(req, res);
                 }
             }
 
@@ -301,11 +290,7 @@ async function modifierProjet(req, res) {
                     .matches(/^[0-9a-zA-Z\-\ :.]+$/).withMessage('La date ne doit contenir que des lettres et des chiffres.')
                     .run(req);
 
-                // Exécute la requête de validation adaptée
-                const errors = validationResult(req);
-                if (!errors.isEmpty()) {
-                    return res.status(400).json({ errors: errors.array() });
-                }
+                validateurErreurs(req, res);
             }
 
             /*Vérification des données des gestionnaires, les id doivent être des entiers
@@ -375,7 +360,6 @@ async function modifierProjet(req, res) {
                         ]
 
                         ressourceModel.ajouterRessources(valeurs_ressources);
-
                     }
 
                     return res.status(200).json({ message: "Projet modifié" });
@@ -383,7 +367,6 @@ async function modifierProjet(req, res) {
                 .catch(() => {
                     return res.status(400).json({ erreur: "Le projet n'a pas pu être modifié" });
                 });
-
         } catch {
             return res.status(400).json({ erreur: "erreur" });
         }
@@ -408,7 +391,6 @@ async function supprimerProjet(req, res) {
         }
     }
 }
-
 
 module.exports = {
     voirListeProjets,

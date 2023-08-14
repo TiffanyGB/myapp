@@ -4,7 +4,7 @@ const ressourceModel = require('./ressourceModel');
 const gerer = require('./gererProjet');
 const { body } = require('express-validator');
 const { json } = require('body-parser');
-const validationDonnees = require('../middleware/validationDonnees');
+const { validateurDonnéesMiddleware } = require('../validateur');
 const gererProjet = require('../models/gererProjet');
 const userModel = require('./userModel');
 const { chercherGestionnaireExtID } = require('./gestionnaireExterneModel');
@@ -31,7 +31,7 @@ const validateProjet = [
         .isLength({ min: 5, max: 10000 }).withMessage('La description doit avoir une longueur comprise entre 5 et 10000 caractères.'),
 
     /**Appel du validateur */
-    validationDonnees.validateUserData,
+    validateurDonnéesMiddleware
 ];
 
 /**Liste des projets */

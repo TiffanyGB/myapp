@@ -1,9 +1,11 @@
 const equipeModel = require('../models/equipeModel');
 const projetModel = require('../models/projetModel');
 const demandeModel = require('../models/demandeModel')
-const { body, validationResult } = require('express-validator');
+const { body } = require('express-validator');
+const { validateurErreurs } = require('../validateur');
 const { creerDossier } = require('../gitlab3');
 const eventModel = require('../models/eventModel');
+
 
 /**A mettre dans un dossier autre que controller */
 async function retournerEquipeProjet(req, res) {
@@ -116,7 +118,7 @@ async function modifierEquipe(req, res) {
     if (projet.length === 0) {
       return res.status(400).json({ erreur: 'L\'id du projet n\'existe pas.' })
     }
-    
+
     try {
       equipeModel.modifierEquipe(valeurs);
       res.status(200).json({ message: "Equipe modifiée" });
@@ -146,8 +148,6 @@ async function supprimerEquipe(req, res) {
   }
 }
 
-/* aaaa Vérifier données */
-
 async function promouvoir(req, res) {
   if (req.method === 'OPTIONS') {
     res.status(200).json({ sucess: 'Agress granted' });
@@ -173,10 +173,7 @@ async function promouvoir(req, res) {
         }).withMessage('L\'id est trop long.')
         .run(req);
 
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-      }
+      validateurErreurs(req, res);
 
       /*Vérifier si l'étudiant est dans l'équipe */
       const appartenir = await equipeModel.appartenirEquipe(idUser, idEquipe);
@@ -199,7 +196,6 @@ async function promouvoir(req, res) {
   }
 }
 
-/* aaaa Vérifier données */
 
 async function supprimerMembre(req, res) {
   if (req.method === 'OPTIONS') {
@@ -224,10 +220,7 @@ async function supprimerMembre(req, res) {
       }).withMessage('L\'id est trop long.')
       .run(req);
 
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
+    validateurErreurs(req, res);
 
     try {
       /*Vérifier si l'étudiant est dans l'équipe */
@@ -349,10 +342,8 @@ async function demandeEquipe(req, res) {
       .run(req);
 
 
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
+      validateurErreurs(req, res);
+
 
     const equipe = await equipeModel.chercherEquipeID(idEquipe);
 
@@ -413,10 +404,7 @@ async function accepterDemande(req, res) {
       }).withMessage('L\'id est trop long.')
       .run(req);
 
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
+      validateurErreurs(req, res);
 
     const equipe = await equipeModel.chercherEquipeID(idEquipe);
 
@@ -475,10 +463,8 @@ async function declinerDemande(req, res) {
       }).withMessage('L\'id est trop long.')
       .run(req);
 
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
+      validateurErreurs(req, res);
+
 
     /* Vérifier si l'étudiant a bien envoyé une demande */
     const envoyee = await equipeModel.demandeDejaEnvoyee(idUser, idEquipe);
