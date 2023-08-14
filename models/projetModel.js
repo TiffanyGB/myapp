@@ -13,7 +13,7 @@ const { chercherGestionnaireIapau } = require('./gestionnaireIaModel');
 const validateProjet = [
     body('nom')
         .notEmpty().withMessage('Le nom ne doit pas être vide.')
-        .isLength({ min: 2, max: 30 }).withMessage('Le prénom doit avoir une longueur comprise entre 3 et 40 caractères.'),
+        .isLength({ min: 2, max: 30 }).withMessage('Le nom doit avoir une longueur comprise entre 3 et 40 caractères.'),
 
 
     body('lienSujet')

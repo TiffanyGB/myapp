@@ -368,12 +368,15 @@ async function creerJsonTousEvents() {
 
         tabRetour.oldEvents = [];
         tabRetour.actualEvent = [];
+        const motsDejaAjoutes = new Set(); 
 
         /*Infos des anciens  events*/
         for (i = 0; i < listesAnciens.rows.length; i++) {
 
             ancienCourant = listesAnciens.rows[i];
             courantInfos = {};
+            let motCle = [];
+
 
             courantInfos.type = ancienCourant.type_event;
             courantInfos.id = ancienCourant.idevent;
@@ -387,17 +390,23 @@ async function creerJsonTousEvents() {
             let gainTotal = 0;
 
             /*les mots-clés provenant de la liste des projets de l'event */
-            let motCle = [];
 
             for (j = 0; j < listeProjets.length; j++) {
                 gainTotal += listeProjets[j].recompense;
-
+            
                 let recupeMot = await motCleModel.recupererMot(listeProjets[j].idprojet);
-
+            
                 for (k = 0; k < recupeMot.length; k++) {
-                    motCle.push(recupeMot[k].mot);
+                    let mot = recupeMot[k].mot;
+            
+                    if (!motCle.includes(mot)) {
+                        motCle.push(mot);
+                    }
                 }
             }
+            
+
+
             courantInfos.mot = motCle;
             courantInfos.gain = gainTotal;
 
@@ -428,16 +437,18 @@ async function creerJsonTousEvents() {
             let gainTotal = 0;
             let motCle = [];
 
-
             for (j = 0; j < listeProjets.length; j++) {
                 gainTotal += listeProjets[j].recompense;
-
+            
                 let recupeMot = await motCleModel.recupererMot(listeProjets[j].idprojet);
-
+            
                 for (k = 0; k < recupeMot.length; k++) {
-                    motCle.push(recupeMot[k].mot);
+                    let mot = recupeMot[k].mot;
+            
+                    if (!motCle.includes(mot)) {
+                        motCle.push(mot);
+                    }
                 }
-
             }
             courantInfos.mot = motCle;
             courantInfos.gain = gainTotal;

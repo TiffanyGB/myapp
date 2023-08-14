@@ -22,7 +22,6 @@ async function retournerEquipeProjet(req, res) {
   }
 }
 
-/* aaaa Vérifier données */
 async function creerEquipe(req, res) {
   if (req.method === 'OPTIONS') {
     res.status(200).json({ sucess: 'Agress granted' });
@@ -112,6 +111,12 @@ async function modifierEquipe(req, res) {
       idEquipe
     ]
 
+    /*Récupérer l'event de l'équipe*/
+    const projet = await projetModel.chercheridProjet(idProjet);
+    if (projet.length === 0) {
+      return res.status(400).json({ erreur: 'L\'id du projet n\'existe pas.' })
+    }
+    
     try {
       equipeModel.modifierEquipe(valeurs);
       res.status(200).json({ message: "Equipe modifiée" });
@@ -157,6 +162,22 @@ async function promouvoir(req, res) {
         idUser
       } = req.body;
 
+      await body('idUser')
+        .notEmpty().withMessage('L\'id du projet ne doit pas être vide.')
+        .matches(/^[0-9]*$/).withMessage("L\'id ne doit avoir que des chiffres.")
+        .custom((value, { req }) => {
+          if (/^[0-9]*$/.test(value)) {
+            return value >= 1 && value <= 999999999;
+          }
+          return true;
+        }).withMessage('L\'id est trop long.')
+        .run(req);
+
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+      }
+
       /*Vérifier si l'étudiant est dans l'équipe */
       const appartenir = await equipeModel.appartenirEquipe(idUser, idEquipe);
       if (appartenir.length === 0) {
@@ -191,6 +212,22 @@ async function supprimerMembre(req, res) {
     const {
       idUser
     } = req.body;
+
+    await body('idUser')
+      .notEmpty().withMessage('L\'id du projet ne doit pas être vide.')
+      .matches(/^[0-9]*$/).withMessage("L\'id ne doit avoir que des chiffres.")
+      .custom((value, { req }) => {
+        if (/^[0-9]*$/.test(value)) {
+          return value >= 1 && value <= 999999999;
+        }
+        return true;
+      }).withMessage('L\'id est trop long.')
+      .run(req);
+
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
 
     try {
       /*Vérifier si l'étudiant est dans l'équipe */
@@ -307,8 +344,8 @@ async function demandeEquipe(req, res) {
     ]
 
     await body('message')
-      .isLength({ min: 0, max: 200 })
-      .withMessage('Le message doit contenir entre 0 et 200 caracteres')
+      .isLength({ min: 0, max: 300 })
+      .withMessage('Le message doit contenir entre 0 et 300 caracteres')
       .run(req);
 
 
@@ -365,6 +402,22 @@ async function accepterDemande(req, res) {
 
     const idUser = req.body.id;
 
+    await body('id')
+      .notEmpty().withMessage('L\'id du projet ne doit pas être vide.')
+      .matches(/^[0-9]*$/).withMessage("L\'id ne doit avoir que des chiffres.")
+      .custom((value, { req }) => {
+        if (/^[0-9]*$/.test(value)) {
+          return value >= 1 && value <= 999999999;
+        }
+        return true;
+      }).withMessage('L\'id est trop long.')
+      .run(req);
+
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
     const equipe = await equipeModel.chercherEquipeID(idEquipe);
 
     /* L'étudiant ne doit pas avoir d'équipe dans l'event*/
@@ -383,7 +436,7 @@ async function accepterDemande(req, res) {
     /* Vérifier si l'étudiant a bien envoyé une demande */
     const envoyee = await equipeModel.demandeDejaEnvoyee(idUser, idEquipe);
     if (envoyee.length === 0) {
-      return res.status(400).json({ erreur: 'Aucune demande provenant de cet id' });
+      return res.status(400).json({ erreur: 'Aucune demande provenant de cet utilisateur' });
     }
 
     try {
@@ -411,10 +464,26 @@ async function declinerDemande(req, res) {
 
     const idUser = req.body.id;
 
+    await body('id')
+      .notEmpty().withMessage('L\'id du projet ne doit pas être vide.')
+      .matches(/^[0-9]*$/).withMessage("L\'id ne doit avoir que des chiffres.")
+      .custom((value, { req }) => {
+        if (/^[0-9]*$/.test(value)) {
+          return value >= 1 && value <= 999999999;
+        }
+        return true;
+      }).withMessage('L\'id est trop long.')
+      .run(req);
+
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
     /* Vérifier si l'étudiant a bien envoyé une demande */
     const envoyee = await equipeModel.demandeDejaEnvoyee(idUser, idEquipe);
     if (envoyee.length === 0) {
-      return res.status(404).json({ erreur: 'Aucune demande provenant de cet id' });
+      return res.status(404).json({ erreur: 'Aucune demande provenant de cet utilisateur' });
     }
 
     try {

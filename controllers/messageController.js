@@ -1,5 +1,5 @@
 const messageModel = require('../models/messageModel');
-const eventModel = require('../models/eventModel');
+const { body, validationResult } = require('express-validator');
 
 async function envoyerMessage(req, res) {
     if (req.method === 'OPTIONS') {
@@ -17,6 +17,17 @@ async function envoyerMessage(req, res) {
             contenu,
             idUser
         ];
+
+        await body('contenu')
+            .isLength({ min: 0, max: 1000 })
+            .withMessage('Le message est trop long (maximum 1000 caractères)')
+            .run(req);
+
+
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
 
         try {
             if (req.userProfile === 'etudiant') {
@@ -58,6 +69,17 @@ async function messageGlobalProjet(req, res) {
             contenu
         } = req.body;
 
+        await body('contenu')
+            .isLength({ min: 0, max: 1000 })
+            .withMessage('Le message est trop long (maximum 1000 caractères)')
+            .run(req);
+
+
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
+
         try {
 
             messageModel.envoyerMessageGlobalProjet(contenu, idProjet, idUser);
@@ -78,6 +100,17 @@ async function messageGlobalEvent(req, res) {
         const {
             contenu
         } = req.body;
+
+        await body('contenu')
+            .isLength({ min: 0, max: 1000 })
+            .withMessage('Le message est trop long (maximum 1000 caractères)')
+            .run(req);
+
+
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
 
         try {
             messageModel.envoyerMessageGlobalEvent(contenu, idEvent, idUser);

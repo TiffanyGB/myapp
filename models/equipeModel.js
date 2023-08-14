@@ -36,7 +36,7 @@ const validerEquipe = [
     body('idProjet')
         .notEmpty().withMessage('L\'id du projet ne doit pas être vide.')
         .matches(/^[0-9]*$/).withMessage("L\'id ne doit avoir que des chiffres.")
-        .isLength({ min: 1, max: 1000 }).withMessage('L\'id est trop long.'),
+        .isInt({ min: 1, max: 999999999 }).withMessage('L\'id est trop long.'),
 
     /**Appel du validateur */
     validationDonnees.validateUserData,

@@ -4,8 +4,9 @@
  */
 
 const annotationModel = require('../models/annotationEquipeModel');
+const { body, validationResult } = require('express-validator');
 
-        /**Vérifier contenu  */
+/**Vérifier contenu  */
 
 /**
  * Controller pour créer une nouvelle annotation associée à une équipe.
@@ -29,7 +30,7 @@ const annotationModel = require('../models/annotationEquipeModel');
  * avec succès ou une erreur en cas d'échec.
  * @throws {Error} Une erreur si la création de l'annotation échoue.
 */
-function ecrireAnnotation(req, res) {
+async function ecrireAnnotation(req, res) {
 
     if (req.method === 'OPTIONS') {
         res.status(200).json({ sucess: 'Access granted' });
@@ -39,6 +40,17 @@ function ecrireAnnotation(req, res) {
         const auteur = req.id;
 
         const contenu = req.body.contenu;
+
+        await body('contenu')
+            .isLength({ min: 0, max: 2000 })
+            .withMessage('Le message est trop long (maximum 2000 caractères)')
+            .run(req);
+
+
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
 
         try {
             annotationModel.creerAnnotation([idEquipe, auteur, contenu]);
