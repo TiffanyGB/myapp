@@ -268,11 +268,10 @@ async function jsonEventChoisi(idEvent, typeUser, req) {
             for (let j = 0; j < listeMots.length; j++) {
                 let motCourant = listeMots[j];
                 let motLowerCase = motCourant.mot.toLowerCase();
-                
+                projetInfos.thematique.push(motCourant.mot);
+
                 if (!motsDejaAjoutes.has(motLowerCase)) {
-                    tabRetour.themes.push(motCourant.mot);
-                    projetInfos.thematique.push(motCourant.mot);
-                    
+                    tabRetour.themes.push(motCourant.mot);                    
                     motsDejaAjoutes.add(motLowerCase);
                 }
             }

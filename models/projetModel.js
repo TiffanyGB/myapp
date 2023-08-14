@@ -150,7 +150,7 @@ async function listeProjetsJson(req) {
             projetCourant = projetsListe[i];
 
             if (req.userProfile === 'gestionnaire') {
-                gerer_ia = await gererProjet.chercherGestionnaireIA(projetCourant.idprojet, req.id);
+                gerer_ia = await gererProjet.chercherGestionnaireIAID(projetCourant.idprojet, req.id);
                 gerer_ext = await gererProjet.chercherGestionnaireExtID(projetCourant.idprojet, req.id);
             }
             if ((gerer_ia.length > 0 || gerer_ext.length > 0) || req.userProfile === 'admin') {

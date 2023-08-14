@@ -430,7 +430,7 @@ async function accepterDemande(req, res) {
     const aUneEquipe = await equipeModel.aUneEquipeDansEvent(idUser, idEvent);
 
     if (aUneEquipe != -1) {
-      return res.status(200).json({ erreur: 'Vous avez déjà une équipe dans cet évènement' });
+      return res.status(200).json({ erreur: 'L\'utilisateur a déjà rejoint une équipe' });
     }
 
     /* Vérifier si l'étudiant a bien envoyé une demande */

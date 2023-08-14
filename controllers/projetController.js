@@ -8,24 +8,19 @@ const { body, validationResult } = require('express-validator');
 
 
 /**Liste des projets */
-function voirListeProjets(req, res) {
+async function voirListeProjets(req, res) {
     if (req.method === 'OPTION') {
         res.status(200).json({ sucess: 'Agress granted' });
     }
     else if (req.method === 'GET') {
 
         /*Récupérer la liste des projets */
-        projetModel.listeProjetsJson(req)
-            .then((result) => {
-                /**Aucun projet dans la bdd */
-                if (result === 'aucun') {
-                    res.status(200).json([]);
-                } else if (result === "erreur_student") {
-                    res.status(400).json({ erreur: "Erreur lors de la récupération des données côté étudiant" });
-                } else {
-                    res.status(200).json(result);
-                }
-            });
+        try {
+            const jsonretour = await projetModel.listeProjetsJson(req)
+            res.status(200).json(jsonretour);
+        } catch (error){
+            res.status(400).json({ erreur: "Erreur lors de la récupération des données côté étudiant" });
+        }
     }
 }
 
@@ -37,7 +32,6 @@ async function infosProjet(req, res) {
         const idProjet = res.locals.idProjet;
 
         try {
-
             const projetInfos = await projetModel.infosProjet(idProjet);
             return res.status(200).json(projetInfos);
         } catch (error) {
