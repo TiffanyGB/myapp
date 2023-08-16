@@ -1,6 +1,12 @@
 /**
  * @fileoverview Controllers des annotations d'une équipes.
  * @module Annotation_équipes
+ * 
+ * @version 1.0.0 
+ * @author Tiffany GAY-BELLILE
+ * @requires ../../models/annotationEquipeModel
+ * @requires ../validateur
+ * @requires express-validator
  */
 
 const annotationModel = require('../models/annotationEquipeModel');
@@ -10,6 +16,14 @@ const {validateurErreurs} = require('../validateur');
 
 /**
  * Controller pour créer une nouvelle annotation associée à une équipe.
+ * 
+ * @function
+ * @param {Object} req - L'objet de la requête (express request object).
+ * @param {Object} res - L'objet de la réponse (express response object).
+ * @returns {Object} - Retourne un objet JSON avec un message indiquant si l'annotation a été créée
+ * avec succès ou une erreur en cas d'échec.
+ * @throws {Error} Une erreur si la création de l'annotation échoue.
+ * @description  Controller pour créer une nouvelle annotation associée à une équipe.
  * 
  * Récupère les informations utiles à l'insertion dans la base de données:
  * 
@@ -23,12 +37,6 @@ const {validateurErreurs} = require('../validateur');
  * du profil (dans cet ordre, les middlewares dépendants les uns des autres).
  * 
  * Accès à ce controller: Gestionnaires du projet et les administrateurs ((*)verifProfil/checkAG).
- * @function
- * @param {Object} req - L'objet de la requête (express request object).
- * @param {Object} res - L'objet de la réponse (express response object).
- * @returns {Object} - Retourne un objet JSON avec un message indiquant si l'annotation a été créée
- * avec succès ou une erreur en cas d'échec.
- * @throws {Error} Une erreur si la création de l'annotation échoue.
 */
 async function ecrireAnnotation(req, res) {
 
@@ -47,7 +55,6 @@ async function ecrireAnnotation(req, res) {
             .run(req);
 
             validateurErreurs(req, res);
-
 
         try {
             annotationModel.creerAnnotation([idEquipe, auteur, contenu]);
@@ -95,7 +102,6 @@ async function getAnnotationEquipe(req, res) {
         }
     }
 }
-
 
 module.exports = {
     ecrireAnnotation,

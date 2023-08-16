@@ -186,13 +186,13 @@ async function createUser(req, res) {
 
         /**Pseudo et/ou email déjà pris */
         if (insertion === 'les2') {
-          return res.status(400).json({ error: 'Mail et pseudo' });
+          return res.status(400).json({ error: 'Mail et pseudo déjà pris.' });
 
         } else if (insertion === 'pseudo') {
-          return res.status(400).json({ error: 'Pseudo' });
+          return res.status(400).json({ error: 'Le pseudo est déjà pris.' });
 
         } else if (insertion === 'mail') {
-          return res.status(400).json({ error: 'Mail' });
+          return res.status(400).json({ error: 'L\'adresse mail est déjà prise.' });
         }
 
       }).catch(() => {

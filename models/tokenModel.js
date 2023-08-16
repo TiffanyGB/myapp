@@ -5,6 +5,16 @@
 
 const pool = require('../database/configDB');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
+
+
+/** 
+ * @constant
+ * @type {string}
+ * @description Clé secrète des token, est regénée à chaque redémarrage du serveur.
+*/
+const secretKey = crypto.randomBytes(64).toString('hex');
+
 
 /**
  * Stocke un JWT (JSON Web Token) dans la base de données avec la clé secrète correspondante.
@@ -136,4 +146,4 @@ async function verifyToken(req, res, next) {
   }
 }
 
-module.exports = { stockerJWT, chercherToken, verifyToken, supprimerJWT }
+module.exports = { stockerJWT, chercherToken, verifyToken, supprimerJWT, secretKey }

@@ -1,6 +1,6 @@
 {
     "source": {
-      "include": ["controllers", "database", "public", "routes", "middleware", "models"],
+      "include": ["controllers/", "controllers/Auth" ,"database", "public", "routes", "middleware", "models", "verifications"],
       "exclude": ["node_modules"] 
     },
     "opts": {

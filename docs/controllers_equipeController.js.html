@@ -29,7 +29,12 @@
             <pre class="prettyprint source linenums"><code>const equipeModel = require('../models/equipeModel');
 const projetModel = require('../models/projetModel');
 const demandeModel = require('../models/demandeModel')
-const { body, validationResult } = require('express-validator');
+const { body } = require('express-validator');
+const { validateurErreurs } = require('../validateur');
+const { creerDossier } = require('../gitlab3');
+const eventModel = require('../models/eventModel');
+const {validateUserId} = require('../verifications/verifierDonnéesGénérales')
+
 
 /**A mettre dans un dossier autre que controller */
 async function retournerEquipeProjet(req, res) {
@@ -40,15 +45,14 @@ async function retournerEquipeProjet(req, res) {
     const idProjet = res.locals.idProjet;
 
     try {
-      const equipeList = await equipeModel.jsonListeEquipeProjet(idProjet);
-      res.status(200).json(equipeList);
+      const equipeListe = await equipeModel.jsonListeEquipeProjet(idProjet);
+      res.status(200).json(equipeListe);
     } catch (error) {
       res.status(400).json({ erreur: "Erreur lors de la récupération des équipes" });
     }
   }
 }
 
-/* aaaa Vérifier données */
 async function creerEquipe(req, res) {
   if (req.method === 'OPTIONS') {
     res.status(200).json({ sucess: 'Agress granted' });
@@ -73,7 +77,6 @@ async function creerEquipe(req, res) {
       idProjet
     ]
 
-    /* Création de l'équipe */
     try {
       /* L'étudiant ne doit pas avoir d'équipe dans l'event*/
 
@@ -83,7 +86,6 @@ async function creerEquipe(req, res) {
         return res.status(400).json({ erreur: 'L\'id du projet n\'existe pas.' })
       }
 
-
       const idEvent = projet[0].idevent;
 
       const aUneEquipe = await equipeModel.aUneEquipeDansEvent(idCapitaine, idEvent);
@@ -91,17 +93,21 @@ async function creerEquipe(req, res) {
       if (aUneEquipe != -1) {
         return res.status(400).json({ erreur: 'Vous avez déjà une équipe dans cet évènement' });
       }
+      
       let idEquipe = await equipeModel.creerEquipe(infos);
 
       equipeModel.ajouterMembre(idCapitaine, idEquipe);
 
       /* Supprimer les demandes de l'étudiant des autres equipes */
-      demandeModel.supprimerDemandes(idUser);
+      demandeModel.supprimerDemandes(idCapitaine);
+
+      const event_nom = (await eventModel.chercherEvenement(idEvent))[0].nom;
+
+      const nomDossier = creerDossier(idEquipe, event_nom);
 
       return res.status(200).json(idEquipe);
     } catch (error) {
-      throw (error)
-      //return res.status(400).json({ erreur: 'Erreur création équipe.' });
+      return res.status(400).json({ erreur: 'Erreur création équipe.' });
     }
   }
 }
@@ -136,6 +142,12 @@ async function modifierEquipe(req, res) {
       idEquipe
     ]
 
+    /*Récupérer l'event de l'équipe*/
+    const projet = await projetModel.chercheridProjet(idProjet);
+    if (projet.length === 0) {
+      return res.status(400).json({ erreur: 'L\'id du projet n\'existe pas.' })
+    }
+
     try {
       equipeModel.modifierEquipe(valeurs);
       res.status(200).json({ message: "Equipe modifiée" });
@@ -165,8 +177,6 @@ async function supprimerEquipe(req, res) {
   }
 }
 
-/* aaaa Vérifier données */
-
 async function promouvoir(req, res) {
   if (req.method === 'OPTIONS') {
     res.status(200).json({ sucess: 'Agress granted' });
@@ -180,6 +190,8 @@ async function promouvoir(req, res) {
       const {
         idUser
       } = req.body;
+
+      await validateUserId('idUser', req, res);
 
       /*Vérifier si l'étudiant est dans l'équipe */
       const appartenir = await equipeModel.appartenirEquipe(idUser, idEquipe);
@@ -202,7 +214,6 @@ async function promouvoir(req, res) {
   }
 }
 
-/* aaaa Vérifier données */
 
 async function supprimerMembre(req, res) {
   if (req.method === 'OPTIONS') {
@@ -215,6 +226,8 @@ async function supprimerMembre(req, res) {
     const {
       idUser
     } = req.body;
+
+    await validateUserId('idUser', req, res);
 
     try {
       /*Vérifier si l'étudiant est dans l'équipe */
@@ -252,7 +265,9 @@ async function getInfosEquipe(req, res) {
 
     const jsonRetour = await equipeModel.jsonInformationsEquipe(idEquipe, req);
 
-    res.status(200).json(jsonRetour);
+    return res.status(200).json(jsonRetour);
+  } else {
+    return res.status(404).json('Page not found');
   }
 }
 
@@ -302,6 +317,9 @@ async function quitterEquipe(req, res) {
     } catch {
       return res.status(400).json({ error: 'N\'a pas pu quitter.' });
     }
+
+  } else {
+    return res.status(404).json('Page not found');
   }
 }
 
@@ -326,15 +344,13 @@ async function demandeEquipe(req, res) {
     ]
 
     await body('message')
-      .isLength({ min: 0, max: 200 })
-      .withMessage('Le message doit contenir entre 0 et 200 caracteres')
+      .isLength({ min: 0, max: 300 })
+      .withMessage('Le message doit contenir entre 0 et 300 caracteres')
       .run(req);
 
 
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
+      validateurErreurs(req, res);
+
 
     const equipe = await equipeModel.chercherEquipeID(idEquipe);
 
@@ -369,6 +385,8 @@ async function demandeEquipe(req, res) {
     } catch (error) {
       return res.status(400).json({ error: 'Erreur lors de l\'envoi du message.' });
     }
+  } else {
+    return res.status(404).json('Page not found');
   }
 }
 
@@ -382,6 +400,8 @@ async function accepterDemande(req, res) {
 
     const idUser = req.body.id;
 
+    await validateUserId('idUser', req, res);
+
     const equipe = await equipeModel.chercherEquipeID(idEquipe);
 
     /* L'étudiant ne doit pas avoir d'équipe dans l'event*/
@@ -394,13 +414,13 @@ async function accepterDemande(req, res) {
     const aUneEquipe = await equipeModel.aUneEquipeDansEvent(idUser, idEvent);
 
     if (aUneEquipe != -1) {
-      return res.status(200).json({ erreur: 'Vous avez déjà une équipe dans cet évènement' });
+      return res.status(200).json({ erreur: 'L\'utilisateur a déjà rejoint une équipe' });
     }
 
     /* Vérifier si l'étudiant a bien envoyé une demande */
     const envoyee = await equipeModel.demandeDejaEnvoyee(idUser, idEquipe);
     if (envoyee.length === 0) {
-      return res.status(400).json({ erreur: 'Aucune demande provenant de cet id' });
+      return res.status(400).json({ erreur: 'Aucune demande provenant de cet utilisateur' });
     }
 
     try {
@@ -413,6 +433,8 @@ async function accepterDemande(req, res) {
     } catch {
       res.status(400).json({ error: 'Erreur lors de l\'acceptation de l\'étudiant.' });
     }
+  } else {
+    return res.status(404).json('Page not found');
   }
 }
 
@@ -426,10 +448,12 @@ async function declinerDemande(req, res) {
 
     const idUser = req.body.id;
 
+    await validateUserId('idUser', req, res);
+
     /* Vérifier si l'étudiant a bien envoyé une demande */
     const envoyee = await equipeModel.demandeDejaEnvoyee(idUser, idEquipe);
     if (envoyee.length === 0) {
-      return res.status(404).json({ erreur: 'Aucune demande provenant de cet id' });
+      return res.status(404).json({ erreur: 'Aucune demande provenant de cet utilisateur' });
     }
 
     try {
@@ -439,6 +463,8 @@ async function declinerDemande(req, res) {
     } catch {
       res.status(400).json({ error: 'Erreur lors du rejet de la demande.' });
     }
+  } else {
+    return res.status(404).json('Page not found');
   }
 }
 
@@ -455,6 +481,8 @@ async function voirMesEquipes(req, res) {
     } catch {
       return res.status(400).json({ erreur: "Erreur lors de la récupération des données." });
     }
+  } else {
+    return res.status(404).json('Page not found');
   }
 }
 
@@ -471,7 +499,7 @@ module.exports = {
   demandeEquipe,
   accepterDemande,
   declinerDemande,
-  voirMesEquipes
+  voirMesEquipes,
 }</code></pre>
         </article>
     </section>
@@ -482,13 +510,13 @@ module.exports = {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Annotation_%2525C3%2525A9quipes.html">Annotation_équipes</a></li><li><a href="module-Evenement.html">Evenement</a></li><li><a href="module-Gestion_demandes_admission.html">Gestion_demandes_admission</a></li><li><a href="module-Gestion_des_utilisateurs.html">Gestion_des_utilisateurs</a></li><li><a href="module-Projet.html">Projet</a></li><li><a href="module-Token.html">Token</a></li><li><a href="module-UserRouter.html">UserRouter</a></li><li><a href="module-VerifierProfil.html">VerifierProfil</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-UserRouter-UserRouter.html">UserRouter</a></li></ul><h3>Global</h3><ul><li><a href="global.html#ajouterRegle">ajouterRegle</a></li><li><a href="global.html#chercherGestionnaireExtID">chercherGestionnaireExtID</a></li><li><a href="global.html#chercherGestionnaireIapau">chercherGestionnaireIapau</a></li><li><a href="global.html#chercherListeGestionnaireIapau">chercherListeGestionnaireIapau</a></li><li><a href="global.html#chercherListeGestionnairesExt">chercherListeGestionnairesExt</a></li><li><a href="global.html#chercherListeStudents">chercherListeStudents</a></li><li><a href="global.html#chercherStudent">chercherStudent</a></li><li><a href="global.html#chercheridProjet">chercheridProjet</a></li><li><a href="global.html#comparerMdp">comparerMdp</a></li><li><a href="global.html#connexion">connexion</a></li><li><a href="global.html#creationProjet">creationProjet</a></li><li><a href="global.html#creerEtudiant">creerEtudiant</a></li><li><a href="global.html#creerGestionnaireExterne">creerGestionnaireExterne</a></li><li><a href="global.html#creerGestionnaireIA">creerGestionnaireIA</a></li><li><a href="global.html#creerProjet">creerProjet</a></li><li><a href="global.html#equipeExiste">equipeExiste</a></li><li><a href="global.html#infosProjet">infosProjet</a></li><li><a href="global.html#inscriptionEleve">inscriptionEleve</a></li><li><a href="global.html#insererMot">insererMot</a></li><li><a href="global.html#listeProjetsJson">listeProjetsJson</a></li><li><a href="global.html#modifierEtudiant">modifierEtudiant</a></li><li><a href="global.html#modifierExterne">modifierExterne</a></li><li><a href="global.html#modifierIapau">modifierIapau</a></li><li><a href="global.html#modifierProjet">modifierProjet</a></li><li><a href="global.html#recupererAncienEvents">recupererAncienEvents</a></li><li><a href="global.html#recupererEventActuel">recupererEventActuel</a></li><li><a href="global.html#recuperer_projets">recuperer_projets</a></li><li><a href="global.html#recuperer_regles">recuperer_regles</a></li><li><a href="global.html#recuperer_ressourcesPrivees">recuperer_ressourcesPrivees</a></li><li><a href="global.html#recuperer_ressourcesPubliques">recuperer_ressourcesPubliques</a></li><li><a href="global.html#recuperer_toutes_ressources">recuperer_toutes_ressources</a></li><li><a href="global.html#retournerEquipeProjet">retournerEquipeProjet</a></li><li><a href="global.html#salageMdp">salageMdp</a></li><li><a href="global.html#supprimerProjet">supprimerProjet</a></li><li><a href="global.html#tousLesProjets">tousLesProjets</a></li><li><a href="global.html#updateMdp">updateMdp</a></li><li><a href="global.html#validerEtudiant">validerEtudiant</a></li><li><a href="global.html#verifIdEquipe">verifIdEquipe</a></li><li><a href="global.html#verifIdEvent">verifIdEvent</a></li><li><a href="global.html#verifIdProjet">verifIdProjet</a></li><li><a href="global.html#voirEvent">voirEvent</a></li><li><a href="global.html#voirListeGestionnaires">voirListeGestionnaires</a></li><li><a href="global.html#voirListeProjets">voirListeProjets</a></li><li><a href="global.html#voirTousEvents">voirTousEvents</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Annotation_%2525C3%2525A9quipes.html">Annotation_équipes</a></li><li><a href="module-Connexion.html">Connexion</a></li><li><a href="module-Evenement.html">Evenement</a></li><li><a href="module-Gestion_demandes_admission.html">Gestion_demandes_admission</a></li><li><a href="module-Gestion_des_utilisateurs.html">Gestion_des_utilisateurs</a></li><li><a href="module-Inscription.html">Inscription</a></li><li><a href="module-Projet.html">Projet</a></li><li><a href="module-Token.html">Token</a></li><li><a href="module-UserRouter.html">UserRouter</a></li><li><a href="module-VerifierProfil.html">VerifierProfil</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-UserRouter-UserRouter.html">UserRouter</a></li></ul><h3>Global</h3><ul><li><a href="global.html#ajouterRegle">ajouterRegle</a></li><li><a href="global.html#chercherGestionnaireExtID">chercherGestionnaireExtID</a></li><li><a href="global.html#chercherGestionnaireIapau">chercherGestionnaireIapau</a></li><li><a href="global.html#chercherListeGestionnaireIapau">chercherListeGestionnaireIapau</a></li><li><a href="global.html#chercherListeGestionnairesExt">chercherListeGestionnairesExt</a></li><li><a href="global.html#chercherListeStudents">chercherListeStudents</a></li><li><a href="global.html#chercherStudent">chercherStudent</a></li><li><a href="global.html#chercheridProjet">chercheridProjet</a></li><li><a href="global.html#comparerMdp">comparerMdp</a></li><li><a href="global.html#creationProjet">creationProjet</a></li><li><a href="global.html#creerEtudiant">creerEtudiant</a></li><li><a href="global.html#creerGestionnaireExterne">creerGestionnaireExterne</a></li><li><a href="global.html#creerGestionnaireIA">creerGestionnaireIA</a></li><li><a href="global.html#creerProjet">creerProjet</a></li><li><a href="global.html#equipeExiste">equipeExiste</a></li><li><a href="global.html#infosProjet">infosProjet</a></li><li><a href="global.html#insererMot">insererMot</a></li><li><a href="global.html#listeProjetsJson">listeProjetsJson</a></li><li><a href="global.html#modifierEtudiant">modifierEtudiant</a></li><li><a href="global.html#modifierExterne">modifierExterne</a></li><li><a href="global.html#modifierIapau">modifierIapau</a></li><li><a href="global.html#modifierProjet">modifierProjet</a></li><li><a href="global.html#recupererAncienEvents">recupererAncienEvents</a></li><li><a href="global.html#recupererEventActuel">recupererEventActuel</a></li><li><a href="global.html#recuperer_projets">recuperer_projets</a></li><li><a href="global.html#recuperer_regles">recuperer_regles</a></li><li><a href="global.html#recuperer_ressourcesPrivees">recuperer_ressourcesPrivees</a></li><li><a href="global.html#recuperer_ressourcesPubliques">recuperer_ressourcesPubliques</a></li><li><a href="global.html#recuperer_toutes_ressources">recuperer_toutes_ressources</a></li><li><a href="global.html#retournerEquipeProjet">retournerEquipeProjet</a></li><li><a href="global.html#salageMdp">salageMdp</a></li><li><a href="global.html#supprimerProjet">supprimerProjet</a></li><li><a href="global.html#tousLesProjets">tousLesProjets</a></li><li><a href="global.html#updateMdp">updateMdp</a></li><li><a href="global.html#validerEtudiant">validerEtudiant</a></li><li><a href="global.html#verifIdEquipe">verifIdEquipe</a></li><li><a href="global.html#verifIdEvent">verifIdEvent</a></li><li><a href="global.html#verifIdProjet">verifIdProjet</a></li><li><a href="global.html#voirEvent">voirEvent</a></li><li><a href="global.html#voirListeGestionnaires">voirListeGestionnaires</a></li><li><a href="global.html#voirListeProjets">voirListeProjets</a></li><li><a href="global.html#voirTousEvents">voirTousEvents</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.2</a> on Tue Aug 08 2023 15:10:09 GMT+0200 (Central European Summer Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.2</a> on Wed Aug 16 2023 14:15:11 GMT+0200 (Central European Summer Time)
 </footer>
 
 <script> prettyPrint(); </script>

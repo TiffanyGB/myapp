@@ -18,9 +18,6 @@ async function envoyer_json_liste_gestionnaires() {
         const listeGExt = await gestionnaireExterneModel.chercherListeGestionnairesExt();
         const listeGIa = await gestionnaireIaModel.chercherListeGestionnaireIapau();
 
-        if (listeGExt.length === 0 && listeGIa.length === 0) {
-            return 'aucun_gestionnaires';
-        }
 
         /*Externes */
         if (listeGExt.length > 0) {
@@ -37,7 +34,7 @@ async function envoyer_json_liste_gestionnaires() {
 
                 /**Erreur pas d'utilisateur associé*/
                 if (userCourant.length === 0) {
-                    return 'error_no_user';
+                    throw(error);
                 }
 
                 for (j = 0; j < userCourant.length; j++) {
@@ -67,11 +64,6 @@ async function envoyer_json_liste_gestionnaires() {
 
                 /**Chercher les infos du gestionnaire externe dans la table utilisateur */
                 let userCourant = await userModel.chercherUserID(idCourant);
-
-                /**Erreur pas d'utilisateur associé*/
-                if (userCourant.length === 0) {
-                    return 'error_no_user';
-                }
 
                 for (j = 0; j < userCourant.length; j++) {
 

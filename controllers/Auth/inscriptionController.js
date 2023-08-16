@@ -1,16 +1,22 @@
+/** 
+ * @fileoverview Controller de l'inscription
+ * @module Inscription
+ * 
+ * @version 1.0.0 
+ * @author Tiffany GAY-BELLILE
+ * @requires ../../models/userModel
+ * @requires ../../models/etudiantModel
+ * @requires ../../models/tokenModel
+ * @requires ../../validateur
+ * @requires jsonwebtoken
+ */
+
 const userModel = require('../../models/userModel');
 const etudiantModel = require('../../models/etudiantModel');
-
-const { validateurErreurs } = require('../../validateur');
-const crypto = require('crypto');
-const jwt = require('jsonwebtoken');
 const tokenModel = require('../../models/tokenModel');
 
-const generateSecretKey = () => {
-    return crypto.randomBytes(64).toString('hex');
-};
-const secretKey = generateSecretKey();
-
+const { validateurErreurs } = require('../../validateur');
+const jwt = require('jsonwebtoken');
 
 /**
  * Inscription d'un étudiant.
@@ -19,12 +25,15 @@ const secretKey = generateSecretKey();
  * @param {Object} req - L'objet requête Express.
  * @param {Object} res - L'objet réponse Express.
  * @returns {Object} - L'objet réponse Express avec les résultats de l'inscription ou les erreurs.
- * @route POST /users/inscription
+ * @description Cette fonction récupère les données du formulaire d'inscription renvoyées par la requête. 
+ * Elle vérifie les que les données soient bonnes grâce à la fonction de validation des données d'un étudiant.
+ * S'il y a un problème dans ses données, elle renvoie la liste des erreurs. Sinon, elle insère l'étudiant dans
+ * la base de données.
  */
 async function inscriptionEleve(req, res) {
     if (req.method === 'POST') {
 
-        /**Données du formulaire d'inscription */
+        /**Données renvoyées par la requête*/
         const {
             nom: userNom,
             prenom: userPrenom,
@@ -50,53 +59,45 @@ async function inscriptionEleve(req, res) {
             userVille,
         ];
 
-        /** Pour retrouver l'id de l'utilisateur inséré, pour inséré un etudiant du même id */
-        const values_id = [
-            userPseudo,
-            userMail
-        ];
-
         /*Vérifier les données des étudiants */
         await etudiantModel.validerEtudiant(req);
-
-        validateurErreurs(req,res);
+        validateurErreurs(req, res);
 
         try {
-            userModel.insererUser(values, password, values_id, 'etudiant')
+            const insertion = await userModel.insererUser(values, password, [userPseudo, userMail], 'etudiant')
 
-                .then((insertion) => {
-                    if (typeof insertion === 'number') {
+            /*La variable 'insertion' contient l'id de l'utilisateur inséré */
+            if (typeof insertion === 'number') {
 
-                        etudiantModel.creerEtudiant(userEcole, userNiveauEtude, insertion)
-                            .then(() => {
+                etudiantModel.creerEtudiant(userEcole, userNiveauEtude, insertion)
+                    .then(() => {
 
-                                /**  Informations à insérer dans le token */
-                                const payload = {
-                                    "utilisateurId": insertion,
-                                    "utilisateurType": 'etudiant'
-                                };
+                        /**  Informations à insérer dans le token */
+                        const payload = {
+                            "utilisateurId": insertion,
+                            "utilisateurType": 'etudiant'
+                        };
 
-                                /**  Générer le JWT */
-                                const token = jwt.sign(payload, secretKey, { expiresIn: '30d' });
-                                tokenModel.stockerJWT(token, secretKey);
-                                return res.status(200).json({ token: token, id: insertion, prenom: userPrenom, nom: userNom, pseudo: userPseudo, role: 'etudiant' });
-                            })
-                            .catch(() => {
-                                /**Supprimer l'utilisateur */
-                                userModel.supprimerUser(insertion, 'etudiant')
-                                return res.status(400).json({ erreur: "erreur", Détails: "Utilisateur supprimé de la table utilisateur" });
-                            });
+                        /**  Générer le JWT */
+                        const token = jwt.sign(payload, tokenModel.secretKey, { expiresIn: '24h' });
+                        tokenModel.stockerJWT(token, tokenModel.secretKey);
+                        return res.status(200).json({ token: token, id: insertion, prenom: userPrenom, nom: userNom, pseudo: userPseudo, role: 'etudiant' });
+                    })
+                    .catch(() => {
+                        /**Supprimer l'utilisateur */
+                        userModel.supprimerUser(insertion, 'etudiant')
+                        return res.status(400).json({ erreur: "erreur", Détails: "Utilisateur supprimé de la table utilisateur" });
+                    });
 
-                    } else if (insertion === 'les2') {
-                        return res.status(400).json({ error: 'L\'email et le pseudo existent déjà.' });
+            } else if (insertion === 'les2') {
+                return res.status(400).json({ error: 'L\'email et le pseudo existent déjà.' });
 
-                    } else if (insertion === 'pseudo') {
-                        return res.status(400).json({ error: 'Le pseudo existe déjà.' });
+            } else if (insertion === 'pseudo') {
+                return res.status(400).json({ error: 'Le pseudo existe déjà.' });
 
-                    } else if (insertion === 'mail') {
-                        return res.status(400).json({ error: 'L\'adresse mail existe déjà.' });
-                    }
-                });
+            } else if (insertion === 'mail') {
+                return res.status(400).json({ error: 'L\'adresse mail existe déjà.' });
+            }
         } catch {
             return res.status(400).json({ message: 'Erreur lors de l\'insertion de l\'utilisateur.' });
         }

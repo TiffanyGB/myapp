@@ -13,6 +13,7 @@ async function verifId(res, next, id, nomId, table) {
     throw error;
   }
 }
+
 /**Vérifier si existe equipe */
 async function verifIdEquipe(req, res, next) {
   const id = req.params.id;

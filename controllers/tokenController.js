@@ -6,6 +6,7 @@
 const jwt = require('jsonwebtoken');
 const tokenModel = require('../models/tokenModel');
 
+
 function verifierToken(req, res) {
   if (req.method === 'OPTIONS') {
 

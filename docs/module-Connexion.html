@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: routes/users.js</title>
+    <title>JSDoc: Module: Connexion</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,124 +17,340 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: routes/users.js</h1>
+    <h1 class="page-title">Module: Connexion</h1>
 
     
 
 
 
+
+<section>
+
+<header>
     
-    <section>
-        <article>
-            <pre class="prettyprint source linenums"><code>/**
- * @fileoverview Ce fichier contient le router pour la gestion des utilisateurs ie
- * - Création,
- * - Suppression
- * - Modification,
- * - Voir la liste des utilisateurs.
- * Ces routes ne sont accesibles que par l'administrateur.
- * 
- * @module UserRouter
+</header>
 
- * @version 1.0.0
- * @author	Tiffany GAY-BELLILE
- */
+<article>
+    <div class="container-overview">
+    
+        
+            <div class="description">Controller de la connexion</div>
+        
 
-/**
- * Router pour les utilisateurs.
- * Gère les routes liées aux utilisateurs, telles que /users, /users/:id, etc.
- * @namespace UserRouter
- * @see {@link module:UserController}
- * @see {@link module:UserModel}
- */
-
-var express = require('express');
-var router = express.Router();
-const userController = require('../controllers/userController');
-const userModel = require('../models/userModel');
-const tokenModel = require('../models/tokenModel');
-const profil = require('../middleware/verifProfil');
-const checkAdminProfile = profil.checkProfile('admin');
-const validationDonnees = require('../middleware/validationDonnees');
-const aucunProfil = profil.interdireAucunProfil;
-const { verifIdNombre } = require('../verifications/verifierDonnéesGénérales');
-
-/**
- * @route GET /users
- * @description Endpoint pour voir la liste des utilisateurs
- * @access Seuls les administrateurs peuvent utiliser cette route.
- * @authentication Requiert un token JWT valide dans l'en-tête Authorization.
- */
-router.get('/',
-  tokenModel.verifyToken,
-  checkAdminProfile,
-  userController.voirUtilisateurs);
-
-/**
- * @route ALL /users/create
- * @description Endpoint pour créer un nouvel utilisateur.
- * @access Seuls les administrateurs peuvent utiliser cette route.
- * @authentication Requiert un token JWT valide dans l'en-tête Authorization.
- */
-router.all(
-  '/create',
-  tokenModel.verifyToken,
-  checkAdminProfile,
-  userModel.validateUser,
-  validationDonnees.validatePasswordCreation,
-  userController.createUser,
-
-);
-
-/**
- * @route ALL /users/edit/:id
- * @description Endpoint pour modifier un utilisateur.
- * @access Seuls ceux avec un compte.
- * @authentication Requiert un token JWT valide dans l'en-tête Authorization.
- */
-router.all('/edit/:id', (req, res, next) => {
-  res.locals.userId = req.params.id;
-
-  try {
-    if (verifIdNombre(res.locals.userId, res) === -1) {
-      return res.status(400).json({ erreur: 'L\'id doit être un nombre.' })
-    }
-  } catch {
-    return res.status(400).json('Problème lors de la vérification du numéro de l\'équipe');
-  }
-  next();
-}, tokenModel.verifyToken,
-  aucunProfil,
-  userModel.validateUser,
-  validationDonnees.validatePasswordModif,
-  userController.modifierUser);
+        
 
 
-/**
- * @route GET /users/delete/:id
- * @description Endpoint pour supprimer un utilisateur.
- * @access Seuls les administrateurs peuvent utiliser cette route.
- * @authentication Requiert un token JWT valide dans l'en-tête Authorization.
- */
-router.all('/delete/:id', (req, res, next) => {
-  res.locals.userId = req.params.id;
+<dl class="details">
 
-  try {
-    if (verifIdNombre(res.locals.userId, res) === -1) {
-      return res.status(400).json({ erreur: 'L\'id doit être un nombre.' })
-    }
-  } catch {
-    return res.status(400).json('Problème lors de la vérification du numéro de l\'équipe');
-  }
+    
+    <dt class="tag-version">Version:</dt>
+    <dd class="tag-version"><ul class="dummy"><li>1.0.0</li></ul></dd>
+    
 
-  next();
-}, tokenModel.verifyToken,
-  checkAdminProfile,
-  userController.supprimerUser);
+    
 
-module.exports = router;</code></pre>
-        </article>
-    </section>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-author">Author:</dt>
+    <dd class="tag-author">
+        <ul>
+            <li><a href="mailto:tiffany.gbellile@gmail.com">Tiffany GAY-BELLILE</a></li>
+        </ul>
+    </dd>
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="controllers_Auth_connexionController.js.html">controllers/Auth/connexionController.js</a>, <a href="controllers_Auth_connexionController.js.html#line1">line 1</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+        
+    
+    </div>
+
+    
+
+    
+        <h3 class="subsection-title">Requires</h3>
+
+        <ul>
+            <li>module:../../models/passwordModel</li>
+        
+            <li>module:../../models/tokenModel</li>
+        
+            <li>module:../../database/configDB</li>
+        
+            <li>module:jsonwebtoken</li>
+        </ul>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="~connexion"><span class="type-signature">(async, inner) </span>connexion<span class="signature">(req, res)</span><span class="type-signature"> &rarr; {object}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Cette fonction permet à un utilisateur de se connecter à son compte avec 
+un login/email et un mot de passe.
+
+Le champ 'identifiant' peut être un pseudo ou une adresse mail.
+Le champ 'seSouvenir' vaut 'true' si l'utilisteur a coché cette option sur la page de connexion,
+'false' dans le cas contraire. Ce champ permet d'ajuster la date d'expiration du token, plus longue
+si il vaut 'true'.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>req</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">L'objet de requête HTTP.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>res</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">L'objet de réponse HTTP.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="controllers_Auth_connexionController.js.html">controllers/Auth/connexionController.js</a>, <a href="controllers_Auth_connexionController.js.html#line38">line 38</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Throws:</h5>
+
+        
+
+<dl>
+    <dt>
+        <div class="param-desc">
+        Erreur lors de la requete qui recherche un utilisateur ayant le même identifiant.
+        </div>
+    </dt>
+    <dd></dd>
+    <dt>
+        <dl>
+            <dt>
+                Type
+            </dt>
+            <dd>
+                
+<span class="param-type">Error</span>
+
+
+            </dd>
+        </dl>
+    </dt>
+    <dd></dd>
+</dl>
+
+
+    
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    Un JSON contenant le token généré, les informations de l'utilisateur suivantes:
+id, nom, prénom, pseudo, rôle (Etudiant, gestionnaire externe, gestionnaire IA Pau, administrateur)
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">object</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+    
+
+    
+
+    
+</article>
+
+</section>
 
 
 

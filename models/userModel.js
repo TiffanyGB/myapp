@@ -5,8 +5,7 @@
 
 const pool = require('../database/configDB');
 const passwordModel = require('../models/passwordModel');
-const profilModel = require('./profilModel');
-const verif = require('../controllers/Auth/verificationExistenceController');
+const verif = require('../verifications/verif_pseudo_mail_libres');
 const preference = require('./profilModel');
 const { body } = require('express-validator');
 const { validateurDonnéesMiddleware } = require('../validateur');
@@ -118,25 +117,21 @@ async function insererUser(values, password, values2, type) {
 
         values.push(type, mdp);
 
-        const nonExiste = await verif.verifExistence(values2);
+        const existeP = await verif.existePseudo(values2[0]);
+        const existeM = await verif.existeMail(values2[1]);
 
         /**Pas d'utilisateur ayant les mêmes id, on peut insérer */
-        if (nonExiste) {
+        if (!existeP && !existeM) {
             return new Promise((resolve) => {
                 pool.query(insertUser, values)
                     .then((result) => {
 
                         let id = result.rows[0].iduser;
-                        /*Insertion des préférences pour le profil */
-                        profilModel.preferences(id);
                         resolve(id);
                     });
             });
         }
         else {
-            const existeP = await verif.existePseudo(values2[0]);
-            const existeM = await verif.existeMail(values2[1]);
-
             if (existeM && existeP) {
                 return "les2";
             }

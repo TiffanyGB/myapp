@@ -150,7 +150,7 @@ async function modifierEvent(req, res) {
   }
 }
 
-async function supprimerEvent(req, res) {
+function supprimerEvent(req, res) {
   if (req.method === 'OPTIONS') {
     res.status(200).json({ sucess: 'Agress granted' });
   }
@@ -159,15 +159,10 @@ async function supprimerEvent(req, res) {
     const idevent = res.locals.idevent;
 
     try {
-
-      const result = await eventModel.supprimerEvent(idevent);
-      if (result === 'ok') {
+      eventModel.supprimerEvent(idevent);
         return res.status(200).json({ message: "Suppression réussie" });
-      } else {
-        return res.status(400).json({ erreur: 'Echec de la suppression' });
-      }
     } catch (error) {
-      return res.status(500).json({ erreur: 'Erreur lors de la suppression de l\'utilisateur' });
+      return res.status(500).json({ erreur: 'Erreur lors de la suppression de l\'événement.' });
     }
   }
 }

@@ -13,7 +13,7 @@ async function validerEtudiant(req) {
     await body('niveau_etude')
         .isIn(['L1', 'L2', 'L3', 'M1', 'M2', 'Doctorat'])
         .isLength({ min: 2, max: 15 })
-        .withMessage("Le niveau d'études n'est pas valide")
+        .withMessage("Le niveau scolaire n'est pas valide")
         .run(req);
 }
 

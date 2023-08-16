@@ -1,3 +1,17 @@
+/** 
+ * @fileoverview Controller de l'inscription
+ * @module Equipe
+ * 
+ * @version 1.0.0 
+ * @author Tiffany GAY-BELLILE
+ * @requires ../../models/equipeModel
+ * @requires ../../models/projetModel
+ * @requires ../../models/projetModel
+ * @requires ../../models/eventModel
+ * @requires ../validateur
+ * @requires jsonwebtoken
+ */
+
 const equipeModel = require('../models/equipeModel');
 const projetModel = require('../models/projetModel');
 const demandeModel = require('../models/demandeModel')
@@ -5,9 +19,9 @@ const { body } = require('express-validator');
 const { validateurErreurs } = require('../validateur');
 const { creerDossier } = require('../gitlab3');
 const eventModel = require('../models/eventModel');
+const { validateUserId } = require('../verifications/verifierDonnéesGénérales')
 
 
-/**A mettre dans un dossier autre que controller */
 async function retournerEquipeProjet(req, res) {
   if (req.method === 'OPTIONS') {
     res.status(200).json({ sucess: 'Agress granted' });
@@ -16,8 +30,8 @@ async function retournerEquipeProjet(req, res) {
     const idProjet = res.locals.idProjet;
 
     try {
-      const equipeList = await equipeModel.jsonListeEquipeProjet(idProjet);
-      res.status(200).json(equipeList);
+      const equipeListe = await equipeModel.jsonListeEquipeProjet(idProjet);
+      res.status(200).json(equipeListe);
     } catch (error) {
       res.status(400).json({ erreur: "Erreur lors de la récupération des équipes" });
     }
@@ -48,7 +62,6 @@ async function creerEquipe(req, res) {
       idProjet
     ]
 
-    /* Création de l'équipe */
     try {
       /* L'étudiant ne doit pas avoir d'équipe dans l'event*/
 
@@ -65,6 +78,7 @@ async function creerEquipe(req, res) {
       if (aUneEquipe != -1) {
         return res.status(400).json({ erreur: 'Vous avez déjà une équipe dans cet évènement' });
       }
+
       let idEquipe = await equipeModel.creerEquipe(infos);
 
       equipeModel.ajouterMembre(idCapitaine, idEquipe);
@@ -162,18 +176,7 @@ async function promouvoir(req, res) {
         idUser
       } = req.body;
 
-      await body('idUser')
-        .notEmpty().withMessage('L\'id du projet ne doit pas être vide.')
-        .matches(/^[0-9]*$/).withMessage("L\'id ne doit avoir que des chiffres.")
-        .custom((value, { req }) => {
-          if (/^[0-9]*$/.test(value)) {
-            return value >= 1 && value <= 999999999;
-          }
-          return true;
-        }).withMessage('L\'id est trop long.')
-        .run(req);
-
-      validateurErreurs(req, res);
+      await validateUserId('idUser', req, res);
 
       /*Vérifier si l'étudiant est dans l'équipe */
       const appartenir = await equipeModel.appartenirEquipe(idUser, idEquipe);
@@ -209,18 +212,7 @@ async function supprimerMembre(req, res) {
       idUser
     } = req.body;
 
-    await body('idUser')
-      .notEmpty().withMessage('L\'id du projet ne doit pas être vide.')
-      .matches(/^[0-9]*$/).withMessage("L\'id ne doit avoir que des chiffres.")
-      .custom((value, { req }) => {
-        if (/^[0-9]*$/.test(value)) {
-          return value >= 1 && value <= 999999999;
-        }
-        return true;
-      }).withMessage('L\'id est trop long.')
-      .run(req);
-
-    validateurErreurs(req, res);
+    await validateUserId('idUser', req, res);
 
     try {
       /*Vérifier si l'étudiant est dans l'équipe */
@@ -342,7 +334,7 @@ async function demandeEquipe(req, res) {
       .run(req);
 
 
-      validateurErreurs(req, res);
+    validateurErreurs(req, res);
 
 
     const equipe = await equipeModel.chercherEquipeID(idEquipe);
@@ -393,18 +385,7 @@ async function accepterDemande(req, res) {
 
     const idUser = req.body.id;
 
-    await body('id')
-      .notEmpty().withMessage('L\'id du projet ne doit pas être vide.')
-      .matches(/^[0-9]*$/).withMessage("L\'id ne doit avoir que des chiffres.")
-      .custom((value, { req }) => {
-        if (/^[0-9]*$/.test(value)) {
-          return value >= 1 && value <= 999999999;
-        }
-        return true;
-      }).withMessage('L\'id est trop long.')
-      .run(req);
-
-      validateurErreurs(req, res);
+    await validateUserId('idUser', req, res);
 
     const equipe = await equipeModel.chercherEquipeID(idEquipe);
 
@@ -452,19 +433,7 @@ async function declinerDemande(req, res) {
 
     const idUser = req.body.id;
 
-    await body('id')
-      .notEmpty().withMessage('L\'id du projet ne doit pas être vide.')
-      .matches(/^[0-9]*$/).withMessage("L\'id ne doit avoir que des chiffres.")
-      .custom((value, { req }) => {
-        if (/^[0-9]*$/.test(value)) {
-          return value >= 1 && value <= 999999999;
-        }
-        return true;
-      }).withMessage('L\'id est trop long.')
-      .run(req);
-
-      validateurErreurs(req, res);
-
+    await validateUserId('idUser', req, res);
 
     /* Vérifier si l'étudiant a bien envoyé une demande */
     const envoyee = await equipeModel.demandeDejaEnvoyee(idUser, idEquipe);
@@ -501,7 +470,6 @@ async function voirMesEquipes(req, res) {
     return res.status(404).json('Page not found');
   }
 }
-
 
 module.exports = {
   retournerEquipeProjet,

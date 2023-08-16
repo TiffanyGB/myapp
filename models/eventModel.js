@@ -149,20 +149,15 @@ async function modifierEvent(valeurs) {
 }
 
 /*Supprimer un event*/
-async function supprimerEvent(idEvent) {
+function supprimerEvent(idEvent) {
 
     const supprimer = `DELETE FROM Evenement WHERE idEvent = $1`;
 
-    return new Promise((resolve, reject) => {
-
+    try{
         pool.query(supprimer, [idEvent])
-            .then(() => {
-                resolve('ok');
-            })
-            .catch((error) => {
-                reject(error);
-            });
-    });
+    }catch (error){
+        throw (error);
+    }
 }
 
 /**
