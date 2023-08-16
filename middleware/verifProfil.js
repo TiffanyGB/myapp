@@ -107,8 +107,8 @@ async function checkACG(req, res, next) {
         break;
       case 'gestionnaire':
         /*Vérifier la gestion du projet */
-        const gerer_ia = await gererProjet.chercherGestionnaireIAID(id, req.id);
-        const gerer_ext = await gererProjet.chercherGestionnaireExtID(id, req.id);
+        const gerer_ia = await gererProjet.chercherGestionnaireIAID(id.idprojet, req.id);
+        const gerer_ext = await gererProjet.chercherGestionnaireExtID(id.idprojet, req.id);
 
         if (gerer_ia.length > 0 || gerer_ext.length > 0) {
           next();
