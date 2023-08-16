@@ -235,7 +235,7 @@ CREATE TABLE Preferences(
 CREATE TABLE MessageGestionnaireAdmin(
     idMessage SERIAL PRIMARY KEY,
     idEquipe INT REFERENCES Equipe(idEquipe) ON DELETE CASCADE,
-    idExpediteur INT REFERENCES Utilisateur(idUser),
+    idExpediteur INT REFERENCES Utilisateur(idUser)  ON DELETE CASCADE NOT NULL,
     contenu TEXT NOT NULL,
     estLu BOOLEAN DEFAULT FALSE,
     typeMessage VARCHAR(30) CHECK (typeMessage IN ('team', 'projet', 'event')) DEFAULT 'team',
@@ -245,7 +245,7 @@ CREATE TABLE MessageGestionnaireAdmin(
 CREATE TABLE MessageEquipe(
     idMessage SERIAL PRIMARY KEY,
     idEquipe INT REFERENCES Equipe(idEquipe) ON DELETE CASCADE,
-    idExpediteur INT REFERENCES Etudiant(idEtudiant),
+    idExpediteur INT REFERENCES Etudiant(idEtudiant)  ON DELETE CASCADE NOT NULL,
     contenu TEXT NOT NULL,
     estLu BOOLEAN DEFAULT FALSE,
     typeMessage VARCHAR(30) DEFAULT 'team' CHECK (typeMessage = 'team'),
@@ -255,7 +255,7 @@ CREATE TABLE MessageEquipe(
 CREATE TABLE Annotation(
     idAnnotation SERIAL PRIMARY KEY,
     idEquipe INT REFERENCES Equipe(idEquipe) ON DELETE CASCADE NOT NULL,
-    auteur INT REFERENCES Utilisateur(idUser) NOT NULL,
+    auteur INT REFERENCES Utilisateur(idUser) NOT NULL  ON DELETE CASCADE NOT NULL,
     contenu TEXT NOT NULL,
     date_annotation TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
