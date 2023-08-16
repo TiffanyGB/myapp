@@ -1,6 +1,6 @@
 const pool = require('./configDB');
 const passwordModel = require('../models/passwordModel');
-const verificationExistence = require('../controllers/Auth/verificationExistenceController');
+const verificationExistence = require('../verifications/verif_pseudo_mail_libres');
 const userModel = require('../models/userModel');
 
 
