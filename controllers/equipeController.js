@@ -296,6 +296,9 @@ async function quitterEquipe(req, res) {
 
     try {
       equipeModel.quitterEquipe(idEquipe, idUser);
+
+      equipeModel.ouvrirEquipe(idEquipe);
+
       return res.status(200).json({ message: "Equipe quittée" });
 
     } catch {
