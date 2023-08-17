@@ -8,21 +8,21 @@ const valeurs2 = ['test2', 'test2@etudiant.fr'];
 
 function verifExistence(values) {
     const verifExistence = `SELECT * FROM UTILISATEUR WHERE (pseudo = $1) OR (email = $2)`;
-  
+
     return new Promise((resolve, reject) => {
-      pool.query(verifExistence, values)
-        .then((result) => {
-          if (result.rows.length > 0) {
-            resolve(false);
-          } else {
-            resolve(true);
-          }
-        })
-        .catch((error) => {
-          reject(error);
-        });
+        pool.query(verifExistence, values)
+            .then((result) => {
+                if (result.rows.length > 0) {
+                    resolve(false);
+                } else {
+                    resolve(true);
+                }
+            })
+            .catch((error) => {
+                reject(error);
+            });
     });
-  }
+}
 
 const createDefaultUser1 = async () => {
     try {
