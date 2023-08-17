@@ -43,7 +43,7 @@ async function createEvent(req, res) {
         .run(req);
 
       await body('regles.*.titre')
-        .notEmpty().withMessage('Le nom ne doit pas être vide.')
+        .notEmpty().withMessage('Le nom des règles ne doit pas être vide.')
         .isLength({ min: 2, max: 50 }).withMessage('Le prénom doit avoir une longueur comprise entre 2 et 50 caractères.')
         .run(req);
 
@@ -52,7 +52,11 @@ async function createEvent(req, res) {
         .isLength({ min: 2, max: 1000 }).withMessage('Le lien doit avoir une longueur comprise entre 3 et 1000 caractères.')
         .run(req);
 
-      validateurErreurs(req,res);
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        errorDetected = true; // Marquer qu'une erreur a été détectée
+        return res.status(400).json({ errors: errors.array() });
+      }
     }
 
 
@@ -120,6 +124,29 @@ async function modifierEvent(req, res) {
       image,
       idevent,
     ];
+    
+    for (const regle of regles) {
+      await body('regles')
+        .optional()
+        .isArray({ min: 1 }).withMessage('Le tableau des ressources ne doit pas être vide.')
+        .run(req);
+
+      await body('regles.*.titre')
+        .notEmpty().withMessage('Le nom des règles ne doit pas être vide.')
+        .isLength({ min: 2, max: 50 }).withMessage('Le prénom doit avoir une longueur comprise entre 2 et 50 caractères.')
+        .run(req);
+
+      await body('regles.*.contenu')
+        .notEmpty().withMessage('La règle ne doit pas être vide.')
+        .isLength({ min: 2, max: 1000 }).withMessage('Le lien doit avoir une longueur comprise entre 3 et 1000 caractères.')
+        .run(req);
+
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        errorDetected = true; // Marquer qu'une erreur a été détectée
+        return res.status(400).json({ errors: errors.array() });
+      }
+    }
 
     try {
       eventModel.modifierEvent(valeurs_event)
@@ -160,7 +187,7 @@ function supprimerEvent(req, res) {
 
     try {
       eventModel.supprimerEvent(idevent);
-        return res.status(200).json({ message: "Suppression réussie" });
+      return res.status(200).json({ message: "Suppression réussie" });
     } catch (error) {
       return res.status(500).json({ erreur: 'Erreur lors de la suppression de l\'événement.' });
     }
@@ -259,7 +286,7 @@ async function voirTousEvents(req, res) {
     try {
       const result = await eventModel.creerJsonTousEvents();
       res.status(200).json(result);
-      
+
     } catch (error) {
       res.status(500).json({ message: 'Une erreur s\'est produite lors de la récupération des événements.' });
     }

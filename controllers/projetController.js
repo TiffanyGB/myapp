@@ -6,6 +6,7 @@ const gestionnaireIaModel = require('../models/gestionnaireIaModel');
 const ressourceModel = require('../models/ressourceModel');
 const { body } = require('express-validator');
 const { validateurErreurs } = require('../validateur');
+const {validationResult } = require('express-validator');
 
 
 /**Liste des projets */
@@ -75,11 +76,14 @@ async function creationProjet(req, res) {
                 await body('motClefs')
                     .optional()
                     .notEmpty().withMessage('Le mot-clé ne doit pas être vide.')
-                    .isLength({ min: 2, max: 25 }).withMessage('Le mot-clé doit avoir une longueur comprise entre 2 et 25 caractères.')
+                    .isLength({ min: 1, max: 25 }).withMessage('Le mot-clé doit avoir une longueur comprise entre 1 et 25 caractères.')
                     .run(req);
 
-                validateurErreurs(req, res);
-            }
+                    const errors = validationResult(req);
+                    if (!errors.isEmpty()) {
+                        errorDetected = true; // Marquer qu'une erreur a été détectée
+                        return res.status(400).json({ errors: errors.array() });
+                    }            }
         }
 
         for (const ressource of Ressources) {
@@ -89,38 +93,43 @@ async function creationProjet(req, res) {
                 .run(req);
 
             await body('Ressources.*.nom')
-                .notEmpty().withMessage('Le nom ne doit pas être vide.')
-                .isLength({ min: 2, max: 100 }).withMessage('Le prénom doit avoir une longueur comprise entre 3 et 100 caractères.')
+                .notEmpty().withMessage('Le nom des ressources est obligatoire.')
+                .isLength({ min: 2, max: 100 }).withMessage('Le nom des ressources doit avoir une longueur comprise entre 3 et 100 caractères.')
                 .run(req);
 
             await body('Ressources.*.type')
-                .notEmpty().withMessage('Le type ne doit pas être vide.')
+                .notEmpty().withMessage('Le type des ressources est obligatoire.')
                 .matches(/^(video|lien|drive|téléchargment)$/).withMessage('Le type doit avoir "video", "lien", "drive" ou "téléchargement".')
                 .isLength({ min: 2, max: 18 })
                 .run(req);
 
             await body('Ressources.*.lien')
-                .notEmpty().withMessage('Le nom ne doit pas être vide.')
+                .notEmpty().withMessage('Le lien des ressources est obligatoire.')
                 .isURL()
-                .isLength({ min: 3, max: 1000 }).withMessage('Le prénom doit avoir une longueur comprise entre 3 et 1000 caractères.')
+                .isLength({ min: 3, max: 2000 }).withMessage('Le lien de la ressource doit  être valide.')
                 .run(req);
             await body('Ressources.*.description')
-                .notEmpty().withMessage('La description est obligatoire.')
-                .isLength({ min: 10, max: 10000 }).withMessage('La description doit avoir une longueur comprise entre 10 et 10000 caractères.')
+                .notEmpty().withMessage('La description des ressources est obligatoire.')
+                .isLength({ min: 10, max: 10000 }).withMessage('La description de la ressource doit avoir une longueur comprise entre 10 et 10000 caractères.')
                 .run(req);
             await body('Ressources.*.consultation')
-                .notEmpty().withMessage('La consultation ne doit pas être vide.')
-                .matches(/^(privé|public)$/).withMessage('Le type doit avoir "privé", "public".')
+                .notEmpty().withMessage('La consultation des ressources ne doit pas être vide.')
+                .matches(/^(privé|public)$/).withMessage('Le consultation des ressources doit être "privé" ou "public".')
                 .isLength({ min: 2, max: 6 })
                 .run(req);
 
             await body('Ressources.*.publication')
-                .notEmpty().withMessage('La date ne doit pas être vide.')
+                .notEmpty().withMessage('La date de publication des ressources ne doit pas être vide.')
                 .isLength({ min: 10, max: 30 }).withMessage('La date doit avoir une longueur comprise entre 3 et 30 caractères.')
                 .matches(/^[0-9a-zA-Z\-\ :.]+$/).withMessage('La date ne doit contenir que des lettres et des chiffres.')
                 .run(req);
 
-            validateurErreurs(req, res);
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                errorDetected = true; // Marquer qu'une erreur a été détectée
+                return res.status(400).json({ errors: errors.array() });
+            }
+    
         }
 
         /*Vérification des données des gestionnaires, les id doivent être des entiers
@@ -240,58 +249,67 @@ async function modifierProjet(req, res) {
             ];
 
 
-            if (motClefs.length > 0) {
-                for (const mot of motClefs) {
-                    await body('motClefs')
-                        .optional()
-                        .notEmpty().withMessage('Le mot-clé ne doit pas être vide.')
-                        .isLength({ min: 2, max: 25 }).withMessage('Le mot-clé doit avoir une longueur comprise entre 2 et 25 caractères.')
-                        .run(req);
-
-                    validateurErreurs(req, res);
-                }
-            }
-
-            for (const ressource of Ressources) {
-                await body('Ressources')
+        /*Vérification des données des mots-clés */
+        if (motClefs.length > 0) {
+            for (const mot of motClefs) {
+                await body('motClefs')
                     .optional()
-                    .isArray({ min: 1 }).withMessage('Le tableau des ressources ne doit pas être vide.')
+                    .notEmpty().withMessage('Le mot-clé ne doit pas être vide.')
+                    .isLength({ min: 1, max: 25 }).withMessage('Le mot-clé doit avoir une longueur comprise entre 1 et 25 caractères.')
                     .run(req);
 
-                await body('Ressources.*.nom')
-                    .notEmpty().withMessage('Le nom ne doit pas être vide.')
-                    .isLength({ min: 2, max: 100 }).withMessage('Le nom doit avoir une longueur comprise entre 3 et 100 caractères.')
-                    .run(req);
+                    const errors = validationResult(req);
+                    if (!errors.isEmpty()) {
+                        errorDetected = true; // Marquer qu'une erreur a été détectée
+                        return res.status(400).json({ errors: errors.array() });
+                    }            }
+        }
 
-                await body('Ressources.*.type')
-                    .notEmpty().withMessage('Le type ne doit pas être vide.')
-                    .matches(/^(video|lien|drive|téléchargement)$/).withMessage('Le type doit avoir "vidéo", "lien", "drive" ou "téléchargement".')
-                    .isLength({ min: 2, max: 18 })
-                    .run(req);
+        for (const ressource of Ressources) {
+            await body('Ressources')
+                .optional()
+                .isArray({ min: 1 }).withMessage('Le tableau des ressources ne doit pas être vide.')
+                .run(req);
 
-                await body('Ressources.*.lien')
-                    .notEmpty().withMessage('Le lien ne doit pas être vide.')
-                    .isURL().withMessage('Le lien de chaque ressource doit être un lien valide.')
-                    .isLength({ min: 3, max: 1000 }).withMessage('Le lien doit avoir une longueur comprise entre 3 et 1000 caractères.')
-                    .run(req);
-                await body('Ressources.*.description')
-                    .notEmpty().withMessage('La description est obligatoire.')
-                    .isLength({ min: 10, max: 10000 }).withMessage('La description doit avoir une longueur comprise entre 10 et 10000 caractères.')
-                    .run(req);
-                await body('Ressources.*.consultation')
-                    .notEmpty().withMessage('La consultation ne doit pas être vide.')
-                    .matches(/^(privé|public)$/).withMessage('Le type doit avoir "privé", "public".')
-                    .isLength({ min: 2, max: 6 })
-                    .run(req);
+            await body('Ressources.*.nom')
+                .notEmpty().withMessage('Le nom des ressources est obligatoire.')
+                .isLength({ min: 2, max: 100 }).withMessage('Le nom des ressources doit avoir une longueur comprise entre 3 et 100 caractères.')
+                .run(req);
 
-                await body('Ressources.*.publication')
-                    .notEmpty().withMessage('La date ne doit pas être vide.')
-                    .isLength({ min: 10, max: 30 }).withMessage('La date doit avoir une longueur comprise entre 3 et 30 caractères.')
-                    .matches(/^[0-9a-zA-Z\-\ :.]+$/).withMessage('La date ne doit contenir que des lettres et des chiffres.')
-                    .run(req);
+            await body('Ressources.*.type')
+                .notEmpty().withMessage('Le type des ressources est obligatoire.')
+                .matches(/^(video|lien|drive|téléchargment)$/).withMessage('Le type doit avoir "video", "lien", "drive" ou "téléchargement".')
+                .isLength({ min: 2, max: 18 })
+                .run(req);
 
-                validateurErreurs(req, res);
+            await body('Ressources.*.lien')
+                .notEmpty().withMessage('Le lien des ressources est obligatoire.')
+                .isURL()
+                .isLength({ min: 3, max: 2000 }).withMessage('Le lien de la ressource doit  être valide.')
+                .run(req);
+            await body('Ressources.*.description')
+                .notEmpty().withMessage('La description des ressources est obligatoire.')
+                .isLength({ min: 10, max: 10000 }).withMessage('La description de la ressource doit avoir une longueur comprise entre 10 et 10000 caractères.')
+                .run(req);
+            await body('Ressources.*.consultation')
+                .notEmpty().withMessage('La consultation des ressources ne doit pas être vide.')
+                .matches(/^(privé|public)$/).withMessage('Le consultation des ressources doit être "privé" ou "public".')
+                .isLength({ min: 2, max: 6 })
+                .run(req);
+
+            await body('Ressources.*.publication')
+                .notEmpty().withMessage('La date de publication des ressources ne doit pas être vide.')
+                .isLength({ min: 10, max: 30 }).withMessage('La date doit avoir une longueur comprise entre 3 et 30 caractères.')
+                .matches(/^[0-9a-zA-Z\-\ :.]+$/).withMessage('La date ne doit contenir que des lettres et des chiffres.')
+                .run(req);
+
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                errorDetected = true; // Marquer qu'une erreur a été détectée
+                return res.status(400).json({ errors: errors.array() });
             }
+    
+        }
 
             /*Vérification des données des gestionnaires, les id doivent être des entiers
             et doivent correspondre à des gestionnaires */
