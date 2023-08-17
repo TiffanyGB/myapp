@@ -107,13 +107,13 @@ async function checkACG(req, res, next) {
         break;
       case 'gestionnaire':
         /*Vérifier la gestion du projet */
-        const gerer_ia = await gererProjet.chercherGestionnaireIAID(id.idprojet, req.id);
-        const gerer_ext = await gererProjet.chercherGestionnaireExtID(id.idprojet, req.id);
+        const gerer_ia = await gererProjet.chercherGestionnaireIAID(equipe[0].idprojet, req.id);
+        const gerer_ext = await gererProjet.chercherGestionnaireExtID(equipe[0].idprojet, req.id);
 
         if (gerer_ia.length > 0 || gerer_ext.length > 0) {
           next();
         } else {
-          return res.status(400).json({ erreur: `Mauvais profil, il faut gérer l'événement.` });
+          return res.status(400).json({ erreur: `Mauvais profil, il faut gérer le projet.` });
         }
         break;
       case 'etudiant':
@@ -257,9 +257,6 @@ async function checkAGidEquipe(req, res, next) {
 
       const gerer_ia = await gererProjet.chercherGestionnaireIAID(equipe.idprojet, req.id);
       const gerer_ext = await gererProjet.chercherGestionnaireExtID(equipe.idprojet, req.id);
-
-      console.log(gerer_ext, req.id, id);
-      console.log(gerer_ia)
 
       if (gerer_ia.length > 0 || gerer_ext.length > 0) {
         next();
