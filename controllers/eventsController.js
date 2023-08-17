@@ -1,7 +1,7 @@
 const projetModel = require('../models/projetModel');
 const eventModel = require('../models/eventModel');
 const regleModel = require('../models/reglesModel');
-const { body } = require('express-validator');
+const { body, validationResult } = require('express-validator');
 const { validateurErreurs } = require('../validateur');
 
 async function createEvent(req, res) {
