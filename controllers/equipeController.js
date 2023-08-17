@@ -15,7 +15,7 @@
 const equipeModel = require('../models/equipeModel');
 const projetModel = require('../models/projetModel');
 const demandeModel = require('../models/demandeModel')
-const { body } = require('express-validator');
+const { body, validationResult } = require('express-validator');
 const { validateurErreurs } = require('../validateur');
 const { creerDossier } = require('../gitlab3');
 const eventModel = require('../models/eventModel');
@@ -199,7 +199,6 @@ async function promouvoir(req, res) {
   }
 }
 
-
 async function supprimerMembre(req, res) {
   if (req.method === 'OPTIONS') {
     res.status(200).json({ sucess: 'Agress granted' });
@@ -328,15 +327,6 @@ async function demandeEquipe(req, res) {
       message
     ]
 
-    await body('message')
-      .isLength({ min: 0, max: 300 })
-      .withMessage('Le message doit contenir entre 0 et 300 caracteres')
-      .run(req);
-
-
-    validateurErreurs(req, res);
-
-
     const equipe = await equipeModel.chercherEquipeID(idEquipe);
 
     /*Vérifier que l'équipe est ouverte */
@@ -361,6 +351,18 @@ async function demandeEquipe(req, res) {
     const envoyee = await equipeModel.demandeDejaEnvoyee(idUser, idEquipe);
     if (envoyee.length > 0) {
       return res.status(404).json({ erreur: 'Une demande a déjà été envoyée' });
+    }
+
+    await body('message')
+      .isLength({ min: 0, max: 1200 })
+      .withMessage('Le message doit contenir entre 0 et 1200 caracteres')
+      .run(req);
+
+
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      errorDetected = true;
+      return res.status(400).json({ errors: errors.array() });
     }
 
     try {
@@ -408,18 +410,30 @@ async function accepterDemande(req, res) {
       return res.status(400).json({ erreur: 'Aucune demande provenant de cet utilisateur' });
     }
 
+    /*Si l'équipe est au complet, on ne peut pas accepeter de demande*/
+    const nb_max_event = (await eventModel.chercherEvenement(idEvent))[0].nombre_max_equipe;
+    const nb_membres = (await equipeModel.ListeMembre(idEquipe)).length;
+
+    if(nb_max_event === nb_membres){
+      return res.status(400).json({error: 'L\'équipe est déjà complète'});
+    }
+
     try {
       equipeModel.ajouterMembre(idUser, idEquipe);
 
       /* Supprimer les demandes de l'étudiant des autres equipes */
       demandeModel.supprimerDemandes(idUser);
-      res.status(200).json({ message: "Etudiant accepté" });
+
+      /*Si l'équipe devient complète, se ferme */
+      if((nb_membres + 1) === nb_max_event){
+        equipeModel.fermerEquipe(idEquipe);
+      }
+
+      return res.status(200).json({ message: "Etudiant accepté" });
 
     } catch {
-      res.status(400).json({ error: 'Erreur lors de l\'acceptation de l\'étudiant.' });
+      return res.status(400).json({ error: 'Erreur lors de l\'acceptation de l\'étudiant.' });
     }
-  } else {
-    return res.status(404).json('Page not found');
   }
 }
 

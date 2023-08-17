@@ -143,7 +143,7 @@ async function modifierEvent(req, res) {
 
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
-        errorDetected = true; // Marquer qu'une erreur a été détectée
+        errorDetected = true;
         return res.status(400).json({ errors: errors.array() });
       }
     }

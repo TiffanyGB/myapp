@@ -116,6 +116,32 @@ async function equipesOuvertes() {
     });
 }
 
+async function fermerEquipe(idEquipe) {
+
+    const modifier = `UPDATE Equipe
+    SET statut_recrutement = 'fermé'
+    WHERE idEquipe = $1`;
+
+    try{
+        pool.query(modifier, [idEquipe]);
+    }catch (error){
+        throw error;
+    }
+}
+
+async function ouvrirEquipe(idEquipe) {
+
+    const modifier = `UPDATE Equipe
+    SET statut_recrutement = 'ouvert'
+    WHERE idEquipe = $1`;
+
+    try{
+        pool.query(modifier, [idEquipe]);
+    }catch (error){
+        throw error;
+    }
+}
+
 /* Requete créer équipe */
 async function creerEquipe(valeurs) {
 
@@ -764,5 +790,8 @@ module.exports = {
     demandeDejaEnvoyee,
     jsonMesEquipes,
     aUneEquipeDansEvent,
-    equipeExiste
+    equipeExiste,
+    fermerEquipe,
+    ouvrirEquipe,
+    ListeMembre
 }
