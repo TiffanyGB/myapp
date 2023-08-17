@@ -1,18 +1,35 @@
 const pool = require('./configDB');
 const passwordModel = require('../models/passwordModel');
-const verificationExistence = require('../verifications/verif_pseudo_mail_libres');
+
 const userModel = require('../models/userModel');
 
 
 const valeurs = ['admin', 'admin@admin.fr'];
 
+function verifExistence(values) {
+    const verifExistence = `SELECT * FROM UTILISATEUR WHERE (pseudo = $1) OR (email = $2)`;
+  
+    return new Promise((resolve, reject) => {
+      pool.query(verifExistence, values)
+        .then((result) => {
+          if (result.rows.length > 0) {
+            resolve(false);
+          } else {
+            resolve(true);
+          }
+        })
+        .catch((error) => {
+          reject(error);
+        });
+    });
+  }
 
 const createDefaultUser = async () => {
     try {
         const password = 'Admin2023!';
 
         /**Aucun utilisateur ne possède le même pseudo ou email */
-        const nonExiste = await verificationExistence.verifExistence(valeurs);
+        const nonExiste = await verifExistence(valeurs);
 
         if (!nonExiste) {
 

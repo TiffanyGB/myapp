@@ -255,7 +255,7 @@ CREATE TABLE MessageEquipe(
 CREATE TABLE Annotation(
     idAnnotation SERIAL PRIMARY KEY,
     idEquipe INT REFERENCES Equipe(idEquipe) ON DELETE CASCADE NOT NULL,
-    auteur INT REFERENCES Utilisateur(idUser) NOT NULL  ON DELETE CASCADE NOT NULL,
+    auteur INT REFERENCES Utilisateur(idUser) ON DELETE CASCADE NOT NULL,
     contenu TEXT NOT NULL,
     date_annotation TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
