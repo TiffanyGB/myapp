@@ -375,9 +375,7 @@ async function demandeEquipe(req, res) {
     } catch (error) {
       return res.status(400).json({ error: 'Erreur lors de l\'envoi du message.' });
     }
-  } else {
-    return res.status(404).json('Page not found');
-  }
+  } 
 }
 
 async function accepterDemande(req, res) {

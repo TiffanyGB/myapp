@@ -2,6 +2,9 @@ const pool = require("../database/configDB");
 const userModel = require('./userModel');
 const equipeModel = require('./equipeModel');
 const projetModel = require('../models/projetModel');
+const adminModel = require('./adminModel');
+const gestionnaireIAModel = require('./gestionnaireIaModel');
+const etudiant = require('./etudiantModel');
 
 // Envoyer message en tant qu'etudiant
 function envoyerMessageEquipe(valeurs) {
@@ -106,7 +109,27 @@ async function jsonGetMessegaeEquipe(idEquipe, req) {
 
         let user = (await userModel.chercherUserID(temp.idSender))[0];
         temp.pseudoSender = user.pseudo;
-        temp.roleSender = user.typeuser;
+        let id = user.iduser;
+
+        /*Chercher le role de l'utilisateur */
+        let role = await adminModel.chercherAdminID(id);
+        if(role.length != 0){
+            temp.roleSender = 'Administrateur';
+        }else{
+            role = await etudiant.chercherStudent(id);
+
+            if(role.length != 0){
+                temp.roleSender = 'Étudiant';
+            }else{
+                role = await gestionnaireIAModel.chercherGestionnaireIapau(id);
+
+                if(role.length != 0){
+                    temp.roleSender = 'Gestionnaire IA PAU';
+                }else{
+                    temp.roleSender = 'Gestionnaire Externe';
+                }
+            }
+        }
 
         temp.dateMessage = messageCourant.date_envoie;
 

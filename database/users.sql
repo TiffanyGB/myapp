@@ -102,6 +102,7 @@ CREATE TABLE Projet(
     recompense INTEGER NOT NULL,   
     imgProjet VARCHAR(100),
     sujet VARCHAR(500) NOT NULL,
+    template VARCHAR(1000) NOT NULL,
     derniereModif TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     date_creation TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     idEvent INT REFERENCES Evenement(idEvent) ON DELETE SET NULL
