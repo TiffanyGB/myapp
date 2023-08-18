@@ -454,6 +454,15 @@ async function jsonInformationsEquipe(idEquipe, req) {
 
             if (etudiant.length === 0) {
                 jsonRetour.dansEquipe = false;
+
+                const demande = await demandeDejaEnvoyee(req.id, idEquipe);
+                console.log(demande.length)
+                if(demande.length === 0){
+                    jsonRetour.demandeFaite = false;
+                }else{
+                    jsonRetour.demandeFaite = true;
+
+                }
                 return jsonRetour;
             }
             jsonRetour.dansEquipe = true;
@@ -731,7 +740,6 @@ async function jsonEquipesOuvertes(idEvent, req) {
     }
     return jsonRetour;
 }
-
 
 /*Déplacer les duex fonctions là */
 function envoyerDemande(valeurs) {

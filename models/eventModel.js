@@ -271,7 +271,6 @@ async function jsonEventChoisi(idEvent, typeUser, req) {
                 }
             }
 
-
             /**Les ressources */
             const listeRessource = await ressourceModel.recuperer_toutes_ressources(projetCourant.idprojet);
 

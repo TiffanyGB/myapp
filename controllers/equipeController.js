@@ -417,8 +417,8 @@ async function accepterDemande(req, res) {
     const nb_max_event = (await eventModel.chercherEvenement(idEvent))[0].nombre_max_equipe;
     const nb_membres = (await equipeModel.ListeMembre(idEquipe)).length;
 
-    if(nb_max_event === nb_membres){
-      return res.status(400).json({error: 'L\'équipe est déjà complète'});
+    if (nb_max_event === nb_membres) {
+      return res.status(400).json({ error: 'L\'équipe est déjà complète' });
     }
 
     try {
@@ -428,7 +428,7 @@ async function accepterDemande(req, res) {
       demandeModel.supprimerDemandes(idUser);
 
       /*Si l'équipe devient complète, se ferme */
-      if((nb_membres + 1) === nb_max_event){
+      if ((nb_membres + 1) === nb_max_event) {
         equipeModel.fermerEquipe(idEquipe);
       }
 
