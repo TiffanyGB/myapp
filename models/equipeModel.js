@@ -122,9 +122,9 @@ async function fermerEquipe(idEquipe) {
     SET statut_recrutement = 'fermé'
     WHERE idEquipe = $1`;
 
-    try{
+    try {
         pool.query(modifier, [idEquipe]);
-    }catch (error){
+    } catch (error) {
         throw error;
     }
 }
@@ -135,9 +135,9 @@ async function ouvrirEquipe(idEquipe) {
     SET statut_recrutement = 'ouvert'
     WHERE idEquipe = $1`;
 
-    try{
+    try {
         pool.query(modifier, [idEquipe]);
-    }catch (error){
+    } catch (error) {
         throw error;
     }
 }
@@ -449,20 +449,18 @@ async function jsonInformationsEquipe(idEquipe, req) {
             jsonRetour.superUser = false;
         }
 
+        const demandeFaite = await demandeDejaEnvoyee(req.id, idEquipe);
+        if (demandeFaite.length === 0) {
+            jsonRetour.demandeFaite = false;
+        } else {
+            jsonRetour.demandeFaite = true;
+        }
+
         if (req.userProfile === 'etudiant') {
             const etudiant = await appartenirEquipe(req.id, idEquipe);
 
             if (etudiant.length === 0) {
                 jsonRetour.dansEquipe = false;
-
-                const demande = await demandeDejaEnvoyee(req.id, idEquipe);
-                console.log(demande.length)
-                if(demande.length === 0){
-                    jsonRetour.demandeFaite = false;
-                }else{
-                    jsonRetour.demandeFaite = true;
-
-                }
                 return jsonRetour;
             }
             jsonRetour.dansEquipe = true;
