@@ -4,19 +4,6 @@ const idProjet = '48423057';
 const gitlabBaseUrl = 'https://gitlab.com/api/v4/';
 const accessToken = 'glpat-oE7qvER3ewf4PUohzy5t';
 
-// function genererChaineAleatoire(longueur) {
-
-
-//   const caracteresPossibles = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-//   let chaineAleatoire = '';
-
-//   for (let i = 0; i < longueur; i++) {
-//     const caractereAleatoire = caracteresPossibles[Math.floor(Math.random() * caracteresPossibles.length)];
-//     chaineAleatoire += caractereAleatoire;
-//   }
-
-//   return chaineAleatoire;
-// }
 
 function creerDossier(idEquipe, nom_event) {
 
@@ -54,7 +41,6 @@ function creerDossier(idEquipe, nom_event) {
   return nomEquipe;
 }
 
-
 async function recupererJSON(idEquipe, event) {
   const nomEquipe = 'Equip_' + idEquipe;
   const eventEquipe = '' + event + '/' + nomEquipe;
@@ -75,7 +61,7 @@ async function recupererJSON(idEquipe, event) {
 
     for (let i = 0; i < nbFichiers; i++) {
       let fichierCourant = fichiers[i].name;
-      let endpointFichier = `projects/${idProjet}/repository/files/${encodeURIComponent(eventEquipe)}` + '%2F' +fichierCourant + '/raw?ref=main';
+      let endpointFichier = `projects/${idProjet}/repository/files/${encodeURIComponent(eventEquipe)}` + '%2F' + fichierCourant + '/raw?ref=main';
 
       endpointFichierPromises.push(
         axios.get(`${gitlabBaseUrl}${endpointFichier}`, { headers })
@@ -101,8 +87,45 @@ async function recupererJSON(idEquipe, event) {
   }
 }
 
+function creerRepertoire(idEquipe) {
 
-function supprimerDossierEquipe(nomEquipe, event){
+  const endpoint = `/projects/`;
+
+  const messageCommit = 'Création du repo ';
+  const branch = 'main';
+
+  const nomEquipe = 'Equipe_' + idEquipe;
+
+  const commitContent = {
+    branch,
+    commit_message: messageCommit,
+    actions: [
+      {
+        name: nomEquipe
+      },
+    ],
+  };
+
+  const headers = {
+    'PRIVATE-TOKEN': accessToken,
+  };
+
+  axios.post(`${gitlabBaseUrl}${endpoint}`, commitContent, { headers })
+    .then(response => {
+      console.log('Dossier créé avec succès.');
+    })
+    .catch(error => {
+      console.error('Erreur lors de la requête API GitLab :', error);
+    });
+
+  return nomEquipe;
+}
+
+
+
+//Créer utilisateur
+
+function supprimerDossierEquipe(nomEquipe, event) {
   const eventEquipe = '' + event + '/' + nomEquipe;
 
   const endpoint = `/projects/${idProjet}/repository/tree?path=${encodeURIComponent(eventEquipe)}`;
@@ -118,4 +141,4 @@ function supprimerDossierEquipe(nomEquipe, event){
 //   console.log(a);
 // })();
 
-module.exports = { creerDossier, recupererJSON }
+module.exports = { creerDossier, recupererJSON, creerRepertoire }

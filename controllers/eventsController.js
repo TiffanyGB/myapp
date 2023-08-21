@@ -2,7 +2,6 @@ const projetModel = require('../models/projetModel');
 const eventModel = require('../models/eventModel');
 const regleModel = require('../models/reglesModel');
 const { body, validationResult } = require('express-validator');
-const { validateurErreurs } = require('../validateur');
 
 async function createEvent(req, res) {
   if (req.method === 'OPTIONS') {
@@ -59,21 +58,20 @@ async function createEvent(req, res) {
       }
     }
 
-
     try {
 
+      /*Création de l'événement, idevent stocke l'id de celui-ci */
       const idevent = await eventModel.creerEvent(valeurs_event, regles);
 
-      /* l'id de l'event doit être un nombre, sinon erreur */
       if (typeof idevent === 'number') {
 
-        /* Pour tous les projets, on les associe à l'événement */
+        /* On associe tous les projets à l'événement */
         for (i = 0; i < projets.length; i++) {
 
           /* Vérification de l'existence */
-          const user = await projetModel.chercheridProjet(projets[i].idProjet);
+          const projet = await projetModel.chercheridProjet(projets[i].idProjet);
 
-          if (user.length === 0) {
+          if (projet.length === 0) {
             return res.status(404).json({ erreur: 'L\'id ' + projets[i].idProjet + ' n\'existe pas dans les projets' });
           }
           await projetModel.rattacherProjetEvent(idevent, projets[i].idProjet);
@@ -124,7 +122,7 @@ async function modifierEvent(req, res) {
       image,
       idevent,
     ];
-    
+
     for (const regle of regles) {
       await body('regles')
         .optional()
@@ -206,7 +204,6 @@ async function listeEquipes(req, res) {
     try {
       const event = await eventModel.jsonlisteEquipeEvent(idevent);
       return res.status(200).json(event)
-
     }
     catch {
       return res.status(404).json({ erreur: 'Erreur lors de la récupération des informations' });
@@ -224,9 +221,7 @@ async function recupInfoEvent(req, res) {
 
     const json = await eventModel.recup_Infos_Modif_Event(idevent);
 
-
-    res.status(200).json(json);
-
+    return res.status(200).json(json);
   }
 }
 

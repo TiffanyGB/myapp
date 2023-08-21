@@ -14,9 +14,8 @@
 const userModel = require('../../models/userModel');
 const etudiantModel = require('../../models/etudiantModel');
 const tokenModel = require('../../models/tokenModel');
-
-const { validateurErreurs } = require('../../validateur');
 const jwt = require('jsonwebtoken');
+const { validationResult } = require('express-validator');
 
 /**
  * Inscription d'un étudiant.
@@ -61,30 +60,36 @@ async function inscriptionEleve(req, res) {
 
         /*Vérifier les données des étudiants */
         await etudiantModel.validerEtudiant(req);
-        validateurErreurs(req, res);
+
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            errorDetected = true;
+            return res.status(400).json({ errors: errors.array() });
+        }
 
         try {
-            const insertion = await userModel.insererUser(values, password, [userPseudo, userMail], 'etudiant')
+            /*Insertion de l'utilisateur, si cela s'est fait sans erreur, 
+            l'id de l'utilisateur est renvoyé*/
+            const insertion = await userModel.insererUser(values, password, [userPseudo, userMail], 'etudiant');
 
-            /*La variable 'insertion' contient l'id de l'utilisateur inséré */
             if (typeof insertion === 'number') {
 
                 etudiantModel.creerEtudiant(userEcole, userNiveauEtude, insertion)
                     .then(() => {
 
-                        /**  Informations à insérer dans le token */
+                        /*  Informations à insérer dans le token */
                         const payload = {
                             "utilisateurId": insertion,
                             "utilisateurType": 'etudiant'
                         };
 
-                        /**  Générer le JWT */
+                        /*  Générer le JWT */
                         const token = jwt.sign(payload, tokenModel.secretKey, { expiresIn: '24h' });
                         tokenModel.stockerJWT(token, tokenModel.secretKey);
                         return res.status(200).json({ token: token, id: insertion, prenom: userPrenom, nom: userNom, pseudo: userPseudo, role: 'etudiant' });
                     })
                     .catch(() => {
-                        /**Supprimer l'utilisateur */
+                        /*Supprimer l'utilisateur */
                         userModel.supprimerUser(insertion, 'etudiant')
                         return res.status(400).json({ erreur: "erreur", Détails: "Utilisateur supprimé de la table utilisateur" });
                     });

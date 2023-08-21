@@ -10,8 +10,7 @@
  */
 
 const annotationModel = require('../models/annotationEquipeModel');
-const { body } = require('express-validator');
-const {validateurErreurs} = require('../validateur');
+const { body, validationResult } = require('express-validator');
 
 
 /**
@@ -44,17 +43,18 @@ async function ecrireAnnotation(req, res) {
         res.status(200).json({ sucess: 'Access granted' });
 
     } else if (req.method === 'POST') {
+
         const idEquipe = res.locals.idEquipe;
         const auteur = req.id;
-
         const contenu = req.body.contenu;
 
-        await body('contenu')
-            .isLength({ min: 0, max: 2000 })
-            .withMessage('Le message est trop long (maximum 2000 caractères)')
-            .run(req);
+        await annotationModel.validerAnnotation(req);
 
-            validateurErreurs(req, res);
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            errorDetected = true;
+            return res.status(400).json({ errors: errors.array() });
+        }
 
         try {
             annotationModel.creerAnnotation([idEquipe, auteur, contenu]);
@@ -96,9 +96,9 @@ async function getAnnotationEquipe(req, res) {
             for (i = 0; i < annotation.length; i++) {
                 delete annotation[i].idannotation;
             }
-            res.status(200).json(annotation);
+            return res.status(200).json(annotation);
         } catch {
-            res.status(400).json({ error: 'Echec lors de la création de l\'annotation.' });
+            return res.status(400).json({ error: 'Echec lors de la création de l\'annotation.' });
         }
     }
 }

@@ -16,7 +16,6 @@ const equipeModel = require('../models/equipeModel');
 const projetModel = require('../models/projetModel');
 const demandeModel = require('../models/demandeModel')
 const { body, validationResult } = require('express-validator');
-const { validateurErreurs } = require('../validateur');
 const { creerDossier } = require('../gitlab3');
 const eventModel = require('../models/eventModel');
 const { validateUserId } = require('../verifications/verifierDonnéesGénérales')
@@ -24,16 +23,16 @@ const { validateUserId } = require('../verifications/verifierDonnéesGénérales
 
 async function retournerEquipeProjet(req, res) {
   if (req.method === 'OPTIONS') {
-    res.status(200).json({ sucess: 'Agress granted' });
+    return res.status(200).json({ sucess: 'Agress granted' });
   }
   else if (req.method === 'GET') {
     const idProjet = res.locals.idProjet;
 
     try {
       const equipeListe = await equipeModel.jsonListeEquipeProjet(idProjet);
-      res.status(200).json(equipeListe);
+      return res.status(200).json(equipeListe);
     } catch (error) {
-      res.status(400).json({ erreur: "Erreur lors de la récupération des équipes" });
+      return res.status(400).json({ erreur: "Erreur lors de la récupération des équipes" });
     }
   }
 }

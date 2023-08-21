@@ -6,6 +6,13 @@
 const pool = require('../database/configDB');
 const userModel = require('../models/userModel');
 
+async function validerAnnotation(req) {
+    await body('contenu')
+    .isLength({ min: 0, max: 2000 })
+    .withMessage('Le message est trop long (maximum 2000 caractères)')
+    .run(req);
+}
+
 /**
  * Créer une nouvelle annotation associée à une équipe.
  * 
@@ -102,5 +109,6 @@ async function jsonGetAnnotation(idEquipe){
 module.exports = {
     creerAnnotation,
     jsonGetAnnotation,
-    getAnnotationEquipes
+    getAnnotationEquipes,
+    validerAnnotation
 }
