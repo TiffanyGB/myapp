@@ -25,7 +25,7 @@ const validerEquipe = [
 
     body('lien_discussion')
         .optional({ nullable: true, checkFalsy: true })
-        .isURL().withMessage('Doit être un lien')
+        .isURL().withMessage('Le champ conversation doit être un lien valide')
         .isLength({ max: 400 }).withMessage('La taille maximum est de 400 caractères.'),
 
     body('preferenceQuestionnaire')

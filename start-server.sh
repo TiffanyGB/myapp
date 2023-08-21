@@ -5,7 +5,7 @@ PM2_APP_NAME="bin/www"
 
 restart_pm2_app() {
   echo "Redémarrage de l'application PM2..."
-  pm2 restart "$PM2_APP_NAME"
+  pm2 start "$PM2_APP_NAME"
   echo "Application PM2 redémarrée."
 }
 

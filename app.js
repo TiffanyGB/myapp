@@ -1,5 +1,4 @@
 var createError = require('http-errors');
-var i18n = require('i18n');
 const bodyParser = require('body-parser');
 const fs = require('fs');
 var express = require('express');
@@ -49,11 +48,6 @@ var tokenRouter = require('./routes/token');
 var messageRouter = require('./routes/message');
 var gitLabRouter = require('./routes/gitlab');
 
-
-/** configure le moteur de rendu de vues en spécifiant le répertoire views où se trouvent les fichiers de vue et le moteur de rendu pug */
-// view engine setup
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'pug');
 
 app.use(logger('dev'));
 app.use(express.json());
