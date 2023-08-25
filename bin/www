@@ -8,11 +8,13 @@ var app = require('../app');
 var debug = require('debug')('myapp:server');
 var http = require('http');
 
+var env = require('../../environnement.json');
+
 /**
  * Get port from environment and store in Express.
  */
-
-var port = normalizePort(process.env.PORT || '3000');
+var portString = '' + env.backend.port;
+var port = normalizePort(process.env.PORT || portString);
 app.set('port', port);
 
 /**
