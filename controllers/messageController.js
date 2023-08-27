@@ -1,6 +1,5 @@
 const messageModel = require('../models/messageModel');
 const { body, validationResult } = require('express-validator');
-const { validateurErreurs } = require('../validateur');
 
 async function envoyerMessage(req, res) {
     if (req.method === 'OPTIONS') {

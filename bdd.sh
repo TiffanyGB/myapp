@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Configurations de la base de données
-DB_USER="admingaia"
+DB_USER="test44"
 DB_NAME="postgres"
 DB_PORT=5432 # Port par défaut pour PostgreSQL
 

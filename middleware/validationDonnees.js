@@ -1,5 +1,5 @@
 const { body } = require('express-validator');
-const {validateurDonnéesMiddleware} = require('../validateur');
+const {validateurDonnéesMiddleware} = require('../verifications/validateur');
 
 
 const validatePasswordCreation = [

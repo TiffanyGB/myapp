@@ -1,16 +1,12 @@
 const { Pool } = require('pg');
 
-const environnement = require('../../environnement.json');t
-const database = environnement.backend.database;
-
 const pool = new Pool({
-  user: database.user,
-  password: database.password,
-  host: database.port,
-  database: database.database,
-  port: database.port,
+  user: 'test44',
+  password: 'iapau',
+  host: 'localhost',
+  database: 'iapau',
+  port: '5432',
 });
 
 pool.connect();
 module.exports = pool;
-

@@ -8,7 +8,7 @@ const passwordModel = require('../models/passwordModel');
 const verif = require('../verifications/verif_pseudo_mail_libres');
 const preference = require('./profilModel');
 const { body } = require('express-validator');
-const { validateurDonnéesMiddleware } = require('../validateur');
+const { validateurDonnéesMiddleware } = require('../verifications/validateur');
 
 const validateUser = [
     body('prenom')

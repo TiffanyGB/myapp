@@ -6,9 +6,9 @@ const ressourceModel = require('./ressourceModel');
 const classementModel = require('./classementModel');
 const finalisteModel = require('./finalisteModel');
 const equipeModel = require('./equipeModel');
-const { aUneEquipe, jsonListeEquipeProjet } = require('./equipeModel');
+const {jsonListeEquipeProjet } = require('./equipeModel');
 
-const { validateurDonnéesMiddleware } = require('../validateur');
+const { validateurDonnéesMiddleware } = require('../verifications/validateur');
 const { body } = require('express-validator');
 
 const validateEvent = [

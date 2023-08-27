@@ -8,7 +8,6 @@
  * @requires ../../models/projetModel
  * @requires ../../models/projetModel
  * @requires ../../models/eventModel
- * @requires ../validateur
  * @requires jsonwebtoken
  */
 
@@ -16,7 +15,7 @@ const equipeModel = require('../models/equipeModel');
 const projetModel = require('../models/projetModel');
 const demandeModel = require('../models/demandeModel')
 const { body, validationResult } = require('express-validator');
-const { creerDossier } = require('../gitlab3');
+const { creerDossier, creerUtilisateur, creerRepertoire} = require('../gitlab3');
 const eventModel = require('../models/eventModel');
 const { validateUserId } = require('../verifications/verifierDonnéesGénérales')
 
@@ -87,7 +86,18 @@ async function creerEquipe(req, res) {
 
       const event_nom = (await eventModel.chercherEvenement(idEvent))[0].nom;
 
-      const nomDossier = creerDossier(idEquipe, event_nom);
+      /*Gitlab*/
+
+      /*Création du dossier de l'équipe dans le répertoire annexe*/
+      creerDossier(idEquipe, event_nom);
+      
+      /*Création de l'utilisateur lié au repo de l'équipe */
+      const valeurs = await creerUtilisateur(nom);
+      console.log(valeurs)
+
+      equipeModel.insererAccesEquipeGit(valeurs[1], valeurs[0], idEquipe);
+      /*Création du repo de l'équipe */
+      creerRepertoire(idEquipe, valeurs[2])
 
       return res.status(200).json(idEquipe);
     } catch (error) {
@@ -374,7 +384,7 @@ async function demandeEquipe(req, res) {
     } catch (error) {
       return res.status(400).json({ error: 'Erreur lors de l\'envoi du message.' });
     }
-  } 
+  }
 }
 
 async function accepterDemande(req, res) {

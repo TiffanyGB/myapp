@@ -117,6 +117,8 @@ CREATE TABLE Equipe(
     lien_github TEXT DEFAULT NULL,
     lienDiscussion TEXT DEFAULT NULL,
     preferenceQuestionnaire BOOLEAN DEFAULT false,
+    login_gitlab VARCHAR(100) DEFAULT NULL,
+    mdp_gitlab VARCHAR(100) DEFAULT NULL,
     idProjet INT REFERENCES Projet(idProjet) ON DELETE CASCADE,
     idCapitaine INT REFERENCES Etudiant(idEtudiant) ON DELETE CASCADE,
     date_creation TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -269,10 +271,10 @@ INSERT INTO Evenement (nom, debut_inscription, date_debut, date_fin, description
 VALUES ('Événement 2', '2023-09-01', '2023-09-15', '2023-09-30', 'Ceci est la description de l''événement 2', 1, 3, 'Message de fin de l''événement 2', 'challenge', 'img2.jpg');
 
 INSERT INTO Projet (nom, description_projet, recompense, sujet, idEvent, imgProjet, template)
-VALUES ('Projet 1', 'Ceci est la description du projet 1', 500, 'Sujet du projet 1', 1, '', 'template1');
+VALUES ('Projet 1', 'Ceci est la description du projet 1', 500, 'Sujet du projet 1', 1, '', '');
 
 INSERT INTO Projet (nom, description_projet, recompense,  sujet, idEvent, imgProjet, template)
-VALUES ('Projet 2', 'Ceci est la description du projet 2', 1000,  'Sujet du projet 2', 2, '', 'template2');
+VALUES ('Projet 2', 'Ceci est la description du projet 2', 1000,  'Sujet du projet 2', 2, '', '');
 
 INSERT INTO Ressource (titre, type_ressource, lien, date_apparition, statut, description_ressource, idProjet)
 VALUES ('Ressource 1', 'drive', 'https://drive.google.com/file1', '2023-01-01', 'public', 'Description de la ressource 1', 1);

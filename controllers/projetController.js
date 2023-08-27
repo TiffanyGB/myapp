@@ -5,7 +5,6 @@ const gestionnaireExterneModel = require('../models/gestionnaireExterneModel');
 const gestionnaireIaModel = require('../models/gestionnaireIaModel');
 const ressourceModel = require('../models/ressourceModel');
 const { body } = require('express-validator');
-const { validateurErreurs } = require('../validateur');
 const {validationResult } = require('express-validator');
 
 

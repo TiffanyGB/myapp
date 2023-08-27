@@ -1,10 +1,24 @@
 const axios = require('axios');
 
-const idProjet = '48423057';
-const gitlabBaseUrl = 'https://gitlab.com/api/v4/';
-const accessToken = 'glpat-oE7qvER3ewf4PUohzy5t';
 
+/* */
+const idProjet = '5';
+const gitlabBaseUrl = 'http://10.0.12.111/api/v4';
+const accessToken = 'glpat-aDuBCdH2VwA68epzVYd3';
 
+function genererChaineAleatoire(longueur) {
+  const caracteresPossibles = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let chaineAleatoire = '';
+
+  for (let i = 0; i < longueur; i++) {
+    const caractereAleatoire = caracteresPossibles[Math.floor(Math.random() * caracteresPossibles.length)];
+    chaineAleatoire += caractereAleatoire;
+  }
+
+  return chaineAleatoire;
+}
+
+/**Annexe */
 function creerDossier(idEquipe, nom_event) {
 
   const endpoint = `/projects/${encodeURIComponent(idProjet)}/repository/commits`;
@@ -30,17 +44,15 @@ function creerDossier(idEquipe, nom_event) {
     'PRIVATE-TOKEN': accessToken,
   };
 
-  axios.post(`${gitlabBaseUrl}${endpoint}`, commitContent, { headers })
-    .then(response => {
-      console.log('Dossier créé avec succès.');
-    })
-    .catch(error => {
-      console.error('Erreur lors de la requête API GitLab :', error);
-    });
+  try {
+    axios.post(`${gitlabBaseUrl}${endpoint}`, commitContent, { headers })
 
-  return nomEquipe;
+  } catch {
+    console.error('Erreur lors de la requête API GitLab :', error);
+  }
 }
 
+/**Annexe */
 async function recupererJSON(idEquipe, event) {
   const nomEquipe = 'Equip_' + idEquipe;
   const eventEquipe = '' + event + '/' + nomEquipe;
@@ -87,23 +99,15 @@ async function recupererJSON(idEquipe, event) {
   }
 }
 
-function creerRepertoire(idEquipe) {
+function creerRepertoire(idEquipe, id_user) {
 
-  const endpoint = `/projects/`;
-
-  const messageCommit = 'Création du repo ';
-  const branch = 'main';
+  const endpoint = `/projects/user/${id_user}`;
 
   const nomEquipe = 'Equipe_' + idEquipe;
 
   const commitContent = {
-    branch,
-    commit_message: messageCommit,
-    actions: [
-      {
-        name: nomEquipe
-      },
-    ],
+    name: nomEquipe,
+    user_id: id_user
   };
 
   const headers = {
@@ -117,28 +121,77 @@ function creerRepertoire(idEquipe) {
     .catch(error => {
       console.error('Erreur lors de la requête API GitLab :', error);
     });
-
-  return nomEquipe;
 }
 
+//Créer utilisateur,
+async function creerUtilisateur(nom_equipe) {
 
+  const endpoint = `/users`;
 
-//Créer utilisateur
+  const mdp = genererChaineAleatoire(10);
+  const username = nom_equipe + "_" + genererChaineAleatoire(4);
+  const email = "equipe" + genererChaineAleatoire(3) + "@gaia-iapau.fr"
 
-function supprimerDossierEquipe(nomEquipe, event) {
-  const eventEquipe = '' + event + '/' + nomEquipe;
+  const commitContent = {
+    email: email,
+    password: mdp,
+    username: username,
+    name: nom_equipe,
+  };
 
-  const endpoint = `/projects/${idProjet}/repository/tree?path=${encodeURIComponent(eventEquipe)}`;
 
   const headers = {
     'PRIVATE-TOKEN': accessToken,
   };
+
+  try{
+    const reponse = await axios.post(`${gitlabBaseUrl}${endpoint}`, commitContent, { headers })
+    const id_compte_gitlab = reponse.data.id;
+
+    const valeurs_equipe = [mdp, commitContent.email, id_compte_gitlab];
+    return valeurs_equipe;
+
+  }catch{ (error)
+    console.error('Erreur lors de la requête API GitLab :', error);
+  }
 }
 
 
-// (async () => {
-//   const a = await recupererJSON('elephantelKAhvTPzjJk8KhBuogB', 'Événement 1');
-//   console.log(a);
-// })();
+module.exports = { creerDossier, recupererJSON, creerRepertoire, creerUtilisateur }
 
-module.exports = { creerDossier, recupererJSON, creerRepertoire }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// function supprimerDossierEquipe(nomEquipe, event) {
+  //   const eventEquipe = '' + event + '/' + nomEquipe;
+  
+  //   const endpoint = `/projects/${idProjet}/repository/tree?path=${encodeURIComponent(eventEquipe)}`;
+  
+  //   const headers = {
+  //     'PRIVATE-TOKEN': accessToken,
+  //   };
+  // }

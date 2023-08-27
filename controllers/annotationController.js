@@ -5,7 +5,6 @@
  * @version 1.0.0 
  * @author Tiffany GAY-BELLILE
  * @requires ../../models/annotationEquipeModel
- * @requires ../validateur
  * @requires express-validator
  */
 

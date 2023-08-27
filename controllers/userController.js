@@ -24,7 +24,7 @@ const userModel = require('../models/userModel');
 const etudiantModel = require('../models/etudiantModel');
 const gestionnaireIaModel = require('../models/gestionnaireIaModel');
 const gestionnaireExterneModel = require('../models/gestionnaireExterneModel');
-const {validateurErreurs} = require('../validateur');
+const { body, validationResult } = require('express-validator');
 
 
 /**
@@ -122,8 +122,11 @@ async function createUser(req, res) {
         return res.status(400).json({ erreur: "Le type est incorrect" });
     }
 
-    validateurErreurs(req, res);
-
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        errorDetected = true;
+        return res.status(400).json({ errors: errors.array() });
+    }
 
     /**Insertion dans la table user */
     userModel.insererUser(valeurs_communes, password, valeurs_id, type)
@@ -279,8 +282,11 @@ async function modifierUser(req, res) {
         return res.status(400).json({ erreur: "Le type est incorrect" });
     }
 
-    validateurErreurs(req, res);
-
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        errorDetected = true;
+        return res.status(400).json({ errors: errors.array() });
+    }
 
     /* Modification etudiant */
     switch (type) {

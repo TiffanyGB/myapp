@@ -1,5 +1,5 @@
 const pool = require('../database/configDB');
-const { validateurDonnéesMiddleware } = require('../validateur');
+const { validateurDonnéesMiddleware } = require('../verifications/validateur');
 const userModel = require('./userModel');
 const projetModel = require('./projetModel')
 const { body } = require('express-validator');
@@ -142,6 +142,19 @@ async function ouvrirEquipe(idEquipe) {
     }
 }
 
+async function chercheraccesGitlab(idEquipe){
+    const chercher = `SELECT login_gitlab, mdp_gitlab
+    FROM Equipe
+    WHERE idEquipe = $1`;
+
+    try{
+        const donnees = await pool.query(chercher, [idEquipe])
+        return donnees.rows;
+    }catch (error){
+        throw (error);
+    }
+}
+
 /* Requete créer équipe */
 async function creerEquipe(valeurs) {
 
@@ -175,6 +188,19 @@ function modifierEquipe(valeurs) {
 
     try {
         pool.query(modifier, valeurs);
+    } catch (error) {
+        throw error;
+    }
+}
+
+function insererAccesEquipeGit(login, mdp, idEquipe) {
+    const inserer = `UPDATE Equipe 
+    SET login_gitlab = $1,
+    mdp_gitlab = $2
+    WHERE idEquipe = $3`;
+
+    try {
+        pool.query(inserer, [login, mdp, idEquipe])
     } catch (error) {
         throw error;
     }
@@ -554,6 +580,15 @@ async function jsonInformationsEquipe(idEquipe, req) {
 
             jsonRetour.resultats.push(temp)
         }
+
+        /*Accès à gitlab */
+        const acces = (await chercheraccesGitlab(idEquipe))[0];
+        jsonRetour.acces_gitlab = [];
+        temp = {};
+        temp.login = acces.login_gitlab;
+        temp.mot_de_passe = acces.mdp_gitlab;
+        jsonRetour.acces_gitlab.push(temp);
+
         return jsonRetour;
     }
 
@@ -799,5 +834,6 @@ module.exports = {
     equipeExiste,
     fermerEquipe,
     ouvrirEquipe,
-    ListeMembre
+    ListeMembre,
+    insererAccesEquipeGit
 }
