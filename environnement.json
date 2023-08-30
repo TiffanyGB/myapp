@@ -1,0 +1,53 @@
+{
+    "frontend": {
+        "port": 9000,
+        "URL": "http://localhost:8000"
+    },
+    "backend": {
+        "port": 3000,
+        "URL": "http://localhost:3000",
+        "assets": {
+            "images": "/http://localhost:3000/images"
+        },
+        "secretKey": "e89dd22b36f5d65fa4436be9a2cc45d42ce00dcf7763ac7ac873b9110c192c22515c349b4db3d075245a87fb47d45a24adab8757efaf9ab958aa42d2e156fceb",
+        "database": {
+            "host": "localhost",
+            "port": 5432,
+            "user": "administrateur",
+            "password": "iaPauPassword",
+            "database": "iapau"
+        }
+    },
+    "app": {
+        "computationImpact": {
+            "gitlab": {
+                "host": "http://10.0.12.111/api/v4",
+                "port": "443",
+                "user": "gitlab_IA_PAU_USER",
+                "password": "FZOPmfj.#ehj(iIupOm",
+                "token": "glpat-aDuBCdH2VwA68epzVYd3",
+                "repo_results_url": "https://gitlab.com/repo_results",
+                "idProjet": "5"
+            },
+            "json2csv": {
+                "options": {
+                    "delimiter": ";",
+                    "fields": [
+                        {
+                            "label": "Evt",
+                            "value": "event"
+                        },
+                        {
+                            "label": "Mem. CPU",
+                            "value": "result.mem_cpu.value"
+                        },
+                        {
+                            "label": "Energie CPU",
+                            "value": "result.joules_cpu.value"
+                        }
+                    ]
+                }
+            }
+        }
+    }
+}

@@ -1,73 +1,45 @@
 const pool = require('./configDB');
 const passwordModel = require('../models/passwordModel');
-
 const userModel = require('../models/userModel');
-
 
 const valeurs = ['admin', 'admin@admin.fr'];
 
-function verifExistence(values) {
-    const verifExistence = `SELECT * FROM UTILISATEUR WHERE (pseudo = $1) OR (email = $2)`;
-  
-    return new Promise((resolve, reject) => {
-      pool.query(verifExistence, values)
-        .then((result) => {
-          if (result.rows.length > 0) {
-            resolve(false);
-          } else {
-            resolve(true);
-          }
-        })
-        .catch((error) => {
-          reject(error);
-        });
-    });
-  }
+async function verifExistance() {
+    const query = 'SELECT * FROM UTILISATEUR WHERE pseudo = $1 OR email = $2';
+    const result = await pool.query(query, valeurs);
+    return result.rows.length > 0;
+}
 
-const createDefaultUser = async () => {
+async function createDefaultUser() {
     try {
         const password = 'Admin2023!';
 
-        /**Aucun utilisateur ne possède le même pseudo ou email */
-        const nonExiste = await verifExistence(valeurs);
-
-        if (!nonExiste) {
-
+        if (await verifExistance()) {
             const idUser = await userModel.chercherUserPseudo(valeurs[0]);
             userModel.supprimerUser(idUser);
         }
 
         const hashedPassword = await passwordModel.salageMdp(password);
 
-        const query = `
-                INSERT INTO Utilisateur (nom, prenom, pseudo, email, date_inscription, hashMdp, typeUser)
-                VALUES ('admin', 'admin', 'admin', 'admin@admin.fr', CURRENT_TIMESTAMP, $1, 'administrateur')
-            `;
+        const insertQuery = `
+            INSERT INTO Utilisateur (nom, prenom, pseudo, email, date_inscription, hashMdp)
+            VALUES ('admin', 'admin', 'admin', 'admin@admin.fr', CURRENT_TIMESTAMP, $1) 
+            RETURNING iduser`;
 
         const params = [hashedPassword];
 
-        /**Insertion dans la bdd */
-        await pool.query(query, params);
-
-        console.log('Utilisateur par défaut créé avec succès');
-
-
+        const id = await pool.query(insertQuery, params);
+        return id.rows[0].iduser;
     } catch (error) {
         console.error('Erreur lors de la création de l\'utilisateur par défaut:', error);
     }
-};
+}
 
-const createDefaultAdmin = async (pseudo) => {
+async function createDefaultAdmin(idUser) {
     try {
-        const idUser = await userModel.chercherUserPseudo(pseudo);
-        const query = `
-            INSERT INTO Admini (idAdmin)
-            VALUES ($1)
-        `;
+        const insertQuery = 'INSERT INTO Admini (idAdmin) VALUES ($1)';
 
-        const mdp = [idUser];
-
-        await pool.query(query, mdp);
+        await pool.query(insertQuery, [idUser]);
 
         console.log('Admin par défaut créé avec succès');
     } catch (error) {
@@ -76,23 +48,13 @@ const createDefaultAdmin = async (pseudo) => {
 }
 
 (async () => {
-    let errorOccurred = false;
     try {
-        await createDefaultUser();
+        const id = await createDefaultUser();
+        await createDefaultAdmin(id);
     } catch (error) {
-        console.error('Erreur lors de la création de l\'utilisateur par défaut:', error);
-        errorOccurred = true;
+        console.error('Erreur lors de la création de l\'utilisateur ou de l\'admin par défaut:', error);
+    } finally {
+        pool.end();
+        process.exit();
     }
-
-    if (!errorOccurred) {
-        try {
-            await createDefaultAdmin('admin');
-        } catch (error) {
-            console.error('Erreur lors de la création de l\'admin par défaut:', error);
-        }
-    }
-
-    pool.end();
-
-    process.exit();
 })();

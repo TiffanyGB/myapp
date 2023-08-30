@@ -5,23 +5,22 @@ const gestionnaireExterneModel = require('../models/gestionnaireExterneModel');
 const gestionnaireIaModel = require('../models/gestionnaireIaModel');
 const ressourceModel = require('../models/ressourceModel');
 const { body } = require('express-validator');
-const {validationResult } = require('express-validator');
-
+const { validationResult } = require('express-validator');
 
 /**Liste des projets */
 async function voirListeProjets(req, res) {
     if (req.method === 'OPTION') {
-        res.status(200).json({ sucess: 'Agress granted' });
+        return res.status(200).json({ sucess: 'Agress granted' });
     }
     else if (req.method === 'GET') {
-
-        /*Récupérer la liste des projets */
         try {
             const jsonretour = await projetModel.listeProjetsJson(req)
-            res.status(200).json(jsonretour);
+            return res.status(200).json(jsonretour);
         } catch (error) {
-            res.status(400).json({ erreur: "Erreur lors de la récupération des données côté étudiant" });
+            return res.status(400).json({ erreur: "Erreur lors de la récupération des données côté étudiant" });
         }
+    } else {
+        return res.status(404).json('Page not found');
     }
 }
 
@@ -38,18 +37,18 @@ async function infosProjet(req, res) {
         } catch (error) {
             return res.status(400).json({ erreur: "Erreur lors de la récupération des équipes" });
         }
+    } else {
+        return res.status(404).json('Page not found');
     }
 }
-
 
 /**Créer */
 async function creationProjet(req, res) {
     if (req.method === 'OPTION') {
-        res.status(200).json({ sucess: 'Agress granted' });
+        return res.status(200).json({ sucess: 'Agress granted' });
     }
     else if (req.method === 'POST') {
 
-        /**Vérifier ces valeurs */
         const {
             nom,
             lienSujet,
@@ -59,14 +58,17 @@ async function creationProjet(req, res) {
             gestionnaireIA,
             recompense,
             description,
-            image
+            image,
+            template
         } = req.body;
+
         const valeurs_projets = [
             nom,
             description,
             recompense,
             lienSujet,
-            image
+            image,
+            template
         ];
 
         /*Vérification des données des mots-clés */
@@ -78,11 +80,12 @@ async function creationProjet(req, res) {
                     .isLength({ min: 1, max: 25 }).withMessage('Le mot-clé doit avoir une longueur comprise entre 1 et 25 caractères.')
                     .run(req);
 
-                    const errors = validationResult(req);
-                    if (!errors.isEmpty()) {
-                        errorDetected = true; // Marquer qu'une erreur a été détectée
-                        return res.status(400).json({ errors: errors.array() });
-                    }            }
+                const errors = validationResult(req);
+                if (!errors.isEmpty()) {
+                    errorDetected = true; // Marquer qu'une erreur a été détectée
+                    return res.status(400).json({ errors: errors.array() });
+                }
+            }
         }
 
         for (const ressource of Ressources) {
@@ -128,7 +131,6 @@ async function creationProjet(req, res) {
                 errorDetected = true; // Marquer qu'une erreur a été détectée
                 return res.status(400).json({ errors: errors.array() });
             }
-    
         }
 
         /*Vérification des données des gestionnaires, les id doivent être des entiers
@@ -147,7 +149,6 @@ async function creationProjet(req, res) {
             }
         }
 
-
         for (const element of gestionnaireIA) {
             const parsedElement = parseInt(element, 10);
 
@@ -165,7 +166,6 @@ async function creationProjet(req, res) {
         try {
             /*On crée le projet et on récupère son id dans la bdd */
             const projetInsertion = await projetModel.creerProjet(valeurs_projets);
-
             if (typeof projetInsertion === 'number') {
 
                 /*Insertion des mots-clés */
@@ -205,114 +205,98 @@ async function creationProjet(req, res) {
         } catch (error) {
             return res.status(400).json({ erreur: "Erreur lors de la création du projet" });
         }
-
+    } else {
+        return res.status(404).json('Page not found');
     }
 }
 
 /**Modifier */
 async function modifierProjet(req, res) {
     if (req.method === 'OPTION') {
-        res.status(200).json({ sucess: 'Agress granted' });
+        return res.status(200).json({ sucess: 'Agress granted' });
     }
     else if (req.method === 'PATCH') {
 
         const idProjet = res.locals.idProjet;
+        const data = req.body;
 
         try {
-            // Vérifier que l'id existe dans la bdd, sinon 404 error
-            const user = await projetModel.chercheridProjet(idProjet);
-            if (user.length === 0) {
-                return res.status(404).json({ erreur: 'L\'id n\'existe pas' });
-            }
-
-            const {
-                nom,
-                lienSujet,
-                motClefs,
-                Ressources,
-                gestionnaireExterne,
-                gestionnaireIA,
-                recompense,
-                description,
-                image
-            } = req.body;
-
 
             const valeurs_projets = [
-                nom,
-                description,
-                recompense,
-                lienSujet,
-                image,
+                data.nom,
+                data.description,
+                data.recompense,
+                data.lienSujet,
+                data.image,
                 idProjet
             ];
 
-
-        /*Vérification des données des mots-clés */
-        if (motClefs.length > 0) {
-            for (const mot of motClefs) {
-                await body('motClefs')
-                    .optional()
-                    .notEmpty().withMessage('Le mot-clé ne doit pas être vide.')
-                    .isLength({ min: 1, max: 25 }).withMessage('Le mot-clé doit avoir une longueur comprise entre 1 et 25 caractères.')
-                    .run(req);
+            /*Vérification des données des mots-clés */
+            if (data.motClefs.length > 0) {
+                for (const mot of data.motClefs) {
+                    await body('motClefs')
+                        .optional()
+                        .notEmpty().withMessage('Le mot-clé ne doit pas être vide.')
+                        .isLength({ min: 1, max: 25 }).withMessage('Le mot-clé doit avoir une longueur comprise entre 1 et 25 caractères.')
+                        .run(req);
 
                     const errors = validationResult(req);
                     if (!errors.isEmpty()) {
                         errorDetected = true; // Marquer qu'une erreur a été détectée
                         return res.status(400).json({ errors: errors.array() });
-                    }            }
-        }
-
-        for (const ressource of Ressources) {
-            await body('Ressources')
-                .optional()
-                .isArray({ min: 1 }).withMessage('Le tableau des ressources ne doit pas être vide.')
-                .run(req);
-
-            await body('Ressources.*.nom')
-                .notEmpty().withMessage('Le nom des ressources est obligatoire.')
-                .isLength({ min: 2, max: 100 }).withMessage('Le nom des ressources doit avoir une longueur comprise entre 3 et 100 caractères.')
-                .run(req);
-
-            await body('Ressources.*.type')
-                .notEmpty().withMessage('Le type des ressources est obligatoire.')
-                .matches(/^(video|lien|drive|téléchargment)$/).withMessage('Le type doit avoir "video", "lien", "drive" ou "téléchargement".')
-                .isLength({ min: 2, max: 18 })
-                .run(req);
-
-            await body('Ressources.*.lien')
-                .notEmpty().withMessage('Le lien des ressources est obligatoire.')
-                .isURL()
-                .isLength({ min: 3, max: 2000 }).withMessage('Le lien de la ressource doit  être valide.')
-                .run(req);
-            await body('Ressources.*.description')
-                .notEmpty().withMessage('La description des ressources est obligatoire.')
-                .isLength({ min: 10, max: 10000 }).withMessage('La description de la ressource doit avoir une longueur comprise entre 10 et 10000 caractères.')
-                .run(req);
-            await body('Ressources.*.consultation')
-                .notEmpty().withMessage('La consultation des ressources ne doit pas être vide.')
-                .matches(/^(privé|public)$/).withMessage('Le consultation des ressources doit être "privé" ou "public".')
-                .isLength({ min: 2, max: 6 })
-                .run(req);
-
-            await body('Ressources.*.publication')
-                .notEmpty().withMessage('La date de publication des ressources ne doit pas être vide.')
-                .isLength({ min: 10, max: 30 }).withMessage('La date doit avoir une longueur comprise entre 3 et 30 caractères.')
-                .matches(/^[0-9a-zA-Z\-\ :.]+$/).withMessage('La date ne doit contenir que des lettres et des chiffres.')
-                .run(req);
-
-            const errors = validationResult(req);
-            if (!errors.isEmpty()) {
-                errorDetected = true; // Marquer qu'une erreur a été détectée
-                return res.status(400).json({ errors: errors.array() });
+                    }
+                }
             }
-    
-        }
+
+            for (const ressource of data.Ressources) {
+                await body('Ressources')
+                    .optional()
+                    .isArray({ min: 1 }).withMessage('Le tableau des ressources ne doit pas être vide.')
+                    .run(req);
+
+                await body('Ressources.*.nom')
+                    .notEmpty().withMessage('Le nom des ressources est obligatoire.')
+                    .isLength({ min: 2, max: 100 }).withMessage('Le nom des ressources doit avoir une longueur comprise entre 3 et 100 caractères.')
+                    .run(req);
+
+                await body('Ressources.*.type')
+                    .notEmpty().withMessage('Le type des ressources est obligatoire.')
+                    .matches(/^(video|lien|drive|téléchargment)$/).withMessage('Le type doit avoir "video", "lien", "drive" ou "téléchargement".')
+                    .isLength({ min: 2, max: 18 })
+                    .run(req);
+
+                await body('Ressources.*.lien')
+                    .notEmpty().withMessage('Le lien des ressources est obligatoire.')
+                    .isURL()
+                    .isLength({ min: 3, max: 2000 }).withMessage('Le lien de la ressource doit  être valide.')
+                    .run(req);
+                await body('Ressources.*.description')
+                    .notEmpty().withMessage('La description des ressources est obligatoire.')
+                    .isLength({ min: 10, max: 10000 }).withMessage('La description de la ressource doit avoir une longueur comprise entre 10 et 10000 caractères.')
+                    .run(req);
+                await body('Ressources.*.consultation')
+                    .notEmpty().withMessage('La consultation des ressources ne doit pas être vide.')
+                    .matches(/^(privé|public)$/).withMessage('Le consultation des ressources doit être "privé" ou "public".')
+                    .isLength({ min: 2, max: 6 })
+                    .run(req);
+
+                await body('Ressources.*.publication')
+                    .notEmpty().withMessage('La date de publication des ressources ne doit pas être vide.')
+                    .isLength({ min: 10, max: 30 }).withMessage('La date doit avoir une longueur comprise entre 3 et 30 caractères.')
+                    .matches(/^[0-9a-zA-Z\-\ :.]+$/).withMessage('La date ne doit contenir que des lettres et des chiffres.')
+                    .run(req);
+
+                const errors = validationResult(req);
+                if (!errors.isEmpty()) {
+                    errorDetected = true; // Marquer qu'une erreur a été détectée
+                    return res.status(400).json({ errors: errors.array() });
+                }
+
+            }
 
             /*Vérification des données des gestionnaires, les id doivent être des entiers
             et doivent correspondre à des gestionnaires */
-            for (const element of gestionnaireExterne) {
+            for (const element of data.gestionnaireExterne) {
                 const parsedElement = parseInt(element, 10);
 
                 if (!Number.isInteger(parsedElement)) {
@@ -326,7 +310,7 @@ async function modifierProjet(req, res) {
                 }
             }
 
-            for (const element of gestionnaireIA) {
+            for (const element of data.gestionnaireIA) {
                 const parsedElement = parseInt(element, 10);
 
                 if (!Number.isInteger(parsedElement)) {
@@ -340,52 +324,46 @@ async function modifierProjet(req, res) {
                 }
             }
             projetModel.modifierProjet(valeurs_projets)
-                .then(() => {
 
-                    /**Supprimer anciennes données */
-                    gererProjet.destituerProjetExterne(idProjet);
-                    gererProjet.destituerProjetIa(idProjet);
-                    motModel.supprimerMot(idProjet);
-                    ressourceModel.supprimerRessources(idProjet);
+            /**Supprimer anciennes données */
+            gererProjet.destituerProjetExterne(idProjet);
+            gererProjet.destituerProjetIa(idProjet);
+            motModel.supprimerMot(idProjet);
+            ressourceModel.supprimerRessources(idProjet);
 
-                    for (i = 0; i < motClefs.length; i++) {
-                        let motValeurs = [motClefs[i], idProjet];
-                        motModel.insererMot(motValeurs);
-                    }
-                    for (let i = 0; i < gestionnaireExterne.length; i++) {
+            for (i = 0; i < data.motClefs.length; i++) {
+                let motValeurs = [data.motClefs[i], idProjet];
+                motModel.insererMot(motValeurs);
+            }
+            for (let i = 0; i < data.gestionnaireExterne.length; i++) {
 
-                        let id = gestionnaireExterne[i];
-                        gererProjet.attribuerProjetExterne(idProjet, id);
-                    }
-                    for (let i = 0; i < gestionnaireIA.length; i++) {
-                        let id2 = gestionnaireIA[i];
-                        gererProjet.attribuerProjetIA(idProjet, id2);
-                    }
+                let id = data.gestionnaireExterne[i];
+                gererProjet.attribuerProjetExterne(idProjet, id);
+            }
+            for (let i = 0; i < data.gestionnaireIA.length; i++) {
+                let id2 = data.gestionnaireIA[i];
+                gererProjet.attribuerProjetIA(idProjet, id2);
+            }
 
-                    for (i = 0; i < Ressources.length; i++) {
+            for (i = 0; i < data.Ressources.length; i++) {
 
-                        let courant = Ressources[i];
+                let courant = data.Ressources[i];
 
-                        let valeurs_ressources = [
-                            courant.nom,
-                            courant.type,
-                            courant.lien,
-                            courant.publication,
-                            courant.consultation,
-                            courant.description,
-                            idProjet
-                        ]
+                let valeurs_ressources = [
+                    courant.nom,
+                    courant.type,
+                    courant.lien,
+                    courant.publication,
+                    courant.consultation,
+                    courant.description,
+                    idProjet
+                ]
 
-                        ressourceModel.ajouterRessources(valeurs_ressources);
-                    }
-
-                    return res.status(200).json({ message: "Projet modifié" });
-                })
-                .catch(() => {
-                    return res.status(400).json({ erreur: "Le projet n'a pas pu être modifié" });
-                });
-        } catch {
-            return res.status(400).json({ erreur: "erreur" });
+                ressourceModel.ajouterRessources(valeurs_ressources);
+            }
+            return res.status(200).json({ message: "Projet modifié" });
+        } catch (error) {
+            return res.status(400).json({ erreur: "Le projet n'a pas pu être modifié" });
         }
     }
 }
@@ -393,7 +371,7 @@ async function modifierProjet(req, res) {
 /**Supprimer */
 async function supprimerProjet(req, res) {
     if (req.method === 'OPTION') {
-        res.status(200).json({ sucess: 'Agress granted' });
+        return res.status(200).json({ sucess: 'Agress granted' });
     }
     else if (req.method === 'DELETE') {
 

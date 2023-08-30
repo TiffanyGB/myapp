@@ -2,9 +2,27 @@ const pool = require("../database/configDB");
 const userModel = require('./userModel');
 const equipeModel = require('./equipeModel');
 const projetModel = require('../models/projetModel');
-const adminModel = require('./adminModel');
-const gestionnaireIAModel = require('./gestionnaireIaModel');
-const etudiant = require('./etudiantModel');
+const { body, validationResult } = require('express-validator');
+
+async function validateMessageContenu(req, res) {
+
+    await body('contenu')
+        .notEmpty()
+        .isLength({ min: 1, max: 1000 })
+        .withMessage('Le message est trop long (maximum 1000 caractères)')
+        .custom((value) => !(/^\s+$/.test(value))) // Vérifier que ce n'est pas que des espaces
+        .withMessage('Le message ne peut pas être composé uniquement d\'espaces')
+        .run(req);
+
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return { isValid: false, errors: errors.array() };
+    }
+
+    return { isValid: true, errors: null };
+}
+
+
 
 // Envoyer message en tant qu'etudiant
 function envoyerMessageEquipe(valeurs) {
@@ -43,9 +61,9 @@ async function envoyerMessageGlobalProjet(contenu, idProjet, idUser) {
         let equipesCourantes = equipesProjet[i];
         let donnees = [equipesCourantes.idequipe, contenu, idUser, 'projet'];
 
-        try{
+        try {
             pool.query(envoyer, donnees);
-        }catch (error){
+        } catch (error) {
             throw (error);
         }
     }
@@ -59,17 +77,17 @@ async function envoyerMessageGlobalEvent(contenu, idEvent, idUser) {
 
     const projets = await projetModel.recuperer_projets(idEvent);
 
-    for(i = 0; i < projets.length; i++){
+    for (i = 0; i < projets.length; i++) {
         const equipesProjet = await equipeModel.listeEquipeProjet(projets[i].idprojet);
 
         for (j = 0; j < equipesProjet.length; j++) {
 
             let equipesCourantes = equipesProjet[j];
             let donnees = [equipesCourantes.idequipe, contenu, idUser, 'event'];
-    
-            try{
+
+            try {
                 pool.query(envoyer, donnees);
-            }catch (error){
+            } catch (error) {
                 throw (error);
             }
         }
@@ -84,12 +102,8 @@ async function getMessageEquipe(idEquipe) {
     WHERE idEquipe = $1`;
 
     try {
-        return new Promise((resolve) => {
-            pool.query(envoyer, [idEquipe])
-                .then((result) => {
-                    resolve(result.rows);
-                });
-        });
+        const chercher = await pool.query(envoyer, [idEquipe]);
+        return chercher.rows;
     } catch (error) {
         throw error;
     }
@@ -112,23 +126,22 @@ async function jsonGetMessegaeEquipe(idEquipe, req) {
         let id = user.iduser;
 
         /*Chercher le role de l'utilisateur */
-        let role = await adminModel.chercherAdminID(id);
-        if(role.length != 0){
-            temp.roleSender = 'Administrateur';
-        }else{
-            role = await etudiant.chercherStudent(id);
-
-            if(role.length != 0){
+        const type = await userModel.chercherType(id);
+        switch (type) {
+            case 'etudiant':
                 temp.roleSender = 'Étudiant';
-            }else{
-                role = await gestionnaireIAModel.chercherGestionnaireIapau(id);
-
-                if(role.length != 0){
-                    temp.roleSender = 'Gestionnaire IA PAU';
-                }else{
-                    temp.roleSender = 'Gestionnaire Externe';
-                }
-            }
+                break;
+            case 'administrateur':
+                temp.roleSender = 'Administrateur';
+                break;
+            case 'gestionnaireIA':
+                temp.roleSender = 'Gestionnaire IA PAU';
+                break;
+            case 'etudiant':
+                temp.roleSender = 'Gestionnaire Externe';
+                break;
+            default:
+                break;
         }
 
         temp.dateMessage = messageCourant.date_envoie;
@@ -147,12 +160,12 @@ async function jsonGetMessegaeEquipe(idEquipe, req) {
     return jsonRetour;
 }
 
-
 module.exports = {
     envoyerMessageEquipe,
     envoyerMessageGerant,
     jsonGetMessegaeEquipe,
     envoyerMessageGlobalProjet,
     getMessageEquipe,
-    envoyerMessageGlobalEvent
+    envoyerMessageGlobalEvent,
+    validateMessageContenu
 }

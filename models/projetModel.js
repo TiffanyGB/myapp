@@ -9,10 +9,14 @@ const gererProjet = require('../models/gererProjet');
 const userModel = require('./userModel');
 const { chercherGestionnaireExtID } = require('./gestionnaireExterneModel');
 const { chercherGestionnaireIapau } = require('./gestionnaireIaModel');
+const env = require('../environnement.json');
+const img_url = env.backend.assets.images;
+
 
 const validateProjet = [
     body('nom')
         .notEmpty().withMessage('Le nom ne doit pas être vide.')
+        .custom((value) => !(/^\s+$/.test(value)))
         .isLength({ min: 2, max: 30 }).withMessage('Le nom doit avoir une longueur comprise entre 3 et 40 caractères.'),
 
 
@@ -23,11 +27,13 @@ const validateProjet = [
 
     body('recompense')
         .notEmpty().withMessage('La récompense ne doit pas être vide.')
+        .custom((value) => !(/^\s+$/.test(value)))
         .isLength({ min: 0, max: 100000 }).withMessage('La récompense doit être un nombre entre 0 et 100 000.'),
 
 
     body('description')
         .notEmpty().withMessage('La description est obligatoire.')
+        .custom((value) => !(/^\s+$/.test(value)))
         .isLength({ min: 5, max: 10000 }).withMessage('La description doit avoir une longueur comprise entre 5 et 10000 caractères.'),
 
     /**Appel du validateur */
@@ -35,70 +41,57 @@ const validateProjet = [
 ];
 
 /**Liste des projets */
-function tousLesProjets() {
+async function tousLesProjets() {
 
     const projets = `SELECT * FROM Projet`;
 
-    return new Promise((resolve, reject) => {
-        pool.query(projets)
-            .then((res) => {
-                resolve(res.rows);
-            })
-            .catch((error) => {
-                reject(error);
-            });
-    });
+    try {
+        const chercher = await pool.query(projets);
+        return chercher.rows;
+    } catch {
+        throw (error);
+    }
+
 }
 
 /**Chercher la liste des projets d'un event */
-function recuperer_projets(idEvent) {
+async function recuperer_projets(idEvent) {
 
     const chercherProjets = `SELECT * FROM Projet WHERE idevent = $1`
 
-    return new Promise((resolve, reject) => {
-        pool.query(chercherProjets, [idEvent])
-            .then((res) => {
-                resolve(res.rows);
-            })
-            .catch((error) => {
-                reject(error);
-            });
-    });
+    try {
+        const chercher = await pool.query(chercherProjets, [idEvent]);
+        return chercher.rows;
+    } catch {
+        throw (error);
+    }
 }
 
 /**Chercher un projet par son id*/
-function chercheridProjet(idProjet) {
+async function chercheridProjet(idProjet) {
     const users = 'SELECT * FROM Projet WHERE idProjet = $1';
 
-    return new Promise((resolve, reject) => {
-        pool.query(users, [idProjet])
-            .then((res) => {
-                resolve(res.rows);
-            })
-            .catch((error) => {
-                reject(error);
-            });
-    });
+    try {
+        const chercher = await pool.query(users, [idProjet]);
+        return chercher.rows;
+    } catch {
+        throw (error);
+    }
 }
 
 /**Créer un projet */
 async function creerProjet(valeur_projet) {
 
-    const inserer = `INSERT INTO Projet (nom, description_projet, recompense, sujet, imgProjet)
-      VALUES ($1, $2, $3, $4, $5) RETURNING idProjet`;
+    const inserer = `INSERT INTO Projet (nom, description_projet, recompense, sujet, imgProjet, template)
+      VALUES ($1, $2, $3, $4, $5, $6) RETURNING idProjet`;
 
-    return new Promise((resolve, reject) => {
-        pool.query(inserer, valeur_projet)
-            .then((result) => {
-                const idProjet = result.rows[0].idprojet;
-                resolve(idProjet);
-            })
-            .catch((error) => {
-                reject(error);
-            });
-    });
+    try {
+        const chercher = await pool.query(inserer, valeur_projet);
+        return chercher.rows[0].idprojet;
+    } catch (error){
+        throw (error);
+    }
 }
-
 
 /**Modifier un projet */
 async function modifierProjet(valeur_projet) {
@@ -114,7 +107,6 @@ async function modifierProjet(valeur_projet) {
 
     try {
         pool.query(modifier, valeur_projet)
-
     }
     catch (error) {
         throw error;
@@ -168,7 +160,7 @@ async function listeProjetsJson(req) {
                 temp.description = projetCourant.description_projet;
                 temp.derniereModif = projetCourant.dernieremodif;
                 temp.recompense = projetCourant.recompense;
-                temp.image = projetCourant.imgprojet;
+                temp.image = img_url + "/" + projetCourant.imgprojet;
                 temp.sujet = projetCourant.sujet;
                 temp.themes = [];
 
@@ -198,7 +190,6 @@ async function listeProjetsJson(req) {
                 }
                 jsonRetour.projets.push(temp);
             }
-
         }
         return jsonRetour;
     }
@@ -214,7 +205,7 @@ async function toutesInfosProjet(projetCourant, projetInfos) {
     if (projetCourant.imgprojet == null) {
         projetInfos.img = '';
     } else {
-        projetInfos.img = projetCourant.imgprojet;
+        projetInfos.img = img_url + "/" + projetCourant.imgprojet;
     }
     projetInfos.titre = projetCourant.nom;
     projetInfos.idprojet = projetCourant.idprojet;
@@ -246,7 +237,7 @@ async function infosProjet(idProjet) {
             jsonRetour.recompense = projet.recompense;
             jsonRetour.sujet = projet.sujet;
             jsonRetour.derniereModif = projet.dernieremodif;
-            jsonRetour.image = projet.imgprojet;
+            jsonRetour.image = img_url + "/" + projet.imgprojet;
 
             if (jsonRetour.idevent == null) {
                 jsonRetour.idevent = '';

@@ -1,66 +1,59 @@
 const pool = require('../database/configDB');
-const userModel = require('./userModel');
 const { body } = require('express-validator');
-
 
 async function validerGestionnaireExterne(req) {
     await body('entreprise')
-      .notEmpty().withMessage("Le nom de l'entreprise ne doit pas être vide.")
-      .matches(/^[A-Za-z0-9\W]+$/).withMessage("Le nom de l'entreprise doit contenir uniquement des lettres et des chiffres.")
-      .isLength({ min: 2, max: 100 }).withMessage("Le nom de l'entreprise doit avoir une longueur comprise entre 2 et 100 caractères.")
-      .custom((value, { req }) => {
-        if (/<|>/.test(value)) {
-          throw new Error("Le nom de l'entreprise ne doit pas contenir les caractères '<' ou '>'");
-        }
-        return true;
-      })
-      .run(req);
-  
+        .notEmpty().withMessage("Le nom de l'entreprise ne doit pas être vide.")
+        .custom((value) => !(/^\s+$/.test(value)))
+        .matches(/^[A-Za-z0-9\W]+$/).withMessage("Le nom de l'entreprise doit contenir uniquement des lettres et des chiffres.")
+        .isLength({ min: 2, max: 300 }).withMessage("Le nom de l'entreprise doit avoir une longueur comprise entre 2 et 300 caractères.")
+        .custom((value, { req }) => {
+            if (/<|>/.test(value)) {
+                throw new Error("Le nom de l'entreprise ne doit pas contenir les caractères '<' ou '>'");
+            }
+            return true;
+        })
+        .run(req);
+
     await body('metier')
-      .notEmpty().withMessage("Le métier ne doit pas être vide.")
-      .matches(/^[A-Za-z0-9\W]+$/).withMessage("Le métier doit contenir uniquement des lettres et des chiffres.")
-      .isLength({ min: 2, max: 100 }).withMessage("Le métier doit avoir une longueur comprise entre 2 et 100 caractères.")
-      .custom((value, { req }) => {
-        if (/<|>/.test(value)) {
-          throw new Error("Le métier ne doit pas contenir les caractères '<' ou '>'");
-        }
-        return true;
-      })
-      .run(req);
-  }
+        .notEmpty().withMessage("Le métier ne doit pas être vide.")
+        .custom((value) => !(/^\s+$/.test(value)))
+        .matches(/^[A-Za-z0-9\W]+$/).withMessage("Le métier doit contenir uniquement des lettres et des chiffres.")
+        .isLength({ min: 2, max: 200 }).withMessage("Le métier doit avoir une longueur comprise entre 2 et 200 caractères.")
+        .custom((value, { req }) => {
+            if (/<|>/.test(value)) {
+                throw new Error("Le métier ne doit pas contenir les caractères '<' ou '>'");
+            }
+            return true;
+        })
+        .run(req);
+}
 
 
 /**Liste des étudiants */
-function chercherListeGestionnairesExt() {
+async function chercherListeGestionnairesExt() {
 
     const users = `SELECT * FROM Gestionnaire_externe`;
 
-    return new Promise((resolve, reject) => {
-        pool.query(users)
-            .then((res) => {
-                resolve(res.rows);
-            })
-            .catch((error) => {
-                reject(error);
-            });
-    });
+    try {
+        const chercher = await pool.query(users);
+        return (chercher.rows);
+    } catch (error) {
+        throw error;
+    }
 }
 
 /**Chercher un gestionnaire externe par son id*/
-function chercherGestionnaireExtID(IdUser) {
+async function chercherGestionnaireExtID(IdUser) {
 
     const users = `SELECT * FROM Gestionnaire_externe WHERE id_g_externe = $1`;
-    const params = [IdUser];
 
-    return new Promise((resolve, reject) => {
-        pool.query(users, params)
-            .then((res) => {
-                resolve(res.rows);
-            })
-            .catch((error) => {
-                reject(error);
-            });
-    });
+    try {
+        const chercher = await pool.query(users, [IdUser]);
+        return (chercher.rows);
+    } catch (error) {
+        throw error;
+    }
 }
 
 /**
@@ -77,39 +70,40 @@ function chercherGestionnaireExtID(IdUser) {
  * - 'pseudo' si le pseudo existe déjà.
  * - 'mail' si l'email existe déjà.
  */
-
-
 async function creerGestionnaireExterne(id, entreprise, metier) {
 
     const valeurs_ges = [id, entreprise, metier];
     const requet = `INSERT INTO Gestionnaire_externe (id_g_externe, entreprise, metier) VALUES ($1, $2, $3)`;
 
     try {
-        return new Promise((resolve, reject) => {
-            pool.query(requet, valeurs_ges)
-                .then(() => {
-                    resolve('true');
-                })
-                .catch((error) => {
-                    reject(error);
-                });
-        });
+        pool.query(requet, valeurs_ges);
     }
     catch (error) {
         throw error;
     }
 }
+async function getExterneInfo(userId) {
 
-/**Modifier */
-async function modifierExterne(idUser, valeurs, metier, entreprise, password) {
+    try{
+        const chercherGE = await chercherGestionnaireExtID(userId);
+        const gex = chercherGE[0];
+    
+        return {
+            entreprise: gex.entreprise,
+            metier: gex.metier,
+        };
+    }catch (error){
+        throw error;
+    }
 
 }
+
 
 
 module.exports = {
     chercherListeGestionnairesExt,
     chercherGestionnaireExtID,
     creerGestionnaireExterne,
-    modifierExterne,
-    validerGestionnaireExterne
+    validerGestionnaireExterne,
+    getExterneInfo
 }

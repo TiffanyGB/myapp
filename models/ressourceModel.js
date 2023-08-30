@@ -7,58 +7,48 @@ function ajouterRessources(valeurs) {
 
     try {
         pool.query(ajouter, valeurs);
-
     } catch (error) {
         throw error;
     }
 }
 
 /**Ressources publiques */
-function recuperer_ressourcesPubliques(idProjet) {
+async function recuperer_ressourcesPubliques(idProjet) {
 
     const chercherRessources = `SELECT * FROM Ressource WHERE idprojet = $1 AND statut = 'public'`;
 
-    return new Promise((resolve, reject) => {
-        pool.query(chercherRessources, [idProjet])
-            .then((res) => {
-                resolve(res.rows);
-            })
-            .catch((error) => {
-                reject(error);
-            });
-    });
+    try{
+        const chercher = await pool.query(chercherRessources, [idProjet]);
+        return chercher.rows;
+    }catch (error){
+        throw (error);
+    }
 }
 
 /**Ressources privées */
-function recuperer_ressourcesPrivees(idProjet) {
+async function recuperer_ressourcesPrivees(idProjet) {
 
     const chercherRessources = `SELECT * FROM Ressource WHERE idprojet = $1 and statut= 'privé'`;
 
-    return new Promise((resolve, reject) => {
-        pool.query(chercherRessources, [idProjet])
-            .then((res) => {
-                resolve(res.rows);
-            })
-            .catch((error) => {
-                reject(error);
-            });
-    });
+    try{
+        const chercher = await pool.query(chercherRessources, [idProjet]);
+        return chercher.rows;
+    }catch (error){
+        throw (error);
+    }
 }
 
 /**toutes les ressources d'un projet */
-function recuperer_toutes_ressources(idProjet) {
+async function recuperer_toutes_ressources(idProjet) {
 
     const chercherRessources = `SELECT * FROM Ressource WHERE idprojet = $1`;
 
-    return new Promise((resolve, reject) => {
-        pool.query(chercherRessources, [idProjet])
-            .then((res) => {
-                resolve(res.rows);
-            })
-            .catch((error) => {
-                reject(error);
-            });
-    });
+    try {
+        const chercher = await pool.query(chercherRessources, [idProjet])
+        return chercher.rows;
+    } catch (error) {
+        throw error;
+    }
 }
 
 function supprimerRessources(idProjet) {
@@ -67,7 +57,6 @@ function supprimerRessources(idProjet) {
 
     try {
         pool.query(supprimer, [idProjet]);
-
     } catch (error) {
         throw error;
     }

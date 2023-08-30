@@ -15,7 +15,6 @@
 /**
  * Router pour les utilisateurs.
  * Gère les routes liées aux utilisateurs, telles que /users, /users/:id, etc.
- * @namespace UserRouter
  * @see {@link module:UserController}
  * @see {@link module:UserModel}
  */
@@ -27,7 +26,8 @@ const userModel = require('../models/userModel');
 const tokenModel = require('../models/tokenModel');
 const profil = require('../middleware/verifProfil');
 const checkAdminProfile = profil.checkProfile('admin');
-const validationDonnees = require('../middleware/validationDonnees');
+const passwordModel = require('../models/passwordModel');
+const { verifIdUser } = require('../middleware/verifExistenceIdRoute');
 const aucunProfil = profil.interdireAucunProfil;
 const { verifIdNombre } = require('../verifications/verifierDonnéesGénérales');
 
@@ -53,7 +53,7 @@ router.all(
   tokenModel.verifyToken,
   checkAdminProfile,
   userModel.validateUser,
-  validationDonnees.validatePasswordCreation,
+  passwordModel.validatePasswordCreation,
   userController.createUser,
 
 );
@@ -76,9 +76,10 @@ router.all('/edit/:id', (req, res, next) => {
   }
   next();
 }, tokenModel.verifyToken,
+  verifIdUser,
   aucunProfil,
   userModel.validateUser,
-  validationDonnees.validatePasswordModif,
+  passwordModel.validatePasswordModif,
   userController.modifierUser);
 
 
@@ -101,6 +102,7 @@ router.all('/delete/:id', (req, res, next) => {
 
   next();
 }, tokenModel.verifyToken,
+  verifIdUser,
   checkAdminProfile,
   userController.supprimerUser);
 

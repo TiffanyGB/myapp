@@ -15,7 +15,7 @@ const passwordModel = require('../../models/passwordModel');
 const pool = require('../../database/configDB');
 const jwt = require('jsonwebtoken');
 const tokenModel = require('../../models/tokenModel');
-
+const { chercherType } = require('../../models/userModel');
 
 /**
  * Connexion d'un utilisateur.
@@ -57,10 +57,12 @@ async function connexion(req, res) {
 
                 if (match) {
 
+                    let type = await chercherType(user.iduser);
+
                     /* Informations à insérer dans le token */
                     const payload = {
                         "utilisateurId": user.iduser,
-                        "utilisateurType": user.typeuser
+                        "utilisateurType": type
                     };
 
                     /*  Générer le JWT */
@@ -71,9 +73,8 @@ async function connexion(req, res) {
                         temps = '24h';
                     }
                     const token = jwt.sign(payload, tokenModel.secretKey, { expiresIn: temps });
-                    tokenModel.stockerJWT(token, tokenModel.secretKey);
 
-                    return res.status(200).json({ token: token, id: user.iduser, prenom: user.prenom, nom: user.nom, pseudo: user.pseudo, role: user.typeuser });
+                    return res.status(200).json({ token: token, id: user.iduser, prenom: user.prenom, nom: user.nom, pseudo: user.pseudo, role: type });
                 } else {
                     return res.status(400).json({ champ: 'mot de passe', message: 'Le mot de passe est incorrect' });
                 }
@@ -81,6 +82,8 @@ async function connexion(req, res) {
         } catch (error) {
             return res.status(400).json('Erreur lors de l\'exécution de la requête');
         }
+    } else {
+        return res.status(404).json('Page not found');
     }
 }
 

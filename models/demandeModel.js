@@ -1,6 +1,5 @@
 /**
  * @fileoverview Models des annotations d'une équipes.
- * @module Gestion_demandes_admission
  */
 
 const pool = require('../database/configDB');
@@ -47,7 +46,36 @@ function declinerDemande(idUser, idEquipe) {
     }
 }
 
+function envoyerDemande(valeurs) {
+
+    const envoyer = `INSERT INTO DemandeEquipe
+    (idUser, idEquipe, messageDemande)
+    VALUES ($1, $2, $3)`;
+
+    try {
+        pool.query(envoyer, valeurs);
+    } catch (error) {
+        throw (error);
+    }
+}
+
+async function demandeDejaEnvoyee(idUser, idEquipe) {
+
+    const envoyee = `SELECT *
+    FROM DemandeEquipe 
+    WHERE idUser = $1 AND idEquipe = $2`;
+
+    try {
+        const res = await pool.query(envoyee, [idUser, idEquipe]);
+        return res.rows;
+    } catch (error) {
+        throw (error);
+    }
+}
+
 module.exports = {
     supprimerDemandes,
-    declinerDemande
+    declinerDemande,
+    envoyerDemande,
+    demandeDejaEnvoyee
 }

@@ -1,6 +1,5 @@
 /**
  * @fileoverview Fonctions intéragissant avec la BDD pour la gestion des projets des gestionnaires.
- * @module Projet
  */
 
 const pool = require('../database/configDB');
@@ -20,20 +19,12 @@ const pool = require('../database/configDB');
  */
 async function chercherGestionnaireIA(idProjet) {
     try {
-        const valeurs = [idProjet];
-
         const attribuer = `SELECT * FROM Gerer_ia_pau 
         WHERE idProjet = $1`;
 
-        return new Promise((resolve, reject) => {
-            pool.query(attribuer, valeurs)
-                .then((res) => {
-                    resolve(res.rows);
-                })
-                .catch((err) => {
-                    reject(err);
-                });
-        });
+        const result = await pool.query(attribuer, [idProjet]);
+        return result.rows;
+
     } catch (error) {
         throw error;
     }
@@ -61,15 +52,10 @@ async function chercherGestionnaireExtID(idProjet, idGestionnaire) {
         const attribuer = `SELECT * FROM Gerer_externe 
         WHERE idProjet = $1 and id_g_externe = $2`;
 
-        return new Promise((resolve, reject) => {
-            pool.query(attribuer, valeurs)
-                .then((res) => {
-                    resolve(res.rows);
-                })
-                .catch((err) => {
-                    reject(err);
-                });
-        });
+        const result = await pool.query(attribuer, valeurs);
+        return result.rows;
+
+
     } catch (error) {
         throw error;
     }
@@ -90,6 +76,7 @@ async function chercherGestionnaireExtID(idProjet, idGestionnaire) {
  * @throws {Error} Une erreur si la requête de récupération échoue.
  */
 
+/**Changer nom si j'ai le temps */
 async function chercherGestionnaireIAID(idProjet, idGestionnaire) {
     try {
         const valeurs = [idProjet, idGestionnaire];
@@ -97,15 +84,8 @@ async function chercherGestionnaireIAID(idProjet, idGestionnaire) {
         const attribuer = `SELECT * FROM Gerer_ia_pau 
         WHERE idProjet = $1 and id_g_iapau = $2`;
 
-        return new Promise((resolve, reject) => {
-            pool.query(attribuer, valeurs)
-                .then((res) => {
-                    resolve(res.rows);
-                })
-                .catch((err) => {
-                    reject(err);
-                });
-        });
+        const chercher = await pool.query(attribuer, valeurs);
+        return chercher.rows;
     } catch (error) {
         throw error;
     }
@@ -126,20 +106,12 @@ async function chercherGestionnaireIAID(idProjet, idGestionnaire) {
  */
 async function chercherGestionnaireExt(idProjet) {
     try {
-        const valeurs = [idProjet];
-
         const attribuer = `SELECT * FROM Gerer_externe 
         WHERE idProjet = $1`;
 
-        return new Promise((resolve, reject) => {
-            pool.query(attribuer, valeurs)
-                .then((res) => {
-                    resolve(res.rows);
-                })
-                .catch((err) => {
-                    reject(err);
-                });
-        });
+        const chercher = await pool.query(attribuer, [idProjet]);
+        return chercher.rows;
+
     } catch (error) {
         throw error;
     }
@@ -234,12 +206,10 @@ async function destituerProjetExterne(idProjet) {
 async function destituerProjetIa(idProjet) {
 
     try {
-
         const destituer = `DELETE FROM Gerer_ia_pau 
         WHERE idProjet = $1`;
 
         pool.query(destituer, [idProjet]);
-
     } catch (error) {
         throw error;
     }

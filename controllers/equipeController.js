@@ -15,9 +15,9 @@ const equipeModel = require('../models/equipeModel');
 const projetModel = require('../models/projetModel');
 const demandeModel = require('../models/demandeModel')
 const { body, validationResult } = require('express-validator');
-const { creerDossier, creerUtilisateur, creerRepertoire} = require('../gitlab3');
+const { creerDossier, creerUtilisateur, creerRepertoire } = require('./gitlab3');
 const eventModel = require('../models/eventModel');
-const { validateUserId } = require('../verifications/verifierDonnéesGénérales')
+const { validateUserId } = require('../verifications/verifierDonnéesGénérales');
 
 
 async function retournerEquipeProjet(req, res) {
@@ -33,6 +33,8 @@ async function retournerEquipeProjet(req, res) {
     } catch (error) {
       return res.status(400).json({ erreur: "Erreur lors de la récupération des équipes" });
     }
+  } else {
+    return res.status(404).json('Page not found');
   }
 }
 
@@ -45,26 +47,21 @@ async function creerEquipe(req, res) {
     const idCapitaine = req.id;
 
     /*Récupération données du body */
-    const {
-      nom,
-      statut,
-      description,
-      idProjet,
-    } = req.body;
+    const userData = req.body;
 
     const infos = [
       idCapitaine,
-      nom,
-      description,
-      statut,
-      idProjet
+      userData.nom,
+      userData.description,
+      userData.statut,
+      userData.idProjet
     ]
 
     try {
       /* L'étudiant ne doit pas avoir d'équipe dans l'event*/
 
       /*Récupérer l'event de l'équipe*/
-      const projet = await projetModel.chercheridProjet(idProjet);
+      const projet = await projetModel.chercheridProjet(userData.idProjet);
       if (projet.length === 0) {
         return res.status(400).json({ erreur: 'L\'id du projet n\'existe pas.' })
       }
@@ -88,73 +85,67 @@ async function creerEquipe(req, res) {
 
       /*Gitlab*/
 
-      /*Création du dossier de l'équipe dans le répertoire annexe*/
-      creerDossier(idEquipe, event_nom);
-      
-      /*Création de l'utilisateur lié au repo de l'équipe */
-      const valeurs = await creerUtilisateur(nom);
-      console.log(valeurs)
+      // /*Création du dossier de l'équipe dans le répertoire annexe*/
+      // creerDossier(idEquipe, event_nom);
 
-      equipeModel.insererAccesEquipeGit(valeurs[1], valeurs[0], idEquipe);
-      /*Création du repo de l'équipe */
-      creerRepertoire(idEquipe, valeurs[2])
+      // /*Création de l'utilisateur lié au repo de l'équipe */
+      // const valeurs = await creerUtilisateur(userData.nom);
+      // console.log(valeurs)
+
+      // equipeModel.insererAccesEquipeGit(valeurs[1], valeurs[0], idEquipe);
+      // /*Création du repo de l'équipe */
+      // creerRepertoire(idEquipe, valeurs[2])
 
       return res.status(200).json(idEquipe);
     } catch (error) {
       return res.status(400).json({ erreur: 'Erreur création équipe.' });
     }
+  } else {
+    return res.status(404).json('Page not found');
   }
 }
 
 async function modifierEquipe(req, res) {
   if (req.method === 'OPTIONS') {
-    res.status(200).json({ sucess: 'Agress granted' });
+    return res.status(200).json({ sucess: 'Agress granted' });
   }
   else if (req.method === 'PATCH') {
 
     const idEquipe = res.locals.idEquipe;
 
-    const {
-      nom,
-      statut,
-      description,
-      idProjet,
-      lien_discussion,
-      preferenceQuestionnaire,
-      github
-    } = req.body;
-
+    const userData = req.body;
 
     const valeurs = [
-      nom,
-      description,
-      statut,
-      idProjet,
-      lien_discussion,
-      preferenceQuestionnaire,
-      github,
+      userData.nom,
+      userData.description,
+      userData.statut,
+      userData.idProjet,
+      userData.lien_discussion,
+      userData.preferenceQuestionnaire,
+      userData.github,
       idEquipe
     ]
 
     /*Récupérer l'event de l'équipe*/
-    const projet = await projetModel.chercheridProjet(idProjet);
+    const projet = await projetModel.chercheridProjet(userData.idProjet);
     if (projet.length === 0) {
       return res.status(400).json({ erreur: 'L\'id du projet n\'existe pas.' })
     }
 
     try {
       equipeModel.modifierEquipe(valeurs);
-      res.status(200).json({ message: "Equipe modifiée" });
-
-    } catch {
-      res.status(400).json({ error: "Modification de l'équipe" });
+      return res.status(200).json({ message: "Equipe modifiée" });
+    } catch (error) {
+      return res.status(400).json({ error: "Modification de l'équipe" });
     }
+  } else {
+    return res.status(404).json('Page not found');
   }
 }
 
 async function supprimerEquipe(req, res) {
   if (req.method === 'OPTIONS') {
-    res.status(200).json({ sucess: 'Agress granted' });
+    return res.status(200).json({ sucess: 'Agress granted' });
   }
   else if (req.method === 'DELETE') {
 
@@ -163,48 +154,52 @@ async function supprimerEquipe(req, res) {
 
       /*Suppression */
       equipeModel.supprimerEquipe(idEquipe);
-      res.status(200).json({ message: "Equipe supprimée" });
+      return res.status(200).json({ message: "Equipe supprimée" });
 
     } catch {
-      res.status(400).json({ error: "Suppression de l'équipe" });
+      return res.status(400).json({ error: "Suppression de l'équipe" });
     }
+  } else {
+    return res.status(404).json('Page not found');
   }
 }
 
 async function promouvoir(req, res) {
   if (req.method === 'OPTIONS') {
-    res.status(200).json({ sucess: 'Agress granted' });
+    return res.status(200).json({ sucess: 'Agress granted' });
   }
   else if (req.method === 'POST') {
 
     try {
-
       const idEquipe = res.locals.idEquipe;
 
       const {
         idUser
       } = req.body;
 
-      await validateUserId('idUser', req, res);
+      /*L'id doit être un nombre naturel */
+      await validateUserId(idUser, req, res);
 
       /*Vérifier si l'étudiant est dans l'équipe */
       const appartenir = await equipeModel.appartenirEquipe(idUser, idEquipe);
-      if (appartenir.length === 0) {
+      if (appartenir.length == 0) {
         return res.status(400).json({ erreur: 'L\'étudiant ne fait pas partie de l\'équipe' });
       }
 
       /*Le capitaine ne peut pas se promouvoir lui-même */
       const equipe = await equipeModel.chercherEquipeID(idEquipe);
-      if (idUser === equipe[0].idcapitaine) {
-        return res.status(404).json({ erreur: 'Le capitaine ne peut pas se supprimer lui-même.' });
+      if (idUser == equipe[0].idcapitaine) {
+        return res.status(404).json({ erreur: 'Le capitaine ne peut pas se promouvoir lui-même.' });
       }
 
       equipeModel.promouvoir(idEquipe, idUser);
-      res.status(200).json({ message: "Capitaine promu" });
+      return res.status(200).json({ message: "Capitaine promu" });
 
     } catch {
-      res.status(400).json({ error: "Erreur promotion" });
+      return res.status(400).json({ error: "Erreur promotion" });
     }
+  } else {
+    return res.status(404).json('Page not found');
   }
 }
 
@@ -220,7 +215,7 @@ async function supprimerMembre(req, res) {
       idUser
     } = req.body;
 
-    await validateUserId('idUser', req, res);
+    await validateUserId(idUser, req, res);
 
     try {
       /*Vérifier si l'étudiant est dans l'équipe */
@@ -235,11 +230,13 @@ async function supprimerMembre(req, res) {
       }
 
       equipeModel.supprimerUnMembre(idUser, idEquipe);
-      res.status(200).json({ message: "Membre supprimé" });
+      return res.status(200).json({ message: "Membre supprimé" });
 
     } catch {
-      res.status(400).json({ error: "Erreur suppression" });
+      return res.status(400).json({ error: "Erreur suppression" });
     }
+  } else {
+    return res.status(404).json('Page not found');
   }
 }
 /* Voir le profil, d'une équipe et pour la modif
@@ -249,10 +246,9 @@ si capitaine/gestionnaire de l'équipe ou admin voir tout */
 async function getInfosEquipe(req, res) {
 
   if (req.method === 'OPTIONS') {
-    res.status(200).json({ sucess: 'Agress granted' });
+    return res.status(200).json({ sucess: 'Agress granted' });
   }
   else if (req.method === 'GET') {
-
 
     const idEquipe = res.locals.idEquipe;
 
@@ -266,7 +262,7 @@ async function getInfosEquipe(req, res) {
 
 async function listeOuvertes(req, res) {
   if (req.method === 'OPTIONS') {
-    res.status(200).json({ sucess: 'Agress granted' });
+    return res.status(200).json({ sucess: 'Agress granted' });
   }
   else if (req.method === 'GET') {
 
@@ -274,19 +270,20 @@ async function listeOuvertes(req, res) {
 
     try {
       const equipesOuvertes = await equipeModel.jsonEquipesOuvertes(idEvent, req);
-      res.status(200).json(equipesOuvertes);
+      return res.status(200).json(equipesOuvertes);
 
     } catch {
-      res.status(400).json({ error: 'Erreur lors de la récupération' });
+      return res.status(400).json({ error: 'Erreur lors de la récupération' });
     }
+  } else {
+    return res.status(404).json('Page not found');
   }
 }
 
 async function quitterEquipe(req, res) {
   if (req.method === 'OPTIONS') {
-    res.status(200).json({ sucess: 'Agress granted' });
-  }
-  else if (req.method === 'DELETE') {
+    return res.status(200).json({ sucess: 'Agress granted' });
+  } else if (req.method === 'DELETE') {
 
     const idUser = req.id;
     const idEquipe = res.locals.idEquipe;
@@ -299,21 +296,17 @@ async function quitterEquipe(req, res) {
     const equipe = await equipeModel.chercherEquipeID(idEquipe);
 
     /*Ne doit pas être capitaine */
-    if (equipe[0].idcapitaine === idUser) {
+    if (equipe[0].idcapitaine == idUser) {
       return res.status(404).json({ erreur: 'Le capitaine ne peut pas quitter son équipe' });
     }
 
     try {
       equipeModel.quitterEquipe(idEquipe, idUser);
-
-      equipeModel.ouvrirEquipe(idEquipe);
-
       return res.status(200).json({ message: "Equipe quittée" });
 
-    } catch {
+    } catch (error) {
       return res.status(400).json({ error: 'N\'a pas pu quitter.' });
     }
-
   } else {
     return res.status(404).json('Page not found');
   }
@@ -327,7 +320,6 @@ async function demandeEquipe(req, res) {
 
     const idUser = req.id;
     let idEquipe = res.locals.idEquipe;
-    idEquipe
 
     const {
       message
@@ -360,7 +352,7 @@ async function demandeEquipe(req, res) {
     }
 
     /* Vérifier si une demande a déjà été envoyée */
-    const envoyee = await equipeModel.demandeDejaEnvoyee(idUser, idEquipe);
+    const envoyee = await demandeModel.demandeDejaEnvoyee(idUser, idEquipe);
     if (envoyee.length > 0) {
       return res.status(404).json({ erreur: 'Une demande a déjà été envoyée' });
     }
@@ -378,26 +370,27 @@ async function demandeEquipe(req, res) {
     }
 
     try {
-      equipeModel.envoyerDemande(valeurs);
+      demandeModel.envoyerDemande(valeurs);
       return res.status(200).json({ message: "Message envoyé" });
 
     } catch (error) {
       return res.status(400).json({ error: 'Erreur lors de l\'envoi du message.' });
     }
+  } else {
+    return res.status(404).json('Page not found');
   }
 }
 
 async function accepterDemande(req, res) {
   if (req.method === 'OPTIONS') {
-    res.status(200).json({ sucess: 'Agress granted' });
+    return res.status(200).json({ sucess: 'Agress granted' });
   }
   else if (req.method === 'POST') {
 
     const idEquipe = res.locals.idEquipe;
-
     const idUser = req.body.id;
 
-    await validateUserId('idUser', req, res);
+    await validateUserId(idUser, req, res);
 
     const equipe = await equipeModel.chercherEquipeID(idEquipe);
 
@@ -415,7 +408,7 @@ async function accepterDemande(req, res) {
     }
 
     /* Vérifier si l'étudiant a bien envoyé une demande */
-    const envoyee = await equipeModel.demandeDejaEnvoyee(idUser, idEquipe);
+    const envoyee = await demandeModel.demandeDejaEnvoyee(idUser, idEquipe);
     if (envoyee.length === 0) {
       return res.status(400).json({ erreur: 'Aucune demande provenant de cet utilisateur' });
     }
@@ -424,7 +417,7 @@ async function accepterDemande(req, res) {
     const nb_max_event = (await eventModel.chercherEvenement(idEvent))[0].nombre_max_equipe;
     const nb_membres = (await equipeModel.ListeMembre(idEquipe)).length;
 
-    if (nb_max_event === nb_membres) {
+    if (nb_max_event == nb_membres) {
       return res.status(400).json({ error: 'L\'équipe est déjà complète' });
     }
 
@@ -438,12 +431,13 @@ async function accepterDemande(req, res) {
       if ((nb_membres + 1) === nb_max_event) {
         equipeModel.fermerEquipe(idEquipe);
       }
-
       return res.status(200).json({ message: "Etudiant accepté" });
 
-    } catch {
+    } catch (error){
       return res.status(400).json({ error: 'Erreur lors de l\'acceptation de l\'étudiant.' });
     }
+  } else {
+    return res.status(404).json('Page not found');
   }
 }
 
@@ -454,23 +448,22 @@ async function declinerDemande(req, res) {
   else if (req.method === 'POST') {
 
     const idEquipe = res.locals.idEquipe;
-
     const idUser = req.body.id;
 
-    await validateUserId('idUser', req, res);
+    await validateUserId(idUser, req, res);
 
     /* Vérifier si l'étudiant a bien envoyé une demande */
-    const envoyee = await equipeModel.demandeDejaEnvoyee(idUser, idEquipe);
+    const envoyee = await demandeModel.demandeDejaEnvoyee(idUser, idEquipe);
     if (envoyee.length === 0) {
       return res.status(404).json({ erreur: 'Aucune demande provenant de cet utilisateur' });
     }
 
     try {
       demandeModel.declinerDemande(idUser, idEquipe);
-      res.status(200).json({ message: "Demande rejetée" });
+      return res.status(200).json({ message: "Demande rejetée" });
 
-    } catch {
-      res.status(400).json({ error: 'Erreur lors du rejet de la demande.' });
+    } catch (error){
+      return res.status(400).json({ error: 'Erreur lors du rejet de la demande.' });
     }
   } else {
     return res.status(404).json('Page not found');
@@ -479,15 +472,14 @@ async function declinerDemande(req, res) {
 
 async function voirMesEquipes(req, res) {
   if (req.method === 'OPTIONS') {
-    res.status(200).json({ sucess: 'Agress granted' });
+    return res.status(200).json({ sucess: 'Agress granted' });
   }
   else if (req.method === 'GET') {
-
     try {
       const jsonInfos = await equipeModel.jsonMesEquipes(req.id);
       return res.status(200).json(jsonInfos);
 
-    } catch {
+    } catch (error) {
       return res.status(400).json({ erreur: "Erreur lors de la récupération des données." });
     }
   } else {

@@ -1,6 +1,8 @@
+const pool = require('../database/configDB');
 const gestionnaireExterneModel = require('./gestionnaireExterneModel');
 const gestionnaireIaModel = require('./gestionnaireIaModel');
 const userModel = require('./userModel');
+
 
 
 /*JSON de la liste des gestionnaires externes et internes
@@ -87,6 +89,61 @@ async function envoyer_json_liste_gestionnaires() {
     }
 }
 
+async function modifierExterne(idUser, valeurs, metier, entreprise, password) {
+
+    try {
+        const result = await userModel.modifierUser(idUser, valeurs, password)
+
+        switch (result) {
+            case 'les2':
+                return 'les2';
+            case 'pseudo':
+                return 'pseudo';
+            case 'mail':
+                return 'mail';
+            default:
+                break;
+        }
+
+        const modif = `UPDATE Gestionnaire_externe
+            SET entreprise = $1,
+            metier = $2 
+            WHERE id_g_externe = $3`;
+
+        pool.query(modif, [entreprise, metier, idUser]);
+
+    } catch (error) {
+        throw error;
+    }
+}
+
+async function modifierIapau(idUser, valeurs, role_asso, password) {
+    try {
+
+        const result = await userModel.modifierUser(idUser, valeurs, password);
+
+        switch (result) {
+            case 'les2':
+                return 'les2';
+            case 'pseudo':
+                return 'pseudo';
+            case 'mail':
+                return 'mail';
+            default:
+                break;
+        }
+
+        const modif = `UPDATE Gestionnaire_iapau
+                SET role_asso = '${role_asso}'
+                WHERE id_g_iapau = ${idUser}`;
+
+        pool.query(modif);
+    } catch (error) {
+        throw error;
+    }
+}
 module.exports = {
-    envoyer_json_liste_gestionnaires
+    envoyer_json_liste_gestionnaires,
+    modifierIapau,
+    modifierExterne
 }

@@ -1,21 +1,22 @@
 const pool = require('../database/configDB');
 const userModel = require('./userModel');
-const { body, validationResult } = require('express-validator');
+const { body } = require('express-validator');
 
 
 async function validerGestionnaireIA(req) {
     await body('role_asso')
-      .notEmpty().withMessage("Le rôle ne doit pas être vide.")
-      .matches(/^[A-Za-z0-9\W]+$/)
-      .isLength({ min: 2, max: 100 }).withMessage("Le rôle doit avoir une longueur comprise entre 2 et 100 caractères.")
-      .custom((value, { req }) => {
-        if (/<|>/.test(value)) {
-          throw new Error("Le rôle ne doit pas contenir les caractères '<' ou '>'");
-        }
-        return true;
-      })
-      .run(req);
-  }
+        .notEmpty().withMessage("Le rôle ne doit pas être vide.")
+        .custom((value) => !(/^\s+$/.test(value)))
+        .matches(/^[A-Za-z0-9\W]+$/)
+        .isLength({ min: 2, max: 200 }).withMessage("Le rôle doit avoir une longueur comprise entre 2 et 200 caractères.")
+        .custom((value, { req }) => {
+            if (/<|>/.test(value)) {
+                throw new Error("Le rôle ne doit pas contenir les caractères '<' ou '>'");
+            }
+            return true;
+        })
+        .run(req);
+}
 
 /**Liste des gestionnaires ia pau */
 function chercherListeGestionnaireIapau() {
@@ -72,57 +73,26 @@ async function creerGestionnaireIA(id, role_asso) {
     const requet = `INSERT INTO Gestionnaire_iapau (id_g_iapau, role_asso) VALUES ($1, $2)`;
 
     try {
-        return new Promise((resolve, reject) => {
-            pool.query(requet, valeurs_ges)
-                .then(() => {
-                    resolve('true');
-                })
-                .catch((error) => {
-                    reject(error);
-                });
-        });
+        pool.query(requet, valeurs_ges)
     }
     catch (error) {
         throw error;
     }
 }
 
+async function getIAGestionnaireInfo(userId) {
+    const chercherGIA = await chercherGestionnaireIapau(userId);
+    const gia = chercherGIA[0];
 
-/**Modifier un gestionnaire ia pau */
-async function modifierIapau(idUser, valeurs, role_asso, password) {
-    // try {
-    //     userModel.modifierUser(idUser, valeurs, password)
-    //         .then(() => {
-
-    //             const student = `UPDATE Gestionnaire_iapau
-    //             SET role_asso = '${role_asso}'
-    //             WHERE id_g_iapau = ${idUser}`;
-
-    //             console.log()
-    //             try {
-    //                 pool.query(student);
-    //                 console.log("reussi");
-    //             }
-    //             catch (error) {
-    //                 console.error("Erreur lors de la mise à jour du gestionnaire iapau", error);
-    //             }
-
-    //         })
-    //         .catch((error) => {
-    //             console.error("Erreur lors de la mise à jour du gestionnaire iapau", error);
-    //         });
-
-    // } catch (error) {
-    //     console.error("Erreur lors de la mise à jour du gestionnaire iapau", error);
-    //     throw error;
-    // }
+    return {
+        role_asso: gia.role_asso,
+    };
 }
-
 
 module.exports = {
     chercherGestionnaireIapau,
     chercherListeGestionnaireIapau,
     creerGestionnaireIA,
-    modifierIapau,
     validerGestionnaireIA,
+    getIAGestionnaireInfo
 }

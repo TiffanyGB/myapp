@@ -2,13 +2,13 @@ var express = require('express');
 var router = express.Router();
 const { verifIdNombre } = require('../verifications/verifierDonnéesGénérales');
 const userModel = require('../models/userModel');
-const validationDonnees = require('../middleware/validationDonnees');
+const passwordModel = require('../models/passwordModel');
 const tokenModel = require('../models/tokenModel');
 const { verifIdEvent } = require('../middleware/verifExistenceIdRoute');
 const bodyParser = require('body-parser');
 const inscriptionController = require('../controllers/Auth/inscriptionController');
 const { connexion } = require('../controllers/Auth/connexionController');
-const {voirTousEvents, voirEvent} = require('../controllers/eventsController');
+const { voirTousEvents, voirEvent } = require('../controllers/eventsController');
 
 router.use(bodyParser.json());
 router.use(express.json());
@@ -17,11 +17,11 @@ router.use(express.urlencoded({ extended: false }));
 
 router.all('/inscription',
   userModel.validateUser,
-  validationDonnees.validatePasswordCreation,
+  passwordModel.validatePasswordCreation,
   inscriptionController.inscriptionEleve);
 
 router.all('/connexion',
-  validationDonnees.connexion,
+  userModel.connexion,
   connexion
 );
 

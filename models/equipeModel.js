@@ -6,11 +6,13 @@ const { body } = require('express-validator');
 const motCleModel = require('../models/motCleModel');
 const gererProjet = require('./gererProjet');
 const annotationModel = require('./annotationEquipeModel');
-const { recupererJSON } = require('../gitlab3');
+const { recupererJSON } = require('../controllers/gitlab3');
+const demandeModel = require('./demandeModel')
 
 const validerEquipe = [
     body('nom')
         .notEmpty().withMessage('Le nom ne doit pas être vide.')
+        .custom((value) => !(/^\s+$/.test(value)))
         .matches(/^[\W0-9a-zA-ZÀ-ÿ \-']*$/)
         .isLength({ min: 2, max: 30 }).withMessage('Le nom doit avoir une longueur comprise entre 2 et 30 caractères.'),
 
@@ -21,6 +23,7 @@ const validerEquipe = [
 
     body('description')
         .optional({ nullable: true, checkFalsy: true })
+        .custom((value) => !(/^\s+$/.test(value)))
         .isLength({ min: 3, max: 2000 }).withMessage('La description doit avoir une longueur comprise entre 3 et 2000 caractères.'),
 
     body('lien_discussion')
@@ -42,78 +45,56 @@ const validerEquipe = [
     validateurDonnéesMiddleware
 ];
 
-/************************************************** C'est à changer dans l'interface ***********/
-function chercherEvenement(idEvent) {
+// /************************************************** C'est à changer dans l'interface ***********/
+async function chercherEvenement(idEvent) {
 
     const users = 'SELECT * FROM Evenement WHERE idEvent = $1';
-    const params = [idEvent];
 
-    return new Promise((resolve, reject) => {
-        pool.query(users, params)
-            .then((res) => {
-                resolve(res.rows);
-            })
-            .catch((error) => {
-                reject(error);
-            });
-    });
+    try {
+        const chercher = await pool.query(users, [idEvent]);
+        return chercher.rows;
+    } catch (error) {
+        throw error;
+    }
+
 }
 
 /* toutes les équipes d'un projet */
 async function listeEquipeProjet(idProjet) {
 
-    const chercher = `SELECT * FROM Equipe WHERE idProjet = $1`;
+    const listeEquipe = `SELECT * FROM Equipe WHERE idProjet = $1`;
 
-    return new Promise((resolve, reject) => {
-        pool.query(chercher, [idProjet])
-            .then((res) => {
-                resolve(res.rows);
-            })
-            .catch((error) => {
-                reject(error);
-            });
-    });
+    try {
+        const chercher = await pool.query(listeEquipe, [idProjet]);
+        return chercher.rows;
+    } catch (error) {
+        throw error;
+    }
 }
 
 async function chercherEquipeID(id) {
 
     const chercher = `SELECT * FROM Equipe WHERE idEquipe = $1`;
 
-    return new Promise((resolve, reject) => {
-        pool.query(chercher, [id])
-            .then((res) => {
-                resolve(res.rows);
-            })
-            .catch((error) => {
-                reject(error);
-            });
-    });
-}
-
-/**Vérifier si existe equipe */
-async function equipeExiste(idEquipe) {
-    const equipe = await equipeModel.chercherEquipeID(idEquipe);
-    if (equipe.length === 0) {
-        return true;
+    try {
+        const res = await pool.query(chercher, [id]);
+        return res.rows;
+    } catch (error) {
+        throw error;
     }
 }
-
 
 /* requete pour les equipes ouvertes */
 async function equipesOuvertes() {
 
     const chercher = `SELECT * FROM Equipe
     WHERE statut_recrutement = 'ouvert'`;
-
-    return new Promise((resolve, reject) => {
-        pool.query(chercher)
-            .then((res) => {
-                resolve(res.rows);
-            })
-            .catch((error) => {
-                reject(error);
-            });
-    });
+    try {
+        const res = await pool.query(chercher);
+        return res.rows;
+    } catch (error) {
+        throw error;
+    }
 }
 
 async function fermerEquipe(idEquipe) {
@@ -142,15 +123,15 @@ async function ouvrirEquipe(idEquipe) {
     }
 }
 
-async function chercheraccesGitlab(idEquipe){
+async function chercheraccesGitlab(idEquipe) {
     const chercher = `SELECT login_gitlab, mdp_gitlab
     FROM Equipe
     WHERE idEquipe = $1`;
 
-    try{
+    try {
         const donnees = await pool.query(chercher, [idEquipe])
         return donnees.rows;
-    }catch (error){
+    } catch (error) {
         throw (error);
     }
 }
@@ -162,13 +143,8 @@ async function creerEquipe(valeurs) {
     VALUES ($1, $2, $3, $4, $5) RETURNING idEquipe`;
 
     try {
-        return new Promise((resolve, reject) => {
-            pool.query(inserer, valeurs)
-                .then((result) => {
-                    let id = result.rows[0].idequipe;
-                    resolve(id);
-                })
-        });
+        const res = await pool.query(inserer, valeurs);
+        return res.rows[0].idequipe;
     } catch (error) {
         throw error;
     }
@@ -206,36 +182,30 @@ function insererAccesEquipeGit(login, mdp, idEquipe) {
     }
 }
 
-function appartenirEquipe(idUser, idEquipe) {
+async function appartenirEquipe(idUser, idEquipe) {
 
     const chercher = `SELECT * FROM Appartenir 
     WHERE idEquipe = $1 AND idUser = $2`;
 
-    return new Promise((resolve, reject) => {
-        pool.query(chercher, [idEquipe, idUser])
-            .then((res) => {
-                resolve(res.rows);
-            })
-            .catch((error) => {
-                reject(error);
-            });
-    });
+    try {
+        const res = await pool.query(chercher, [idEquipe, idUser]);
+        return res.rows;
+    } catch (error) {
+        throw (error);
+    }
 }
 
-function ListeMembre(idEquipe) {
+async function ListeMembre(idEquipe) {
 
     const chercher = `SELECT idUser FROM Appartenir 
     WHERE idEquipe = $1`;
 
-    return new Promise((resolve, reject) => {
-        pool.query(chercher, [idEquipe])
-            .then((res) => {
-                resolve(res.rows);
-            })
-            .catch((error) => {
-                reject(error);
-            });
-    });
+    try {
+        const res = await pool.query(chercher, [idEquipe]);
+        return res.rows;
+    } catch (error) {
+        throw (error);
+    }
 }
 
 function ajouterMembre(idUser, idEquipe) {
@@ -300,20 +270,17 @@ function quitterEquipe(idEquipe, idMembre) {
     }
 }
 
-function recupererDemande(idEquipe) {
+async function recupererDemande(idEquipe) {
 
     const chercher = `SELECT * FROM DemandeEquipe 
     WHERE idEquipe = $1`;
 
-    return new Promise((resolve, reject) => {
-        pool.query(chercher, [idEquipe])
-            .then((res) => {
-                resolve(res.rows);
-            })
-            .catch((error) => {
-                reject(error);
-            });
-    });
+    try {
+        const res = await pool.query(chercher, [idEquipe]);
+        return res.rows;
+    } catch (error) {
+        throw (error);
+    }
 }
 
 /* Les équipes de l'user */
@@ -321,15 +288,12 @@ async function aUneEquipe(idEtudiant) {
 
     const appartientAUneEquipe = `SELECT * FROM Appartenir WHERE idUser = $1`;
 
-    return new Promise((resolve, reject) => {
-        pool.query(appartientAUneEquipe, [idEtudiant])
-            .then((res) => {
-                resolve(res.rows);
-            })
-            .catch((error) => {
-                reject(error);
-            });
-    });
+    try {
+        const res = await pool.query(appartientAUneEquipe, [idEtudiant]);
+        return res.rows;
+    } catch (error) {
+        throw (error);
+    }
 }
 
 async function aUneEquipeDansEvent(idUser, idEvent) {
@@ -475,7 +439,7 @@ async function jsonInformationsEquipe(idEquipe, req) {
             jsonRetour.superUser = false;
         }
 
-        const demandeFaite = await demandeDejaEnvoyee(req.id, idEquipe);
+        const demandeFaite = await demandeModel.demandeDejaEnvoyee(req.id, idEquipe);
         if (demandeFaite.length === 0) {
             jsonRetour.demandeFaite = false;
         } else {
@@ -582,16 +546,17 @@ async function jsonInformationsEquipe(idEquipe, req) {
         }
 
         /*Accès à gitlab */
-        const acces = (await chercheraccesGitlab(idEquipe))[0];
+        // const acces = (await chercheraccesGitlab(idEquipe))[0];
         jsonRetour.acces_gitlab = [];
         temp = {};
-        temp.login = acces.login_gitlab;
-        temp.mot_de_passe = acces.mdp_gitlab;
+        temp.login = "equipe44@iapau-gaia.fr";
+        temp.mot_de_passe = "jUhg4e5pM";
+        // temp.login = acces.login_gitlab;
+        // temp.mot_de_passe = acces.mdp_gitlab;
         jsonRetour.acces_gitlab.push(temp);
 
         return jsonRetour;
     }
-
     catch (error) {
         throw error;
     }
@@ -760,7 +725,7 @@ async function jsonEquipesOuvertes(idEvent, req) {
                 }
 
                 /* Vérifier si une demande a déjà été envoyée */
-                const envoyee = await demandeDejaEnvoyee(req.id, temp.idEquipe);
+                const envoyee = await demandeModel.demandeDejaEnvoyee(req.id, temp.idEquipe);
                 if (envoyee.length > 0) {
                     temp.hasSentDemand = true;
                 } else {
@@ -774,40 +739,6 @@ async function jsonEquipesOuvertes(idEvent, req) {
     return jsonRetour;
 }
 
-/*Déplacer les duex fonctions là */
-function envoyerDemande(valeurs) {
-
-    const envoyer = `INSERT INTO DemandeEquipe
-    (idUser, idEquipe, messageDemande)
-    VALUES ($1, $2, $3)`;
-
-    try {
-        pool.query(envoyer, valeurs);
-    } catch (error) {
-        throw (error);
-    }
-}
-
-async function demandeDejaEnvoyee(idUser, idEquipe) {
-
-    const envoyee = `SELECT *
-    FROM DemandeEquipe 
-    WHERE idUser = $1 AND idEquipe = $2`;
-
-    return new Promise((resolve, reject) => {
-        pool.query(envoyee, [idUser, idEquipe])
-            .then((res) => {
-                resolve(res.rows);
-            })
-            .catch((error) => {
-                reject(error);
-            });
-    });
-}
-
-async function recupererGitlabJSON(idEquipe) {
-
-}
 
 module.exports = {
     aUneEquipe,
@@ -827,11 +758,8 @@ module.exports = {
     supprimerUnMembre,
     quitterEquipe,
     appartenirEquipe,
-    envoyerDemande,
-    demandeDejaEnvoyee,
     jsonMesEquipes,
     aUneEquipeDansEvent,
-    equipeExiste,
     fermerEquipe,
     ouvrirEquipe,
     ListeMembre,

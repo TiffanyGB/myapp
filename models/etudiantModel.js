@@ -1,12 +1,13 @@
 const pool = require('../database/configDB');
 const userModel = require('./userModel');
-const { body, validationResult } = require('express-validator');
+const { body } = require('express-validator');
 
 /**Valider les données */
 async function validerEtudiant(req) {
     await body('ecole')
-        .isLength({ min: 2, max: 100 })
-        .withMessage("L'école doit contenir entre 2 et 100 caractères")
+        .isLength({ min: 2, max: 400 })
+        .custom((value) => !(/^\s+$/.test(value)))
+        .withMessage("L'école doit contenir entre 2 et 400 caractères")
         .matches(/^[^<>]+$/).withMessage('Le pseudo ne doit contenir que des lettres, des chiffres et des caractères spéciaux, sauf les espaces et les symboles "<>".')
         .run(req);
 
@@ -18,36 +19,39 @@ async function validerEtudiant(req) {
 }
 
 /**Liste des étudiants */
-function chercherListeStudents() {
+async function chercherListeStudents() {
 
     const users = 'SELECT * FROM Etudiant';
 
-    return new Promise((resolve, reject) => {
-        pool.query(users)
-            .then((res) => {
-                resolve(res.rows);
-            })
-            .catch((error) => {
-                reject(error);
-            });
-    });
+    try {
+        const res = await pool.query(users);
+        return res.rows;
+    } catch (error) {
+        throw (error);
+    }
 }
 
 /**Chercher un étudiant par son id*/
-function chercherStudent(idUser) {
+async function chercherStudent(idUser) {
 
     const users = 'SELECT * FROM Etudiant WHERE idEtudiant = $1';
-    const params = [idUser];
 
-    return new Promise((resolve, reject) => {
-        pool.query(users, params)
-            .then((res) => {
-                resolve(res.rows);
-            })
-            .catch((error) => {
-                reject(error);
-            });
-    });
+    try {
+        const res = await pool.query(users, [idUser]);
+        return res.rows;
+    } catch (error) {
+        throw (error);
+    }
+}
+
+async function getStudentInfo(userId) {
+    const chercher = await chercherStudent(userId);
+    const etudiantCourant = chercher[0];
+
+    return {
+        niveauEtude: etudiantCourant.niveau_etude,
+        ecole: etudiantCourant.ecole,
+    };
 }
 
 /**Créer un étudiant */
@@ -77,9 +81,7 @@ async function creerEtudiant(ecole, niveau, id) {
     catch (error) {
         throw error;
     }
-
 }
-
 
 /**Modifier un étudiant */
 async function modifierEtudiant(idUser, valeurs, valeurs_etudiant, password) {
@@ -112,10 +114,12 @@ async function modifierEtudiant(idUser, valeurs, valeurs_etudiant, password) {
     }
 }
 
+
 module.exports = {
     chercherStudent,
     creerEtudiant,
     chercherListeStudents,
     modifierEtudiant,
-    validerEtudiant
+    validerEtudiant,
+    getStudentInfo
 }

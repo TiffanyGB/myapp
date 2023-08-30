@@ -13,6 +13,7 @@ function verifIdNombre(id, res){
   }
 }
 
+/*Tous les nombres provenant de body doivent être vérifiés */
 async function validateUserId(idUser, req, res) {
   await body(idUser)
       .notEmpty().withMessage('L\'id ne doit pas être vide.')

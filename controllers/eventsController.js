@@ -5,37 +5,25 @@ const { body, validationResult } = require('express-validator');
 
 async function createEvent(req, res) {
   if (req.method === 'OPTIONS') {
-    res.status(200).json({ success: 'Access granted' });
+    return res.status(200).json({ success: 'Access granted' });
   } else if (req.method === 'POST') {
 
     /* récupération des données */
-    const {
-      typeEvent,
-      nom,
-      inscription,
-      debut,
-      fin,
-      description,
-      nombreMinEquipe,
-      nombreMaxEquipe,
-      image,
-      regles,
-      projets,
-    } = req.body;
+    const data = req.body;
 
     const valeurs_event = [
-      typeEvent,
-      nom,
-      inscription,
-      debut,
-      fin,
-      description,
-      nombreMinEquipe,
-      nombreMaxEquipe,
-      image
+      data.typeEvent,
+      data.nom,
+      data.inscription,
+      data.debut,
+      data.fin,
+      data.description,
+      data.nombreMinEquipe,
+      data.nombreMaxEquipe,
+      data.image
     ];
 
-    for (const regle of regles) {
+    for (const regle of data.regles) {
       await body('regles')
         .optional()
         .isArray({ min: 1 }).withMessage('Le tableau des ressources ne doit pas être vide.')
@@ -59,29 +47,30 @@ async function createEvent(req, res) {
     }
 
     try {
-
       /*Création de l'événement, idevent stocke l'id de celui-ci */
-      const idevent = await eventModel.creerEvent(valeurs_event, regles);
+      const idevent = await eventModel.creerEvent(valeurs_event, data.regles);
 
       if (typeof idevent === 'number') {
 
         /* On associe tous les projets à l'événement */
-        for (i = 0; i < projets.length; i++) {
+        for (i = 0; i < data.projets.length; i++) {
 
           /* Vérification de l'existence */
-          const projet = await projetModel.chercheridProjet(projets[i].idProjet);
+          const projet = await projetModel.chercheridProjet(data.projets[i].idProjet);
 
           if (projet.length === 0) {
-            return res.status(404).json({ erreur: 'L\'id ' + projets[i].idProjet + ' n\'existe pas dans les projets' });
+            return res.status(404).json({ erreur: 'L\'id ' + data.projets[i].idProjet + ' n\'existe pas dans les projets' });
           }
-          await projetModel.rattacherProjetEvent(idevent, projets[i].idProjet);
+          await projetModel.rattacherProjetEvent(idevent, data.projets[i].idProjet);
         }
         return res.status(200).json({ message: 'Evenement créé' });
       }
-      return res.status(400).json({ error: 'Failed to insert' });
+      return res.status(400).json({ error: 'Erreur création' });
     } catch (error) {
-      return res.status(400).json({ error: 'Failed to insert' });
+      return res.status(400).json({ error: 'Erreur création' });
     }
+  }else {
+    return res.status(404).json('Page not found');
   }
 }
 
@@ -96,34 +85,22 @@ async function modifierEvent(req, res) {
     const idevent = res.locals.idevent;
 
     /*Récupération des données */
-    const {
-      nom,
-      inscription,
-      debut,
-      fin,
-      description,
-      nombreMinEquipe,
-      nombreMaxEquipe,
-      messageFin,
-      projets,
-      regles,
-      image
-    } = req.body;
+    const data = req.body;
 
     const valeurs_event = [
-      nom,
-      inscription,
-      debut,
-      fin,
-      description,
-      nombreMinEquipe,
-      nombreMaxEquipe,
-      messageFin,
-      image,
+      data.nom,
+      data.inscription,
+      data.debut,
+      data.fin,
+      data.description,
+      data.nombreMinEquipe,
+      data.nombreMaxEquipe,
+      data.messageFin,
+      data.image,
       idevent,
     ];
 
-    for (const regle of regles) {
+    for (const regle of data.regles) {
       await body('regles')
         .optional()
         .isArray({ min: 1 }).withMessage('Le tableau des ressources ne doit pas être vide.')
@@ -154,30 +131,32 @@ async function modifierEvent(req, res) {
       projetModel.detacherProjetEvent(idevent);
 
       /* Ajout des projets*/
-      for (i = 0; i < projets.length; i++) {
+      for (i = 0; i < data.projets.length; i++) {
 
-        const user = await projetModel.chercheridProjet(projets[i].idProjet);
+        const user = await projetModel.chercheridProjet(data.projets[i].idProjet);
         if (user.length === 0) {
-          return res.status(404).json({ erreur: 'L\'id ' + projets[i].idProjet + ' n\'existe pas dans les projets' });
+          return res.status(404).json({ erreur: 'L\'id ' + data.projets[i].idProjet + ' n\'existe pas dans les projets' });
         }
 
-        await projetModel.rattacherProjetEvent(idevent, projets[i].idProjet);
+        await projetModel.rattacherProjetEvent(idevent, data.projets[i].idProjet);
       }
 
       /*Ajout des règles*/
-      for (let i = 0; i < regles.length; i++) {
-        await regleModel.ajouterRegle(idevent, regles[i].titre, regles[i].contenu);
+      for (let i = 0; i < data.regles.length; i++) {
+        regleModel.ajouterRegle(idevent, data.regles[i].titre, data.regles[i].contenu);
       }
       return res.status(200).json({ message: "Projet modifié" });
     } catch (error) {
       return res.status(400).json({ erreur: "L'événement n'a pas pu être modifié" });
     }
+  }else {
+    return res.status(404).json('Page not found');
   }
 }
 
 function supprimerEvent(req, res) {
   if (req.method === 'OPTIONS') {
-    res.status(200).json({ sucess: 'Agress granted' });
+    return res.status(200).json({ sucess: 'Agress granted' });
   }
   else if (req.method === 'DELETE') {
 
@@ -189,6 +168,8 @@ function supprimerEvent(req, res) {
     } catch (error) {
       return res.status(500).json({ erreur: 'Erreur lors de la suppression de l\'événement.' });
     }
+  }else {
+    return res.status(404).json('Page not found');
   }
 }
 
@@ -217,11 +198,16 @@ async function recupInfoEvent(req, res) {
   }
   else if (req.method === 'GET') {
 
-    const idevent = res.locals.idevent;
+    try {
+      const idevent = res.locals.idevent;
+      const json = await eventModel.recup_Infos_Modif_Event(idevent);
+      return res.status(200).json(json);
 
-    const json = await eventModel.recup_Infos_Modif_Event(idevent);
-
-    return res.status(200).json(json);
+    } catch (error) {
+      return res.status(400).json({ error: 'Erreur lors de la récupération des informations de l\'événement.' });
+    }
+  }else {
+    return res.status(404).json('Page not found');
   }
 }
 
@@ -237,7 +223,9 @@ async function recupInfoEvent(req, res) {
  * Informations en moins pour un non connecté: Ressources privées d'un projet.
  */
 async function voirEvent(req, res) {
-  if (req.method === 'GET') {
+  if (req.method === 'OPTIONS') {
+    return res.status(200).json({ sucess: 'Agress granted' });
+  } else if (req.method === 'GET') {
 
     const eventID = res.locals.eventID;
 
@@ -248,7 +236,7 @@ async function voirEvent(req, res) {
         jsonRetour = await eventModel.jsonEventChoisi(eventID, 'admin', req)
       }
 
-      /**Si c'est un etudiant, afficher les infos de l'etudiant en plus, (equipe) */
+      /**Si c'est un etudiant, afficher les infos de l'etudiant en plus, (id de l'équipe) */
       else if (req.userProfile === 'etudiant') {
         jsonRetour = await eventModel.jsonEventChoisi(eventID, 'etudiant', req)
       }
@@ -259,10 +247,11 @@ async function voirEvent(req, res) {
       }
       return res.status(200).json(jsonRetour);
 
-    } catch {
-      return res.status(500).json({ message: 'Une erreur s\'est produite lors de la récupération de l\'événement.' });
+    } catch (error) {
+      return res.status(500).json({ error: 'Une erreur s\'est produite lors de la récupération de l\'événement.' });
     }
-
+  } else {
+    return res.status(404).json('Page not found');
   }
 }
 
@@ -276,15 +265,19 @@ async function voirEvent(req, res) {
  * @description Cette fonction permet d'envoyer au client les informations à afficher pour tous les événements.
  */
 async function voirTousEvents(req, res) {
-  if (req.method === 'GET') {
+  if (req.method === 'OPTIONS') {
+    return res.status(200).json({ sucess: 'Agress granted' });
+  } else if (req.method === 'GET') {
 
     try {
       const result = await eventModel.creerJsonTousEvents();
-      res.status(200).json(result);
+      return res.status(200).json(result);
 
     } catch (error) {
-      res.status(500).json({ message: 'Une erreur s\'est produite lors de la récupération des événements.' });
+      return res.status(500).json({ message: 'Une erreur s\'est produite lors de la récupération des événements.' });
     }
+  }else {
+    return res.status(404).json('Page not found');
   }
 }
 

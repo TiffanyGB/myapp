@@ -1,19 +1,22 @@
 var express = require('express');
 var router = express.Router();
+
+/*Controllers */
 const equipeController = require('../controllers/equipeController');
-const equipeModel = require('../models/equipeModel');
-const profil = require('../middleware/verifProfil');
-const tokenModel = require('../models/tokenModel');
 const annotationController = require('../controllers/annotationController');
 
+/*Models */
+const equipeModel = require('../models/equipeModel');
+const tokenModel = require('../models/tokenModel');
+
+/*Vérification routes (accès, existence) */
+const profil = require('../middleware/verifProfil');
 const etudiantProfil = profil.checkProfile('etudiant');
 const capitaineAdminGes = profil.checkACG;
 const aucunProfil = profil.interdireAucunProfil;
 const gestionnairesEquipeAdmin = profil.checkAGidEquipe
 const { verifIdNombre } = require('../verifications/verifierDonnéesGénérales');
 const { verifIdEquipe, verifIdEvent } = require('../middleware/verifExistenceIdRoute');
-const fs = require('fs');
-
 
 /**Créer une équipe */
 router.all('/creationEquipe',
@@ -24,7 +27,7 @@ router.all('/creationEquipe',
         try {
             await equipeController.creerEquipe(req, res, next);
         } catch (error) {
-            next(error); // Passez l'erreur au middleware d'erreur global
+            next(error);
         }
     });
 

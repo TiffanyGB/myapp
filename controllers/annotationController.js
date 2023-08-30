@@ -9,7 +9,7 @@
  */
 
 const annotationModel = require('../models/annotationEquipeModel');
-const { body, validationResult } = require('express-validator');
+const { validationResult } = require('express-validator');
 
 
 /**
@@ -25,12 +25,12 @@ const { body, validationResult } = require('express-validator');
  * 
  * Récupère les informations utiles à l'insertion dans la base de données:
  * 
- * Le contenu de l'annotation: Récupéré du body, message que laisse l'administrateur
+ * Le contenu de l'annotation: est récupéré du body, message que laisse l'administrateur
  * ou le gestionnaire du projet,
  * L'id de l'équipe: Directement depuis l'url de la route,
  * L'id de l'auteur de l'annotation depuis son token.
  * 
- * L'appel du controller dans la route , se fait après l'appel de ces middlewares
+ * L'appel du controller dans la route, se fait après l'appel de ces middlewares:
  * la vérification du token, la vérification de l'existence de l'équipe et (*)la vérification
  * du profil (dans cet ordre, les middlewares dépendants les uns des autres).
  * 
@@ -57,10 +57,12 @@ async function ecrireAnnotation(req, res) {
 
         try {
             annotationModel.creerAnnotation([idEquipe, auteur, contenu]);
-            res.status(200).json({ message: 'Annotation créée.' });
-        } catch {
-            res.status(400).json({ error: 'Echec lors de la création de l\'annotation.' });
+            return res.status(200).json({ message: 'Annotation créée.' });
+        } catch (error) {
+            return res.status(400).json({ error: 'Echec lors de la création de l\'annotation.' });
         }
+    } else {
+        return res.status(404).json('Page not found');
     }
 }
 
@@ -82,7 +84,7 @@ async function ecrireAnnotation(req, res) {
 */
 async function getAnnotationEquipe(req, res) {
     if (req.method === 'OPTIONS') {
-        res.status(200).json({ sucess: 'Access granted' });
+        return res.status(200).json({ sucess: 'Access granted' });
 
     } else if (req.method === 'GET') {
         const idEquipe = res.locals.idEquipe;
@@ -99,6 +101,8 @@ async function getAnnotationEquipe(req, res) {
         } catch {
             return res.status(400).json({ error: 'Echec lors de la création de l\'annotation.' });
         }
+    } else {
+        return res.status(404).json('Page not found');
     }
 }
 

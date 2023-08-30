@@ -3,10 +3,10 @@ const projetModel = require('./projetModel');
 const regleModel = require('./reglesModel');
 const motCleModel = require('./motCleModel');
 const ressourceModel = require('./ressourceModel');
-const classementModel = require('./classementModel');
-const finalisteModel = require('./finalisteModel');
 const equipeModel = require('./equipeModel');
-const {jsonListeEquipeProjet } = require('./equipeModel');
+const { jsonListeEquipeProjet} = require('./equipeModel');
+const env = require('../environnement.json');
+const url_images = env.backend.assets.images;
 
 const { validateurDonnéesMiddleware } = require('../verifications/validateur');
 const { body } = require('express-validator');
@@ -20,6 +20,7 @@ const validateEvent = [
 
     body('nom')
         .notEmpty().withMessage('Le nom ne doit pas être vide.')
+        .custom((value) => !(/^\s+$/.test(value)))
         .matches(/^[\Wa-zA-ZÀ-ÿ0-9 \-']*$/)
         .isLength({ min: 2, max: 50 }).withMessage('Le nom doit avoir une longueur comprise entre 3 et 50 caractères.'),
 
@@ -40,6 +41,7 @@ const validateEvent = [
 
     body('description')
         .optional({ nullable: true, checkFalsy: true })
+        .custom((value) => !(/^\s+$/.test(value)))
         .isLength({ min: 0, max: 5000 }).withMessage('La description doit avoir une longueur comprise entre 0 et 5000 caractères.'),
 
 
@@ -63,6 +65,7 @@ const validateEvent = [
 
     body('messageFin')
         .optional({ nullable: true, checkFalsy: true })
+        .custom((value) => !(/^\s+$/.test(value)))
         .isLength({ min: 2, max: 3000 }).withMessage('Le message de fin doit avoir une longueur comprise entre 2 et 3000 caractères.'),
 
     /**Appel du validateur */
@@ -70,35 +73,29 @@ const validateEvent = [
 ];
 
 /*Liste de tous les événements */
-function chercherListeEvenement() {
+async function chercherListeEvenement() {
 
-    const users = 'SELECT * FROM Evenement';
+    const chercher = 'SELECT * FROM Evenement';
 
-    return new Promise((resolve, reject) => {
-        pool.query(users)
-            .then((res) => {
-                resolve(res.rows);
-            })
-            .catch((error) => {
-                reject(error);
-            });
-    });
+    try {
+        const res = await pool.query(chercher);
+        return res.rows;
+    } catch (error) {
+        throw error;
+    }
 }
 
 /*Chercher un événement par son id*/
-function chercherEvenement(idEvent) {
+async function chercherEvenement(idEvent) {
 
-    const users = 'SELECT * FROM Evenement WHERE idEvent = $1';
+    const chercher = 'SELECT * FROM Evenement WHERE idEvent = $1';
 
-    return new Promise((resolve, reject) => {
-        pool.query(users, [idEvent])
-            .then((res) => {
-                resolve(res.rows);
-            })
-            .catch((error) => {
-                reject(error);
-            });
-    });
+    try {
+        const res = await pool.query(chercher, [idEvent]);
+        return res.rows;
+    } catch (error) {
+        throw error;
+    }
 }
 
 /*Création d'événement */
@@ -114,7 +111,7 @@ async function creerEvent(valeurs_event, regles) {
 
         /*Insertion des règles */
         for (let i = 0; i < regles.length; i++) {
-            await regleModel.ajouterRegle(idEvent, regles[i].titre, regles[i].contenu);
+            regleModel.ajouterRegle(idEvent, regles[i].titre, regles[i].contenu);
         }
         return idEvent;
 
@@ -153,9 +150,9 @@ function supprimerEvent(idEvent) {
 
     const supprimer = `DELETE FROM Evenement WHERE idEvent = $1`;
 
-    try{
+    try {
         pool.query(supprimer, [idEvent])
-    }catch (error){
+    } catch (error) {
         throw (error);
     }
 }
@@ -165,18 +162,15 @@ function supprimerEvent(idEvent) {
  * @returns {Promise<Array<Object>>} Une promesse résolue avec un tableau d'objets représentant les événements passés.
  * En cas d'erreur, la promesse est rejetée avec l'erreur rencontrée.
  */
-function recupererAncienEvents() {
+async function recupererAncienEvents() {
     const query = `SELECT * FROM Evenement WHERE DATE(date_fin) < NOW();`;
 
-    return new Promise((resolve, reject) => {
-        pool.query(query)
-            .then((res) => {
-                resolve(res);
-            })
-            .catch((error) => {
-                reject(error);
-            });
-    });
+    try {
+        const chercher = await pool.query(query);
+        return chercher.rows;
+    } catch (error) {
+        throw error;
+    }
 }
 
 /**
@@ -184,42 +178,45 @@ function recupererAncienEvents() {
  * @returns {Promise<Array<Object>>} Une promesse résolue avec un tableau d'objets représentant les événements en cours.
  * En cas d'erreur, la promesse est rejetée avec l'erreur rencontrée.
  */
-function recupererEventActuel() {
+async function recupererEventActuel() {
     const query = `SELECT * FROM Evenement WHERE date_fin > NOW()`;
 
-    return new Promise((resolve, reject) => {
-        pool.query(query)
-            .then((res) => {
-                resolve(res);
-            })
-            .catch((error) => {
-                reject(error);
-            });
-    });
+    try {
+        const chercher = await pool.query(query);
+        return chercher.rows;
+    } catch (error) {
+        throw error;
+    }
 }
 
 async function toutesInfosEvent(idEvent, tabRetour) {
-    const event = (await chercherEvenement(idEvent))[0];
+    try {
+        const event = (await chercherEvenement(idEvent))[0];
 
-    tabRetour.idEvent = event.idevent;
-    tabRetour.title = event.nom;
-    tabRetour.date_creation = event.debut_inscription;
-    tabRetour.date_debut = event.date_debut;
-    tabRetour.date_fin = event.date_fin;
-    tabRetour.type_challenge = event.type_event;
-    tabRetour.description = event.description_event;
-    tabRetour.nbMinParEquipe = event.nombre_min_equipe;
-    tabRetour.nbMaxParEquipe = event.nombre_max_equipe;
-    tabRetour.image = event.img;
+        tabRetour.idEvent = event.idevent;
+        tabRetour.title = event.nom;
+        tabRetour.date_creation = event.debut_inscription;
+        tabRetour.date_debut = event.date_debut;
+        tabRetour.date_fin = event.date_fin;
+        tabRetour.type_challenge = event.type_event;
+        tabRetour.description = event.description_event;
+        tabRetour.nbMinParEquipe = event.nombre_min_equipe;
+        tabRetour.nbMaxParEquipe = event.nombre_max_equipe;
 
-    if (event.message_fin == null) {
-        tabRetour.messageFin = '';
-    } else {
-        tabRetour.messageFin = event.message_fin;
+        tabRetour.image = url_images + "/" + event.img;
+
+        if (event.message_fin == null) {
+            tabRetour.messageFin = '';
+        } else {
+            tabRetour.messageFin = event.message_fin;
+        }
+        tabRetour.regles = [];
+        tabRetour.projet = [];
+        tabRetour.themes = [];
+    } catch (error) {
+        throw error;
     }
-    tabRetour.regles = [];
-    tabRetour.projet = [];
-    tabRetour.themes = [];
+
 }
 
 async function jsonEventChoisi(idEvent, typeUser, req) {
@@ -297,35 +294,10 @@ async function jsonEventChoisi(idEvent, typeUser, req) {
             tabRetour.projet.push(projetInfos);
         }
 
-        /*Classement */
-        let classementFinal = await classementModel.chercherClassement(idEvent);
-        if (classementFinal.length === 0) {
-            tabRetour.classement = [];
-        } else {
-            tabRetour.podium = [];
-
-            temp = {}
-
-            temp.premier = classementFinal.premier;
-            temp.deuxieme = classementFinal.deuxieme;
-            temp.troisieme = classementFinal.troisieme;
-
-            tabRetour.podium.push(temp);
-        }
-
-        /*Finalistes */
-        let finalistes = await finalisteModel.chercher_finalistes(idEvent);
-
-        if (finalistes.length === 0) {
-            tabRetour.finalistes = [];
-        } else {
-
-            tabRetour.finalistes = [];
-
-            for (i = 0; i < finalistes.length; i++) {
-                tabRetour.finalistes.push(finalistes[i]);
-            }
-        }
+        /*Classement --> Obsolète*/
+        tabRetour.classement = [];
+        /*Finalistes --Obsolète*/
+        tabRetour.finalistes = [];
 
         /*Infos étudiants, équipe dans l'event s'il en a une */
         if (typeUser === 'etudiant') {
@@ -364,9 +336,9 @@ async function creerJsonTousEvents() {
         const motsDejaAjoutes = new Set();
 
         /*Infos des anciens  events*/
-        for (i = 0; i < listesAnciens.rows.length; i++) {
+        for (i = 0; i < listesAnciens.length; i++) {
 
-            ancienCourant = listesAnciens.rows[i];
+            ancienCourant = listesAnciens[i];
             courantInfos = {};
             let motCle = [];
 
@@ -374,7 +346,7 @@ async function creerJsonTousEvents() {
             courantInfos.type = ancienCourant.type_event;
             courantInfos.id = ancienCourant.idevent;
             courantInfos.titre = ancienCourant.nom;
-            courantInfos.image = ancienCourant.img;
+            courantInfos.image = url_images + "/" + ancienCourant.img;
             courantInfos.debut = ancienCourant.date_debut;
             courantInfos.fin = ancienCourant.date_fin;
             courantInfos.phase = "Terminé";
@@ -398,8 +370,6 @@ async function creerJsonTousEvents() {
                 }
             }
 
-
-
             courantInfos.mot = motCle;
             courantInfos.gain = gainTotal;
 
@@ -407,15 +377,15 @@ async function creerJsonTousEvents() {
         }
 
         /*Evenement pas encore passés */
-        for (i = 0; i < listeActuels.rows.length; i++) {
+        for (i = 0; i < listeActuels.length; i++) {
 
-            actuelCourant = listeActuels.rows[i];
+            actuelCourant = listeActuels[i];
             courantInfos = {};
 
             courantInfos.type = actuelCourant.type_event;
             courantInfos.id = actuelCourant.idevent;
             courantInfos.titre = actuelCourant.nom;
-            courantInfos.image = actuelCourant.img;
+            courantInfos.image = url_images + "/" + actuelCourant.img;
             courantInfos.debut = actuelCourant.date_debut;
             courantInfos.fin = actuelCourant.date_fin;
 
@@ -494,7 +464,6 @@ async function recup_Infos_Modif_Event(idEvent) {
         delete projet.ressources;
         delete projet.recompense;
         delete projet.thematique;
-        delete projet.img;
         projet.idEvent = idEvent;
     });
 

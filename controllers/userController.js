@@ -9,7 +9,6 @@
  * @author Tiffany GAY-BELLILE
  * 
  * @requires ../public/javascripts/json_liste/liste_utilisateurs
- * @requires ../public/javascripts/modifierGestionnaires
  * @requires ../models/userModel
  * @requires ../models/etudiantModel
  * @requires ../models/gestionnaireIaModel
@@ -18,14 +17,12 @@
  * 
  */
 
-const listeUser = require('../public/javascripts/json_liste/liste_utilisateurs');
-const modifier = require('../public/javascripts/modifierGestionnaires');
+const gestionnaires = require('../models/gestionnaireModel');
 const userModel = require('../models/userModel');
 const etudiantModel = require('../models/etudiantModel');
 const gestionnaireIaModel = require('../models/gestionnaireIaModel');
 const gestionnaireExterneModel = require('../models/gestionnaireExterneModel');
-const { body, validationResult } = require('express-validator');
-
+const { validationResult } = require('express-validator');
 
 /**
  * Récupère la liste des utilisateurs et renvoie un JSON contenant les informations des utilisateurs,
@@ -38,25 +35,20 @@ const { body, validationResult } = require('express-validator');
  * 
  * @memberof module:Contrôleur/Admin
  */
-function voirUtilisateurs(req, res) {
+async function voirUtilisateurs(req, res) {
 
   /*Récupérer la liste des utilisateurs formatée au format json*/
-  listeUser.envoyer_json_liste_user()
-    .then((result) => {
+  try {
+    const result = await userModel.envoyer_json_liste_user();
+    if (result === "erreur_user") {
+      return res.status(400).json({ erreur: "Erreur lors de la récupération des données côté étudiant" })
+    } else {
+      return res.status(200).json(result);
+    }
+  } catch {
+    return res.status(500).json({ error: `Une erreur s\'est produite lors de la récupération des utilisateurs: ${error.message}` });
 
-      /**Erreur lors de la récupération d'un utilisateur */
-      if (result === "erreur_user") {
-        res.status(400).json({ erreur: "Erreur lors de la récupération des données côté étudiant" })
-
-      } else {
-        /**Renvoyer la liste au client */
-        res.status(200).json(result);
-      }
-    })
-    .catch((error) => {
-      res.status(500).json({ message: 'Une erreur s\'est produite lors de la récupération des utilisateurs.' });
-
-    });
+  }
 }
 
 /**
@@ -73,40 +65,24 @@ async function createUser(req, res) {
   } else if (req.method === 'POST') {
 
     /* Récupération des données */
-    const {
-      type: type,
-      nom: userNom,
-      prenom: userPrenom,
-      pseudo: userPseudo,
-      email: userMail,
-      linkedin: userLinkedin,
-      github: userGitHub,
-      ville: userVille,
-      ecole: userEcole,
-      niveau_etude: userNiveauEtude,
-      password,
-      entreprise: userEntreprise,
-      metier: userMetier,
-      role_asso: userRole
-    } = req.body;
+    const userData = req.body;
 
     const valeurs_communes = [
-      userNom,
-      userPrenom,
-      userPseudo,
-      userMail,
-      userLinkedin,
-      userGitHub,
-      userVille,
+      userData.nom,
+      userData.prenom,
+      userData.pseudo,
+      userData.email,
+      userData.linkedin,
+      userData.github,
+      userData.ville,
     ]
 
     const valeurs_id = [
-      userPseudo,
-      userMail
+      userData.pseudo,
+      userData.email
     ]
 
-    /* Validations des données selon le type d'utilisateur */
-    switch (type) {
+    switch (userData.type) {
       case 'etudiant':
         await etudiantModel.validerEtudiant(req);
         break;
@@ -122,257 +98,152 @@ async function createUser(req, res) {
         return res.status(400).json({ erreur: "Le type est incorrect" });
     }
 
+    //TODO: Voir si je peux le mettre dans une fonction
+    //Appel du validateur de express validator
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-        errorDetected = true;
-        return res.status(400).json({ errors: errors.array() });
+      errorDetected = true;
+      return res.status(400).json({ errors: errors.array() });
     }
 
-    /**Insertion dans la table user */
-    userModel.insererUser(valeurs_communes, password, valeurs_id, type)
-      .then((insertion) => {
-        /**Insertion doit contenir l'id de l'utilisateur */
-        if (typeof insertion === 'number') {
+    try {
+      /*Insertion dans la table utilisateur, on récupère l'id de l'utilisateur */
+      const idUser = await userModel.insererUser(valeurs_communes, userData.password, valeurs_id);
 
-          /**On insère les infos supplémentaires dans la table appropriée au type*/
-          switch (type) {
-            case 'etudiant':
-
-              etudiantModel.creerEtudiant(userEcole, userNiveauEtude, insertion)
-                .then(() => {
-                  res.status(200).json({ message: 'Inscription réussie' });
-                })
-                .catch(() => {
-                  /**Supprimer l'utilisateur dans la table utilisateur s'il y a un souci */
-                  userModel.supprimerUser(insertion, 'etudiant')
-                  res.status(400).json({ erreur: "erreur", Détails: "Utilisateur supprimé de la table utilisateur" });
-                });
-
-              break;
-
-            case 'administrateur':
-              res.status(200).json({ message: 'Inscription Admin réussie' });
-              break;
-
-            case 'gestionnaireExterne':
-              gestionnaireExterneModel.creerGestionnaireExterne(insertion, userEntreprise, userMetier)
-                .then(() => {
-                  res.status(200).json({ message: 'Inscription réussie' });
-                })
-                .catch(() => {
-                  /**Supprimer l'utilisateur dans la table utilisateur s'il y a un souci */
-                  userModel.supprimerUser(insertion, 'Gestionnaire_externe')
-                  res.status(400).json({ erreur: "erreur", Détails: "Utilisateur supprimé de la table utilisateur" });
-                });
-
-              break;
-
-            case 'gestionnaireIA':
-              gestionnaireIaModel.creerGestionnaireIA(insertion, userRole)
-                .then(() => {
-                  res.status(200).json({ message: 'Inscription réussie' });
-                })
-                .catch(() => {
-                  /**Supprimer l'utilisateur dans la table utilisateur s'il y a un souci */
-                  userModel.supprimerUser(insertion, 'Gestionnaire_iapau')
-                  res.status(400).json({ erreur: "erreur", Détails: "Utilisateur supprimé de la table utilisateur" });
-                });
-
-              break;
-
-            default:
-              userModel.supprimerUser(insertion);
-              res.status(400).json({ message: 'Le type est incorrect.' });
-              break;
-          }
+      if (typeof idUser === 'number') {
+        /**On insère les infos supplémentaires dans la table appropriée au type*/
+        switch (userData.type) {
+          case 'etudiant':
+            etudiantModel.creerEtudiant(userData.ecole, userData.niveau_etude, idUser);
+            break;
+          case 'gestionnaireExterne':
+            gestionnaireExterneModel.creerGestionnaireExterne(idUser, userData.entreprise, userData.metier);
+            break;
+          case 'gestionnaireIA':
+            gestionnaireIaModel.creerGestionnaireIA(idUser, userData.role_asso);
+            break;
         }
+        return res.status(200).json({ message: 'Inscription réussie' });
+      }
+      /**Pseudo et/ou email déjà pris */
+      else if (idUser === 'les2') {
+        return res.status(400).json({ error: 'Mail et pseudo déjà pris.' });
 
-        /**Pseudo et/ou email déjà pris */
-        if (insertion === 'les2') {
-          return res.status(400).json({ error: 'Mail et pseudo déjà pris.' });
+      } else if (idUser === 'pseudo') {
+        return res.status(400).json({ error: 'Le pseudo est déjà pris.' });
 
-        } else if (insertion === 'pseudo') {
-          return res.status(400).json({ error: 'Le pseudo est déjà pris.' });
+      } else if (idUser === 'mail') {
+        return res.status(400).json({ error: 'L\'adresse mail est déjà prise.' });
+      }
 
-        } else if (insertion === 'mail') {
-          return res.status(400).json({ error: 'L\'adresse mail est déjà prise.' });
-        }
-
-      }).catch(() => {
-        return res.status(400).json({ message: 'Erreur lors de l\'insertion de l\'utilisateur' });
-      });
+    } catch (error) {
+      /*On supprime l'utilisateur de la table "utilisateur" s'il a été inséré et 
+      qu'il n'a pas pu être inséré dans la table de son role*/
+      // const user = await userModel.chercherUserID(idUser);
+      // if (user.length > 0) {
+      //   userModel.supprimerUser(idUser);
+      // }
+      return res.status(400).json({ message: `Erreur lors de l\'insertion de l\'utilisateur: ${error.message}` });
+    }
+  } else {
+    return res.status(404).json('Page not found');
   }
 }
 
 /**Modification users */
+/*NB il y a une fonctionnalité des profils au début */
 async function modifierUser(req, res) {
 
   if (req.method == "OPTIONS") {
-    res.status(200).json({ sucess: 'Agress granted' });
+    return res.status(200).json({ sucess: 'Agress granted' });
   }
   else if (req.method === 'PATCH') {
 
-    /*Si n'est pa admin, vérifier si l'id de l'url est la même que l'utilisteur qui veut modifier */
+    /*Si n'est pas admin, vérifier si l'id de l'url est la même que l'utilisteur qui veut modifier */
     const idUser = res.locals.userId;
     const idToken = req.id;
     const profil = req.userProfile;
-
 
     if (profil != 'admin' && idUser != idToken) {
       return res.status(404).json({ erreur: 'Il faut être administrateur pour modifier un autre compte que le sien.' });
     }
 
-    /**Vérifier que l'id existe dans la bdd, sinon 404 error */
-    const verif = await userModel.chercherUserID(idUser)
-
-    if (verif.length === 0) {
-      return res.status(404).json({ erreur: 'L\'id n\'existe pas' });
-    }
-
     /**Récupération des données */
-    const {
-      nom: userNom,
-      prenom: userPrenom,
-      pseudo: userPseudo,
-      email: userMail,
-      ecole: userEcole,
-      linkedin,
-      github,
-      ville,
-      niveau_etude: userNiveauEtude,
-      entreprise: userEntreprise,
-      metier: userMetier,
-      role_asso: userRole,
-      password,
-    } = req.body;
+    const userData = req.body;
 
     const valeurs = [
-      userNom,
-      userPrenom,
-      userPseudo,
-      userMail,
-      linkedin,
-      github,
-      ville
-    ]
+      userData.nom,
+      userData.prenom,
+      userData.pseudo,
+      userData.email,
+      userData.linkedin,
+      userData.github,
+      userData.ville,
+    ];
 
     const valeurs_etudiant = [
-      userEcole,
-      userNiveauEtude
+      userData.ecole,
+      userData.niveau_etude
     ]
 
-    const user = await userModel.chercherUserID(idUser);
+    let type = await userModel.chercherType(idUser);
 
-    let type = user[0].typeuser;
+    try {
+      let resultMessage = '';
+      let errors;
 
-    /* Vérification des données selon le type */
-    switch (type) {
-      case 'etudiant':
-        await etudiantModel.validerEtudiant(req);
-        break;
-      case 'gestionnaireExterne':
-        await gestionnaireExterneModel.validerGestionnaireExterne(req);
-        break;
-      case 'gestionnaireIA':
-        await gestionnaireIaModel.validerGestionnaireIA(req);
-        break;
-      case 'administrateur':
-        break;
-      default:
-        return res.status(400).json({ erreur: "Le type est incorrect" });
-    }
+      switch (type) {
+        case 'etudiant':
+          await etudiantModel.validerEtudiant(req);
 
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        errorDetected = true;
-        return res.status(400).json({ errors: errors.array() });
-    }
+          errors = validationResult(req);
+          if (!errors.isEmpty()) {
+            errorDetected = true;
+            return res.status(400).json({ errors: errors.array() });
+          }
 
-    /* Modification etudiant */
-    switch (type) {
-      case 'etudiant':
-        etudiantModel.modifierEtudiant(idUser, valeurs, valeurs_etudiant, password)
-          .then((resultat) => {
-            /* Données existantes */
-            if (resultat === 'les2') {
-              res.status(400).json({ erreur: 'Pseudo et email déjà pris' });
+          resultMessage = await etudiantModel.modifierEtudiant(idUser, valeurs, valeurs_etudiant, userData.password);
+          break;
+        case 'gestionnaireExterne':
+          await gestionnaireExterneModel.validerGestionnaireExterne(req);
 
-            } else if (resultat === 'pseudo') {
-              res.status(400).json({ erreur: 'Pseudo déjà pris' });
-            }
-            else if (resultat === 'mail') {
-              res.status(400).json({ erreur: 'Email déjà pris' });
-            } else {
-              res.status(200).json({ message: "Etudiant modifié avec succès" });
-            }
-          })
-          .catch(() => {
-            res.status(400).json({ erreur: 'Echec de la modification de l\' étudiant' });
-          });
-        break;
-      case 'gestionnaireExterne':
-        modifier.modifierExterne(idUser, valeurs, userMetier, userEntreprise, password)
-          .then((resultat) => {
-            /* Données existantes */
-            if (resultat === 'les2') {
-              res.status(400).json({ erreur: 'Pseudo et email déjà pris' });
+          errors = validationResult(req);
+          if (!errors.isEmpty()) {
+            errorDetected = true;
+            return res.status(400).json({ errors: errors.array() });
+          }
 
-            } else if (resultat === 'pseudo') {
-              res.status(400).json({ erreur: 'Pseudo déjà pris' });
-            }
-            else if (resultat === 'mail') {
-              res.status(400).json({ erreur: 'Email déjà pris' });
-            } else {
-              res.status(200).json({ message: "Gestionnaire externe modifié avec succès" });
-            }
-          })
+          resultMessage = await gestionnaires.modifierExterne(idUser, valeurs, userData.metier, userData.entreprise, userData.password);
+          break;
+        case 'gestionnaireIA':
+          await gestionnaireIaModel.validerGestionnaireIA(req);
 
-          .catch(() => {
-            res.status(400).json({ erreur: 'Echec de la modification du gestionnaire' });
-          });
-        break;
+          errors = validationResult(req);
+          if (!errors.isEmpty()) {
+            errorDetected = true;
+            return res.status(400).json({ errors: errors.array() });
+          }
 
-      case 'gestionnaireIA':
-        modifier.modifierIapau(idUser, valeurs, userRole, password)
-          .then((resultat) => {
-            /* Données existantes */
-            if (resultat === 'les2') {
-              res.status(400).json({ erreur: 'Pseudo et email déjà pris' });
+          resultMessage = await gestionnaires.modifierIapau(idUser, valeurs, userData.role_asso, userData.password);
+          break;
+        case 'administrateur':
+          resultMessage = await userModel.modifierUser(idUser, valeurs, userData.password);
+          break;
+        default:
+          return res.status(400).json({ erreur: 'Le type est incorrect' });
+      }
 
-            } else if (resultat === 'pseudo') {
-              res.status(400).json({ erreur: 'Pseudo déjà pris' });
-            }
-            else if (resultat === 'mail') {
-              res.status(400).json({ erreur: 'Email déjà pris' });
-            } else {
-              res.status(200).json({ message: "Gestionnaire IA modifié avec succès" });
-            }
-          })
-          .catch(() => {
-            res.status(400).json({ erreur: 'Echec de la modification du gestionnaire' });
-          });
-        break;
-
-      case 'administrateur':
-        userModel.modifierUser(idUser, valeurs, password)
-          .then((result) => {
-            /* Données existantes */
-            if (result === 'les2') {
-              res.status(400).json({ erreur: 'Pseudo et email déjà pris' });
-
-            } else if (result === 'pseudo') {
-              res.status(400).json({ erreur: 'Pseudo déjà pris' });
-            }
-            else if (result === 'mail') {
-              res.status(400).json({ erreur: 'Email déjà pris' });
-            } else {
-              res.status(200).json({ message: "Administrateur modifié avec succès" });
-            }
-          })
-          .catch(() => {
-            res.status(400).json({ erreur: 'Echec de la modification de l\' Administrateur' });
-          });
-        break;
+      if (resultMessage === 'les2') {
+        return res.status(400).json({ erreur: 'Pseudo et email déjà pris' });
+      } else if (resultMessage === 'pseudo') {
+        return res.status(400).json({ erreur: 'Pseudo déjà pris' });
+      } else if (resultMessage === 'mail') {
+        return res.status(400).json({ erreur: 'Email déjà pris' });
+      } else {
+        return res.status(200).json({ message: `${type} modifié avec succès` });
+      }
+    } catch (error) {
+      return res.status(400).json({ erreur: `Echec de la modification de ${profil}: ${error.message}` });
     }
   } else {
     return res.status(404).json('Page not found');
@@ -382,41 +253,27 @@ async function modifierUser(req, res) {
 /**Suppression */
 async function supprimerUser(req, res) {
   if (req.method === "OPTIONS") {
-    res.status(200).json({ success: 'Access granted' });
+    return res.status(200).json({ success: 'Access granted' });
 
   } else if (req.method === 'DELETE') {
 
-    /**Récupérer l'id de l'utilisateur dans l'url */
+    /**Récupérer l'id de l'utilisateur à supprimer dans l'url */
     const userId = res.locals.userId;
 
     /*L'administrateur ne peut pas se supprimer lui même */
-    if (userId === req.id) {
-      return res.status(400).json('L\'administrateur ne peut pas se supprimer lui-même');
+    if (userId == req.id) {
+      return res.status(400).json({ error: 'L\'administrateur ne peut pas se supprimer lui-même' });
     }
 
     try {
-      /*Vérifier que l'id existe dans la bdd*/
-      const user = await userModel.chercherUserID(userId);
-      if (user.length === 0) {
-        return res.status(404).json({ erreur: 'L\'id n\'existe pas' });
-      }
-
       /*Supprimer l'utilisateur*/
       userModel.supprimerUser(userId);
-
       return res.status(200).json({ message: "Suppression réussie" });
-
     } catch (error) {
-      return res.status(500).json({ erreur: 'Erreur lors de la suppression de l\'utilisateur' });
+      return res.status(500).json({ erreur: `Erreur lors de la suppression de l\'utilisateur: ${error.message}` });
     }
-  }
-}
-
-async function getInfosProfil(req, res) {
-  if (req.method === "OPTIONS") {
-    res.status(200).json({ success: 'Access granted' });
-
-  } else if (req.method === 'GET') {
+  } else {
+    return res.status(404).json('Page not found');
   }
 }
 
@@ -425,5 +282,4 @@ module.exports = {
   voirUtilisateurs,
   modifierUser,
   supprimerUser,
-  getInfosProfil
 };

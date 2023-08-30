@@ -9,6 +9,7 @@ const userModel = require('../models/userModel');
 async function validerAnnotation(req) {
     await body('contenu')
     .isLength({ min: 0, max: 2000 })
+    .custom((value) => !(/^\s+$/.test(value)))
     .withMessage('Le message est trop long (maximum 2000 caractères)')
     .run(req);
 }
@@ -52,17 +53,12 @@ async function getAnnotationEquipes(idEquipe) {
     const chercher = `SELECT * FROM Annotation
     WHERE idEquipe = $1`;
 
-    return new Promise((resolve) => {
         try {
-            pool.query(chercher, [idEquipe])
-                .then((res) => {
-                    resolve(res.rows);
-                })
-
+            const chercher = await pool.query(chercher, [idEquipe])
+            return chercher.rows;
         } catch (error) {
             throw error;
         }
-    });
 }
 
 /**
@@ -98,13 +94,11 @@ async function jsonGetAnnotation(idEquipe){
 
             jsonRetour.annotations.push(temp)
         }
-
         return jsonRetour;
     }catch (error){
         throw error;
     }
 }
-
 
 module.exports = {
     creerAnnotation,
