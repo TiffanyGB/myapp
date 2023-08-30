@@ -7,46 +7,29 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 const cors = require('cors');
 
-/**crée une instance de l'application Express */
-var app = express();
-
 try {
   const env = require('../environnement.json');
   const port = env.frontend.port;
-  app.use(express.static(path.join(__dirname, '../frontend')));
-  app.get('/*', function (req, res) {
+  var app_front = express();
+  app_front.use(express.static(path.join(__dirname, '../frontend')));
+  app_front.get('/*', function (req, res) {
     res.sendFile(path.join(__dirname, '../frontend', 'index.html'));
   });
-  app.listen(port);
+  const corsOptions = {
+    origin: '*',
+    methods: 'GET, POST, OPTIONS, PUT, DELETE, PATCH',
+    allowedHeaders: 'Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With, method',
+    maxAge: 3600,
+  };
+  
+  app_front.use(cors(corsOptions));
+  app_front.listen(port);
 } catch (e) {
   console.log("Erreur lors du chargement de l'application !");
 }
 
-app.use(async (req, res, next) => {
-  try {
-    next();
-  } catch (error) {
-
-    const now = new Date();
-    const fileName = `erreur-${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}-${now.getHours()}-${now.getMinutes()}-${now.getSeconds()}-${Math.random().toString(36).substring(2, 6)}.txt`;
-
-    const dossierErreurs = path.join(__dirname, 'erreurs');
-
-    if (!fs.existsSync(dossierErreurs)) {
-      fs.mkdirSync(dossierErreurs);
-    }
-
-    // Chemin complet vers le fichier d'erreur
-    const cheminFichierErreur = path.join(dossierErreurs, fileName);
-
-    // Écriture des détails de l'erreur dans le fichier
-    const erreurDetails = `URL: ${req.url}\nMéthode: ${req.method}\nErreur: ${error.stack}\n\n`;
-    fs.writeFileSync(cheminFichierErreur, erreurDetails, { flag: 'a' });
-
-    // Réponse BAD REQUEST
-    res.status(400).json({ erreur: 'Une erreur est survenue.' });
-  }
-});
+/**crée une instance de l'application Express */
+var app = express();
 
 /*Routes */
 var eventsRouter = require('../routes/events');
