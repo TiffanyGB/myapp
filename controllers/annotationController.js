@@ -45,7 +45,9 @@ async function ecrireAnnotation(req, res) {
 
         const idEquipe = res.locals.idEquipe;
         const auteur = req.id;
-        const contenu = req.body.contenu;
+        let contenu = req.body.contenu;
+
+        contenu = contenu.trim();
 
         await annotationModel.validerAnnotation(req);
 

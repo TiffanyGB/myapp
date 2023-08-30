@@ -49,7 +49,7 @@ async function creationProjet(req, res) {
     }
     else if (req.method === 'POST') {
 
-        const {
+        let {
             nom,
             lienSujet,
             motClefs,
@@ -62,6 +62,9 @@ async function creationProjet(req, res) {
             template
         } = req.body;
 
+        nom = nom.trim();
+        description = description.trim();
+
         const valeurs_projets = [
             nom,
             description,
@@ -72,21 +75,22 @@ async function creationProjet(req, res) {
         ];
 
         /*Vérification des données des mots-clés */
-        if (motClefs.length > 0) {
-            for (const mot of motClefs) {
-                await body('motClefs')
-                    .optional()
-                    .notEmpty().withMessage('Le mot-clé ne doit pas être vide.')
-                    .isLength({ min: 1, max: 25 }).withMessage('Le mot-clé doit avoir une longueur comprise entre 1 et 25 caractères.')
-                    .run(req);
 
-                const errors = validationResult(req);
-                if (!errors.isEmpty()) {
-                    errorDetected = true; // Marquer qu'une erreur a été détectée
-                    return res.status(400).json({ errors: errors.array() });
-                }
+        for (let mot of motClefs) {
+            await body('motClefs')
+                .optional()
+                .notEmpty().withMessage('Le mot-clé ne doit pas être vide.')
+                .isLength({ min: 1, max: 25 }).withMessage('Le mot-clé doit avoir une longueur comprise entre 1 et 25 caractères.')
+                .run(req);
+
+            // mot.motClefs = mot.motClefs.trim();
+
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                return res.status(400).json({ errors: errors.array() });
             }
         }
+
 
         for (const ressource of Ressources) {
             await body('Ressources')
@@ -128,7 +132,6 @@ async function creationProjet(req, res) {
 
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
-                errorDetected = true; // Marquer qu'une erreur a été détectée
                 return res.status(400).json({ errors: errors.array() });
             }
         }

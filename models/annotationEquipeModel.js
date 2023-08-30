@@ -5,6 +5,7 @@
 
 const pool = require('../database/configDB');
 const userModel = require('../models/userModel');
+const { body } = require('express-validator');
 
 async function validerAnnotation(req) {
     await body('contenu')

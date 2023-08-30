@@ -11,19 +11,22 @@ async function createEvent(req, res) {
     /* récupération des données */
     const data = req.body;
 
+    const nom = data.nom.trim();
+    const description = data.description.trim();
     const valeurs_event = [
       data.typeEvent,
-      data.nom,
+      nom,
       data.inscription,
       data.debut,
       data.fin,
-      data.description,
+      description,
       data.nombreMinEquipe,
       data.nombreMaxEquipe,
       data.image
     ];
 
-    for (const regle of data.regles) {
+
+    for (let regle of data.regles) {
       await body('regles')
         .optional()
         .isArray({ min: 1 }).withMessage('Le tableau des ressources ne doit pas être vide.')
@@ -38,6 +41,9 @@ async function createEvent(req, res) {
         .notEmpty().withMessage('La règle ne doit pas être vide.')
         .isLength({ min: 2, max: 1000 }).withMessage('Le lien doit avoir une longueur comprise entre 3 et 1000 caractères.')
         .run(req);
+
+      regle.titre = regle.titre.trim();
+      regle.contenu = regle.contenu.trim();
 
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
@@ -69,7 +75,7 @@ async function createEvent(req, res) {
     } catch (error) {
       return res.status(400).json({ error: 'Erreur création' });
     }
-  }else {
+  } else {
     return res.status(404).json('Page not found');
   }
 }
@@ -100,7 +106,7 @@ async function modifierEvent(req, res) {
       idevent,
     ];
 
-    for (const regle of data.regles) {
+    for (let regle of data.regles) {
       await body('regles')
         .optional()
         .isArray({ min: 1 }).withMessage('Le tableau des ressources ne doit pas être vide.')
@@ -115,6 +121,10 @@ async function modifierEvent(req, res) {
         .notEmpty().withMessage('La règle ne doit pas être vide.')
         .isLength({ min: 2, max: 1000 }).withMessage('Le lien doit avoir une longueur comprise entre 3 et 1000 caractères.')
         .run(req);
+
+
+      regle.titre = regle.titre.trim();
+      regle.contenu = regle.contenu.trim();
 
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
@@ -149,7 +159,7 @@ async function modifierEvent(req, res) {
     } catch (error) {
       return res.status(400).json({ erreur: "L'événement n'a pas pu être modifié" });
     }
-  }else {
+  } else {
     return res.status(404).json('Page not found');
   }
 }
@@ -168,7 +178,7 @@ function supprimerEvent(req, res) {
     } catch (error) {
       return res.status(500).json({ erreur: 'Erreur lors de la suppression de l\'événement.' });
     }
-  }else {
+  } else {
     return res.status(404).json('Page not found');
   }
 }
@@ -206,7 +216,7 @@ async function recupInfoEvent(req, res) {
     } catch (error) {
       return res.status(400).json({ error: 'Erreur lors de la récupération des informations de l\'événement.' });
     }
-  }else {
+  } else {
     return res.status(404).json('Page not found');
   }
 }
@@ -271,12 +281,12 @@ async function voirTousEvents(req, res) {
 
     try {
       const result = await eventModel.creerJsonTousEvents();
-      return res.status(200).json('oui');
+      return res.status(200).json(result);
 
     } catch (error) {
       return res.status(500).json({ message: 'Une erreur s\'est produite lors de la récupération des événements.' });
     }
-  }else {
+  } else {
     return res.status(404).json('Page not found');
   }
 }

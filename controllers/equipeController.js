@@ -49,10 +49,13 @@ async function creerEquipe(req, res) {
     /*Récupération données du body */
     const userData = req.body;
 
+    let nom = userData.nom.trim();
+    let description = userData.description.trim();
+
     const infos = [
       idCapitaine,
-      userData.nom,
-      userData.description,
+      nom,
+      description,
       userData.statut,
       userData.idProjet
     ]
@@ -115,9 +118,12 @@ async function modifierEquipe(req, res) {
 
     const userData = req.body;
 
+    let nom = userData.nom.trim();
+    let description = userData.description.trim();
+
     const valeurs = [
-      userData.nom,
-      userData.description,
+      nom,
+      description,
       userData.statut,
       userData.idProjet,
       userData.lien_discussion,
@@ -321,9 +327,8 @@ async function demandeEquipe(req, res) {
     const idUser = req.id;
     let idEquipe = res.locals.idEquipe;
 
-    const {
-      message
-    } = req.body;
+    const data = req.body;
+    const message = data.message.trim();
 
     const valeurs = [
       idUser,

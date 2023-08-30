@@ -34,18 +34,21 @@ async function inscriptionEleve(req, res) {
 
         /**Données renvoyées par la requête*/
         const {
-            nom: userNom,
-            prenom: userPrenom,
+            nom,
+            prenom,
             pseudo: userPseudo,
             email: userMail,
             linkedin: userLinkedin,
             github: userGitHub,
-            ville: userVille,
+            ville,
             ecole: userEcole,
             niveau_etude: userNiveauEtude,
             password
         } = req.body;
 
+        let userNom = nom.trim();
+        let userPrenom = prenom.trim();
+        let userVille = ville.trim();
 
         /** Informations spécifique à un utilisateur */
         const values = [
