@@ -15,7 +15,7 @@ const { validateurDonnéesMiddleware } = require('../verifications/validateur');
 const validateUser = [
     body('prenom')
         .notEmpty().withMessage('Le prénom ne doit pas être vide.')
-        .custom((value) => !(/^\s+$/.test(value)))
+        .custom((value) => !(/^\s+$/.test(value))).withMessage('Le prénom ne doit pas être vide.')
         .matches(/^[a-zA-ZÀ-ÿ \-']*$/).withMessage("Le prénom doit contenir uniquement des lettres, des espaces, des tirets '-', des apostrophes ''', ou des lettres avec accents.")
         .isLength({ min: 2, max: 60 }).withMessage('Le prénom doit avoir une longueur comprise entre 2 et 60 caractères.'),
 

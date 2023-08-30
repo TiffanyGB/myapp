@@ -1,0 +1,39 @@
+{
+  "files": {
+    "main.css": "/static/css/main.d21bf416.css",
+    "main.js": "/static/js/main.0ed4ad1b.js",
+    "static/media/pyrenees.jpg": "/static/media/pyrenees.01219bdf5fca9832930e.jpg",
+    "static/media/Inter-Light.ttf": "/static/media/Inter-Light.eec8664621fec98efb37.ttf",
+    "static/media/dataChallenge.jpg": "/static/media/dataChallenge.6cdc3d62601999cca4ea.jpg",
+    "static/media/photoFont1.jpg": "/static/media/photoFont1.da372628460bfdd7e859.jpg",
+    "static/media/image-attractive.jpg": "/static/media/image-attractive.bbe8837b14cf97d6e4c3.jpg",
+    "static/media/test.jpg": "/static/media/test.244ff4be7ad5b3f568ad.jpg",
+    "static/media/testt.jpeg": "/static/media/testt.b56acf9871239a5497af.jpeg",
+    "static/media/iapau_logo.png": "/static/media/iapau_logo.29a01ef98da3ae216731.png",
+    "static/media/profil.jpg": "/static/media/profil.7ab333c2c112cab8278b.jpg",
+    "static/media/coordinateur.png": "/static/media/coordinateur.8d36763635bf27a94d4e.png",
+    "static/media/partners.png": "/static/media/partners.b18723605ca404caa58f.png",
+    "static/media/employe.png": "/static/media/employe.9d7e5cf36261df291eb5.png",
+    "static/media/Kick.png": "/static/media/Kick.33a65a54f943b4525ce8.png",
+    "static/media/un-evenement.png": "/static/media/un-evenement.a3927f50f123c47bdf2b.png",
+    "static/media/lancement-du-projet.png": "/static/media/lancement-du-projet.89f56901595dad66a43f.png",
+    "static/media/teamValide.png": "/static/media/teamValide.70a0dcd82d16e207568f.png",
+    "static/media/Accept.png": "/static/media/Accept.af2a744f043c0183e3bc.png",
+    "static/media/Deny.png": "/static/media/Deny.d50e25860160c6ce3279.png",
+    "static/media/logout.png": "/static/media/logout.0ceb32389978c719ac66.png",
+    "static/media/myevents.png": "/static/media/myevents.c341ee956f28db543abd.png",
+    "static/media/on-button.png": "/static/media/on-button.b32ed76770083472be2a.png",
+    "static/media/team.png": "/static/media/team.57035ce484adbbc1313b.png",
+    "static/media/teamIcone.png": "/static/media/teamIcone.7310f86425e2fcbc5d34.png",
+    "static/media/off-button.png": "/static/media/off-button.9bf895f0705e192e4789.png",
+    "static/media/MDPhidden.png": "/static/media/MDPhidden.a81cfb08e8b44aba3209.png",
+    "static/media/teamNonValide.png": "/static/media/teamNonValide.4b02b3271284d5d9ab7b.png",
+    "index.html": "/index.html",
+    "main.d21bf416.css.map": "/static/css/main.d21bf416.css.map",
+    "main.0ed4ad1b.js.map": "/static/js/main.0ed4ad1b.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.d21bf416.css",
+    "static/js/main.0ed4ad1b.js"
+  ]
+}

@@ -203,7 +203,7 @@ async function toutesInfosEvent(idEvent, tabRetour) {
         tabRetour.nbMinParEquipe = event.nombre_min_equipe;
         tabRetour.nbMaxParEquipe = event.nombre_max_equipe;
 
-        tabRetour.image = url_images + "/" + event.img;
+        tabRetour.image = event.img;
 
         if (event.message_fin == null) {
             tabRetour.messageFin = '';

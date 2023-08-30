@@ -567,7 +567,7 @@ async function jsonListeEquipeProjet(idProjet) {
 
     try {
         const equipeList = await listeEquipeProjet(idProjet);
-
+        console.log(equipeList)
         jsonRetour = {};
         jsonRetour.equipe = [];
 
@@ -623,6 +623,7 @@ async function jsonListeEquipeProjet(idProjet) {
         throw error;
     }
 }
+
 async function jsonMesEquipes(idUser) {
 
     let jsonRetour = {};
@@ -676,6 +677,7 @@ async function jsonMesEquipes(idUser) {
     }
     return jsonRetour;
 }
+
 
 async function jsonEquipesOuvertes(idEvent, req) {
 

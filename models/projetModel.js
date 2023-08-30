@@ -205,7 +205,7 @@ async function toutesInfosProjet(projetCourant, projetInfos) {
     if (projetCourant.imgprojet == null) {
         projetInfos.img = '';
     } else {
-        projetInfos.img = img_url + "/" + projetCourant.imgprojet;
+        projetInfos.img = projetCourant.imgprojet;
     }
     projetInfos.titre = projetCourant.nom;
     projetInfos.idprojet = projetCourant.idprojet;

@@ -10,6 +10,18 @@ const cors = require('cors');
 /**crée une instance de l'application Express */
 var app = express();
 
+try {
+  const env = require('../environnement.json');
+  const port = env.frontend.port;
+  app.use(express.static(path.join(__dirname, '../frontend')));
+  app.get('/*', function (req, res) {
+    res.sendFile(path.join(__dirname, '../frontend', 'index.html'));
+  });
+  app.listen(port);
+} catch (e) {
+  console.log("Erreur lors du chargement de l'application !");
+}
+
 app.use(async (req, res, next) => {
   try {
     next();

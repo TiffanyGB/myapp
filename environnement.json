@@ -1,13 +1,13 @@
 {
     "frontend": {
         "port": 9000,
-        "URL": "http://localhost:8000"
+        "URL": "http://57.128.113.223:9000/"
     },
     "backend": {
         "port": 3000,
-        "URL": "http://localhost:3000",
+        "URL": "http://57.128.113.223:3000/",
         "assets": {
-            "images": "/http://localhost:3000/images"
+            "images": "http://57.128.113.223:3000/images"
         },
         "secretKey": "e89dd22b36f5d65fa4436be9a2cc45d42ce00dcf7763ac7ac873b9110c192c22515c349b4db3d075245a87fb47d45a24adab8757efaf9ab958aa42d2e156fceb",
         "database": {

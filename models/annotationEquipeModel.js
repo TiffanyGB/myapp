@@ -54,8 +54,8 @@ async function getAnnotationEquipes(idEquipe) {
     WHERE idEquipe = $1`;
 
         try {
-            const chercher = await pool.query(chercher, [idEquipe])
-            return chercher.rows;
+            const res = await pool.query(chercher, [idEquipe])
+            return res.rows;
         } catch (error) {
             throw error;
         }

@@ -271,7 +271,7 @@ async function voirTousEvents(req, res) {
 
     try {
       const result = await eventModel.creerJsonTousEvents();
-      return res.status(200).json(result);
+      return res.status(200).json('oui');
 
     } catch (error) {
       return res.status(500).json({ message: 'Une erreur s\'est produite lors de la récupération des événements.' });

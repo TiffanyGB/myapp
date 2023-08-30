@@ -225,7 +225,7 @@ async function supprimerMembre(req, res) {
       }
 
       const equipe = await equipeModel.chercherEquipeID(idEquipe);
-      if (idUser === equipe[0].idcapitaine) {
+      if (idUser == equipe[0].idcapitaine) {
         return res.status(404).json({ erreur: 'Le capitaine ne peut pas se supprimer lui-même.' });
       }
 
