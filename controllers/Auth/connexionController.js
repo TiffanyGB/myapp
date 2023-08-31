@@ -24,8 +24,8 @@ const { chercherType } = require('../../models/userModel');
  * @param {object} res - L'objet de réponse HTTP.
  * @returns {object} Un JSON contenant le token généré, les informations de l'utilisateur suivantes:
  * id, nom, prénom, pseudo, rôle (Etudiant, gestionnaire externe, gestionnaire IA Pau, administrateur)
- * @throws {Error}Erreur lors de la requete qui recherche un utilisateur ayant le même identifiant.
- * @description Cette fonction permet à un utilisateur de se connecter à son compte avec 
+ * @description Cette fonction permet à un utilisateur de se connecter à son compte avec. Si la connexion
+ * a échoué, un code 400 est retourné avec un message d'erreur.
  * un login/email et un mot de passe.
  * 
  * Le champ 'identifiant' peut être un pseudo ou une adresse mail.

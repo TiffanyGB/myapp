@@ -6,8 +6,9 @@ const { body } = require('express-validator');
 const motCleModel = require('../models/motCleModel');
 const gererProjet = require('./gererProjet');
 const annotationModel = require('./annotationEquipeModel');
-const { recupererJSON } = require('../controllers/gitlab3');
-const demandeModel = require('./demandeModel')
+const { recupererJSON } = require('../controllers/gitlabController');
+const demandeModel = require('./demandeModel');
+const env = require('../environnement.json')
 
 const validerEquipe = [
     body('nom')
@@ -533,26 +534,25 @@ async function jsonInformationsEquipe(idEquipe, req) {
             jsonRetour.liste_user_attente.push(temp);
         }
 
-        // const result = await recupererJSON(idEquipe, event[0].nom);
+        const result = await recupererJSON(idEquipe, event[0].nom);
         jsonRetour.resultats = [];
 
-        // for (i = 0; i < result.length; i++) {
-        //     let temp = {};
+        for (i = 0; i < result.length; i++) {
+            let temp = {};
 
-        //     temp.date = new Date();
-        //     temp.content = JSON.stringify(result[i]);
+            temp.content = JSON.stringify(result[i]);
+            temp.date = result[i].end;
 
-        //     jsonRetour.resultats.push(temp)
-        // }
+            jsonRetour.resultats.push(temp)
+        }
 
         /*Accès à gitlab */
-        // const acces = (await chercheraccesGitlab(idEquipe))[0];
+        const acces = (await chercheraccesGitlab(idEquipe))[0];
         jsonRetour.acces_gitlab = [];
         temp = {};
-        temp.login = "equipe44@iapau-gaia.fr";
-        temp.mot_de_passe = "jUhg4e5pM";
-        // temp.login = acces.login_gitlab;
-        // temp.mot_de_passe = acces.mdp_gitlab;
+        temp.login = acces.login_gitlab;
+        temp.mot_de_passe = acces.mdp_gitlab;
+        temp.lien_gitlab = env.app.computationImpact.gitlab.host;
         jsonRetour.acces_gitlab.push(temp);
 
         return jsonRetour;
@@ -567,7 +567,6 @@ async function jsonListeEquipeProjet(idProjet) {
 
     try {
         const equipeList = await listeEquipeProjet(idProjet);
-        console.log(equipeList)
         jsonRetour = {};
         jsonRetour.equipe = [];
 
@@ -616,6 +615,17 @@ async function jsonListeEquipeProjet(idProjet) {
             temp.idCapitaine = equipeCourante.idcapitaine;
             temp.pseudoCapitaine = ((await userModel.chercherUserID(equipeCourante.idcapitaine))[0].pseudo);
 
+            const result = await recupererJSON(equipeCourante.idequipe, event.nom);
+            temp.resultats = [];
+    
+            for (i = 0; i < result.length; i++) {
+                let temp2 = {};
+    
+                temp2.content = JSON.stringify(result[i]);
+                temp2.date = result[i].end;
+    
+                temp.resultats.push(temp2)
+            }
             jsonRetour.equipe.push(temp);
         }
         return jsonRetour;

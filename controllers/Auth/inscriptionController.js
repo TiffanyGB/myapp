@@ -23,9 +23,10 @@ const { body, validationResult } = require('express-validator');
  * 
  * @param {Object} req - L'objet requête Express.
  * @param {Object} res - L'objet réponse Express.
- * @returns {Object} - L'objet réponse Express avec les résultats de l'inscription ou les erreurs.
+ * @throws {Error}Erreur lors de l'inscription.
+ * @returns {Object} - Un code 200
  * @description Cette fonction récupère les données du formulaire d'inscription renvoyées par la requête. 
- * Elle vérifie les que les données soient bonnes grâce à la fonction de validation des données d'un étudiant.
+ * Elle vérifie que les données soient bonnes grâce à la fonction de validation des données d'un étudiant.
  * S'il y a un problème dans ses données, elle renvoie la liste des erreurs. Sinon, elle insère l'étudiant dans
  * la base de données.
  */

@@ -3,6 +3,22 @@ const eventModel = require('../models/eventModel');
 const regleModel = require('../models/reglesModel');
 const { body, validationResult } = require('express-validator');
 
+/**
+ * Création d'un événement.
+ * @async
+ * @param {object} req - L'objet de requête HTTP.
+ * @param {object} res - L'objet de réponse HTTP.
+ * @returns {object} Une erreur 
+ * @description Cette fonction permet à un utilisateur de se connecter à son compte avec 
+ * un login/email et un mot de passe.
+ * 
+ * Le champ 'identifiant' peut être un pseudo ou une adresse mail.
+ * Le champ 'seSouvenir' vaut 'true' si l'utilisteur a coché cette option sur la page de connexion,
+ * 'false' dans le cas contraire. Ce champ permet d'ajuster la date d'expiration du token, plus longue
+ * si il vaut 'true'.
+ * @headers
+ *    {string} Authorization - Token d'authentification JWT.
+ */
 async function createEvent(req, res) {
   if (req.method === 'OPTIONS') {
     return res.status(200).json({ success: 'Access granted' });

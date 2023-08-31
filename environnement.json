@@ -21,7 +21,8 @@
     "app": {
         "computationImpact": {
             "gitlab": {
-                "host": "http://10.0.12.111/api/v4",
+                "host": "http://10.0.12.111/",
+                "api_gitlab": "http://10.0.12.111/api/v4",
                 "port": "443",
                 "user": "gitlab_IA_PAU_USER",
                 "password": "FZOPmfj.#ehj(iIupOm",

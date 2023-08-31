@@ -7,7 +7,7 @@
  * @requires ../../models/equipeModel
  * @requires ../../models/projetModel
  * @requires ../../models/projetModel
- * @requires ../../models/eventModel
+ * @requires ../../models/eventModel-
  * @requires jsonwebtoken
  */
 
@@ -15,7 +15,7 @@ const equipeModel = require('../models/equipeModel');
 const projetModel = require('../models/projetModel');
 const demandeModel = require('../models/demandeModel')
 const { body, validationResult } = require('express-validator');
-const { creerDossier, creerUtilisateur, creerRepertoire } = require('./gitlab3');
+const { creerDossier, creerUtilisateur, copieDuTemplate } = require('./gitlabController');
 const eventModel = require('../models/eventModel');
 const { validateUserId } = require('../verifications/verifierDonnéesGénérales');
 
@@ -88,19 +88,20 @@ async function creerEquipe(req, res) {
 
       /*Gitlab*/
 
-      // /*Création du dossier de l'équipe dans le répertoire annexe*/
-      // creerDossier(idEquipe, event_nom);
+      /*Création du dossier de l'équipe dans le répertoire annexe*/
+      creerDossier(idEquipe, event_nom);
 
-      // /*Création de l'utilisateur lié au repo de l'équipe */
-      // const valeurs = await creerUtilisateur(userData.nom);
-      // console.log(valeurs)
+      /*Création de l'utilisateur lié au repo de l'équipe */
+      const valeurs = await creerUtilisateur(userData.nom);
+      console.log(valeurs)
 
-      // equipeModel.insererAccesEquipeGit(valeurs[1], valeurs[0], idEquipe);
-      // /*Création du repo de l'équipe */
-      // creerRepertoire(idEquipe, valeurs[2])
+      equipeModel.insererAccesEquipeGit(valeurs[1], valeurs[0], idEquipe);
+      /*Création du repo de l'équipe */
+      await copieDuTemplate(6,idEquipe, valeurs[3]);
 
       return res.status(200).json(idEquipe);
     } catch (error) {
+      console.log(error.message)
       return res.status(400).json({ erreur: 'Erreur création équipe.' });
     }
   } else {
