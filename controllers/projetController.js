@@ -220,8 +220,11 @@ async function modifierProjet(req, res) {
     }
     else if (req.method === 'PATCH') {
 
-        const idProjet = res.locals.idProjet;
+        let idProjet = res.locals.idProjet;
         const data = req.body;
+
+        data.nom = nom.trim();
+        data.description = description.trim();
 
         try {
 

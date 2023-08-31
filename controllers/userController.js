@@ -65,7 +65,14 @@ async function createUser(req, res) {
   } else if (req.method === 'POST') {
 
     /* Récupération des données */
-    const userData = req.body;
+    let userData = req.body;
+
+    userData.nom = userData.nom.trim();
+    userData.prenom = userData.prenom.trim();
+    userData.ville = userData.ville.trim();
+    userData.entreprise = userData.entreprise.trim();
+    userData.metier = userData.metier.trim();
+    userData.role_asso = userData.role_asso.trim();
 
     const valeurs_communes = [
       userData.nom,
@@ -169,8 +176,15 @@ async function modifierUser(req, res) {
     }
 
     /**Récupération des données */
-    const userData = req.body;
+    let userData = req.body;
 
+    userData.nom = userData.nom.trim();
+    userData.prenom = userData.prenom.trim();
+    userData.ville = userData.ville.trim();
+    userData.entreprise = userData.entreprise.trim();
+    userData.metier = userData.metier.trim();
+    userData.role_asso = userData.role_asso.trim();
+    
     const valeurs = [
       userData.nom,
       userData.prenom,

@@ -459,7 +459,7 @@ async function recup_Infos_Modif_Event(idEvent) {
     delete jsonRetour.team;
     delete jsonRetour.themes;
     const event = await chercherEvenement(idEvent);
-    if (event.image == null) {
+    if (event[0].img == null) {
         jsonRetour.image = '';
     } else {
         jsonRetour.image = event[0].img;
