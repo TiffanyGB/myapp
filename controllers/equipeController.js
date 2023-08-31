@@ -88,16 +88,16 @@ async function creerEquipe(req, res) {
 
       /*Gitlab*/
 
-      /*Création du dossier de l'équipe dans le répertoire annexe*/
-      creerDossier(idEquipe, event_nom);
+      // /*Création du dossier de l'équipe dans le répertoire annexe*/
+      // creerDossier(idEquipe, event_nom);
 
-      /*Création de l'utilisateur lié au repo de l'équipe */
-      const valeurs = await creerUtilisateur(userData.nom);
-      console.log(valeurs)
+      // /*Création de l'utilisateur lié au repo de l'équipe */
+      // const valeurs = await creerUtilisateur(userData.nom);
+      // console.log(valeurs)
 
-      equipeModel.insererAccesEquipeGit(valeurs[1], valeurs[0], idEquipe);
-      /*Création du repo de l'équipe */
-      await copieDuTemplate(6,idEquipe, valeurs[3]);
+      // equipeModel.insererAccesEquipeGit(valeurs[1], valeurs[0], idEquipe);
+      // /*Création du repo de l'équipe */
+      // await copieDuTemplate(6,idEquipe, valeurs[3]);
 
       return res.status(200).json(idEquipe);
     } catch (error) {
