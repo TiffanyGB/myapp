@@ -688,7 +688,6 @@ async function jsonMesEquipes(idUser) {
     return jsonRetour;
 }
 
-
 async function jsonEquipesOuvertes(idEvent, req) {
 
     jsonRetour = {};

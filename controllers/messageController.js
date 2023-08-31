@@ -47,11 +47,7 @@ async function envoyerMessage(req, res) {
         }
 
         try {
-            if (req.userProfile === 'etudiant') {
-                messageModel.envoyerMessageEquipe(valeurs);
-            } else if (req.userProfile === 'admin' || req.userProfile === 'gestionnaire') {
-                messageModel.envoyerMessageGerant(valeurs);
-            }
+            messageModel.envoyerMessageEquipe(valeurs);
 
             return res.status(200).json({ message: 'Message envoyé à l\'équipe ' + idEquipe });
         } catch (error) {

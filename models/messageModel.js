@@ -22,8 +22,6 @@ async function validateMessageContenu(req, res) {
     return { isValid: true, errors: null };
 }
 
-
-
 // Envoyer message en tant qu'etudiant
 function envoyerMessageEquipe(valeurs) {
     const envoyer = `INSERT INTO MessageEquipe
@@ -36,21 +34,10 @@ function envoyerMessageEquipe(valeurs) {
     }
 
 }
-//Envoyer message en tant que gerant
-function envoyerMessageGerant(valeurs) {
-    const envoyer = `INSERT INTO MessageGestionnaireAdmin
-    (idEquipe, contenu, idExpediteur) VALUES ($1, $2, $3)`;
-
-    try {
-        pool.query(envoyer, valeurs);
-    } catch (error) {
-        throw error;
-    }
-}
 
 async function envoyerMessageGlobalProjet(contenu, idProjet, idUser) {
 
-    const envoyer = `INSERT INTO MessageGestionnaireAdmin
+    const envoyer = `INSERT INTO MessageEquipe
     (idEquipe, contenu, idExpediteur, typeMessage)
     VALUES ($1, $2, $3, $4)`;
 
@@ -71,7 +58,7 @@ async function envoyerMessageGlobalProjet(contenu, idProjet, idUser) {
 
 async function envoyerMessageGlobalEvent(contenu, idEvent, idUser) {
 
-    const envoyer = `INSERT INTO MessageGestionnaireAdmin
+    const envoyer = `INSERT INTO MessageEquipe
     (idEquipe, contenu, idExpediteur, typeMessage)
     VALUES ($1, $2, $3, $4)`;
 
@@ -97,8 +84,6 @@ async function envoyerMessageGlobalEvent(contenu, idEvent, idUser) {
 //Recuperer tous les messages de l'equipe
 async function getMessageEquipe(idEquipe) {
     const envoyer = `SELECT * FROM MessageEquipe
-    WHERE idEquipe = $1
-    UNION SELECT * FROM MessageGestionnaireAdmin
     WHERE idEquipe = $1`;
 
     try {
@@ -162,7 +147,6 @@ async function jsonGetMessegaeEquipe(idEquipe, req) {
 
 module.exports = {
     envoyerMessageEquipe,
-    envoyerMessageGerant,
     jsonGetMessegaeEquipe,
     envoyerMessageGlobalProjet,
     getMessageEquipe,
