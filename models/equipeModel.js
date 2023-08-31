@@ -9,6 +9,7 @@ const annotationModel = require('./annotationEquipeModel');
 const { recupererJSON } = require('../controllers/gitlabController');
 const demandeModel = require('./demandeModel');
 const env = require('../environnement.json')
+const url_images = env.backend.assets.images;
 
 const validerEquipe = [
     body('nom')
@@ -412,6 +413,7 @@ async function jsonInformationsEquipe(idEquipe, req) {
         jsonRetour.sujet.id_projet = projet[0].idprojet;
         jsonRetour.sujet.description = projet[0].description_projet;
         jsonRetour.sujet.lien_sujet = projet[0].sujet;
+        jsonRetour.sujet.image = url_images + "/"+ projet[0].imgprojet;
         jsonRetour.sujet.mots = [];
 
         let listeMots = await motCleModel.recupererMot(projet[0].idprojet);

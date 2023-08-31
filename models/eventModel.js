@@ -202,8 +202,7 @@ async function toutesInfosEvent(idEvent, tabRetour) {
         tabRetour.description = event.description_event;
         tabRetour.nbMinParEquipe = event.nombre_min_equipe;
         tabRetour.nbMaxParEquipe = event.nombre_max_equipe;
-
-        tabRetour.image = event.img;
+        tabRetour.image = url_images + "/" + event.img;
 
         if (event.message_fin == null) {
             tabRetour.messageFin = '';
@@ -459,6 +458,13 @@ async function recup_Infos_Modif_Event(idEvent) {
     delete jsonRetour.userIsInterested;
     delete jsonRetour.team;
     delete jsonRetour.themes;
+    const event = await chercherEvenement(idEvent);
+    if (event.image == null) {
+        jsonRetour.image = '';
+    } else {
+        jsonRetour.image = event[0].img;
+    }    
+
 
     jsonRetour.projet.forEach((projet) => {
         delete projet.ressources;

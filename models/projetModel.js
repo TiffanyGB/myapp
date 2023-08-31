@@ -198,8 +198,6 @@ async function listeProjetsJson(req) {
     }
 }
 
-/*Crée un json avec toutes les informations dans la bdd d'un evenement sauf la derniere modification */
-/*Peut etre l'ajouter? */
 async function toutesInfosProjet(projetCourant, projetInfos) {
 
     if (projetCourant.imgprojet == null) {
@@ -237,8 +235,14 @@ async function infosProjet(idProjet) {
             jsonRetour.recompense = projet.recompense;
             jsonRetour.sujet = projet.sujet;
             jsonRetour.derniereModif = projet.dernieremodif;
-            jsonRetour.image = img_url + "/" + projet.imgprojet;
+            jsonRetour.image = projet.imgprojet;
 
+            if (jsonRetour.image == null) {
+                jsonRetour.image = '';
+            } else {
+                jsonRetour.image = projet.image;
+            }
+            
             if (jsonRetour.idevent == null) {
                 jsonRetour.idevent = '';
             } else {

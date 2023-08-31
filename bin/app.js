@@ -46,7 +46,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
 /**configure le middleware express.static() pour servir les fichiers statiques du répertoire public, tels que les images, les fichiers CSS, etc */
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, '../public')));
 
 const corsOptions = {
   origin: '*',
