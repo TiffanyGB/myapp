@@ -106,8 +106,6 @@ utilisateurs.</div>
         <ul>
             <li>module:../public/javascripts/json_liste/liste_utilisateurs</li>
         
-            <li>module:../public/javascripts/modifierGestionnaires</li>
-        
             <li>module:../models/userModel</li>
         
             <li>module:../models/etudiantModel</li>
@@ -129,72 +127,6 @@ utilisateurs.</div>
     
 
     
-        <h3 class="subsection-title">Members</h3>
-
-        
-            
-<h4 class="name" id="~infoUser"><span class="type-signature">(inner) </span>infoUser<span class="type-signature"></span></h4>
-
-
-
-
-<div class="description">
-    Vérifier que le nouveau pseudo et email n'existent pas
-</div>
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="models_userModel.js.html">models/userModel.js</a>, <a href="models_userModel.js.html#line156">line 156</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-    
 
     
         <h3 class="subsection-title">Methods</h3>
@@ -205,7 +137,7 @@ utilisateurs.</div>
     
 
     
-    <h4 class="name" id="~chercherAdminID"><span class="type-signature">(inner) </span>chercherAdminID<span class="signature">()</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="~createUser"><span class="type-signature">(async, inner) </span>createUser<span class="signature">(req, res)</span><span class="type-signature"> &rarr; {Object}</span></h4>
     
 
     
@@ -213,491 +145,12 @@ utilisateurs.</div>
 
 
 <div class="description">
-    Chercher un admin par son id
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="models_adminModel.js.html">models/adminModel.js</a>, <a href="models_adminModel.js.html#line40">line 40</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="~chercherListeUtilisateurs"><span class="type-signature">(inner) </span>chercherListeUtilisateurs<span class="signature">()</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Liste des utilisateurs
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="models_userModel.js.html">models/userModel.js</a>, <a href="models_userModel.js.html#line58">line 58</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="~chercherUserID"><span class="type-signature">(inner) </span>chercherUserID<span class="signature">()</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Chercher un utilisateur par son id
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="models_userModel.js.html">models/userModel.js</a>, <a href="models_userModel.js.html#line74">line 74</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="~chercherUserPseudo"><span class="type-signature">(inner) </span>chercherUserPseudo<span class="signature">()</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Pour supprimer, odifier la fonction de hachage de l'admin
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="models_userModel.js.html">models/userModel.js</a>, <a href="models_userModel.js.html#line90">line 90</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="~createUser"><span class="type-signature">(async, inner) </span>createUser<span class="signature">()</span><span class="type-signature"> &rarr; {object|Error}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Créer un utilisateur.
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="controllers_userController.js.html">controllers/userController.js</a>, <a href="controllers_userController.js.html#line70">line 70</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-<ul>
-        <li>
-<div class="param-desc">
-    200 - Un tableau contenant tous les utilisateurs.
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">object</span>
-
-
-    </dd>
-</dl>
-</li>
-    
-        <li>
-<div class="param-desc">
-    500 - Erreur serveur.
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Error</span>
-
-
-    </dd>
-</dl>
-</li>
-    </ul>
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="~creerAdmin"><span class="type-signature">(async, inner) </span>creerAdmin<span class="signature">(values_user)</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Création d'un administrateur.
-
-Insert dans la table 'Admini' un nouvel admin
+    Ce contrôleur permet de créer un nouvel utilisateur.
+ 
+Si l'adresse mail ou le pseudo sont déjà pris, une erreur est renvoyée.
+Accès à ce controller: Administrateurs.
+
+Route: users.js
 </div>
 
 
@@ -733,13 +186,13 @@ Insert dans la table 'Admini' un nouvel admin
 
         <tr>
             
-                <td class="name"><code>values_user</code></td>
+                <td class="name"><code>req</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">Array</span>
+<span class="param-type">object</span>
 
 
             
@@ -749,7 +202,30 @@ Insert dans la table 'Admini' un nouvel admin
 
             
 
-            <td class="description last">Les valeurs des champs utilisateur.</td>
+            <td class="description last">L'objet de requête HTTP.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>res</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">L'objet de réponse HTTP.</td>
         </tr>
 
     
@@ -790,1135 +266,7 @@ Insert dans la table 'Admini' un nouvel admin
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="models_adminModel.js.html">models/adminModel.js</a>, <a href="models_adminModel.js.html#line17">line 17</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="~insererUser"><span class="type-signature">(async, inner) </span>insererUser<span class="signature">()</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Création utilisateur
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="models_userModel.js.html">models/userModel.js</a>, <a href="models_userModel.js.html#line109">line 109</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="~modifierAdministrateur"><span class="type-signature">(async, inner) </span>modifierAdministrateur<span class="signature">()</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Modifier un admin
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="models_adminModel.js.html">models/adminModel.js</a>, <a href="models_adminModel.js.html#line30">line 30</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="~modifierUser"><span class="type-signature">(async, inner) </span>modifierUser<span class="signature">()</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Modification users
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="controllers_userController.js.html">controllers/userController.js</a>, <a href="controllers_userController.js.html#line208">line 208</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="~modifierUser"><span class="type-signature">(async, inner) </span>modifierUser<span class="signature">()</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Modifier un utilisateur, injections sql
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="models_userModel.js.html">models/userModel.js</a>, <a href="models_userModel.js.html#line151">line 151</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="~supprimerUser"><span class="type-signature">(async, inner) </span>supprimerUser<span class="signature">()</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Suppression
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="controllers_userController.js.html">controllers/userController.js</a>, <a href="controllers_userController.js.html#line383">line 383</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="~supprimerUser"><span class="type-signature">(inner) </span>supprimerUser<span class="signature">()</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Supprimer
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="models_userModel.js.html">models/userModel.js</a>, <a href="models_userModel.js.html#line213">line 213</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-    
-
-    
-
-    
-</article>
-
-</section>
-
-
-
-
-
-
-
-<section>
-
-<header>
-    
-</header>
-
-<article>
-    <div class="container-overview">
-    
-        
-            <div class="description">Model des administrateurs.</div>
-        
-
-        
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="models_adminModel.js.html">models/adminModel.js</a>, <a href="models_adminModel.js.html#line1">line 1</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-        
-    
-    </div>
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-        <h3 class="subsection-title">Members</h3>
-
-        
-            
-<h4 class="name" id="~infoUser"><span class="type-signature">(inner) </span>infoUser<span class="type-signature"></span></h4>
-
-
-
-
-<div class="description">
-    Vérifier que le nouveau pseudo et email n'existent pas
-</div>
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="models_userModel.js.html">models/userModel.js</a>, <a href="models_userModel.js.html#line156">line 156</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-    
-
-    
-        <h3 class="subsection-title">Methods</h3>
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="~chercherAdminID"><span class="type-signature">(inner) </span>chercherAdminID<span class="signature">()</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Chercher un admin par son id
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="models_adminModel.js.html">models/adminModel.js</a>, <a href="models_adminModel.js.html#line40">line 40</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="~chercherListeUtilisateurs"><span class="type-signature">(inner) </span>chercherListeUtilisateurs<span class="signature">()</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Liste des utilisateurs
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="models_userModel.js.html">models/userModel.js</a>, <a href="models_userModel.js.html#line58">line 58</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="~chercherUserID"><span class="type-signature">(inner) </span>chercherUserID<span class="signature">()</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Chercher un utilisateur par son id
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="models_userModel.js.html">models/userModel.js</a>, <a href="models_userModel.js.html#line74">line 74</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="~chercherUserPseudo"><span class="type-signature">(inner) </span>chercherUserPseudo<span class="signature">()</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Pour supprimer, odifier la fonction de hachage de l'admin
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="models_userModel.js.html">models/userModel.js</a>, <a href="models_userModel.js.html#line90">line 90</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="~createUser"><span class="type-signature">(async, inner) </span>createUser<span class="signature">()</span><span class="type-signature"> &rarr; {object|Error}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Créer un utilisateur.
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="controllers_userController.js.html">controllers/userController.js</a>, <a href="controllers_userController.js.html#line70">line 70</a>
+        <a href="controllers_userController.js.html">controllers/userController.js</a>, <a href="controllers_userController.js.html#line69">line 69</a>
     </li></ul></dd>
     
 
@@ -1944,10 +292,10 @@ Insert dans la table 'Admini' un nouvel admin
 
 
 <h5>Returns:</h5>
-<ul>
-        <li>
+
+        
 <div class="param-desc">
-    200 - Un tableau contenant tous les utilisateurs.
+    - Message de succès ou d'erreur.
 </div>
 
 
@@ -1958,33 +306,13 @@ Insert dans la table 'Admini' un nouvel admin
     </dt>
     <dd>
         
-<span class="param-type">object</span>
+<span class="param-type">Object</span>
 
 
     </dd>
 </dl>
-</li>
+
     
-        <li>
-<div class="param-desc">
-    500 - Erreur serveur.
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Error</span>
-
-
-    </dd>
-</dl>
-</li>
-    </ul>
 
 
 
@@ -1996,7 +324,7 @@ Insert dans la table 'Admini' un nouvel admin
     
 
     
-    <h4 class="name" id="~creerAdmin"><span class="type-signature">(async, inner) </span>creerAdmin<span class="signature">(values_user)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="~modifierUser"><span class="type-signature">(async, inner) </span>modifierUser<span class="signature">(req, res)</span><span class="type-signature"> &rarr; {Object}</span></h4>
     
 
     
@@ -2004,9 +332,12 @@ Insert dans la table 'Admini' un nouvel admin
 
 
 <div class="description">
-    Création d'un administrateur.
+    Ce contrôleur permet de mofidier utilisateur.
+ 
+Si l'adresse mail ou le pseudo sont déjà pris par un autre utilisateur, une erreur est renvoyée.
+Accès à ce controller: Administrateurs.
 
-Insert dans la table 'Admini' un nouvel admin
+Route: users.js
 </div>
 
 
@@ -2042,13 +373,13 @@ Insert dans la table 'Admini' un nouvel admin
 
         <tr>
             
-                <td class="name"><code>values_user</code></td>
+                <td class="name"><code>req</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">Array</span>
+<span class="param-type">object</span>
 
 
             
@@ -2058,7 +389,30 @@ Insert dans la table 'Admini' un nouvel admin
 
             
 
-            <td class="description last">Les valeurs des champs utilisateur.</td>
+            <td class="description last">L'objet de requête HTTP.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>res</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">L'objet de réponse HTTP.</td>
         </tr>
 
     
@@ -2099,1135 +453,7 @@ Insert dans la table 'Admini' un nouvel admin
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="models_adminModel.js.html">models/adminModel.js</a>, <a href="models_adminModel.js.html#line17">line 17</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="~insererUser"><span class="type-signature">(async, inner) </span>insererUser<span class="signature">()</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Création utilisateur
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="models_userModel.js.html">models/userModel.js</a>, <a href="models_userModel.js.html#line109">line 109</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="~modifierAdministrateur"><span class="type-signature">(async, inner) </span>modifierAdministrateur<span class="signature">()</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Modifier un admin
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="models_adminModel.js.html">models/adminModel.js</a>, <a href="models_adminModel.js.html#line30">line 30</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="~modifierUser"><span class="type-signature">(async, inner) </span>modifierUser<span class="signature">()</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Modification users
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="controllers_userController.js.html">controllers/userController.js</a>, <a href="controllers_userController.js.html#line208">line 208</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="~modifierUser"><span class="type-signature">(async, inner) </span>modifierUser<span class="signature">()</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Modifier un utilisateur, injections sql
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="models_userModel.js.html">models/userModel.js</a>, <a href="models_userModel.js.html#line151">line 151</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="~supprimerUser"><span class="type-signature">(async, inner) </span>supprimerUser<span class="signature">()</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Suppression
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="controllers_userController.js.html">controllers/userController.js</a>, <a href="controllers_userController.js.html#line383">line 383</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="~supprimerUser"><span class="type-signature">(inner) </span>supprimerUser<span class="signature">()</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Supprimer
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="models_userModel.js.html">models/userModel.js</a>, <a href="models_userModel.js.html#line213">line 213</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-    
-
-    
-
-    
-</article>
-
-</section>
-
-
-
-
-
-
-
-<section>
-
-<header>
-    
-</header>
-
-<article>
-    <div class="container-overview">
-    
-        
-            <div class="description">Model des utilisateurs.</div>
-        
-
-        
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="models_userModel.js.html">models/userModel.js</a>, <a href="models_userModel.js.html#line1">line 1</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-        
-    
-    </div>
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-        <h3 class="subsection-title">Members</h3>
-
-        
-            
-<h4 class="name" id="~infoUser"><span class="type-signature">(inner) </span>infoUser<span class="type-signature"></span></h4>
-
-
-
-
-<div class="description">
-    Vérifier que le nouveau pseudo et email n'existent pas
-</div>
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="models_userModel.js.html">models/userModel.js</a>, <a href="models_userModel.js.html#line156">line 156</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-    
-
-    
-        <h3 class="subsection-title">Methods</h3>
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="~chercherAdminID"><span class="type-signature">(inner) </span>chercherAdminID<span class="signature">()</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Chercher un admin par son id
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="models_adminModel.js.html">models/adminModel.js</a>, <a href="models_adminModel.js.html#line40">line 40</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="~chercherListeUtilisateurs"><span class="type-signature">(inner) </span>chercherListeUtilisateurs<span class="signature">()</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Liste des utilisateurs
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="models_userModel.js.html">models/userModel.js</a>, <a href="models_userModel.js.html#line58">line 58</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="~chercherUserID"><span class="type-signature">(inner) </span>chercherUserID<span class="signature">()</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Chercher un utilisateur par son id
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="models_userModel.js.html">models/userModel.js</a>, <a href="models_userModel.js.html#line74">line 74</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="~chercherUserPseudo"><span class="type-signature">(inner) </span>chercherUserPseudo<span class="signature">()</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Pour supprimer, odifier la fonction de hachage de l'admin
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="models_userModel.js.html">models/userModel.js</a>, <a href="models_userModel.js.html#line90">line 90</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="~createUser"><span class="type-signature">(async, inner) </span>createUser<span class="signature">()</span><span class="type-signature"> &rarr; {object|Error}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Créer un utilisateur.
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="controllers_userController.js.html">controllers/userController.js</a>, <a href="controllers_userController.js.html#line70">line 70</a>
+        <a href="controllers_userController.js.html">controllers/userController.js</a>, <a href="controllers_userController.js.html#line180">line 180</a>
     </li></ul></dd>
     
 
@@ -3253,10 +479,10 @@ Insert dans la table 'Admini' un nouvel admin
 
 
 <h5>Returns:</h5>
-<ul>
-        <li>
+
+        
 <div class="param-desc">
-    200 - Un tableau contenant tous les utilisateurs.
+    - Message de succès ou d'erreur.
 </div>
 
 
@@ -3267,33 +493,13 @@ Insert dans la table 'Admini' un nouvel admin
     </dt>
     <dd>
         
-<span class="param-type">object</span>
+<span class="param-type">Object</span>
 
 
     </dd>
 </dl>
-</li>
+
     
-        <li>
-<div class="param-desc">
-    500 - Erreur serveur.
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Error</span>
-
-
-    </dd>
-</dl>
-</li>
-    </ul>
 
 
 
@@ -3305,7 +511,7 @@ Insert dans la table 'Admini' un nouvel admin
     
 
     
-    <h4 class="name" id="~creerAdmin"><span class="type-signature">(async, inner) </span>creerAdmin<span class="signature">(values_user)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="~supprimerUser"><span class="type-signature">(async, inner) </span>supprimerUser<span class="signature">(req, res)</span><span class="type-signature"> &rarr; {Object}</span></h4>
     
 
     
@@ -3313,9 +519,10 @@ Insert dans la table 'Admini' un nouvel admin
 
 
 <div class="description">
-    Création d'un administrateur.
-
-Insert dans la table 'Admini' un nouvel admin
+    Ce contrôleur permet de supprimer un utilisateur.
+ 
+Son identidiant est récuépré dans la requête.
+Route: users.js
 </div>
 
 
@@ -3351,13 +558,13 @@ Insert dans la table 'Admini' un nouvel admin
 
         <tr>
             
-                <td class="name"><code>values_user</code></td>
+                <td class="name"><code>req</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">Array</span>
+<span class="param-type">object</span>
 
 
             
@@ -3367,7 +574,30 @@ Insert dans la table 'Admini' un nouvel admin
 
             
 
-            <td class="description last">Les valeurs des champs utilisateur.</td>
+            <td class="description last">L'objet de requête HTTP.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>res</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">L'objet de réponse HTTP.</td>
         </tr>
 
     
@@ -3408,7 +638,7 @@ Insert dans la table 'Admini' un nouvel admin
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="models_adminModel.js.html">models/adminModel.js</a>, <a href="models_adminModel.js.html#line17">line 17</a>
+        <a href="controllers_userController.js.html">controllers/userController.js</a>, <a href="controllers_userController.js.html#line291">line 291</a>
     </li></ul></dd>
     
 
@@ -3433,6 +663,28 @@ Insert dans la table 'Admini' un nouvel admin
 
 
 
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    - Message de succès ou d'erreur.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Object</span>
+
+
+    </dd>
+</dl>
+
+    
 
 
 
@@ -3444,7 +696,7 @@ Insert dans la table 'Admini' un nouvel admin
     
 
     
-    <h4 class="name" id="~insererUser"><span class="type-signature">(async, inner) </span>insererUser<span class="signature">()</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="~voirUtilisateurs"><span class="type-signature">(async, inner) </span>voirUtilisateurs<span class="signature">(req, res)</span><span class="type-signature"> &rarr; {Object}</span></h4>
     
 
     
@@ -3452,7 +704,12 @@ Insert dans la table 'Admini' un nouvel admin
 
 
 <div class="description">
-    Création utilisateur
+    Ce contrôleur permet d'appeler la fonction qui
+récupère la liste de tous les utilisateurs.
+ 
+Accès à ce controller: Administrateurs.
+
+Route: users.js
 </div>
 
 
@@ -3461,6 +718,78 @@ Insert dans la table 'Admini' un nouvel admin
 
 
 
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>req</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">L'objet de requête HTTP.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>res</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">L'objet de réponse HTTP.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
 
 
 
@@ -3496,7 +825,7 @@ Insert dans la table 'Admini' un nouvel admin
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="models_userModel.js.html">models/userModel.js</a>, <a href="models_userModel.js.html#line109">line 109</a>
+        <a href="controllers_userController.js.html">controllers/userController.js</a>, <a href="controllers_userController.js.html#line40">line 40</a>
     </li></ul></dd>
     
 
@@ -3521,446 +850,28 @@ Insert dans la table 'Admini' un nouvel admin
 
 
 
-
-
-
-
+<h5>Returns:</h5>
 
         
-            
-
-    
-
-    
-    <h4 class="name" id="~modifierAdministrateur"><span class="type-signature">(async, inner) </span>modifierAdministrateur<span class="signature">()</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Modifier un admin
+<div class="param-desc">
+    - Message d'erreur ou JSON avec la liste.
 </div>
 
 
 
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="models_adminModel.js.html">models/adminModel.js</a>, <a href="models_adminModel.js.html#line30">line 30</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
         
-            
-
-    
-
-    
-    <h4 class="name" id="~modifierUser"><span class="type-signature">(async, inner) </span>modifierUser<span class="signature">()</span><span class="type-signature"></span></h4>
-    
-
-    
+<span class="param-type">Object</span>
 
 
-
-<div class="description">
-    Modification users
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="controllers_userController.js.html">controllers/userController.js</a>, <a href="controllers_userController.js.html#line208">line 208</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
+    </dd>
 </dl>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
     
-
-    
-    <h4 class="name" id="~modifierUser"><span class="type-signature">(async, inner) </span>modifierUser<span class="signature">()</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Modifier un utilisateur, injections sql
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="models_userModel.js.html">models/userModel.js</a>, <a href="models_userModel.js.html#line151">line 151</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="~supprimerUser"><span class="type-signature">(async, inner) </span>supprimerUser<span class="signature">()</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Suppression
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="controllers_userController.js.html">controllers/userController.js</a>, <a href="controllers_userController.js.html#line383">line 383</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="~supprimerUser"><span class="type-signature">(inner) </span>supprimerUser<span class="signature">()</span><span class="type-signature"></span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Supprimer
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="models_userModel.js.html">models/userModel.js</a>, <a href="models_userModel.js.html#line213">line 213</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -3982,13 +893,13 @@ Insert dans la table 'Admini' un nouvel admin
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Annotation_%2525C3%2525A9quipes.html">Annotation_équipes</a></li><li><a href="module-Connexion.html">Connexion</a></li><li><a href="module-Equipe.html">Equipe</a></li><li><a href="module-Evenement.html">Evenement</a></li><li><a href="module-Gestion_demandes_admission.html">Gestion_demandes_admission</a></li><li><a href="module-Gestion_des_utilisateurs.html">Gestion_des_utilisateurs</a></li><li><a href="module-Inscription.html">Inscription</a></li><li><a href="module-Projet.html">Projet</a></li><li><a href="module-Token.html">Token</a></li><li><a href="module-UserRouter.html">UserRouter</a></li><li><a href="module-VerifierProfil.html">VerifierProfil</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-UserRouter-UserRouter.html">UserRouter</a></li></ul><h3>Global</h3><ul><li><a href="global.html#ajouterRegle">ajouterRegle</a></li><li><a href="global.html#chercherGestionnaireExtID">chercherGestionnaireExtID</a></li><li><a href="global.html#chercherGestionnaireIapau">chercherGestionnaireIapau</a></li><li><a href="global.html#chercherListeGestionnaireIapau">chercherListeGestionnaireIapau</a></li><li><a href="global.html#chercherListeGestionnairesExt">chercherListeGestionnairesExt</a></li><li><a href="global.html#chercherListeStudents">chercherListeStudents</a></li><li><a href="global.html#chercherStudent">chercherStudent</a></li><li><a href="global.html#chercheridProjet">chercheridProjet</a></li><li><a href="global.html#comparerMdp">comparerMdp</a></li><li><a href="global.html#creationProjet">creationProjet</a></li><li><a href="global.html#creerEtudiant">creerEtudiant</a></li><li><a href="global.html#creerGestionnaireExterne">creerGestionnaireExterne</a></li><li><a href="global.html#creerGestionnaireIA">creerGestionnaireIA</a></li><li><a href="global.html#creerProjet">creerProjet</a></li><li><a href="global.html#equipeExiste">equipeExiste</a></li><li><a href="global.html#infosProjet">infosProjet</a></li><li><a href="global.html#insererMot">insererMot</a></li><li><a href="global.html#listeProjetsJson">listeProjetsJson</a></li><li><a href="global.html#modifierEtudiant">modifierEtudiant</a></li><li><a href="global.html#modifierExterne">modifierExterne</a></li><li><a href="global.html#modifierIapau">modifierIapau</a></li><li><a href="global.html#modifierProjet">modifierProjet</a></li><li><a href="global.html#recupererAncienEvents">recupererAncienEvents</a></li><li><a href="global.html#recupererEventActuel">recupererEventActuel</a></li><li><a href="global.html#recuperer_projets">recuperer_projets</a></li><li><a href="global.html#recuperer_regles">recuperer_regles</a></li><li><a href="global.html#recuperer_ressourcesPrivees">recuperer_ressourcesPrivees</a></li><li><a href="global.html#recuperer_ressourcesPubliques">recuperer_ressourcesPubliques</a></li><li><a href="global.html#recuperer_toutes_ressources">recuperer_toutes_ressources</a></li><li><a href="global.html#salageMdp">salageMdp</a></li><li><a href="global.html#supprimerProjet">supprimerProjet</a></li><li><a href="global.html#tousLesProjets">tousLesProjets</a></li><li><a href="global.html#updateMdp">updateMdp</a></li><li><a href="global.html#validerEtudiant">validerEtudiant</a></li><li><a href="global.html#verifIdEquipe">verifIdEquipe</a></li><li><a href="global.html#verifIdEvent">verifIdEvent</a></li><li><a href="global.html#verifIdProjet">verifIdProjet</a></li><li><a href="global.html#voirEvent">voirEvent</a></li><li><a href="global.html#voirListeGestionnaires">voirListeGestionnaires</a></li><li><a href="global.html#voirListeProjets">voirListeProjets</a></li><li><a href="global.html#voirTousEvents">voirTousEvents</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Connexion.html">Connexion</a></li><li><a href="module-Equipe.html">Equipe</a></li><li><a href="module-Gestion_des_utilisateurs.html">Gestion_des_utilisateurs</a></li><li><a href="module-Inscription.html">Inscription</a></li><li><a href="module-Token.html">Token</a></li><li><a href="module-UserRouter.html">UserRouter</a></li><li><a href="module-VerifierProfil.html">VerifierProfil</a></li></ul><h3>Global</h3><ul><li><a href="global.html#ListeMembre">ListeMembre</a></li><li><a href="global.html#aUneEquipeDansEvent">aUneEquipeDansEvent</a></li><li><a href="global.html#ajouterMembre">ajouterMembre</a></li><li><a href="global.html#ajouterRegle">ajouterRegle</a></li><li><a href="global.html#appartenirEquipe">appartenirEquipe</a></li><li><a href="global.html#attribuerProjetExterne">attribuerProjetExterne</a></li><li><a href="global.html#attribuerProjetIA">attribuerProjetIA</a></li><li><a href="global.html#chercherAdminID">chercherAdminID</a></li><li><a href="global.html#chercherEquipeID">chercherEquipeID</a></li><li><a href="global.html#chercherGestionnaireExt">chercherGestionnaireExt</a></li><li><a href="global.html#chercherGestionnaireExtID">chercherGestionnaireExtID</a></li><li><a href="global.html#chercherGestionnaireIA">chercherGestionnaireIA</a></li><li><a href="global.html#chercherGestionnaireIAID">chercherGestionnaireIAID</a></li><li><a href="global.html#chercherGestionnaireIapau">chercherGestionnaireIapau</a></li><li><a href="global.html#chercherListeGestionnaireIapau">chercherListeGestionnaireIapau</a></li><li><a href="global.html#chercherListeGestionnairesExt">chercherListeGestionnairesExt</a></li><li><a href="global.html#chercherListeStudents">chercherListeStudents</a></li><li><a href="global.html#chercherListeUtilisateurs">chercherListeUtilisateurs</a></li><li><a href="global.html#chercherStudent">chercherStudent</a></li><li><a href="global.html#chercherUserID">chercherUserID</a></li><li><a href="global.html#chercherUserPseudo">chercherUserPseudo</a></li><li><a href="global.html#chercheraccesGitlab">chercheraccesGitlab</a></li><li><a href="global.html#chercheridProjet">chercheridProjet</a></li><li><a href="global.html#comparerMdp">comparerMdp</a></li><li><a href="global.html#copieDuTemplate">copieDuTemplate</a></li><li><a href="global.html#createEvent">createEvent</a></li><li><a href="global.html#creationProjet">creationProjet</a></li><li><a href="global.html#creerAdmin">creerAdmin</a></li><li><a href="global.html#creerAnnotation">creerAnnotation</a></li><li><a href="global.html#creerDossier">creerDossier</a></li><li><a href="global.html#creerEquipe">creerEquipe</a></li><li><a href="global.html#creerEtudiant">creerEtudiant</a></li><li><a href="global.html#creerGestionnaireExterne">creerGestionnaireExterne</a></li><li><a href="global.html#creerGestionnaireIA">creerGestionnaireIA</a></li><li><a href="global.html#creerProjet">creerProjet</a></li><li><a href="global.html#creerUtilisateur">creerUtilisateur</a></li><li><a href="global.html#declinerDemande">declinerDemande</a></li><li><a href="global.html#demandeDejaEnvoyee">demandeDejaEnvoyee</a></li><li><a href="global.html#destituerProjetExterne">destituerProjetExterne</a></li><li><a href="global.html#destituerProjetIa">destituerProjetIa</a></li><li><a href="global.html#detacherProjetEvent">detacherProjetEvent</a></li><li><a href="global.html#ecrireAnnotation">ecrireAnnotation</a></li><li><a href="global.html#envoyerDemande">envoyerDemande</a></li><li><a href="global.html#envoyerMessage">envoyerMessage</a></li><li><a href="global.html#envoyerMessageEquipe">envoyerMessageEquipe</a></li><li><a href="global.html#envoyerMessageGlobalEvent">envoyerMessageGlobalEvent</a></li><li><a href="global.html#envoyerMessageGlobalProjet">envoyerMessageGlobalProjet</a></li><li><a href="global.html#envoyer_json_liste_gestionnaires">envoyer_json_liste_gestionnaires</a></li><li><a href="global.html#equipesOuvertes">equipesOuvertes</a></li><li><a href="global.html#fermerEquipe">fermerEquipe</a></li><li><a href="global.html#genererChaineAleatoire">genererChaineAleatoire</a></li><li><a href="global.html#getAnnotationEquipe">getAnnotationEquipe</a></li><li><a href="global.html#getAnnotationEquipes">getAnnotationEquipes</a></li><li><a href="global.html#getExterneInfo">getExterneInfo</a></li><li><a href="global.html#getIAGestionnaireInfo">getIAGestionnaireInfo</a></li><li><a href="global.html#getMessageEquipe">getMessageEquipe</a></li><li><a href="global.html#getStudentInfo">getStudentInfo</a></li><li><a href="global.html#infosProjet">infosProjet</a></li><li><a href="global.html#insererAccesEquipeGit">insererAccesEquipeGit</a></li><li><a href="global.html#insererMot">insererMot</a></li><li><a href="global.html#insererUser">insererUser</a></li><li><a href="global.html#jsonEquipesOuvertes">jsonEquipesOuvertes</a></li><li><a href="global.html#jsonGetAnnotation">jsonGetAnnotation</a></li><li><a href="global.html#jsonGetMessegaeEquipe">jsonGetMessegaeEquipe</a></li><li><a href="global.html#jsonInformationsEquipe">jsonInformationsEquipe</a></li><li><a href="global.html#jsonListeEquipeProjet">jsonListeEquipeProjet</a></li><li><a href="global.html#jsonMesEquipes">jsonMesEquipes</a></li><li><a href="global.html#listeEquipeProjet">listeEquipeProjet</a></li><li><a href="global.html#listeEquipes">listeEquipes</a></li><li><a href="global.html#listeProjetsJson">listeProjetsJson</a></li><li><a href="global.html#modifierEquipe">modifierEquipe</a></li><li><a href="global.html#modifierEtudiant">modifierEtudiant</a></li><li><a href="global.html#modifierEvent">modifierEvent</a></li><li><a href="global.html#modifierExterne">modifierExterne</a></li><li><a href="global.html#modifierIapau">modifierIapau</a></li><li><a href="global.html#modifierProjet">modifierProjet</a></li><li><a href="global.html#modifierUser">modifierUser</a></li><li><a href="global.html#ouvrirEquipe">ouvrirEquipe</a></li><li><a href="global.html#promouvoir">promouvoir</a></li><li><a href="global.html#quitterEquipe">quitterEquipe</a></li><li><a href="global.html#rattacherProjetEvent">rattacherProjetEvent</a></li><li><a href="global.html#recupInfoEvent">recupInfoEvent</a></li><li><a href="global.html#recupererAncienEvents">recupererAncienEvents</a></li><li><a href="global.html#recupererDemande">recupererDemande</a></li><li><a href="global.html#recupererEventActuel">recupererEventActuel</a></li><li><a href="global.html#recupererJSON">recupererJSON</a></li><li><a href="global.html#recupererMessageEquipe">recupererMessageEquipe</a></li><li><a href="global.html#recupererMot">recupererMot</a></li><li><a href="global.html#recuperer_projets">recuperer_projets</a></li><li><a href="global.html#recuperer_regles">recuperer_regles</a></li><li><a href="global.html#recuperer_ressourcesPrivees">recuperer_ressourcesPrivees</a></li><li><a href="global.html#recuperer_ressourcesPubliques">recuperer_ressourcesPubliques</a></li><li><a href="global.html#recuperer_toutes_ressources">recuperer_toutes_ressources</a></li><li><a href="global.html#salageMdp">salageMdp</a></li><li><a href="global.html#supprimerDemandes">supprimerDemandes</a></li><li><a href="global.html#supprimerEquipe">supprimerEquipe</a></li><li><a href="global.html#supprimerEvent">supprimerEvent</a></li><li><a href="global.html#supprimerMot">supprimerMot</a></li><li><a href="global.html#supprimerProjet">supprimerProjet</a></li><li><a href="global.html#supprimerRegles">supprimerRegles</a></li><li><a href="global.html#supprimerUnMembre">supprimerUnMembre</a></li><li><a href="global.html#supprimerUser">supprimerUser</a></li><li><a href="global.html#tousLesProjets">tousLesProjets</a></li><li><a href="global.html#toutesInfosProjet">toutesInfosProjet</a></li><li><a href="global.html#updateMdp">updateMdp</a></li><li><a href="global.html#validerEtudiant">validerEtudiant</a></li><li><a href="global.html#verifIdEquipe">verifIdEquipe</a></li><li><a href="global.html#verifIdEvent">verifIdEvent</a></li><li><a href="global.html#verifIdProjet">verifIdProjet</a></li><li><a href="global.html#verifIdUser">verifIdUser</a></li><li><a href="global.html#voirEvent">voirEvent</a></li><li><a href="global.html#voirListeGestionnaires">voirListeGestionnaires</a></li><li><a href="global.html#voirListeProjets">voirListeProjets</a></li><li><a href="global.html#voirTousEvents">voirTousEvents</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.2</a> on Sun Aug 27 2023 19:13:11 GMT+0200 (Central European Summer Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.2</a> on Fri Sep 01 2023 11:42:28 GMT+0200 (Central European Summer Time)
 </footer>
 
 <script> prettyPrint(); </script>

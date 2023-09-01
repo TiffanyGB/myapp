@@ -15,7 +15,14 @@ async function validerRegles(req) {
         .run(req);
 }
 
-/**Récupérer une regle à partir de l'id de l'event */
+/**
+ * Récupère les règles associées à un événement en fonction de son identifiant.
+ * @async
+ * @function
+ * @param {number} idEvent - Identifiant de l'événement.
+ * @returns {Promise<Array>} - Une promesse résolue avec un tableau de règles associées à l'événement.
+ * @throws {Error} Une erreur si la récupération des règles échoue.
+ */
 async function recuperer_regles(idEvent) {
 
     const chercherProjets = `SELECT * FROM Regle WHERE idevent = $1`
@@ -28,7 +35,14 @@ async function recuperer_regles(idEvent) {
     }
 }
 
-/**Ajouter une regle à un event */
+/**
+ * Ajoute une règle à un événement.
+ * @function
+ * @param {number} idEvent - Identifiant de l'événement auquel ajouter la règle.
+ * @param {string} titre - Le titre de la règle.
+ * @param {string} contenu - Le contenu de la règle.
+ * @throws {Error} Une erreur si l'ajout de la règle échoue.
+ */
 function ajouterRegle(idEvent, titre, contenu) {
 
     const valeur = [titre, contenu, idEvent];
@@ -43,6 +57,13 @@ function ajouterRegle(idEvent, titre, contenu) {
     }
 }
 
+/**
+ * Supprime toutes les règles associées à un événement en fonction de son identifiant.
+ * @async
+ * @function
+ * @param {number} idEvent - Identifiant de l'événement.
+ * @throws {Error} Une erreur si la suppression des règles échoue.
+ */
 async function supprimerRegles(idEvent) {
 
     const supprimer = `DELETE FROM Regle 

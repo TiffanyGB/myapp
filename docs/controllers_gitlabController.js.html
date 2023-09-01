@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: controllers/annotationController.js</title>
+    <title>JSDoc: Source: controllers/gitlabController.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: controllers/annotationController.js</h1>
+    <h1 class="page-title">Source: controllers/gitlabController.js</h1>
 
     
 
@@ -26,122 +26,276 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>/**
- * @fileoverview Contrôleur des annotations d'une équipes.
+            <pre class="prettyprint source linenums"><code>const axios = require('axios');
+
+var env = require('../environnement.json');
+var gitlab = env.app.computationImpact.gitlab;
+const idProjet = gitlab.idProjet;
+const gitlabBaseUrl = gitlab.api_gitlab;
+const accessToken = gitlab.token;
+const urlGitlab = gitlab.host;
+
+/**
+ * @function
+ * @param {int} longueur - Longueur de la chaîne à retourner.
+ * @description Permet de générer des chaînes de caractères aléatoires
  * 
- * @version 1.0.0 
- * @author Tiffany GAY-BELLILE
- * @requires ../../models/annotationEquipeModel
- * @requires express-validator
+ * @returns {String} Chaîne aléatoire
  */
+function genererChaineAleatoire(longueur) {
+  const caracteresPossibles = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let chaineAleatoire = '';
 
-const annotationModel = require('../models/annotationEquipeModel');
-const { validationResult } = require('express-validator');
+  for (let i = 0; i &lt; longueur; i++) {
+    const caractereAleatoire = caracteresPossibles[Math.floor(Math.random() * caracteresPossibles.length)];
+    chaineAleatoire += caractereAleatoire;
+  }
 
-
-/**
- * Contrôleur pour créer une nouvelle annotation associée à une équipe.
- * 
- * @function
- * @param {Object} req - L'objet de la requête (express request object).
- * @param {Object} res - L'objet de la réponse (express response object).
- * @returns {Object} - Retourne un objet JSON avec un message indiquant si l'annotation a été créée
- * avec succès ou une erreur en cas d'échec.
- * @description  Contrôleur fait appel à la fonction de création d'une nouvelle annotation associée à une équipe.
- * 
- * Récupère les informations utiles à l'insertion dans la base de données:
- * 
- * Le contenu de l'annotation: est récupéré du body, message que laisse l'administrateur
- * ou le gestionnaire du projet,
- * L'id de l'équipe: Directement depuis l'url de la route,
- * L'id de l'auteur de l'annotation depuis son token.
- * 
- * Elle vérifie les données du body avec sa fonction de validation.
- * 
- * Accès à ce controller: Gestionnaires du projet et les administrateurs.
- * 
- * 
- * Route: annotation.js
- * 
-*/
-async function ecrireAnnotation(req, res) {
-
-    if (req.method === 'OPTIONS') {
-        res.status(200).json({ sucess: 'Access granted' });
-
-    } else if (req.method === 'POST') {
-
-        const idEquipe = res.locals.idEquipe;
-        const auteur = req.id;
-        let contenu = req.body.contenu;
-
-        /*Supprimer les espcaces au début et à la fin de la chaîne de caractères */
-        contenu = contenu.trim();
-
-        await annotationModel.validerAnnotation(req);
-
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            errorDetected = true;
-            return res.status(400).json({ errors: errors.array() });
-        }
-
-        try {
-            annotationModel.creerAnnotation([idEquipe, auteur, contenu]);
-            return res.status(200).json({ message: 'Annotation créée.' });
-        } catch (error) {
-            return res.status(400).json({ error: 'Echec lors de la création de l\'annotation.' });
-        }
-    } else {
-        return res.status(404).json('Page not found');
-    }
+  return chaineAleatoire;
 }
 
 /**
- * Contrôleur pour récupérer toutes les annotations associées à une équipe.
- * 
  * @function
- * @param {Object} req - L'objet de la requête (express request object).
- * @param {Object} res - L'objet de la réponse (express response object).
- * @returns {Object} - Retourne un objet JSON contenant l'ensemble des annotations de l'équipe.
- * Si la requête échoue, code d'erreur 400 et message d'erreur.
- * @description  Ce contrôleur récupère l'ensemble des annotations liées à une équipe.
- * 
- * L'id de l'équipe est directement récupéré depuis l'url de la route.
- * 
- * Accès à ce controller: Gestionnaires du projet et les administrateurs.
- * 
- * Route: annotation.js
-
+ * @param {String} nom_event - Nom de l'événement
+ * @param {Int} idEquipe - Identifiant de l'équipe
+ * @description Cette fonction permet de créer le dossier annexe sur GitLab qui sert
+ * à récupérer les JSON de l'équipe.
+ *  
+ * Le dossier se trouve dans un dossier portant le nom de l'événement. 
+ * Ce dernier est dans un repertoire dont l'identifant se trouve dans environement.json.
+ * @example
+ * Exemple d'adresse de dossier: 'Repertoire_iapau/Evenement_abc/equipe_4'.
+ * L'équipe possédant l'id dans l'événement 'Evenement_abc' possède ses jsons à l'adresse précédente.
+ * @throws {Error} Si la créaion a échoué.
 */
-async function getAnnotationEquipe(req, res) {
-    if (req.method === 'OPTIONS') {
-        return res.status(200).json({ sucess: 'Access granted' });
+function creerDossier(idEquipe, nom_event) {
 
-    } else if (req.method === 'GET') {
-        const idEquipe = res.locals.idEquipe;
+  const endpoint = `/projects/${encodeURIComponent(idProjet)}/repository/commits`;
 
-        try {
-            const annotation = await annotationModel.jsonGetAnnotation(idEquipe);
+  const messageCommit = 'Ajout du dossier de l\'équipe ' + idEquipe;
+  const branch = 'main';
 
-            /*On enlève le champs idAnnotation du json avant de l'envoyer au client,
-            inutile pour lui */
-            for (i = 0; i &lt; annotation.length; i++) {
-                delete annotation[i].idannotation;
-            }
-            return res.status(200).json(annotation);
-        } catch {
-            return res.status(400).json({ error: 'Echec lors de la création de l\'annotation.' });
-        }
-    } else {
-        return res.status(404).json('Page not found');
-    }
+  /*Nom du dossier */
+  const nomEquipe = 'Equipe_' + idEquipe;
+
+  const commitContent = {
+    branch,
+    commit_message: messageCommit,
+    actions: [
+      {
+        action: 'create',
+        file_path: `${nom_event}/${nomEquipe}/.gitkeep`,
+        content: '',
+      },
+    ],
+  };
+
+  const headers = {
+    'PRIVATE-TOKEN': accessToken,
+  };
+
+  try {
+    axios.post(`${gitlabBaseUrl}${endpoint}`, commitContent, { headers })
+
+  } catch {
+    throw (error);
+  }
 }
 
-module.exports = {
-    ecrireAnnotation,
-    getAnnotationEquipe,
-}</code></pre>
+/**
+ * @async
+ * @function
+ * @param {String} event - Nom de l'événement
+ * @param {Int} idEquipe - Identifiant de l'équipe
+ * @description Cette fonction permet de récupérer les json d'une équipe dans son dossier
+ * annexe associé.
+ * Les fichiers autres que .json sont ignorés.
+ * 
+ * Le nombre de fichiers dans le dossier est récupéré. Puis, le contenu de chaque fichier json est récupéré.
+ * @throws {Error} Si la récupération a échoué.
+ * @returns {Array} Un tableau contenant tous les json de l'équipe.
+
+*/
+async function recupererJSON(idEquipe, event) {
+  const nomEquipe = 'Equipe_' + idEquipe;
+  const eventEquipe = '' + event + '/' + nomEquipe;
+
+  /* Lien pour récupérer l'ensemble des fichiers du répertoire de l'équipe */
+  const endpoint = `/projects/${idProjet}/repository/tree?path=${encodeURIComponent(eventEquipe)}`;
+
+  const headers = {
+    'PRIVATE-TOKEN': accessToken,
+  };
+
+  try {
+    const response = await axios.get(`${gitlabBaseUrl}${endpoint}`, { headers });
+    const fichiers = response.data;
+
+    // Filtrer les fichiers pour ne conserver que ceux avec l'extension ".json"
+    const fichiersJSON = fichiers.filter(fichier => fichier.name.endsWith('.json'));
+
+    const nbFichiersJSON = fichiersJSON.length;
+
+    const contenuFichiers = [];
+
+    let endpointFichierPromises = [];
+
+    for (let i = 0; i &lt; nbFichiersJSON; i++) {
+      let fichierCourant = fichiersJSON[i].name;
+
+      let endpointFichier = `/projects/${idProjet}/repository/files/${encodeURIComponent(eventEquipe)}` + '%2F' + `${encodeURIComponent(fichierCourant)}` + '/raw?ref=main';
+      endpointFichierPromises.push(
+        axios.get(`${gitlabBaseUrl}${endpointFichier}`, { headers })
+          .then(contenu => contenu.data)
+          .catch(error => {
+            console.error('Erreur lors de la requête API GitLab :', error);
+            return null;
+          })
+      );
+    }
+
+    const contenuFichiersResolved = await Promise.all(endpointFichierPromises);
+    contenuFichiersResolved.forEach(contenu => {
+      if (contenu !== null) {
+        contenuFichiers.push(contenu);
+      }
+    });
+
+    return contenuFichiersResolved;
+  } catch (error) {
+    console.error('Erreur lors de la requête API GitLab :', error);
+    return [];
+  }
+}
+
+/**
+ * @async
+ * @function
+ * @param {String} nom_equipe - Nom de l'équipe
+ * @description Cette fonction permet de créer un nouvel utilisateur sur GitLab.
+ * 
+ * Une adresse-mail, un mot de passe et un pseudo sont générés aléatoirement.
+ * Les identifiants seront transmis à l'équipe.
+ * @returns {Array} Tableau contenant le mot de passe, l'email, l'identifiant du compte et le l'id du namespace. 
+ * @throws {Error} Si la création a échoué.
+*/
+async function creerUtilisateur(nom_equipe) {
+
+  const endpoint = `/users`;
+
+  const mdp = genererChaineAleatoire(10);
+  const username = nom_equipe + "_" + genererChaineAleatoire(4);
+  const email = "equipe" + genererChaineAleatoire(8) + "@gaia-iapau.fr"
+
+  const commitContent = {
+    email: email,
+    password: mdp,
+    username: username,
+    name: nom_equipe,
+  };
+
+
+  const headers = {
+    'PRIVATE-TOKEN': accessToken,
+  };
+
+  try{
+    const reponse = await axios.post(`${gitlabBaseUrl}${endpoint}`, commitContent, { headers })
+    const id_compte_gitlab = reponse.data.id;
+    const namespace_id = reponse.data.namespace_id;
+
+    const valeurs_equipe = [mdp, commitContent.email, id_compte_gitlab, namespace_id];
+    return valeurs_equipe;
+
+  }catch{ (error)
+    throw error;
+  }
+}
+
+/**
+ * @async
+ * @function
+ * @param {Int} idTemplate - Id du template du projet
+ * @param {String} idEquipe - Id de l'équipe
+ * @param {String} namespace_id - Id du namespace gitlab de l'équipe
+ * @description Cette fonction permet de faire une copie du répo contenant le template du projet
+ * et d'associer cette copie à l'équipe (grâce au namaspace).
+ * 
+ * @throws {Error} Si la copie a échoué.
+*/
+async function copieDuTemplate(idTemplate, idEquipe,namespace_id) {
+  const endpoint = `/projects/${idTemplate}/fork`;
+  const commitContent = {
+    "name": "Equipe_" + idEquipe,
+    "namespace_id": namespace_id
+  };
+  const headers = {
+    'PRIVATE-TOKEN': accessToken,
+  };
+
+  try {
+    await axios.post(`${gitlabBaseUrl}${endpoint}`, commitContent, { headers });
+  } catch (error) {
+    throw error;
+  }
+}
+
+async function recupererIDTemplate(chemin_template){
+
+  let chemin = chemin_template.split(urlGitlab);
+  chemin = encodeURIComponent(chemin[1]);
+
+  const endpoint = `/projects/${chemin}/`;
+  const headers = {
+    'PRIVATE-TOKEN': accessToken,
+  };
+
+  try {
+    const idTemplate = await axios.get(`${gitlabBaseUrl}${endpoint}`, { headers });
+    return idTemplate.data.id;
+  } catch (error) {
+    throw error;
+  }
+}
+
+module.exports = { creerDossier, recupererJSON, creerUtilisateur, copieDuTemplate, recupererIDTemplate }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// function supprimerDossierEquipe(nomEquipe, event) {
+  //   const eventEquipe = '' + event + '/' + nomEquipe;
+  
+  //   const endpoint = `/projects/${idProjet}/repository/tree?path=${encodeURIComponent(eventEquipe)}`;
+  
+  //   const headers = {
+  //     'PRIVATE-TOKEN': accessToken,
+  //   };
+  // }</code></pre>
         </article>
     </section>
 

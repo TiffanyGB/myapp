@@ -37,7 +37,6 @@
  * @author Tiffany GAY-BELLILE
  * 
  * @requires ../public/javascripts/json_liste/liste_utilisateurs
- * @requires ../public/javascripts/modifierGestionnaires
  * @requires ../models/userModel
  * @requires ../models/etudiantModel
  * @requires ../models/gestionnaireIaModel
@@ -46,54 +45,54 @@
  * 
  */
 
-const listeUser = require('../public/javascripts/json_liste/liste_utilisateurs');
-const modifier = require('../public/javascripts/modifierGestionnaires');
+const gestionnaires = require('../models/gestionnaireModel');
 const userModel = require('../models/userModel');
 const etudiantModel = require('../models/etudiantModel');
 const gestionnaireIaModel = require('../models/gestionnaireIaModel');
 const gestionnaireExterneModel = require('../models/gestionnaireExterneModel');
 const { validationResult } = require('express-validator');
 
-
 /**
- * Récupère la liste des utilisateurs et renvoie un JSON contenant les informations des utilisateurs,
- * si le profil est 'administrateur'.
+ * @async
+ * @function
+ * @param {object} req - L'objet de requête HTTP.
+ * @param {object} res - L'objet de réponse HTTP.
+ * @description Ce contrôleur permet d'appeler la fonction qui
+ * récupère la liste de tous les utilisateurs.
+ *  
+ * Accès à ce controller: Administrateurs.
  * 
- * @param {Object} req - L'objet de requête HTTP.
- * @param {Object} res - L'objet de réponse HTTP.
- * @returns {Promise} Une promesse résolue avec les informations des utilisateurs au format JSON.
- * @throws {Error} Une erreur si la récupération des utilisateurs échoue ou si le profil de l'utilisateur n'est pas valide.
- * 
- * @memberof module:Contrôleur/Admin
+ * Route: users.js
+ * @returns {Object} - Message d'erreur ou JSON avec la liste.
  */
-function voirUtilisateurs(req, res) {
+async function voirUtilisateurs(req, res) {
 
   /*Récupérer la liste des utilisateurs formatée au format json*/
-  listeUser.envoyer_json_liste_user()
-    .then((result) => {
+  try {
+    const result = await userModel.envoyer_json_liste_user();
+    if (result === "erreur_user") {
+      return res.status(400).json({ erreur: "Erreur lors de la récupération des données côté étudiant" })
+    } else {
+      return res.status(200).json(result);
+    }
+  } catch {
+    return res.status(500).json({ error: `Une erreur s\'est produite lors de la récupération des utilisateurs: ${error.message}` });
 
-      /**Erreur lors de la récupération d'un utilisateur */
-      if (result === "erreur_user") {
-        res.status(400).json({ erreur: "Erreur lors de la récupération des données côté étudiant" })
-
-      } else {
-        /**Renvoyer la liste au client */
-        res.status(200).json(result);
-      }
-    })
-    .catch((error) => {
-      res.status(500).json({ message: 'Une erreur s\'est produite lors de la récupération des utilisateurs.' });
-
-    });
+  }
 }
 
 /**
- * Créer un utilisateur.
- *
- * @route POST /users
- * @group Users - Opérations liées aux utilisateurs
- * @returns {object} 200 - Un tableau contenant tous les utilisateurs.
- * @returns {Error}  500 - Erreur serveur.
+ * @async
+ * @function
+ * @param {object} req - L'objet de requête HTTP.
+ * @param {object} res - L'objet de réponse HTTP.
+ * @description Ce contrôleur permet de créer un nouvel utilisateur.
+ *  
+ * Si l'adresse mail ou le pseudo sont déjà pris, une erreur est renvoyée.
+ * Accès à ce controller: Administrateurs.
+ * 
+ * Route: users.js
+ * @returns {Object} - Message de succès ou d'erreur.
  */
 async function createUser(req, res) {
   if (req.method == "OPTIONS") {
@@ -101,40 +100,31 @@ async function createUser(req, res) {
   } else if (req.method === 'POST') {
 
     /* Récupération des données */
-    const {
-      type: type,
-      nom: userNom,
-      prenom: userPrenom,
-      pseudo: userPseudo,
-      email: userMail,
-      linkedin: userLinkedin,
-      github: userGitHub,
-      ville: userVille,
-      ecole: userEcole,
-      niveau_etude: userNiveauEtude,
-      password,
-      entreprise: userEntreprise,
-      metier: userMetier,
-      role_asso: userRole
-    } = req.body;
+    let userData = req.body;
+
+    userData.nom = userData.nom.trim();
+    userData.prenom = userData.prenom.trim();
+    userData.ville = userData.ville.trim();
+    userData.entreprise = userData.entreprise.trim();
+    userData.metier = userData.metier.trim();
+    userData.role_asso = userData.role_asso.trim();
 
     const valeurs_communes = [
-      userNom,
-      userPrenom,
-      userPseudo,
-      userMail,
-      userLinkedin,
-      userGitHub,
-      userVille,
+      userData.nom,
+      userData.prenom,
+      userData.pseudo,
+      userData.email,
+      userData.linkedin,
+      userData.github,
+      userData.ville,
     ]
 
     const valeurs_id = [
-      userPseudo,
-      userMail
+      userData.pseudo,
+      userData.email
     ]
 
-    /* Validations des données selon le type d'utilisateur */
-    switch (type) {
+    switch (userData.type) {
       case 'etudiant':
         await etudiantModel.validerEtudiant(req);
         break;
@@ -150,301 +140,205 @@ async function createUser(req, res) {
         return res.status(400).json({ erreur: "Le type est incorrect" });
     }
 
+    //TODO: Voir si je peux le mettre dans une fonction
+    //Appel du validateur de express validator
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-        errorDetected = true;
-        return res.status(400).json({ errors: errors.array() });
+      errorDetected = true;
+      return res.status(400).json({ errors: errors.array() });
     }
 
-    /**Insertion dans la table user */
-    userModel.insererUser(valeurs_communes, password, valeurs_id, type)
-      .then((insertion) => {
-        /**Insertion doit contenir l'id de l'utilisateur */
-        if (typeof insertion === 'number') {
+    try {
+      /*Insertion dans la table utilisateur, on récupère l'id de l'utilisateur */
+      const idUser = await userModel.insererUser(valeurs_communes, userData.password, valeurs_id);
 
-          /**On insère les infos supplémentaires dans la table appropriée au type*/
-          switch (type) {
-            case 'etudiant':
-
-              etudiantModel.creerEtudiant(userEcole, userNiveauEtude, insertion)
-                .then(() => {
-                  res.status(200).json({ message: 'Inscription réussie' });
-                })
-                .catch(() => {
-                  /**Supprimer l'utilisateur dans la table utilisateur s'il y a un souci */
-                  userModel.supprimerUser(insertion, 'etudiant')
-                  res.status(400).json({ erreur: "erreur", Détails: "Utilisateur supprimé de la table utilisateur" });
-                });
-
-              break;
-
-            case 'administrateur':
-              res.status(200).json({ message: 'Inscription Admin réussie' });
-              break;
-
-            case 'gestionnaireExterne':
-              gestionnaireExterneModel.creerGestionnaireExterne(insertion, userEntreprise, userMetier)
-                .then(() => {
-                  res.status(200).json({ message: 'Inscription réussie' });
-                })
-                .catch(() => {
-                  /**Supprimer l'utilisateur dans la table utilisateur s'il y a un souci */
-                  userModel.supprimerUser(insertion, 'Gestionnaire_externe')
-                  res.status(400).json({ erreur: "erreur", Détails: "Utilisateur supprimé de la table utilisateur" });
-                });
-
-              break;
-
-            case 'gestionnaireIA':
-              gestionnaireIaModel.creerGestionnaireIA(insertion, userRole)
-                .then(() => {
-                  res.status(200).json({ message: 'Inscription réussie' });
-                })
-                .catch(() => {
-                  /**Supprimer l'utilisateur dans la table utilisateur s'il y a un souci */
-                  userModel.supprimerUser(insertion, 'Gestionnaire_iapau')
-                  res.status(400).json({ erreur: "erreur", Détails: "Utilisateur supprimé de la table utilisateur" });
-                });
-
-              break;
-
-            default:
-              userModel.supprimerUser(insertion);
-              res.status(400).json({ message: 'Le type est incorrect.' });
-              break;
-          }
+      if (typeof idUser === 'number') {
+        /**On insère les infos supplémentaires dans la table appropriée au type*/
+        switch (userData.type) {
+          case 'etudiant':
+            etudiantModel.creerEtudiant(userData.ecole, userData.niveau_etude, idUser);
+            break;
+          case 'gestionnaireExterne':
+            gestionnaireExterneModel.creerGestionnaireExterne(idUser, userData.entreprise, userData.metier);
+            break;
+          case 'gestionnaireIA':
+            gestionnaireIaModel.creerGestionnaireIA(idUser, userData.role_asso);
+            break;
         }
+        return res.status(200).json({ message: 'Inscription réussie' });
+      }
+      /**Pseudo et/ou email déjà pris */
+      else if (idUser === 'les2') {
+        return res.status(400).json({ error: 'Mail et pseudo déjà pris.' });
 
-        /**Pseudo et/ou email déjà pris */
-        if (insertion === 'les2') {
-          return res.status(400).json({ error: 'Mail et pseudo déjà pris.' });
+      } else if (idUser === 'pseudo') {
+        return res.status(400).json({ error: 'Le pseudo est déjà pris.' });
 
-        } else if (insertion === 'pseudo') {
-          return res.status(400).json({ error: 'Le pseudo est déjà pris.' });
+      } else if (idUser === 'mail') {
+        return res.status(400).json({ error: 'L\'adresse mail est déjà prise.' });
+      }
 
-        } else if (insertion === 'mail') {
-          return res.status(400).json({ error: 'L\'adresse mail est déjà prise.' });
-        }
-
-      }).catch(() => {
-        return res.status(400).json({ message: 'Erreur lors de l\'insertion de l\'utilisateur' });
-      });
-  }
-}
-
-/**Modification users */
-async function modifierUser(req, res) {
-
-  if (req.method == "OPTIONS") {
-    res.status(200).json({ sucess: 'Agress granted' });
-  }
-  else if (req.method === 'PATCH') {
-
-    /*Si n'est pa admin, vérifier si l'id de l'url est la même que l'utilisteur qui veut modifier */
-    const idUser = res.locals.userId;
-    const idToken = req.id;
-    const profil = req.userProfile;
-
-
-    if (profil != 'admin' &amp;&amp; idUser != idToken) {
-      return res.status(404).json({ erreur: 'Il faut être administrateur pour modifier un autre compte que le sien.' });
-    }
-
-    /**Vérifier que l'id existe dans la bdd, sinon 404 error */
-    const verif = await userModel.chercherUserID(idUser)
-
-    if (verif.length === 0) {
-      return res.status(404).json({ erreur: 'L\'id n\'existe pas' });
-    }
-
-    /**Récupération des données */
-    const {
-      nom: userNom,
-      prenom: userPrenom,
-      pseudo: userPseudo,
-      email: userMail,
-      ecole: userEcole,
-      linkedin,
-      github,
-      ville,
-      niveau_etude: userNiveauEtude,
-      entreprise: userEntreprise,
-      metier: userMetier,
-      role_asso: userRole,
-      password,
-    } = req.body;
-
-    const valeurs = [
-      userNom,
-      userPrenom,
-      userPseudo,
-      userMail,
-      linkedin,
-      github,
-      ville
-    ]
-
-    const valeurs_etudiant = [
-      userEcole,
-      userNiveauEtude
-    ]
-
-    const user = await userModel.chercherUserID(idUser);
-
-    let type = user[0].typeuser;
-
-    /* Vérification des données selon le type */
-    switch (type) {
-      case 'etudiant':
-        await etudiantModel.validerEtudiant(req);
-        break;
-      case 'gestionnaireExterne':
-        await gestionnaireExterneModel.validerGestionnaireExterne(req);
-        break;
-      case 'gestionnaireIA':
-        await gestionnaireIaModel.validerGestionnaireIA(req);
-        break;
-      case 'administrateur':
-        break;
-      default:
-        return res.status(400).json({ erreur: "Le type est incorrect" });
-    }
-
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        errorDetected = true;
-        return res.status(400).json({ errors: errors.array() });
-    }
-
-    /* Modification etudiant */
-    switch (type) {
-      case 'etudiant':
-        etudiantModel.modifierEtudiant(idUser, valeurs, valeurs_etudiant, password)
-          .then((resultat) => {
-            /* Données existantes */
-            if (resultat === 'les2') {
-              res.status(400).json({ erreur: 'Pseudo et email déjà pris' });
-
-            } else if (resultat === 'pseudo') {
-              res.status(400).json({ erreur: 'Pseudo déjà pris' });
-            }
-            else if (resultat === 'mail') {
-              res.status(400).json({ erreur: 'Email déjà pris' });
-            } else {
-              res.status(200).json({ message: "Etudiant modifié avec succès" });
-            }
-          })
-          .catch(() => {
-            res.status(400).json({ erreur: 'Echec de la modification de l\' étudiant' });
-          });
-        break;
-      case 'gestionnaireExterne':
-        modifier.modifierExterne(idUser, valeurs, userMetier, userEntreprise, password)
-          .then((resultat) => {
-            /* Données existantes */
-            if (resultat === 'les2') {
-              res.status(400).json({ erreur: 'Pseudo et email déjà pris' });
-
-            } else if (resultat === 'pseudo') {
-              res.status(400).json({ erreur: 'Pseudo déjà pris' });
-            }
-            else if (resultat === 'mail') {
-              res.status(400).json({ erreur: 'Email déjà pris' });
-            } else {
-              res.status(200).json({ message: "Gestionnaire externe modifié avec succès" });
-            }
-          })
-
-          .catch(() => {
-            res.status(400).json({ erreur: 'Echec de la modification du gestionnaire' });
-          });
-        break;
-
-      case 'gestionnaireIA':
-        modifier.modifierIapau(idUser, valeurs, userRole, password)
-          .then((resultat) => {
-            /* Données existantes */
-            if (resultat === 'les2') {
-              res.status(400).json({ erreur: 'Pseudo et email déjà pris' });
-
-            } else if (resultat === 'pseudo') {
-              res.status(400).json({ erreur: 'Pseudo déjà pris' });
-            }
-            else if (resultat === 'mail') {
-              res.status(400).json({ erreur: 'Email déjà pris' });
-            } else {
-              res.status(200).json({ message: "Gestionnaire IA modifié avec succès" });
-            }
-          })
-          .catch(() => {
-            res.status(400).json({ erreur: 'Echec de la modification du gestionnaire' });
-          });
-        break;
-
-      case 'administrateur':
-        userModel.modifierUser(idUser, valeurs, password)
-          .then((result) => {
-            /* Données existantes */
-            if (result === 'les2') {
-              res.status(400).json({ erreur: 'Pseudo et email déjà pris' });
-
-            } else if (result === 'pseudo') {
-              res.status(400).json({ erreur: 'Pseudo déjà pris' });
-            }
-            else if (result === 'mail') {
-              res.status(400).json({ erreur: 'Email déjà pris' });
-            } else {
-              res.status(200).json({ message: "Administrateur modifié avec succès" });
-            }
-          })
-          .catch(() => {
-            res.status(400).json({ erreur: 'Echec de la modification de l\' Administrateur' });
-          });
-        break;
+    } catch (error) {
+      /*On supprime l'utilisateur de la table "utilisateur" s'il a été inséré et 
+      qu'il n'a pas pu être inséré dans la table de son role*/
+      // const user = await userModel.chercherUserID(idUser);
+      // if (user.length > 0) {
+      //   userModel.supprimerUser(idUser);
+      // }
+      return res.status(400).json({ message: `Erreur lors de l\'insertion de l\'utilisateur: ${error.message}` });
     }
   } else {
     return res.status(404).json('Page not found');
   }
 }
 
-/**Suppression */
-async function supprimerUser(req, res) {
-  if (req.method === "OPTIONS") {
-    res.status(200).json({ success: 'Access granted' });
+/**
+ * @async
+ * @function
+ * @param {object} req - L'objet de requête HTTP.
+ * @param {object} res - L'objet de réponse HTTP.
+ * @description Ce contrôleur permet de mofidier utilisateur.
+ *  
+ * Si l'adresse mail ou le pseudo sont déjà pris par un autre utilisateur, une erreur est renvoyée.
+ * Accès à ce controller: Administrateurs.
+ * 
+ * Route: users.js
+ * @returns {Object} - Message de succès ou d'erreur.
+*/
+async function modifierUser(req, res) {
 
-  } else if (req.method === 'DELETE') {
+  if (req.method == "OPTIONS") {
+    return res.status(200).json({ sucess: 'Agress granted' });
+  }
+  else if (req.method === 'PATCH') {
 
-    /**Récupérer l'id de l'utilisateur dans l'url */
-    const userId = res.locals.userId;
+    /*Si n'est pas admin, vérifier si l'id de l'url est la même que l'utilisteur qui veut modifier */
+    const idUser = res.locals.userId;
+    const profil = req.userProfile;
 
-    /*L'administrateur ne peut pas se supprimer lui même */
-    if (userId === req.id) {
-      return res.status(400).json('L\'administrateur ne peut pas se supprimer lui-même');
-    }
+    /**Récupération des données */
+    let userData = req.body;
+
+    userData.nom = userData.nom.trim();
+    userData.prenom = userData.prenom.trim();
+    userData.ville = userData.ville.trim();
+    userData.entreprise = userData.entreprise.trim();
+    userData.metier = userData.metier.trim();
+    userData.role_asso = userData.role_asso.trim();
+    
+    const valeurs = [
+      userData.nom,
+      userData.prenom,
+      userData.pseudo,
+      userData.email,
+      userData.linkedin,
+      userData.github,
+      userData.ville,
+    ];
+
+    const valeurs_etudiant = [
+      userData.ecole,
+      userData.niveau_etude
+    ]
+
+    let type = await userModel.chercherType(idUser);
 
     try {
-      /*Vérifier que l'id existe dans la bdd*/
-      const user = await userModel.chercherUserID(userId);
-      if (user.length === 0) {
-        return res.status(404).json({ erreur: 'L\'id n\'existe pas' });
+      let resultMessage = '';
+      let errors;
+
+      switch (type) {
+        case 'etudiant':
+          await etudiantModel.validerEtudiant(req);
+
+          errors = validationResult(req);
+          if (!errors.isEmpty()) {
+            errorDetected = true;
+            return res.status(400).json({ errors: errors.array() });
+          }
+
+          resultMessage = await etudiantModel.modifierEtudiant(idUser, valeurs, valeurs_etudiant, userData.password);
+          break;
+        case 'gestionnaireExterne':
+          await gestionnaireExterneModel.validerGestionnaireExterne(req);
+
+          errors = validationResult(req);
+          if (!errors.isEmpty()) {
+            errorDetected = true;
+            return res.status(400).json({ errors: errors.array() });
+          }
+
+          resultMessage = await gestionnaires.modifierExterne(idUser, valeurs, userData.metier, userData.entreprise, userData.password);
+          break;
+        case 'gestionnaireIA':
+          await gestionnaireIaModel.validerGestionnaireIA(req);
+
+          errors = validationResult(req);
+          if (!errors.isEmpty()) {
+            errorDetected = true;
+            return res.status(400).json({ errors: errors.array() });
+          }
+
+          resultMessage = await gestionnaires.modifierIapau(idUser, valeurs, userData.role_asso, userData.password);
+          break;
+        case 'administrateur':
+          resultMessage = await userModel.modifierUser(idUser, valeurs, userData.password);
+          break;
+        default:
+          return res.status(400).json({ erreur: 'Le type est incorrect' });
       }
 
-      /*Supprimer l'utilisateur*/
-      userModel.supprimerUser(userId);
-
-      return res.status(200).json({ message: "Suppression réussie" });
-
+      if (resultMessage === 'les2') {
+        return res.status(400).json({ erreur: 'Pseudo et email déjà pris' });
+      } else if (resultMessage === 'pseudo') {
+        return res.status(400).json({ erreur: 'Pseudo déjà pris' });
+      } else if (resultMessage === 'mail') {
+        return res.status(400).json({ erreur: 'Email déjà pris' });
+      } else {
+        return res.status(200).json({ message: `${type} modifié avec succès` });
+      }
     } catch (error) {
-      return res.status(500).json({ erreur: 'Erreur lors de la suppression de l\'utilisateur' });
+      return res.status(400).json({ erreur: `Echec de la modification de ${profil}: ${error.message}` });
     }
+  } else {
+    return res.status(404).json('Page not found');
   }
 }
 
-async function getInfosProfil(req, res) {
+/**
+ * @async
+ * @function
+ * @param {object} req - L'objet de requête HTTP.
+ * @param {object} res - L'objet de réponse HTTP.
+ * @description Ce contrôleur permet de supprimer un utilisateur.
+ *  
+ * Son identidiant est récuépré dans la requête.
+ * Route: users.js
+ * @returns {Object} - Message de succès ou d'erreur.
+*/
+async function supprimerUser(req, res) {
   if (req.method === "OPTIONS") {
-    res.status(200).json({ success: 'Access granted' });
+    return res.status(200).json({ success: 'Access granted' });
 
-  } else if (req.method === 'GET') {
+  } else if (req.method === 'DELETE') {
+
+    /**Récupérer l'id de l'utilisateur à supprimer dans l'url */
+    const userId = res.locals.userId;
+
+    /*L'administrateur ne peut pas se supprimer lui même */
+    if (userId == req.id) {
+      return res.status(400).json({ error: 'L\'administrateur ne peut pas se supprimer lui-même' });
+    }
+
+    try {
+      /*Supprimer l'utilisateur*/
+      userModel.supprimerUser(userId);
+      return res.status(200).json({ message: "Suppression réussie" });
+    } catch (error) {
+      return res.status(500).json({ erreur: `Erreur lors de la suppression de l\'utilisateur: ${error.message}` });
+    }
+  } else {
+    return res.status(404).json('Page not found');
   }
 }
 
@@ -453,7 +347,6 @@ module.exports = {
   voirUtilisateurs,
   modifierUser,
   supprimerUser,
-  getInfosProfil
 };
 </code></pre>
         </article>
@@ -465,13 +358,13 @@ module.exports = {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Annotation_%2525C3%2525A9quipes.html">Annotation_équipes</a></li><li><a href="module-Connexion.html">Connexion</a></li><li><a href="module-Equipe.html">Equipe</a></li><li><a href="module-Evenement.html">Evenement</a></li><li><a href="module-Gestion_demandes_admission.html">Gestion_demandes_admission</a></li><li><a href="module-Gestion_des_utilisateurs.html">Gestion_des_utilisateurs</a></li><li><a href="module-Inscription.html">Inscription</a></li><li><a href="module-Projet.html">Projet</a></li><li><a href="module-Token.html">Token</a></li><li><a href="module-UserRouter.html">UserRouter</a></li><li><a href="module-VerifierProfil.html">VerifierProfil</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-UserRouter-UserRouter.html">UserRouter</a></li></ul><h3>Global</h3><ul><li><a href="global.html#ajouterRegle">ajouterRegle</a></li><li><a href="global.html#chercherGestionnaireExtID">chercherGestionnaireExtID</a></li><li><a href="global.html#chercherGestionnaireIapau">chercherGestionnaireIapau</a></li><li><a href="global.html#chercherListeGestionnaireIapau">chercherListeGestionnaireIapau</a></li><li><a href="global.html#chercherListeGestionnairesExt">chercherListeGestionnairesExt</a></li><li><a href="global.html#chercherListeStudents">chercherListeStudents</a></li><li><a href="global.html#chercherStudent">chercherStudent</a></li><li><a href="global.html#chercheridProjet">chercheridProjet</a></li><li><a href="global.html#comparerMdp">comparerMdp</a></li><li><a href="global.html#creationProjet">creationProjet</a></li><li><a href="global.html#creerEtudiant">creerEtudiant</a></li><li><a href="global.html#creerGestionnaireExterne">creerGestionnaireExterne</a></li><li><a href="global.html#creerGestionnaireIA">creerGestionnaireIA</a></li><li><a href="global.html#creerProjet">creerProjet</a></li><li><a href="global.html#equipeExiste">equipeExiste</a></li><li><a href="global.html#infosProjet">infosProjet</a></li><li><a href="global.html#insererMot">insererMot</a></li><li><a href="global.html#listeProjetsJson">listeProjetsJson</a></li><li><a href="global.html#modifierEtudiant">modifierEtudiant</a></li><li><a href="global.html#modifierExterne">modifierExterne</a></li><li><a href="global.html#modifierIapau">modifierIapau</a></li><li><a href="global.html#modifierProjet">modifierProjet</a></li><li><a href="global.html#recupererAncienEvents">recupererAncienEvents</a></li><li><a href="global.html#recupererEventActuel">recupererEventActuel</a></li><li><a href="global.html#recuperer_projets">recuperer_projets</a></li><li><a href="global.html#recuperer_regles">recuperer_regles</a></li><li><a href="global.html#recuperer_ressourcesPrivees">recuperer_ressourcesPrivees</a></li><li><a href="global.html#recuperer_ressourcesPubliques">recuperer_ressourcesPubliques</a></li><li><a href="global.html#recuperer_toutes_ressources">recuperer_toutes_ressources</a></li><li><a href="global.html#salageMdp">salageMdp</a></li><li><a href="global.html#supprimerProjet">supprimerProjet</a></li><li><a href="global.html#tousLesProjets">tousLesProjets</a></li><li><a href="global.html#updateMdp">updateMdp</a></li><li><a href="global.html#validerEtudiant">validerEtudiant</a></li><li><a href="global.html#verifIdEquipe">verifIdEquipe</a></li><li><a href="global.html#verifIdEvent">verifIdEvent</a></li><li><a href="global.html#verifIdProjet">verifIdProjet</a></li><li><a href="global.html#voirEvent">voirEvent</a></li><li><a href="global.html#voirListeGestionnaires">voirListeGestionnaires</a></li><li><a href="global.html#voirListeProjets">voirListeProjets</a></li><li><a href="global.html#voirTousEvents">voirTousEvents</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Connexion.html">Connexion</a></li><li><a href="module-Equipe.html">Equipe</a></li><li><a href="module-Gestion_des_utilisateurs.html">Gestion_des_utilisateurs</a></li><li><a href="module-Inscription.html">Inscription</a></li><li><a href="module-Token.html">Token</a></li><li><a href="module-UserRouter.html">UserRouter</a></li><li><a href="module-VerifierProfil.html">VerifierProfil</a></li></ul><h3>Global</h3><ul><li><a href="global.html#ListeMembre">ListeMembre</a></li><li><a href="global.html#aUneEquipeDansEvent">aUneEquipeDansEvent</a></li><li><a href="global.html#ajouterMembre">ajouterMembre</a></li><li><a href="global.html#ajouterRegle">ajouterRegle</a></li><li><a href="global.html#appartenirEquipe">appartenirEquipe</a></li><li><a href="global.html#attribuerProjetExterne">attribuerProjetExterne</a></li><li><a href="global.html#attribuerProjetIA">attribuerProjetIA</a></li><li><a href="global.html#chercherAdminID">chercherAdminID</a></li><li><a href="global.html#chercherEquipeID">chercherEquipeID</a></li><li><a href="global.html#chercherGestionnaireExt">chercherGestionnaireExt</a></li><li><a href="global.html#chercherGestionnaireExtID">chercherGestionnaireExtID</a></li><li><a href="global.html#chercherGestionnaireIA">chercherGestionnaireIA</a></li><li><a href="global.html#chercherGestionnaireIAID">chercherGestionnaireIAID</a></li><li><a href="global.html#chercherGestionnaireIapau">chercherGestionnaireIapau</a></li><li><a href="global.html#chercherListeGestionnaireIapau">chercherListeGestionnaireIapau</a></li><li><a href="global.html#chercherListeGestionnairesExt">chercherListeGestionnairesExt</a></li><li><a href="global.html#chercherListeStudents">chercherListeStudents</a></li><li><a href="global.html#chercherListeUtilisateurs">chercherListeUtilisateurs</a></li><li><a href="global.html#chercherStudent">chercherStudent</a></li><li><a href="global.html#chercherUserID">chercherUserID</a></li><li><a href="global.html#chercherUserPseudo">chercherUserPseudo</a></li><li><a href="global.html#chercheraccesGitlab">chercheraccesGitlab</a></li><li><a href="global.html#chercheridProjet">chercheridProjet</a></li><li><a href="global.html#comparerMdp">comparerMdp</a></li><li><a href="global.html#copieDuTemplate">copieDuTemplate</a></li><li><a href="global.html#createEvent">createEvent</a></li><li><a href="global.html#creationProjet">creationProjet</a></li><li><a href="global.html#creerAdmin">creerAdmin</a></li><li><a href="global.html#creerAnnotation">creerAnnotation</a></li><li><a href="global.html#creerDossier">creerDossier</a></li><li><a href="global.html#creerEquipe">creerEquipe</a></li><li><a href="global.html#creerEtudiant">creerEtudiant</a></li><li><a href="global.html#creerGestionnaireExterne">creerGestionnaireExterne</a></li><li><a href="global.html#creerGestionnaireIA">creerGestionnaireIA</a></li><li><a href="global.html#creerProjet">creerProjet</a></li><li><a href="global.html#creerUtilisateur">creerUtilisateur</a></li><li><a href="global.html#declinerDemande">declinerDemande</a></li><li><a href="global.html#demandeDejaEnvoyee">demandeDejaEnvoyee</a></li><li><a href="global.html#destituerProjetExterne">destituerProjetExterne</a></li><li><a href="global.html#destituerProjetIa">destituerProjetIa</a></li><li><a href="global.html#detacherProjetEvent">detacherProjetEvent</a></li><li><a href="global.html#ecrireAnnotation">ecrireAnnotation</a></li><li><a href="global.html#envoyerDemande">envoyerDemande</a></li><li><a href="global.html#envoyerMessage">envoyerMessage</a></li><li><a href="global.html#envoyerMessageEquipe">envoyerMessageEquipe</a></li><li><a href="global.html#envoyerMessageGlobalEvent">envoyerMessageGlobalEvent</a></li><li><a href="global.html#envoyerMessageGlobalProjet">envoyerMessageGlobalProjet</a></li><li><a href="global.html#envoyer_json_liste_gestionnaires">envoyer_json_liste_gestionnaires</a></li><li><a href="global.html#equipesOuvertes">equipesOuvertes</a></li><li><a href="global.html#fermerEquipe">fermerEquipe</a></li><li><a href="global.html#genererChaineAleatoire">genererChaineAleatoire</a></li><li><a href="global.html#getAnnotationEquipe">getAnnotationEquipe</a></li><li><a href="global.html#getAnnotationEquipes">getAnnotationEquipes</a></li><li><a href="global.html#getExterneInfo">getExterneInfo</a></li><li><a href="global.html#getIAGestionnaireInfo">getIAGestionnaireInfo</a></li><li><a href="global.html#getMessageEquipe">getMessageEquipe</a></li><li><a href="global.html#getStudentInfo">getStudentInfo</a></li><li><a href="global.html#infosProjet">infosProjet</a></li><li><a href="global.html#insererAccesEquipeGit">insererAccesEquipeGit</a></li><li><a href="global.html#insererMot">insererMot</a></li><li><a href="global.html#insererUser">insererUser</a></li><li><a href="global.html#jsonEquipesOuvertes">jsonEquipesOuvertes</a></li><li><a href="global.html#jsonGetAnnotation">jsonGetAnnotation</a></li><li><a href="global.html#jsonGetMessegaeEquipe">jsonGetMessegaeEquipe</a></li><li><a href="global.html#jsonInformationsEquipe">jsonInformationsEquipe</a></li><li><a href="global.html#jsonListeEquipeProjet">jsonListeEquipeProjet</a></li><li><a href="global.html#jsonMesEquipes">jsonMesEquipes</a></li><li><a href="global.html#listeEquipeProjet">listeEquipeProjet</a></li><li><a href="global.html#listeEquipes">listeEquipes</a></li><li><a href="global.html#listeProjetsJson">listeProjetsJson</a></li><li><a href="global.html#modifierEquipe">modifierEquipe</a></li><li><a href="global.html#modifierEtudiant">modifierEtudiant</a></li><li><a href="global.html#modifierEvent">modifierEvent</a></li><li><a href="global.html#modifierExterne">modifierExterne</a></li><li><a href="global.html#modifierIapau">modifierIapau</a></li><li><a href="global.html#modifierProjet">modifierProjet</a></li><li><a href="global.html#modifierUser">modifierUser</a></li><li><a href="global.html#ouvrirEquipe">ouvrirEquipe</a></li><li><a href="global.html#promouvoir">promouvoir</a></li><li><a href="global.html#quitterEquipe">quitterEquipe</a></li><li><a href="global.html#rattacherProjetEvent">rattacherProjetEvent</a></li><li><a href="global.html#recupInfoEvent">recupInfoEvent</a></li><li><a href="global.html#recupererAncienEvents">recupererAncienEvents</a></li><li><a href="global.html#recupererDemande">recupererDemande</a></li><li><a href="global.html#recupererEventActuel">recupererEventActuel</a></li><li><a href="global.html#recupererJSON">recupererJSON</a></li><li><a href="global.html#recupererMessageEquipe">recupererMessageEquipe</a></li><li><a href="global.html#recupererMot">recupererMot</a></li><li><a href="global.html#recuperer_projets">recuperer_projets</a></li><li><a href="global.html#recuperer_regles">recuperer_regles</a></li><li><a href="global.html#recuperer_ressourcesPrivees">recuperer_ressourcesPrivees</a></li><li><a href="global.html#recuperer_ressourcesPubliques">recuperer_ressourcesPubliques</a></li><li><a href="global.html#recuperer_toutes_ressources">recuperer_toutes_ressources</a></li><li><a href="global.html#salageMdp">salageMdp</a></li><li><a href="global.html#supprimerDemandes">supprimerDemandes</a></li><li><a href="global.html#supprimerEquipe">supprimerEquipe</a></li><li><a href="global.html#supprimerEvent">supprimerEvent</a></li><li><a href="global.html#supprimerMot">supprimerMot</a></li><li><a href="global.html#supprimerProjet">supprimerProjet</a></li><li><a href="global.html#supprimerRegles">supprimerRegles</a></li><li><a href="global.html#supprimerUnMembre">supprimerUnMembre</a></li><li><a href="global.html#supprimerUser">supprimerUser</a></li><li><a href="global.html#tousLesProjets">tousLesProjets</a></li><li><a href="global.html#toutesInfosProjet">toutesInfosProjet</a></li><li><a href="global.html#updateMdp">updateMdp</a></li><li><a href="global.html#validerEtudiant">validerEtudiant</a></li><li><a href="global.html#verifIdEquipe">verifIdEquipe</a></li><li><a href="global.html#verifIdEvent">verifIdEvent</a></li><li><a href="global.html#verifIdProjet">verifIdProjet</a></li><li><a href="global.html#verifIdUser">verifIdUser</a></li><li><a href="global.html#voirEvent">voirEvent</a></li><li><a href="global.html#voirListeGestionnaires">voirListeGestionnaires</a></li><li><a href="global.html#voirListeProjets">voirListeProjets</a></li><li><a href="global.html#voirTousEvents">voirTousEvents</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.2</a> on Sun Aug 27 2023 19:13:11 GMT+0200 (Central European Summer Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.2</a> on Fri Sep 01 2023 11:42:28 GMT+0200 (Central European Summer Time)
 </footer>
 
 <script> prettyPrint(); </script>

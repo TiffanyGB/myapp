@@ -3,11 +3,15 @@ const gestionnaireExterneModel = require('./gestionnaireExterneModel');
 const gestionnaireIaModel = require('./gestionnaireIaModel');
 const userModel = require('./userModel');
 
-
-
-/*JSON de la liste des gestionnaires externes et internes
- * Pour la gestion des projets
- */
+/**
+ * Crée un json avec la liste des gestionnaires externes et internes.
+ * Utile pour la modification et création des projets
+ * @async
+ * @function
+ * @author Tiffany GAY-BELLILE <tiffany.gbellile@gmail.com>
+ * @returns {JSON} Json avec les informations
+ * @throws {Error} Une erreur si la requête échoue.
+*/
 async function envoyer_json_liste_gestionnaires() {
 
     try {
@@ -89,6 +93,19 @@ async function envoyer_json_liste_gestionnaires() {
     }
 }
 
+/**
+ * Modifie un gestionnaire externe en fonction de son identifiant.
+ * @async
+ * @function
+ * @param {number} idUser - L'identifiant du gestionnaire externe à modifier.
+ * @param {object} valeurs - Les nouvelles valeurs à mettre à jour pour la table utilisateur.
+ * @param {string} metier - Le nouveau métier du gestionnaire externe.
+ * @param {string} entreprise - La nouvelle entreprise du gestionnaire externe.
+ * @param {string} password - Le nouveau mot de passe du gestionnaire externe (peut être vide).
+ * @returns {Promise<string>} - Une promesse résolue avec un message de confirmation ou une chaîne indiquant le type de conflit rencontré (les2, pseudo, mail).
+ * @throws {Error} Une erreur si la modification échoue.
+ * @author Tiffany GAY-BELLILE
+ */
 async function modifierExterne(idUser, valeurs, metier, entreprise, password) {
 
     try {
@@ -117,6 +134,18 @@ async function modifierExterne(idUser, valeurs, metier, entreprise, password) {
     }
 }
 
+/**
+ * Modifie un gestionnaire IAPAU en fonction de son identifiant.
+ * @async
+ * @function
+ * @param {number} idUser - L'identifiant du gestionnaire IAPAU à modifier.
+ * @param {object} valeurs - Les nouvelles valeurs à mettre à jour pour la table utilisateur.
+ * @param {string} role_asso - Le nouveau rôle associatif du gestionnaire IAPAU.
+ * @param {string} password - Le nouveau mot de passe du gestionnaire IAPAU (peut être vide).
+ * @returns {Promise<string>} - Une promesse résolue avec un message de confirmation ou une chaîne indiquant le type de conflit rencontré (les2, pseudo, mail).
+ * @throws {Error} Une erreur si la modification échoue.
+ * @author Tiffany GAY-BELLILE
+ */
 async function modifierIapau(idUser, valeurs, role_asso, password) {
     try {
 

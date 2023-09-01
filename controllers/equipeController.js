@@ -15,11 +15,25 @@ const equipeModel = require('../models/equipeModel');
 const projetModel = require('../models/projetModel');
 const demandeModel = require('../models/demandeModel')
 const { body, validationResult } = require('express-validator');
-const { creerDossier, creerUtilisateur, copieDuTemplate } = require('./gitlabController');
+const { creerDossier, creerUtilisateur, copieDuTemplate, recupererIDTemplate } = require('./gitlabController');
 const eventModel = require('../models/eventModel');
 const { validateUserId } = require('../verifications/verifierDonnéesGénérales');
 
-
+/**
+ * @function
+ * @param {Object} req - L'objet de la requête (express request object).
+ * @param {Object} res - L'objet de la réponse (express response object).
+ * @description  Ce contrôleur permet de récupérer la liste des équipes participant à un projet.
+ * 
+ * L'id du projet est directement récupéré depuis l'url de la route.
+ * 
+ * Accès à ce controller: Gestionnaires du projet et les administrateurs.
+ * 
+ * Route: teams.js
+ * 
+ * @returns {Object} - Retourne un objet JSON contenant l'ensemble des équipes du projet.
+ * Si la requête échoue, code d'erreur 400 et message d'erreur.
+*/
 async function retournerEquipeProjet(req, res) {
   if (req.method === 'OPTIONS') {
     return res.status(200).json({ sucess: 'Agress granted' });
@@ -38,6 +52,30 @@ async function retournerEquipeProjet(req, res) {
   }
 }
 
+/**
+ * @function
+ * @param {Object} req - L'objet de la requête (express request object).
+ * @param {Object} res - L'objet de la réponse (express response object).
+ * @description  Ce contrôleur permet à un étudiant de créer une équipe pour participer à un 
+ * événement s'il en n'a pas encore. L'id de cet événement est récupéré grâce
+ * à l'id du projet présent dans l'url.
+ * 
+ * Une vérification est faite pour s'assurer qu'il est sans équipe dans celui-ci. 
+ * Si c'est le cas, l'équipe est créée et il est capitaine de celle-ci. Toutes ses demandes
+ * faites à d'autres équipes sont supprimées.
+ * 
+ * Partie Gitlab: 3 choses sont créées. - Un répertoire gitlab afin que l'équipe puisse push son code dessus. 
+ * -Un dossier annexe fin d'y récupérer les résultats d'analyse de code.
+ * -Un compte Gitlab associé au premier repo. Les identifiants (email et mot de passe) sont insérées dans 
+ * la base de données afin de les fournir à l'équipe pour qu'elle puisse accéder à son espace.
+ * 
+ * Accès à ce controller: Etudiant.
+ * 
+ * Route: teams.js
+ * 
+ * @returns {Object} - Retourne l'id de la nouvelle équipe.
+ * Si la requête échoue, code d'erreur 400 et message d'erreur.
+*/
 async function creerEquipe(req, res) {
   if (req.method === 'OPTIONS') {
     res.status(200).json({ sucess: 'Agress granted' });
@@ -49,6 +87,7 @@ async function creerEquipe(req, res) {
     /*Récupération données du body */
     const userData = req.body;
 
+    /*ENlever les espaces au début et à la fin */
     let nom = userData.nom.trim();
     let description = userData.description.trim();
 
@@ -78,7 +117,6 @@ async function creerEquipe(req, res) {
       }
 
       let idEquipe = await equipeModel.creerEquipe(infos);
-
       equipeModel.ajouterMembre(idCapitaine, idEquipe);
 
       /* Supprimer les demandes de l'étudiant des autres equipes */
@@ -88,20 +126,19 @@ async function creerEquipe(req, res) {
 
       /*Gitlab*/
 
-      // /*Création du dossier de l'équipe dans le répertoire annexe*/
-      // creerDossier(idEquipe, event_nom);
+      /*Création du dossier de l'équipe dans le répertoire annexe*/
+      creerDossier(idEquipe, event_nom);
 
-      // /*Création de l'utilisateur lié au repo de l'équipe */
-      // const valeurs = await creerUtilisateur(userData.nom);
-      // console.log(valeurs)
+      /*Création de l'utilisateur lié au repo de l'équipe */
+      const valeurs = await creerUtilisateur(userData.nom);
 
-      // equipeModel.insererAccesEquipeGit(valeurs[1], valeurs[0], idEquipe);
-      // /*Création du repo de l'équipe */
-      // await copieDuTemplate(6,idEquipe, valeurs[3]);
+      equipeModel.insererAccesEquipeGit(valeurs[1], valeurs[0], idEquipe);
+      /*Création du repo de l'équipe */
+      const idTemplate = await recupererIDTemplate(projet[0].template);
+      await copieDuTemplate(idTemplate,idEquipe, valeurs[3]);
 
       return res.status(200).json(idEquipe);
     } catch (error) {
-      console.log(error.message)
       return res.status(400).json({ erreur: 'Erreur création équipe.' });
     }
   } else {
@@ -109,6 +146,19 @@ async function creerEquipe(req, res) {
   }
 }
 
+/**
+ * @function
+ * @param {Object} req - L'objet de la requête (express request object).
+ * @param {Object} res - L'objet de la réponse (express response object).
+ * @description  Ce contrôleur appelle la fonction de modification d'équipe.
+
+ * Accès à ce controller: Capitaine de l'équipe (étudiant), gestionnaires du projet de l'équipe et 
+ * tous les administrateurs.
+ * 
+ * Route: teams.js
+ * 
+ * @returns {Object} - Retourne un message de succès ou d'échec de la requête.
+*/
 async function modifierEquipe(req, res) {
   if (req.method === 'OPTIONS') {
     return res.status(200).json({ sucess: 'Agress granted' });
@@ -119,6 +169,7 @@ async function modifierEquipe(req, res) {
 
     const userData = req.body;
 
+    /*Supression des espaces au début et à la fin */
     let nom = userData.nom.trim();
     let description = userData.description.trim();
 
@@ -150,6 +201,19 @@ async function modifierEquipe(req, res) {
   }
 }
 
+/**
+ * @function
+ * @param {Object} req - L'objet de la requête (express request object).
+ * @param {Object} res - L'objet de la réponse (express response object).
+ * @description  Ce contrôleur appelle la fonction de suppression d'équipe.
+ * L'id de l'équipe est récupéré dans l'url de la requête.
+ * Accès à ce controller: Capitaine de l'équipe (étudiant), gestionnaires du projet de l'équipe et 
+ * tous les administrateurs.
+ * 
+ * Route: teams.js
+ * 
+ * @returns {Object} - Retourne un message de succès ou d'échec de la requête.
+*/
 async function supprimerEquipe(req, res) {
   if (req.method === 'OPTIONS') {
     return res.status(200).json({ sucess: 'Agress granted' });
@@ -171,6 +235,22 @@ async function supprimerEquipe(req, res) {
   }
 }
 
+/**
+ * @function
+ * @param {Object} req - L'objet de la requête (express request object).
+ * @param {Object} res - L'objet de la réponse (express response object).
+ * @description  Ce contrôleur appelle la fonction de promotion d'un membre de l'équipe au statut de capitaine.
+ * L'id de l'équipe est récupéré dans l'url de la requête.
+ * L'ancien capitaine est destitué. Celui-ci ne peut pas se promouvoir lui-même.
+ * 
+ * Une vérification est faite pour s'assurer que l'utilisateur à promouvoir fait partie de l'équipe.
+ * Accès à ce controller: Capitaine de l'équipe (étudiant), gestionnaires du projet de l'équipe et 
+ * tous les administrateurs.
+ * 
+ * Route: teams.js
+ * 
+ * @returns {Object} - Retourne un message de succès ou d'échec de la requête.
+*/
 async function promouvoir(req, res) {
   if (req.method === 'OPTIONS') {
     return res.status(200).json({ sucess: 'Agress granted' });
@@ -200,7 +280,7 @@ async function promouvoir(req, res) {
       }
 
       equipeModel.promouvoir(idEquipe, idUser);
-      return res.status(200).json({ message: "Capitaine promu" });
+      return res.status(200).json({ message: "Membre promu" });
 
     } catch {
       return res.status(400).json({ error: "Erreur promotion" });
@@ -210,6 +290,21 @@ async function promouvoir(req, res) {
   }
 }
 
+/**
+ * @function
+ * @param {Object} req - L'objet de la requête (express request object).
+ * @param {Object} res - L'objet de la réponse (express response object).
+ * @description  Ce contrôleur appelle la fonction de suppression d'un membre de l'équipe.
+ * L'id de l'équipe est récupéré dans l'url de la requête.
+ * L'id de l'utilisateur à éjecté se trouve dans le body de la requête.
+ * Une vérification est faite pour s'assurer que l'utilisateur à supprimer fait partie de l'équipe.
+ * Accès à ce controller: Capitaine de l'équipe (étudiant), gestionnaires du projet de l'équipe et 
+ * tous les administrateurs.
+ * 
+ * Route: teams.js
+ * 
+ * @returns {Object} - Retourne un message de succès ou d'échec de la requête.
+*/
 async function supprimerMembre(req, res) {
   if (req.method === 'OPTIONS') {
     res.status(200).json({ sucess: 'Agress granted' });
@@ -246,10 +341,22 @@ async function supprimerMembre(req, res) {
     return res.status(404).json('Page not found');
   }
 }
-/* Voir le profil, d'une équipe et pour la modif
-Si c'est un etudiant lambda ou gestionnaire, voir le minimum
-si un membre de l'équipe voir un peu plus
-si capitaine/gestionnaire de l'équipe ou admin voir tout */
+
+/**
+ * @function
+ * @param {Object} req - L'objet de la requête (express request object).
+ * @param {Object} res - L'objet de la réponse (express response object).
+ * @description  Ce contrôleur permet de récupérer toutes les informations d'une équipe
+ * selon le profil de l'utilisateur qui veut consulter celle-ci.
+ * 
+ * L'id de l'équipe est récupéré dans l'url de la requête.
+ * 
+ * Accès à ce controller: Tous les utilisateurs ayant un compte.
+ * 
+ * Route: teams.js
+ * 
+ * @returns {Object} - JSON contenant les informations de l'équipe ou un message d'erreur.
+*/
 async function getInfosEquipe(req, res) {
 
   if (req.method === 'OPTIONS') {
@@ -267,6 +374,19 @@ async function getInfosEquipe(req, res) {
   }
 }
 
+/**
+ * @function
+ * @param {Object} req - L'objet de la requête (express request object).
+ * @param {Object} res - L'objet de la réponse (express response object).
+ * @description  Ce contrôleur permet de récupérer la liste des équipes ouvertes à de nouveaux 
+ * membres dans un événements.
+ * 
+ * Accès à ce controller: Etudiants.
+ * 
+ * Route: teams.js
+ * 
+ * @returns {Object} - JSON contenant la liste des équipes ouvertes ou un message d'erreur.
+*/
 async function listeOuvertes(req, res) {
   if (req.method === 'OPTIONS') {
     return res.status(200).json({ sucess: 'Agress granted' });
@@ -287,6 +407,23 @@ async function listeOuvertes(req, res) {
   }
 }
 
+/**
+ * @function
+ * @param {Object} req - L'objet de la requête (express request object).
+ * @param {Object} res - L'objet de la réponse (express response object).
+ * @description  Ce contrôleur appelle la fonction qui permet à un étudiant de quitter
+ * une équipe dont il fait partie.
+ * 
+ * Le capitaine de celle-ci ne peut pas la quitter. 
+ * Une vérification est faite pour s'assurer que l'étudiant fait partie de l'équipe
+ * et qu'il nest pas capitaine.
+ *
+ * Accès à ce controller: Etudiants.
+ * 
+ * Route: teams.js
+ * 
+ * @returns {Object} - Message de succès ou d'erreur.
+*/
 async function quitterEquipe(req, res) {
   if (req.method === 'OPTIONS') {
     return res.status(200).json({ sucess: 'Agress granted' });
@@ -319,6 +456,23 @@ async function quitterEquipe(req, res) {
   }
 }
 
+/**
+ * @function
+ * @param {Object} req - L'objet de la requête (express request object).
+ * @param {Object} res - L'objet de la réponse (express response object).
+ * @description  Ce contrôleur permet à un étudiant d'envoyer une demande d'admission
+ * à une équipe.
+ * 
+ * Une vérification est faite pour s'assurer que l'étudiant n'a aucune équipe dans
+ * l'événement ou qu'il n'a pas encore  envoyé de message à cette équipe. Si oui, un message 
+ * d'erreur est renvoyé. Sinon, la demande est transmise.
+ *
+ * Accès à ce controller: Etudiants.
+ * 
+ * Route: teams.js
+ * 
+ * @returns {Object} - Message de succès ou d'erreur.
+*/
 async function demandeEquipe(req, res) {
   if (req.method === 'OPTIONS') {
     res.status(200).json({ sucess: 'Agress granted' });
@@ -387,6 +541,23 @@ async function demandeEquipe(req, res) {
   }
 }
 
+/**
+ * @function
+ * @param {Object} req - L'objet de la requête (express request object).
+ * @param {Object} res - L'objet de la réponse (express response object).
+ * @description  Ce contrôleur permet d'accepter une demande d'admission.
+ * 
+ * Une vérification est faite pour s'assurer que l'étudiant: -n'a aucune équipe dans
+ * l'événement, -a bien envoyé une demande. Si oui, un message d'erreur est renvoyé. 
+ * Sinon, il est ajouté et toutes ses anciennes demandes dans les autres équipes
+ * de l'événement sont effacées.
+ *
+ * Accès à ce controller: Gestionnaires du projet de l'équipe, capitaine et les administrateurs.
+ * 
+ * Route: teams.js
+ * 
+ * @returns {Object} - Message de succès ou d'erreur.
+*/
 async function accepterDemande(req, res) {
   if (req.method === 'OPTIONS') {
     return res.status(200).json({ sucess: 'Agress granted' });
@@ -447,6 +618,23 @@ async function accepterDemande(req, res) {
   }
 }
 
+/**
+ * @function
+ * @param {Object} req - L'objet de la requête (express request object).
+ * @param {Object} res - L'objet de la réponse (express response object).
+ * @description  Ce contrôleur permet d'accepter une demande d'admission.
+ * 
+ * Une vérification est faite pour s'assurer que l'étudiant a bien envoyé une demande. 
+ * Si oui, un message d'erreur est renvoyé. 
+ * Sinon, il est ajouté et toutes ses anciennes demandes dans les autres équipes
+ * de l'événement sont effacées.
+ *
+ * Accès à ce controller: Gestionnaires du projet de l'équipe, capitaine et les administrateurs.
+ * 
+ * Route: teams.js
+ * 
+ * @returns {Object} - Message de succès ou d'erreur.
+*/
 async function declinerDemande(req, res) {
   if (req.method === 'OPTIONS') {
     res.status(200).json({ sucess: 'Agress granted' });
@@ -476,6 +664,18 @@ async function declinerDemande(req, res) {
   }
 }
 
+/**
+ * @function
+ * @param {Object} req - L'objet de la requête (express request object).
+ * @param {Object} res - L'objet de la réponse (express response object).
+ * @description  Ce contrôleur permet de récupérer la liste des équipes d'un étudiant.
+
+ * Accès à ce controller :Etudiant.
+ * 
+ * Route: teams.js
+ * 
+ * @returns {Object} -JSON de la liste des équipes sinon message d'erreur.
+*/
 async function voirMesEquipes(req, res) {
   if (req.method === 'OPTIONS') {
     return res.status(200).json({ sucess: 'Agress granted' });

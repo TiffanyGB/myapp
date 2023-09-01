@@ -28,28 +28,27 @@
         <article>
             <pre class="prettyprint source linenums"><code>/**
  * @fileoverview Models des annotations d'une équipes.
- * @module Annotation_équipes
  */
 
 const pool = require('../database/configDB');
 const userModel = require('../models/userModel');
+const { body } = require('express-validator');
 
 async function validerAnnotation(req) {
     await body('contenu')
     .isLength({ min: 0, max: 2000 })
+    .custom((value) => !(/^\s+$/.test(value)))
     .withMessage('Le message est trop long (maximum 2000 caractères)')
     .run(req);
 }
 
 /**
- * Créer une nouvelle annotation associée à une équipe.
- * 
- * Le controller lui passe en paramètres les informations à rentrer dans la table
- * Annotation.
- * 
  * @function
+ * @author Tiffany GAY-BELLILE &lt;tiffany.gbellile@gmail.com>
  * @param {Array} valeurs - Un tableau contenant les valeurs à insérer :
  *                         [idEquipe, auteur, contenu]
+ * @description Cette fonction permet de créer une nouvelle annotation.
+ * @returns {Object} Toutes les informations sur l'administrateur
  * @throws {Error} Une erreur si la création de l'annotation échoue.
 */
 function creerAnnotation(valeurs) {
@@ -66,12 +65,11 @@ function creerAnnotation(valeurs) {
 }
 
 /**
- * Récupérer les annotations associées à une équipe.
- * 
- * L'id de l'équipe souhaitée est récupéré du controller
- * 
+ * @async
  * @function
- * @param {number} idEquipe - L'identifiant de l'équipe pour laquelle récupérer les annotations.
+ * @author Tiffany GAY-BELLILE &lt;tiffany.gbellile@gmail.com>
+ * @param {Int} idEquipe - identifiant de l'équipe
+ * @description Cette fonction permet de chercher toutes les annotation d'une équipe.
  * @returns {Promise&lt;Array>} - Une promesse résolue avec un tableau d'annotations associées à l'équipe.
  * @throws {Error} Une erreur si la récupération des annotations échoue.
 */
@@ -80,30 +78,24 @@ async function getAnnotationEquipes(idEquipe) {
     const chercher = `SELECT * FROM Annotation
     WHERE idEquipe = $1`;
 
-    return new Promise((resolve) => {
         try {
-            pool.query(chercher, [idEquipe])
-                .then((res) => {
-                    resolve(res.rows);
-                })
-
+            const res = await pool.query(chercher, [idEquipe])
+            return res.rows;
         } catch (error) {
             throw error;
         }
-    });
 }
 
 /**
- * Récupérer les annotations associées à une équipe au format JSON.
- * 
- * Cette fonction permet de récupérer les annotations associées à une équipe spécifiée et de les
- * retourner au format JSON avec des détails sur le contenu, la date et l'auteur.
- * 
+ * @async
  * @function
- * @param {number} idEquipe - L'identifiant de l'équipe pour laquelle récupérer les annotations.
+ * @author Tiffany GAY-BELLILE &lt;tiffany.gbellile@gmail.com>
+ * @param {Int} idEquipe - identifiant de l'équipe
+ * @description Cette fonction permet de créer un json personnalisé avec toutes les annotations de l'équipe
+ * mais également des éléments en plus comme les noms et prénoms des auteurs.
  * @returns {Promise&lt;Object>} - Une promesse résolue avec un objet JSON contenant les annotations au format détaillé.
  * @throws {Error} Une erreur si la récupération des annotations échoue.
- */
+*/
 async function jsonGetAnnotation(idEquipe){
 
     try{
@@ -126,13 +118,11 @@ async function jsonGetAnnotation(idEquipe){
 
             jsonRetour.annotations.push(temp)
         }
-
         return jsonRetour;
     }catch (error){
         throw error;
     }
 }
-
 
 module.exports = {
     creerAnnotation,
@@ -149,13 +139,13 @@ module.exports = {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Annotation_%2525C3%2525A9quipes.html">Annotation_équipes</a></li><li><a href="module-Connexion.html">Connexion</a></li><li><a href="module-Equipe.html">Equipe</a></li><li><a href="module-Evenement.html">Evenement</a></li><li><a href="module-Gestion_demandes_admission.html">Gestion_demandes_admission</a></li><li><a href="module-Gestion_des_utilisateurs.html">Gestion_des_utilisateurs</a></li><li><a href="module-Inscription.html">Inscription</a></li><li><a href="module-Projet.html">Projet</a></li><li><a href="module-Token.html">Token</a></li><li><a href="module-UserRouter.html">UserRouter</a></li><li><a href="module-VerifierProfil.html">VerifierProfil</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-UserRouter-UserRouter.html">UserRouter</a></li></ul><h3>Global</h3><ul><li><a href="global.html#ajouterRegle">ajouterRegle</a></li><li><a href="global.html#chercherGestionnaireExtID">chercherGestionnaireExtID</a></li><li><a href="global.html#chercherGestionnaireIapau">chercherGestionnaireIapau</a></li><li><a href="global.html#chercherListeGestionnaireIapau">chercherListeGestionnaireIapau</a></li><li><a href="global.html#chercherListeGestionnairesExt">chercherListeGestionnairesExt</a></li><li><a href="global.html#chercherListeStudents">chercherListeStudents</a></li><li><a href="global.html#chercherStudent">chercherStudent</a></li><li><a href="global.html#chercheridProjet">chercheridProjet</a></li><li><a href="global.html#comparerMdp">comparerMdp</a></li><li><a href="global.html#creationProjet">creationProjet</a></li><li><a href="global.html#creerEtudiant">creerEtudiant</a></li><li><a href="global.html#creerGestionnaireExterne">creerGestionnaireExterne</a></li><li><a href="global.html#creerGestionnaireIA">creerGestionnaireIA</a></li><li><a href="global.html#creerProjet">creerProjet</a></li><li><a href="global.html#equipeExiste">equipeExiste</a></li><li><a href="global.html#infosProjet">infosProjet</a></li><li><a href="global.html#insererMot">insererMot</a></li><li><a href="global.html#listeProjetsJson">listeProjetsJson</a></li><li><a href="global.html#modifierEtudiant">modifierEtudiant</a></li><li><a href="global.html#modifierExterne">modifierExterne</a></li><li><a href="global.html#modifierIapau">modifierIapau</a></li><li><a href="global.html#modifierProjet">modifierProjet</a></li><li><a href="global.html#recupererAncienEvents">recupererAncienEvents</a></li><li><a href="global.html#recupererEventActuel">recupererEventActuel</a></li><li><a href="global.html#recuperer_projets">recuperer_projets</a></li><li><a href="global.html#recuperer_regles">recuperer_regles</a></li><li><a href="global.html#recuperer_ressourcesPrivees">recuperer_ressourcesPrivees</a></li><li><a href="global.html#recuperer_ressourcesPubliques">recuperer_ressourcesPubliques</a></li><li><a href="global.html#recuperer_toutes_ressources">recuperer_toutes_ressources</a></li><li><a href="global.html#salageMdp">salageMdp</a></li><li><a href="global.html#supprimerProjet">supprimerProjet</a></li><li><a href="global.html#tousLesProjets">tousLesProjets</a></li><li><a href="global.html#updateMdp">updateMdp</a></li><li><a href="global.html#validerEtudiant">validerEtudiant</a></li><li><a href="global.html#verifIdEquipe">verifIdEquipe</a></li><li><a href="global.html#verifIdEvent">verifIdEvent</a></li><li><a href="global.html#verifIdProjet">verifIdProjet</a></li><li><a href="global.html#voirEvent">voirEvent</a></li><li><a href="global.html#voirListeGestionnaires">voirListeGestionnaires</a></li><li><a href="global.html#voirListeProjets">voirListeProjets</a></li><li><a href="global.html#voirTousEvents">voirTousEvents</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Connexion.html">Connexion</a></li><li><a href="module-Equipe.html">Equipe</a></li><li><a href="module-Gestion_des_utilisateurs.html">Gestion_des_utilisateurs</a></li><li><a href="module-Inscription.html">Inscription</a></li><li><a href="module-Token.html">Token</a></li><li><a href="module-UserRouter.html">UserRouter</a></li><li><a href="module-VerifierProfil.html">VerifierProfil</a></li></ul><h3>Global</h3><ul><li><a href="global.html#ListeMembre">ListeMembre</a></li><li><a href="global.html#aUneEquipeDansEvent">aUneEquipeDansEvent</a></li><li><a href="global.html#ajouterMembre">ajouterMembre</a></li><li><a href="global.html#ajouterRegle">ajouterRegle</a></li><li><a href="global.html#appartenirEquipe">appartenirEquipe</a></li><li><a href="global.html#attribuerProjetExterne">attribuerProjetExterne</a></li><li><a href="global.html#attribuerProjetIA">attribuerProjetIA</a></li><li><a href="global.html#chercherAdminID">chercherAdminID</a></li><li><a href="global.html#chercherEquipeID">chercherEquipeID</a></li><li><a href="global.html#chercherGestionnaireExt">chercherGestionnaireExt</a></li><li><a href="global.html#chercherGestionnaireExtID">chercherGestionnaireExtID</a></li><li><a href="global.html#chercherGestionnaireIA">chercherGestionnaireIA</a></li><li><a href="global.html#chercherGestionnaireIAID">chercherGestionnaireIAID</a></li><li><a href="global.html#chercherGestionnaireIapau">chercherGestionnaireIapau</a></li><li><a href="global.html#chercherListeGestionnaireIapau">chercherListeGestionnaireIapau</a></li><li><a href="global.html#chercherListeGestionnairesExt">chercherListeGestionnairesExt</a></li><li><a href="global.html#chercherListeStudents">chercherListeStudents</a></li><li><a href="global.html#chercherListeUtilisateurs">chercherListeUtilisateurs</a></li><li><a href="global.html#chercherStudent">chercherStudent</a></li><li><a href="global.html#chercherUserID">chercherUserID</a></li><li><a href="global.html#chercherUserPseudo">chercherUserPseudo</a></li><li><a href="global.html#chercheraccesGitlab">chercheraccesGitlab</a></li><li><a href="global.html#chercheridProjet">chercheridProjet</a></li><li><a href="global.html#comparerMdp">comparerMdp</a></li><li><a href="global.html#copieDuTemplate">copieDuTemplate</a></li><li><a href="global.html#createEvent">createEvent</a></li><li><a href="global.html#creationProjet">creationProjet</a></li><li><a href="global.html#creerAdmin">creerAdmin</a></li><li><a href="global.html#creerAnnotation">creerAnnotation</a></li><li><a href="global.html#creerDossier">creerDossier</a></li><li><a href="global.html#creerEquipe">creerEquipe</a></li><li><a href="global.html#creerEtudiant">creerEtudiant</a></li><li><a href="global.html#creerGestionnaireExterne">creerGestionnaireExterne</a></li><li><a href="global.html#creerGestionnaireIA">creerGestionnaireIA</a></li><li><a href="global.html#creerProjet">creerProjet</a></li><li><a href="global.html#creerUtilisateur">creerUtilisateur</a></li><li><a href="global.html#declinerDemande">declinerDemande</a></li><li><a href="global.html#demandeDejaEnvoyee">demandeDejaEnvoyee</a></li><li><a href="global.html#destituerProjetExterne">destituerProjetExterne</a></li><li><a href="global.html#destituerProjetIa">destituerProjetIa</a></li><li><a href="global.html#detacherProjetEvent">detacherProjetEvent</a></li><li><a href="global.html#ecrireAnnotation">ecrireAnnotation</a></li><li><a href="global.html#envoyerDemande">envoyerDemande</a></li><li><a href="global.html#envoyerMessage">envoyerMessage</a></li><li><a href="global.html#envoyerMessageEquipe">envoyerMessageEquipe</a></li><li><a href="global.html#envoyerMessageGlobalEvent">envoyerMessageGlobalEvent</a></li><li><a href="global.html#envoyerMessageGlobalProjet">envoyerMessageGlobalProjet</a></li><li><a href="global.html#envoyer_json_liste_gestionnaires">envoyer_json_liste_gestionnaires</a></li><li><a href="global.html#equipesOuvertes">equipesOuvertes</a></li><li><a href="global.html#fermerEquipe">fermerEquipe</a></li><li><a href="global.html#genererChaineAleatoire">genererChaineAleatoire</a></li><li><a href="global.html#getAnnotationEquipe">getAnnotationEquipe</a></li><li><a href="global.html#getAnnotationEquipes">getAnnotationEquipes</a></li><li><a href="global.html#getExterneInfo">getExterneInfo</a></li><li><a href="global.html#getIAGestionnaireInfo">getIAGestionnaireInfo</a></li><li><a href="global.html#getMessageEquipe">getMessageEquipe</a></li><li><a href="global.html#getStudentInfo">getStudentInfo</a></li><li><a href="global.html#infosProjet">infosProjet</a></li><li><a href="global.html#insererAccesEquipeGit">insererAccesEquipeGit</a></li><li><a href="global.html#insererMot">insererMot</a></li><li><a href="global.html#insererUser">insererUser</a></li><li><a href="global.html#jsonEquipesOuvertes">jsonEquipesOuvertes</a></li><li><a href="global.html#jsonGetAnnotation">jsonGetAnnotation</a></li><li><a href="global.html#jsonGetMessegaeEquipe">jsonGetMessegaeEquipe</a></li><li><a href="global.html#jsonInformationsEquipe">jsonInformationsEquipe</a></li><li><a href="global.html#jsonListeEquipeProjet">jsonListeEquipeProjet</a></li><li><a href="global.html#jsonMesEquipes">jsonMesEquipes</a></li><li><a href="global.html#listeEquipeProjet">listeEquipeProjet</a></li><li><a href="global.html#listeEquipes">listeEquipes</a></li><li><a href="global.html#listeProjetsJson">listeProjetsJson</a></li><li><a href="global.html#modifierEquipe">modifierEquipe</a></li><li><a href="global.html#modifierEtudiant">modifierEtudiant</a></li><li><a href="global.html#modifierEvent">modifierEvent</a></li><li><a href="global.html#modifierExterne">modifierExterne</a></li><li><a href="global.html#modifierIapau">modifierIapau</a></li><li><a href="global.html#modifierProjet">modifierProjet</a></li><li><a href="global.html#modifierUser">modifierUser</a></li><li><a href="global.html#ouvrirEquipe">ouvrirEquipe</a></li><li><a href="global.html#promouvoir">promouvoir</a></li><li><a href="global.html#quitterEquipe">quitterEquipe</a></li><li><a href="global.html#rattacherProjetEvent">rattacherProjetEvent</a></li><li><a href="global.html#recupInfoEvent">recupInfoEvent</a></li><li><a href="global.html#recupererAncienEvents">recupererAncienEvents</a></li><li><a href="global.html#recupererDemande">recupererDemande</a></li><li><a href="global.html#recupererEventActuel">recupererEventActuel</a></li><li><a href="global.html#recupererJSON">recupererJSON</a></li><li><a href="global.html#recupererMessageEquipe">recupererMessageEquipe</a></li><li><a href="global.html#recupererMot">recupererMot</a></li><li><a href="global.html#recuperer_projets">recuperer_projets</a></li><li><a href="global.html#recuperer_regles">recuperer_regles</a></li><li><a href="global.html#recuperer_ressourcesPrivees">recuperer_ressourcesPrivees</a></li><li><a href="global.html#recuperer_ressourcesPubliques">recuperer_ressourcesPubliques</a></li><li><a href="global.html#recuperer_toutes_ressources">recuperer_toutes_ressources</a></li><li><a href="global.html#salageMdp">salageMdp</a></li><li><a href="global.html#supprimerDemandes">supprimerDemandes</a></li><li><a href="global.html#supprimerEquipe">supprimerEquipe</a></li><li><a href="global.html#supprimerEvent">supprimerEvent</a></li><li><a href="global.html#supprimerMot">supprimerMot</a></li><li><a href="global.html#supprimerProjet">supprimerProjet</a></li><li><a href="global.html#supprimerRegles">supprimerRegles</a></li><li><a href="global.html#supprimerUnMembre">supprimerUnMembre</a></li><li><a href="global.html#supprimerUser">supprimerUser</a></li><li><a href="global.html#tousLesProjets">tousLesProjets</a></li><li><a href="global.html#toutesInfosProjet">toutesInfosProjet</a></li><li><a href="global.html#updateMdp">updateMdp</a></li><li><a href="global.html#validerEtudiant">validerEtudiant</a></li><li><a href="global.html#verifIdEquipe">verifIdEquipe</a></li><li><a href="global.html#verifIdEvent">verifIdEvent</a></li><li><a href="global.html#verifIdProjet">verifIdProjet</a></li><li><a href="global.html#verifIdUser">verifIdUser</a></li><li><a href="global.html#voirEvent">voirEvent</a></li><li><a href="global.html#voirListeGestionnaires">voirListeGestionnaires</a></li><li><a href="global.html#voirListeProjets">voirListeProjets</a></li><li><a href="global.html#voirTousEvents">voirTousEvents</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.2</a> on Sun Aug 27 2023 19:13:11 GMT+0200 (Central European Summer Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.2</a> on Fri Sep 01 2023 11:42:28 GMT+0200 (Central European Summer Time)
 </footer>
 
 <script> prettyPrint(); </script>

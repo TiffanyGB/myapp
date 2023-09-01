@@ -22,8 +22,12 @@ async function validateMessageContenu(req, res) {
     return { isValid: true, errors: null };
 }
 
-// Envoyer message en tant qu'etudiant
-function envoyerMessageEquipe(valeurs) {
+/**
+ * Envoie un message à une équipe spécifiée.
+ * @function
+ * @param {Array} valeurs - Un tableau contenant les valeurs à insérer : [idEquipe, contenu, idExpediteur].
+ * @throws {Error} Une erreur si l'envoi du message échoue.
+ */function envoyerMessageEquipe(valeurs) {
     const envoyer = `INSERT INTO MessageEquipe
     (idEquipe, contenu, idExpediteur) VALUES ($1, $2, $3)`;
 
@@ -35,6 +39,15 @@ function envoyerMessageEquipe(valeurs) {
 
 }
 
+/**
+ * Envoie un message global à toutes les équipes d'un projet.
+ * @async
+ * @function
+ * @param {string} contenu - Le contenu du message.
+ * @param {number} idProjet - Identifiant du projet.
+ * @param {number} idUser - Identifiant de l'utilisateur.
+ * @throws {Error} Une erreur si l'envoi du message échoue.
+ */
 async function envoyerMessageGlobalProjet(contenu, idProjet, idUser) {
 
     const envoyer = `INSERT INTO MessageEquipe
@@ -56,6 +69,15 @@ async function envoyerMessageGlobalProjet(contenu, idProjet, idUser) {
     }
 }
 
+/**
+ * Envoie un message global à toutes les équipes de tous les projets d'un événement.
+ * @async
+ * @function
+ * @param {string} contenu - Le contenu du message.
+ * @param {number} idEvent - Identifiant de l'événement.
+ * @param {number} idUser - Identifiant de l'utilisateur.
+ * @throws {Error} Une erreur si l'envoi du message échoue.
+ */
 async function envoyerMessageGlobalEvent(contenu, idEvent, idUser) {
 
     const envoyer = `INSERT INTO MessageEquipe
@@ -81,7 +103,14 @@ async function envoyerMessageGlobalEvent(contenu, idEvent, idUser) {
     }
 }
 
-//Recuperer tous les messages de l'equipe
+/**
+ * Récupère tous les messages d'une équipe spécifiée.
+ * @async
+ * @function
+ * @param {number} idEquipe - Identifiant de l'équipe.
+ * @returns {Promise<Array>} - Une promesse résolue avec un tableau de messages de l'équipe.
+ * @throws {Error} Une erreur si la récupération des messages échoue.
+ */
 async function getMessageEquipe(idEquipe) {
     const envoyer = `SELECT * FROM MessageEquipe
     WHERE idEquipe = $1`;
@@ -94,6 +123,15 @@ async function getMessageEquipe(idEquipe) {
     }
 }
 
+/**
+ * Crée un JSON personnalisé avec tous les messages d'une équipe spécifiée.
+ * @async
+ * @function
+ * @param {number} idEquipe - Identifiant de l'équipe.
+ * @param {express.Request} req - La requête Express.
+ * @returns {Promise<Object>} - Une promesse résolue avec un objet JSON contenant les messages au format détaillé.
+ * @throws {Error} Une erreur si la création du JSON échoue.
+ */
 async function jsonGetMessegaeEquipe(idEquipe, req) {
 
     const equipe = await getMessageEquipe(idEquipe);

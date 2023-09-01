@@ -11,6 +11,7 @@ const pool = require('../database/configDB');
  * Les autres équipes qu'il a sollicitées ne verront plus ses demandes.
  * 
  * @function
+ * @author Tiffany GAY-BELLILE <tiffany.gbellile@gmail.com>
  * @param {number} idUser - L'identifiant de l'utilisateur.
  * @throws {Error} Une erreur si la suppression des demandes échoue.
 */
@@ -30,6 +31,7 @@ function supprimerDemandes(idUser) {
  * Décliner une demande d'admission d'un utilisteur.
  * 
  * @function
+ * @author Tiffany GAY-BELLILE <tiffany.gbellile@gmail.com>
  * @param {number} idUser - L'identifiant de l'utilisateur.
  * @param {number} idEquipe - L'identifiant de l'équipe.
  * @throws {Error} Une erreur si la suppression de la demande échoue.
@@ -45,7 +47,16 @@ function declinerDemande(idUser, idEquipe) {
         throw (error);
     }
 }
-
+/**
+ * Envoyer une demande à une équipe, insère l'id du demandeur 
+ * ainsi que l'équipe souhaitée.
+ * 
+ * @function
+ * @author Tiffany GAY-BELLILE <tiffany.gbellile@gmail.com>
+ * @param {Array} valeurs - Tableau contenant l'id du demandeur,
+ * l'id de l'équipe et le contenu du messsage.
+ * @throws {Error} Une erreur si la requête échoue.
+*/
 function envoyerDemande(valeurs) {
 
     const envoyer = `INSERT INTO DemandeEquipe
@@ -59,6 +70,16 @@ function envoyerDemande(valeurs) {
     }
 }
 
+/**
+ * Cherche si une demande d'admission existe pour un étudiant 
+ * et une équipe données.
+ * @function
+ * @author Tiffany GAY-BELLILE <tiffany.gbellile@gmail.com>
+ * @param {Int} idUser Id de l'étudiant
+ * @param {Int} idEquipe Id de l'équipe
+ * @throws {Error} Une erreur si la requête échoue.
+ * @returns {Array} - Les lignes de la bdd concernées.
+*/
 async function demandeDejaEnvoyee(idUser, idEquipe) {
 
     const envoyee = `SELECT *

@@ -7,7 +7,19 @@ const ressourceModel = require('../models/ressourceModel');
 const { body } = require('express-validator');
 const { validationResult } = require('express-validator');
 
-/**Liste des projets */
+/**
+ * @async
+ * @function
+ * @param {object} req - L'objet de requête HTTP.
+ * @param {object} res - L'objet de réponse HTTP.
+ * @description Ce contrôleur permet de récupérer la liste des projets existants.
+ *  
+ * Accès à ce controller: Administrateurs.
+ * 
+ * Route: projet.js
+ * @returns {Object} -JSON des informations ou message d'erreur si la 
+ * requête échoue.
+ */
 async function voirListeProjets(req, res) {
     if (req.method === 'OPTION') {
         return res.status(200).json({ sucess: 'Agress granted' });
@@ -24,7 +36,22 @@ async function voirListeProjets(req, res) {
     }
 }
 
-/**Informations d'un projet */
+/**
+ * @async
+ * @function
+ * @param {object} req - L'objet de requête HTTP.
+ * @param {object} res - L'objet de réponse HTTP.
+ * @description Ce contrôleur permet de récupérer la liste des 
+ * informations liées à un projet.
+ * 
+ * L'id de ce projet est dans l'url de la requête.
+ *  
+ * Accès à ce controller: Administrateurs, Gestionnaires du projet.
+ * 
+ * Route: projet.js
+ * @returns {Object} -JSON des informations ou message d'erreur si la 
+ * requête échoue.
+ */
 async function infosProjet(req, res) {
     if (req.method === 'OPTION') {
         return res.status(200).json({ success: 'Access granted' });
@@ -42,7 +69,23 @@ async function infosProjet(req, res) {
     }
 }
 
-/**Créer */
+/**
+ * @async
+ * @function
+ * @param {object} req - L'objet de requête HTTP.
+ * @param {object} res - L'objet de réponse HTTP.
+ * @description Ce contrôleur permet d'appeler la fonction de création de projet.
+ * 
+ * Les données à insérées dans la base de données sont vérifiées (mots-clés, ressources).
+ * Des gestionnaires peuvent être rattachés. On vérifie si leur identifiant existe dans une table 
+ * gestionnaire.
+ *  
+ * Accès à ce controller: Administrateurs.
+ * 
+ * Route: projet.js
+ * @returns {Object} - Message de succès ou d'erreur.
+
+ */
 async function creationProjet(req, res) {
     if (req.method === 'OPTION') {
         return res.status(200).json({ sucess: 'Agress granted' });
@@ -213,7 +256,22 @@ async function creationProjet(req, res) {
     }
 }
 
-/**Modifier */
+/**
+ * @async
+ * @function
+ * @param {object} req - L'objet de requête HTTP.
+ * @param {object} res - L'objet de réponse HTTP.
+ * @description Ce contrôleur permet d'appeler la fonction de modification de projet.
+ * 
+ * Les données à insérées dans la base de données sont vérifiées (mots-clés, ressources).
+ * Des gestionnaires peuvent être rattachés ou détachés. On vérifie si leur identifiant existe dans une table 
+ * gestionnaire.
+ *  
+ * Accès à ce controller: Administrateurs.
+ * 
+ * Route: projet.js
+ * @returns {Object} - Message de succès ou d'erreur.
+ */
 async function modifierProjet(req, res) {
     if (req.method === 'OPTION') {
         return res.status(200).json({ sucess: 'Agress granted' });
@@ -223,8 +281,8 @@ async function modifierProjet(req, res) {
         let idProjet = res.locals.idProjet;
         const data = req.body;
 
-        data.nom = nom.trim();
-        data.description = description.trim();
+        data.nom = data.nom.trim();
+        data.description = data.description.trim();
 
         try {
 
@@ -374,7 +432,20 @@ async function modifierProjet(req, res) {
     }
 }
 
-/**Supprimer */
+/**
+ * @async
+ * @function
+ * @param {object} req - L'objet de requête HTTP.
+ * @param {object} res - L'objet de réponse HTTP.
+ * @description Ce contrôleur permet d'appeler la fonction de suppression de projet.
+ * 
+ * L'id du projet est récupéré dans l'url de la requête.
+ *  
+ * Accès à ce controller: Administrateurs.
+ * 
+ * Route: projet.js
+ * @returns {Object} - Message de succès ou d'erreur.
+ */
 async function supprimerProjet(req, res) {
     if (req.method === 'OPTION') {
         return res.status(200).json({ sucess: 'Agress granted' });

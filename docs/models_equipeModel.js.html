@@ -34,11 +34,15 @@ const { body } = require('express-validator');
 const motCleModel = require('../models/motCleModel');
 const gererProjet = require('./gererProjet');
 const annotationModel = require('./annotationEquipeModel');
-const { recupererJSON } = require('../gitlab3');
+const { recupererJSON } = require('../controllers/gitlabController');
+const demandeModel = require('./demandeModel');
+const env = require('../environnement.json')
+const url_images = env.backend.assets.images;
 
 const validerEquipe = [
     body('nom')
         .notEmpty().withMessage('Le nom ne doit pas être vide.')
+        .custom((value) => !(/^\s+$/.test(value)))
         .matches(/^[\W0-9a-zA-ZÀ-ÿ \-']*$/)
         .isLength({ min: 2, max: 30 }).withMessage('Le nom doit avoir une longueur comprise entre 2 et 30 caractères.'),
 
@@ -49,6 +53,7 @@ const validerEquipe = [
 
     body('description')
         .optional({ nullable: true, checkFalsy: true })
+        .custom((value) => !(/^\s+$/.test(value)))
         .isLength({ min: 3, max: 2000 }).withMessage('La description doit avoir une longueur comprise entre 3 et 2000 caractères.'),
 
     body('lien_discussion')
@@ -70,80 +75,91 @@ const validerEquipe = [
     validateurDonnéesMiddleware
 ];
 
-/************************************************** C'est à changer dans l'interface ***********/
-function chercherEvenement(idEvent) {
+// /************************************************** C'est à changer dans l'interface ***********/
+async function chercherEvenement(idEvent) {
 
     const users = 'SELECT * FROM Evenement WHERE idEvent = $1';
-    const params = [idEvent];
 
-    return new Promise((resolve, reject) => {
-        pool.query(users, params)
-            .then((res) => {
-                resolve(res.rows);
-            })
-            .catch((error) => {
-                reject(error);
-            });
-    });
+    try {
+        const chercher = await pool.query(users, [idEvent]);
+        return chercher.rows;
+    } catch (error) {
+        throw error;
+    }
+
 }
 
-/* toutes les équipes d'un projet */
+/**
+ * Récupère la liste des équipes d'un projet en fonction de l'identifiant du projet.
+ * @async
+ * @function
+ * @param {number} idProjet - L'identifiant du projet pour lequel récupérer les équipes.
+ * @returns {Promise&lt;Array>} - Une promesse résolue avec un tableau d'objets représentant les équipes.
+ * @throws {Error} Une erreur si la récupération des équipes échoue.
+ * @author Tiffany GAY-BELLILE &lt;tiffany.gbellile@gmail.com>
+ */
 async function listeEquipeProjet(idProjet) {
 
-    const chercher = `SELECT * FROM Equipe WHERE idProjet = $1`;
+    const listeEquipe = `SELECT * FROM Equipe WHERE idProjet = $1`;
 
-    return new Promise((resolve, reject) => {
-        pool.query(chercher, [idProjet])
-            .then((res) => {
-                resolve(res.rows);
-            })
-            .catch((error) => {
-                reject(error);
-            });
-    });
+    try {
+        const chercher = await pool.query(listeEquipe, [idProjet]);
+        return chercher.rows;
+    } catch (error) {
+        throw error;
+    }
 }
 
+/**
+ * Récupère les informations d'une équipe en fonction de son identifiant.
+ * @async
+ * @function
+ * @param {number} id - L'identifiant de l'équipe à rechercher.
+ * @returns {Promise&lt;Object>} - Une promesse résolue avec un objet représentant l'équipe trouvée.
+ * @throws {Error} Une erreur si la recherche de l'équipe échoue.
+ * @author Tiffany GAY-BELLILE &lt;tiffany.gbellile@gmail.com>
+ */
 async function chercherEquipeID(id) {
 
     const chercher = `SELECT * FROM Equipe WHERE idEquipe = $1`;
 
-    return new Promise((resolve, reject) => {
-        pool.query(chercher, [id])
-            .then((res) => {
-                resolve(res.rows);
-            })
-            .catch((error) => {
-                reject(error);
-            });
-    });
-}
-
-/**Vérifier si existe equipe */
-async function equipeExiste(idEquipe) {
-    const equipe = await equipeModel.chercherEquipeID(idEquipe);
-    if (equipe.length === 0) {
-        return true;
+    try {
+        const res = await pool.query(chercher, [id]);
+        return res.rows;
+    } catch (error) {
+        throw error;
     }
 }
 
 
-/* requete pour les equipes ouvertes */
+/**
+ * Récupère la liste des équipes ouvertes (statut de recrutement "ouvert").
+ * @async
+ * @function
+ * @returns {Promise&lt;Array>} - Une promesse résolue avec un tableau d'objets représentant les équipes ouvertes.
+ * @throws {Error} Une erreur si la récupération des équipes ouvertes échoue.
+ * @author Tiffany GAY-BELLILE &lt;tiffany.gbellile@gmail.com>
+ */
 async function equipesOuvertes() {
 
     const chercher = `SELECT * FROM Equipe
     WHERE statut_recrutement = 'ouvert'`;
-
-    return new Promise((resolve, reject) => {
-        pool.query(chercher)
-            .then((res) => {
-                resolve(res.rows);
-            })
-            .catch((error) => {
-                reject(error);
-            });
-    });
+    try {
+        const res = await pool.query(chercher);
+        return res.rows;
+    } catch (error) {
+        throw error;
+    }
 }
 
+/**
+ * Ferme une équipe en fonction de son identifiant.
+ * @async
+ * @function
+ * @param {number} idEquipe - L'identifiant de l'équipe à fermer.
+ * @throws {Error} Une erreur si la fermeture de l'équipe échoue.
+ * @author Tiffany GAY-BELLILE &lt;tiffany.gbellile@gmail.com>
+ */
 async function fermerEquipe(idEquipe) {
 
     const modifier = `UPDATE Equipe
@@ -157,6 +173,14 @@ async function fermerEquipe(idEquipe) {
     }
 }
 
+/**
+ * Ouvre une équipe en fonction de son identifiant.
+ * @async
+ * @function
+ * @param {number} idEquipe - L'identifiant de l'équipe à ouvrir.
+ * @throws {Error} Une erreur si l'ouverture de l'équipe échoue.
+ * @author Tiffany GAY-BELLILE &lt;tiffany.gbellile@gmail.com>
+ */
 async function ouvrirEquipe(idEquipe) {
 
     const modifier = `UPDATE Equipe
@@ -170,38 +194,57 @@ async function ouvrirEquipe(idEquipe) {
     }
 }
 
-async function chercheraccesGitlab(idEquipe){
+/**
+ * Récupère les informations d'accès GitLab d'une équipe en fonction de son identifiant.
+ * @async
+ * @function
+ * @param {number} idEquipe - L'identifiant de l'équipe pour laquelle récupérer les informations d'accès GitLab.
+ * @returns {Promise&lt;Array>} - Une promesse résolue avec un tableau d'objets représentant les informations d'accès GitLab.
+ * @throws {Error} Une erreur si la récupération des informations d'accès GitLab échoue.
+ * @author Tiffany GAY-BELLILE &lt;tiffany.gbellile@gmail.com>
+ */
+async function chercheraccesGitlab(idEquipe) {
     const chercher = `SELECT login_gitlab, mdp_gitlab
     FROM Equipe
     WHERE idEquipe = $1`;
 
-    try{
+    try {
         const donnees = await pool.query(chercher, [idEquipe])
         return donnees.rows;
-    }catch (error){
+    } catch (error) {
         throw (error);
     }
 }
 
-/* Requete créer équipe */
+/**
+ * Crée une nouvelle équipe en fonction des valeurs fournies.
+ * @async
+ * @function
+ * @param {Array} valeurs - Les valeurs à insérer pour créer l'équipe.
+ * @returns {Promise&lt;number>} - Une promesse résolue avec l'identifiant de la nouvelle équipe créée.
+ * @throws {Error} Une erreur si la création de l'équipe échoue.
+ * @author Tiffany GAY-BELLILE &lt;tiffany.gbellile@gmail.com>
+ */
 async function creerEquipe(valeurs) {
 
     const inserer = `INSERT INTO Equipe (idCapitaine, nom, description_equipe, statut_recrutement, idProjet)
     VALUES ($1, $2, $3, $4, $5) RETURNING idEquipe`;
 
     try {
-        return new Promise((resolve, reject) => {
-            pool.query(inserer, valeurs)
-                .then((result) => {
-                    let id = result.rows[0].idequipe;
-                    resolve(id);
-                })
-        });
+        const res = await pool.query(inserer, valeurs);
+        return res.rows[0].idequipe;
     } catch (error) {
         throw error;
     }
 }
 
+/**
+ * Modifie les informations d'une équipe en fonction des valeurs fournies.
+ * @function
+ * @param {Array} valeurs - Les valeurs à utiliser pour mettre à jour l'équipe.
+ * @throws {Error} Une erreur si la modification de l'équipe échoue.
+ * @author Tiffany GAY-BELLILE &lt;tiffany.gbellile@gmail.com>
+ */
 function modifierEquipe(valeurs) {
 
     const modifier = `UPDATE Equipe
@@ -221,6 +264,15 @@ function modifierEquipe(valeurs) {
     }
 }
 
+/**
+ * Insère les informations d'accès GitLab pour une équipe en fonction des valeurs fournies.
+ * @function
+ * @param {string} login - Le login GitLab à insérer.
+ * @param {string} mdp - Le mot de passe GitLab à insérer.
+ * @param {number} idEquipe - L'identifiant de l'équipe pour laquelle insérer les informations d'accès GitLab.
+ * @throws {Error} Une erreur si l'insertion des informations d'accès GitLab échoue.
+ * @author Tiffany GAY-BELLILE &lt;tiffany.gbellile@gmail.com>
+ */
 function insererAccesEquipeGit(login, mdp, idEquipe) {
     const inserer = `UPDATE Equipe 
     SET login_gitlab = $1,
@@ -234,38 +286,59 @@ function insererAccesEquipeGit(login, mdp, idEquipe) {
     }
 }
 
-function appartenirEquipe(idUser, idEquipe) {
+/**
+ * Vérifie si un utilisateur appartient à une équipe en fonction des identifiants de l'utilisateur et de l'équipe.
+ * @async
+ * @function
+ * @param {number} idUser - L'identifiant de l'utilisateur à vérifier.
+ * @param {number} idEquipe - L'identifiant de l'équipe à vérifier.
+ * @returns {Promise&lt;Array>} - Une promesse résolue avec un tableau d'objets représentant l'appartenance de l'utilisateur à l'équipe.
+ * @throws {Error} Une erreur si la vérification de l'appartenance à l'équipe échoue.
+ * @author Tiffany GAY-BELLILE &lt;tiffany.gbellile@gmail.com>
+ */
+async function appartenirEquipe(idUser, idEquipe) {
 
     const chercher = `SELECT * FROM Appartenir 
     WHERE idEquipe = $1 AND idUser = $2`;
 
-    return new Promise((resolve, reject) => {
-        pool.query(chercher, [idEquipe, idUser])
-            .then((res) => {
-                resolve(res.rows);
-            })
-            .catch((error) => {
-                reject(error);
-            });
-    });
+    try {
+        const res = await pool.query(chercher, [idEquipe, idUser]);
+        return res.rows;
+    } catch (error) {
+        throw (error);
+    }
 }
 
-function ListeMembre(idEquipe) {
+/**
+ * Récupère la liste des membres d'une équipe en fonction de l'identifiant de l'équipe.
+ * @async
+ * @function
+ * @param {number} idEquipe - L'identifiant de l'équipe pour laquelle récupérer la liste des membres.
+ * @returns {Promise&lt;Array>} - Une promesse résolue avec un tableau d'objets représentant les membres de l'équipe.
+ * @throws {Error} Une erreur si la récupération de la liste des membres de l'équipe échoue.
+ * @author Tiffany GAY-BELLILE &lt;tiffany.gbellile@gmail.com>
+ */
+async function ListeMembre(idEquipe) {
 
     const chercher = `SELECT idUser FROM Appartenir 
     WHERE idEquipe = $1`;
 
-    return new Promise((resolve, reject) => {
-        pool.query(chercher, [idEquipe])
-            .then((res) => {
-                resolve(res.rows);
-            })
-            .catch((error) => {
-                reject(error);
-            });
-    });
+    try {
+        const res = await pool.query(chercher, [idEquipe]);
+        return res.rows;
+    } catch (error) {
+        throw (error);
+    }
 }
 
+/**
+ * Ajoute un membre à une équipe en fonction des identifiants de l'utilisateur et de l'équipe.
+ * @function
+ * @param {number} idUser - L'identifiant de l'utilisateur à ajouter à l'équipe.
+ * @param {number} idEquipe - L'identifiant de l'équipe à laquelle ajouter le membre.
+ * @throws {Error} Une erreur si l'ajout du membre à l'équipe échoue.
+ * @author Tiffany GAY-BELLILE &lt;tiffany.gbellile@gmail.com>
+ */
 function ajouterMembre(idUser, idEquipe) {
 
     let inserer = `INSERT INTO Appartenir (idUser, idEquipe)
@@ -279,19 +352,14 @@ function ajouterMembre(idUser, idEquipe) {
 
 }
 
-async function suprimerTousMembres(idEquipe) {
-
-    const supprimer = `DELETE FROM Appartenir
-    WHERE idEquipe = $1`;
-
-    try {
-        pool.query(supprimer, [idEquipe]);
-    } catch (error) {
-        throw error;
-    }
-
-}
-
+/**
+ * Supprime un membre d'une équipe en fonction des identifiants de l'utilisateur et de l'équipe.
+ * @function
+ * @param {number} idUser - L'identifiant de l'utilisateur à supprimer de l'équipe.
+ * @param {number} idEquipe - L'identifiant de l'équipe de laquelle supprimer le membre.
+ * @throws {Error} Une erreur si la suppression du membre de l'équipe échoue.
+ * @author Tiffany GAY-BELLILE &lt;tiffany.gbellile@gmail.com>
+ */
 function supprimerUnMembre(idUser, idEquipe) {
 
     let supprimer = `DELETE FROM Appartenir 
@@ -304,6 +372,13 @@ function supprimerUnMembre(idUser, idEquipe) {
     }
 }
 
+/**
+ * Supprime une équipe en fonction de son identifiant.
+ * @function
+ * @param {number} idEquipe - L'identifiant de l'équipe à supprimer.
+ * @throws {Error} Une erreur si la suppression de l'équipe échoue.
+ * @author Tiffany GAY-BELLILE &lt;tiffany.gbellile@gmail.com>
+ */
 function supprimerEquipe(idEquipe) {
 
     const supprimer = `DELETE FROM Equipe 
@@ -316,6 +391,14 @@ function supprimerEquipe(idEquipe) {
     }
 }
 
+/**
+ * Fait quitter un membre d'une équipe en fonction des identifiants de l'utilisateur et de l'équipe.
+ * @function
+ * @param {number} idEquipe - L'identifiant de l'équipe dont le membre doit quitter.
+ * @param {number} idMembre - L'identifiant de l'utilisateur qui doit quitter l'équipe.
+ * @throws {Error} Une erreur si le membre ne peut pas quitter l'équipe.
+ * @author Tiffany GAY-BELLILE &lt;tiffany.gbellile@gmail.com>
+ */
 function quitterEquipe(idEquipe, idMembre) {
 
     const quitter = `DELETE FROM Appartenir
@@ -328,38 +411,40 @@ function quitterEquipe(idEquipe, idMembre) {
     }
 }
 
-function recupererDemande(idEquipe) {
+/**
+ * Récupère les demandes d'équipe en fonction de l'identifiant de l'équipe.
+ * @async
+ * @function
+ * @param {number} idEquipe - L'identifiant de l'équipe pour laquelle récupérer les demandes.
+ * @returns {Promise&lt;Array>} - Une promesse résolue avec un tableau d'objets représentant les demandes d'équipe.
+ * @throws {Error} Une erreur si la récupération des demandes d'équipe échoue.
+ * @author Tiffany GAY-BELLILE &lt;tiffany.gbellile@gmail.com>
+ */
+async function recupererDemande(idEquipe) {
 
     const chercher = `SELECT * FROM DemandeEquipe 
     WHERE idEquipe = $1`;
 
-    return new Promise((resolve, reject) => {
-        pool.query(chercher, [idEquipe])
-            .then((res) => {
-                resolve(res.rows);
-            })
-            .catch((error) => {
-                reject(error);
-            });
-    });
+    try {
+        const res = await pool.query(chercher, [idEquipe]);
+        return res.rows;
+    } catch (error) {
+        throw (error);
+    }
 }
 
-/* Les équipes de l'user */
-async function aUneEquipe(idEtudiant) {
 
-    const appartientAUneEquipe = `SELECT * FROM Appartenir WHERE idUser = $1`;
-
-    return new Promise((resolve, reject) => {
-        pool.query(appartientAUneEquipe, [idEtudiant])
-            .then((res) => {
-                resolve(res.rows);
-            })
-            .catch((error) => {
-                reject(error);
-            });
-    });
-}
-
+/**
+ * Vérifie si un utilisateur appartient à au moins une équipe 
+ * dans un événement en fonction de son identifiant de celui de l'événement.
+ * @async
+ * @function
+ * @param {number} idEtudiant - L'identifiant de l'utilisateur à vérifier.
+ * @param {number} idEvent - Identifiant de l'événement
+ * @returns {Promise&lt;Array>} - Une promesse résolue avec un tableau d'objets représentant l'appartenance de l'utilisateur à des équipes.
+ * @throws {Error} Une erreur si la vérification de l'appartenance à une équipe échoue.
+ * @author Tiffany GAY-BELLILE &lt;tiffany.gbellile@gmail.com>
+ */
 async function aUneEquipeDansEvent(idUser, idEvent) {
     try {
 
@@ -383,7 +468,14 @@ async function aUneEquipeDansEvent(idUser, idEvent) {
     }
 }
 
-/* Promouvoir capitaine */
+/**
+ * Promouvoir un membre de l'équipe au poste de capitaine en fonction des identifiants de l'équipe et de l'étudiant.
+ * @function
+ * @param {number} idEquipe - L'identifiant de l'équipe.
+ * @param {number} idEtudiant - L'identifiant de l'étudiant à promouvoir en tant que capitaine.
+ * @throws {Error} Une erreur si la promotion du capitaine échoue.
+ * @author Tiffany GAY-BELLILE &lt;tiffany.gbellile@gmail.com>
+ */
 function promouvoir(idEquipe, idEtudiant) {
 
     const promouvoir = `UPDATE Equipe
@@ -397,6 +489,21 @@ function promouvoir(idEquipe, idEtudiant) {
     }
 }
 
+/**
+ * Récupère les informations d'une équipe au format JSON en fonction de son identifiant et de la requête utilisateur.
+ * Selon le profil de l'utilisateur, des informations sont présentes en plus.
+ * 
+ * Voir le profil, d'une équipe et pour la modif
+ *Si c'est un etudiant lambda ou gestionnaire (qui ne gère pas le projet de l'équipe), voir le minimum
+ *si membre/gestionnaire de l'équipe ou admin voir tout
+ * @async
+ * @function
+ * @param {number} idEquipe - L'identifiant de l'équipe pour laquelle récupérer les informations.
+ * @param {object} req - La requête utilisateur.
+ * @returns {Promise&lt;object>} - Une promesse résolue avec un objet représentant les informations de l'équipe au format JSON.
+ * @throws {Error} Une erreur si la récupération des informations de l'équipe échoue.
+ * @author Tiffany GAY-BELLILE &lt;tiffany.gbellile@gmail.com>
+ */
 async function jsonInformationsEquipe(idEquipe, req) {
 
     try {
@@ -475,6 +582,7 @@ async function jsonInformationsEquipe(idEquipe, req) {
         jsonRetour.sujet.id_projet = projet[0].idprojet;
         jsonRetour.sujet.description = projet[0].description_projet;
         jsonRetour.sujet.lien_sujet = projet[0].sujet;
+        jsonRetour.sujet.image = url_images + "/" + projet[0].imgprojet;
         jsonRetour.sujet.mots = [];
 
         let listeMots = await motCleModel.recupererMot(projet[0].idprojet);
@@ -503,7 +611,7 @@ async function jsonInformationsEquipe(idEquipe, req) {
             jsonRetour.superUser = false;
         }
 
-        const demandeFaite = await demandeDejaEnvoyee(req.id, idEquipe);
+        const demandeFaite = await demandeModel.demandeDejaEnvoyee(req.id, idEquipe);
         if (demandeFaite.length === 0) {
             jsonRetour.demandeFaite = false;
         } else {
@@ -603,8 +711,9 @@ async function jsonInformationsEquipe(idEquipe, req) {
         for (i = 0; i &lt; result.length; i++) {
             let temp = {};
 
-            temp.date = new Date();
+            temp.result = 'success'
             temp.content = JSON.stringify(result[i]);
+            temp.date = result[i].end;
 
             jsonRetour.resultats.push(temp)
         }
@@ -615,22 +724,31 @@ async function jsonInformationsEquipe(idEquipe, req) {
         temp = {};
         temp.login = acces.login_gitlab;
         temp.mot_de_passe = acces.mdp_gitlab;
+        // temp.login = 'acces.login_gitlab';
+        // temp.mot_de_passe = 'acces.mdp_gitlab';
+        temp.lien_gitlab = env.app.computationImpact.gitlab.host;
         jsonRetour.acces_gitlab.push(temp);
 
         return jsonRetour;
     }
-
     catch (error) {
         throw error;
     }
 }
 
-/*Permet de voir les équipes associées à un projet */
+/**
+ * Récupère la liste des équipes associées à un projet au format JSON en fonction de l'identifiant du projet.
+ * @async
+ * @function
+ * @param {number} idProjet - L'identifiant du projet pour lequel récupérer la liste des équipes.
+ * @returns {Promise&lt;object>} - Une promesse résolue avec un objet représentant la liste des équipes au format JSON.
+ * @throws {Error} Une erreur si la récupération de la liste des équipes échoue.
+ * @author Tiffany GAY-BELLILE &lt;tiffany.gbellile@gmail.com>
+ */
 async function jsonListeEquipeProjet(idProjet) {
 
     try {
         const equipeList = await listeEquipeProjet(idProjet);
-
         jsonRetour = {};
         jsonRetour.equipe = [];
 
@@ -679,6 +797,17 @@ async function jsonListeEquipeProjet(idProjet) {
             temp.idCapitaine = equipeCourante.idcapitaine;
             temp.pseudoCapitaine = ((await userModel.chercherUserID(equipeCourante.idcapitaine))[0].pseudo);
 
+            const result = await recupererJSON(equipeCourante.idequipe, event.nom);
+            temp.resultats = [];
+
+            for (i = 0; i &lt; result.length; i++) {
+                let temp2 = {};
+                temp2.result = 'success';
+                temp2.content = JSON.stringify(result[i]);
+                temp2.date = result[i].end;
+
+                temp.resultats.push(temp2)
+            }
             jsonRetour.equipe.push(temp);
         }
         return jsonRetour;
@@ -686,6 +815,16 @@ async function jsonListeEquipeProjet(idProjet) {
         throw error;
     }
 }
+
+/**
+ * Récupère les équipes auxquelles un étudiant appartient au format JSON en fonction de son identifiant.
+ * @async
+ * @function
+ * @param {number} idUser - L'identifiant de l'étudiant pour lequel récupérer les équipes.
+ * @returns {Promise&lt;object>} - Une promesse résolue avec un objet représentant les équipes auxquelles l'étudiant appartient au format JSON.
+ * @throws {Error} Une erreur si la récupération des équipes de l'étudiant échoue.
+ * @author Tiffany GAY-BELLILE &lt;tiffany.gbellile@gmail.com>
+ */
 async function jsonMesEquipes(idUser) {
 
     let jsonRetour = {};
@@ -740,6 +879,18 @@ async function jsonMesEquipes(idUser) {
     return jsonRetour;
 }
 
+/**
+ * Récupère les équipes ouvertes d'un événement au format JSON en fonction de l'identifiant de l'événement et de la requête utilisateur.
+ * Quelques informations de l'équipe sont renvoyées comme le pseudo du capitaine ou le nom de l'équipe.
+ * Mais aussi, si l'étudiant a déjà envoyé une demande d'admission.
+ * @async
+ * @function
+ * @param {number} idEvent - L'identifiant de l'événement pour lequel récupérer les équipes ouvertes.
+ * @param {object} req - La requête utilisateur.
+ * @returns {Promise&lt;object>} - Une promesse résolue avec un objet représentant les équipes ouvertes au format JSON.
+ * @throws {Error} Une erreur si la récupération des équipes ouvertes échoue.
+ * @author Tiffany GAY-BELLILE &lt;tiffany.gbellile@gmail.com>
+ */
 async function jsonEquipesOuvertes(idEvent, req) {
 
     jsonRetour = {};
@@ -788,7 +939,7 @@ async function jsonEquipesOuvertes(idEvent, req) {
                 }
 
                 /* Vérifier si une demande a déjà été envoyée */
-                const envoyee = await demandeDejaEnvoyee(req.id, temp.idEquipe);
+                const envoyee = await demandeModel.demandeDejaEnvoyee(req.id, temp.idEquipe);
                 if (envoyee.length > 0) {
                     temp.hasSentDemand = true;
                 } else {
@@ -802,43 +953,8 @@ async function jsonEquipesOuvertes(idEvent, req) {
     return jsonRetour;
 }
 
-/*Déplacer les duex fonctions là */
-function envoyerDemande(valeurs) {
-
-    const envoyer = `INSERT INTO DemandeEquipe
-    (idUser, idEquipe, messageDemande)
-    VALUES ($1, $2, $3)`;
-
-    try {
-        pool.query(envoyer, valeurs);
-    } catch (error) {
-        throw (error);
-    }
-}
-
-async function demandeDejaEnvoyee(idUser, idEquipe) {
-
-    const envoyee = `SELECT *
-    FROM DemandeEquipe 
-    WHERE idUser = $1 AND idEquipe = $2`;
-
-    return new Promise((resolve, reject) => {
-        pool.query(envoyee, [idUser, idEquipe])
-            .then((res) => {
-                resolve(res.rows);
-            })
-            .catch((error) => {
-                reject(error);
-            });
-    });
-}
-
-async function recupererGitlabJSON(idEquipe) {
-
-}
 
 module.exports = {
-    aUneEquipe,
     jsonListeEquipeProjet,
     promouvoir,
     supprimerEquipe,
@@ -848,18 +964,14 @@ module.exports = {
     validerEquipe,
     ajouterMembre,
     modifierEquipe,
-    suprimerTousMembres,
     equipesOuvertes,
     jsonEquipesOuvertes,
     jsonInformationsEquipe,
     supprimerUnMembre,
     quitterEquipe,
     appartenirEquipe,
-    envoyerDemande,
-    demandeDejaEnvoyee,
     jsonMesEquipes,
     aUneEquipeDansEvent,
-    equipeExiste,
     fermerEquipe,
     ouvrirEquipe,
     ListeMembre,
@@ -874,13 +986,13 @@ module.exports = {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Annotation_%2525C3%2525A9quipes.html">Annotation_équipes</a></li><li><a href="module-Connexion.html">Connexion</a></li><li><a href="module-Equipe.html">Equipe</a></li><li><a href="module-Evenement.html">Evenement</a></li><li><a href="module-Gestion_demandes_admission.html">Gestion_demandes_admission</a></li><li><a href="module-Gestion_des_utilisateurs.html">Gestion_des_utilisateurs</a></li><li><a href="module-Inscription.html">Inscription</a></li><li><a href="module-Projet.html">Projet</a></li><li><a href="module-Token.html">Token</a></li><li><a href="module-UserRouter.html">UserRouter</a></li><li><a href="module-VerifierProfil.html">VerifierProfil</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-UserRouter-UserRouter.html">UserRouter</a></li></ul><h3>Global</h3><ul><li><a href="global.html#ajouterRegle">ajouterRegle</a></li><li><a href="global.html#chercherGestionnaireExtID">chercherGestionnaireExtID</a></li><li><a href="global.html#chercherGestionnaireIapau">chercherGestionnaireIapau</a></li><li><a href="global.html#chercherListeGestionnaireIapau">chercherListeGestionnaireIapau</a></li><li><a href="global.html#chercherListeGestionnairesExt">chercherListeGestionnairesExt</a></li><li><a href="global.html#chercherListeStudents">chercherListeStudents</a></li><li><a href="global.html#chercherStudent">chercherStudent</a></li><li><a href="global.html#chercheridProjet">chercheridProjet</a></li><li><a href="global.html#comparerMdp">comparerMdp</a></li><li><a href="global.html#creationProjet">creationProjet</a></li><li><a href="global.html#creerEtudiant">creerEtudiant</a></li><li><a href="global.html#creerGestionnaireExterne">creerGestionnaireExterne</a></li><li><a href="global.html#creerGestionnaireIA">creerGestionnaireIA</a></li><li><a href="global.html#creerProjet">creerProjet</a></li><li><a href="global.html#equipeExiste">equipeExiste</a></li><li><a href="global.html#infosProjet">infosProjet</a></li><li><a href="global.html#insererMot">insererMot</a></li><li><a href="global.html#listeProjetsJson">listeProjetsJson</a></li><li><a href="global.html#modifierEtudiant">modifierEtudiant</a></li><li><a href="global.html#modifierExterne">modifierExterne</a></li><li><a href="global.html#modifierIapau">modifierIapau</a></li><li><a href="global.html#modifierProjet">modifierProjet</a></li><li><a href="global.html#recupererAncienEvents">recupererAncienEvents</a></li><li><a href="global.html#recupererEventActuel">recupererEventActuel</a></li><li><a href="global.html#recuperer_projets">recuperer_projets</a></li><li><a href="global.html#recuperer_regles">recuperer_regles</a></li><li><a href="global.html#recuperer_ressourcesPrivees">recuperer_ressourcesPrivees</a></li><li><a href="global.html#recuperer_ressourcesPubliques">recuperer_ressourcesPubliques</a></li><li><a href="global.html#recuperer_toutes_ressources">recuperer_toutes_ressources</a></li><li><a href="global.html#salageMdp">salageMdp</a></li><li><a href="global.html#supprimerProjet">supprimerProjet</a></li><li><a href="global.html#tousLesProjets">tousLesProjets</a></li><li><a href="global.html#updateMdp">updateMdp</a></li><li><a href="global.html#validerEtudiant">validerEtudiant</a></li><li><a href="global.html#verifIdEquipe">verifIdEquipe</a></li><li><a href="global.html#verifIdEvent">verifIdEvent</a></li><li><a href="global.html#verifIdProjet">verifIdProjet</a></li><li><a href="global.html#voirEvent">voirEvent</a></li><li><a href="global.html#voirListeGestionnaires">voirListeGestionnaires</a></li><li><a href="global.html#voirListeProjets">voirListeProjets</a></li><li><a href="global.html#voirTousEvents">voirTousEvents</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Connexion.html">Connexion</a></li><li><a href="module-Equipe.html">Equipe</a></li><li><a href="module-Gestion_des_utilisateurs.html">Gestion_des_utilisateurs</a></li><li><a href="module-Inscription.html">Inscription</a></li><li><a href="module-Token.html">Token</a></li><li><a href="module-UserRouter.html">UserRouter</a></li><li><a href="module-VerifierProfil.html">VerifierProfil</a></li></ul><h3>Global</h3><ul><li><a href="global.html#ListeMembre">ListeMembre</a></li><li><a href="global.html#aUneEquipeDansEvent">aUneEquipeDansEvent</a></li><li><a href="global.html#ajouterMembre">ajouterMembre</a></li><li><a href="global.html#ajouterRegle">ajouterRegle</a></li><li><a href="global.html#appartenirEquipe">appartenirEquipe</a></li><li><a href="global.html#attribuerProjetExterne">attribuerProjetExterne</a></li><li><a href="global.html#attribuerProjetIA">attribuerProjetIA</a></li><li><a href="global.html#chercherAdminID">chercherAdminID</a></li><li><a href="global.html#chercherEquipeID">chercherEquipeID</a></li><li><a href="global.html#chercherGestionnaireExt">chercherGestionnaireExt</a></li><li><a href="global.html#chercherGestionnaireExtID">chercherGestionnaireExtID</a></li><li><a href="global.html#chercherGestionnaireIA">chercherGestionnaireIA</a></li><li><a href="global.html#chercherGestionnaireIAID">chercherGestionnaireIAID</a></li><li><a href="global.html#chercherGestionnaireIapau">chercherGestionnaireIapau</a></li><li><a href="global.html#chercherListeGestionnaireIapau">chercherListeGestionnaireIapau</a></li><li><a href="global.html#chercherListeGestionnairesExt">chercherListeGestionnairesExt</a></li><li><a href="global.html#chercherListeStudents">chercherListeStudents</a></li><li><a href="global.html#chercherListeUtilisateurs">chercherListeUtilisateurs</a></li><li><a href="global.html#chercherStudent">chercherStudent</a></li><li><a href="global.html#chercherUserID">chercherUserID</a></li><li><a href="global.html#chercherUserPseudo">chercherUserPseudo</a></li><li><a href="global.html#chercheraccesGitlab">chercheraccesGitlab</a></li><li><a href="global.html#chercheridProjet">chercheridProjet</a></li><li><a href="global.html#comparerMdp">comparerMdp</a></li><li><a href="global.html#copieDuTemplate">copieDuTemplate</a></li><li><a href="global.html#createEvent">createEvent</a></li><li><a href="global.html#creationProjet">creationProjet</a></li><li><a href="global.html#creerAdmin">creerAdmin</a></li><li><a href="global.html#creerAnnotation">creerAnnotation</a></li><li><a href="global.html#creerDossier">creerDossier</a></li><li><a href="global.html#creerEquipe">creerEquipe</a></li><li><a href="global.html#creerEtudiant">creerEtudiant</a></li><li><a href="global.html#creerGestionnaireExterne">creerGestionnaireExterne</a></li><li><a href="global.html#creerGestionnaireIA">creerGestionnaireIA</a></li><li><a href="global.html#creerProjet">creerProjet</a></li><li><a href="global.html#creerUtilisateur">creerUtilisateur</a></li><li><a href="global.html#declinerDemande">declinerDemande</a></li><li><a href="global.html#demandeDejaEnvoyee">demandeDejaEnvoyee</a></li><li><a href="global.html#destituerProjetExterne">destituerProjetExterne</a></li><li><a href="global.html#destituerProjetIa">destituerProjetIa</a></li><li><a href="global.html#detacherProjetEvent">detacherProjetEvent</a></li><li><a href="global.html#ecrireAnnotation">ecrireAnnotation</a></li><li><a href="global.html#envoyerDemande">envoyerDemande</a></li><li><a href="global.html#envoyerMessage">envoyerMessage</a></li><li><a href="global.html#envoyerMessageEquipe">envoyerMessageEquipe</a></li><li><a href="global.html#envoyerMessageGlobalEvent">envoyerMessageGlobalEvent</a></li><li><a href="global.html#envoyerMessageGlobalProjet">envoyerMessageGlobalProjet</a></li><li><a href="global.html#envoyer_json_liste_gestionnaires">envoyer_json_liste_gestionnaires</a></li><li><a href="global.html#equipesOuvertes">equipesOuvertes</a></li><li><a href="global.html#fermerEquipe">fermerEquipe</a></li><li><a href="global.html#genererChaineAleatoire">genererChaineAleatoire</a></li><li><a href="global.html#getAnnotationEquipe">getAnnotationEquipe</a></li><li><a href="global.html#getAnnotationEquipes">getAnnotationEquipes</a></li><li><a href="global.html#getExterneInfo">getExterneInfo</a></li><li><a href="global.html#getIAGestionnaireInfo">getIAGestionnaireInfo</a></li><li><a href="global.html#getMessageEquipe">getMessageEquipe</a></li><li><a href="global.html#getStudentInfo">getStudentInfo</a></li><li><a href="global.html#infosProjet">infosProjet</a></li><li><a href="global.html#insererAccesEquipeGit">insererAccesEquipeGit</a></li><li><a href="global.html#insererMot">insererMot</a></li><li><a href="global.html#insererUser">insererUser</a></li><li><a href="global.html#jsonEquipesOuvertes">jsonEquipesOuvertes</a></li><li><a href="global.html#jsonGetAnnotation">jsonGetAnnotation</a></li><li><a href="global.html#jsonGetMessegaeEquipe">jsonGetMessegaeEquipe</a></li><li><a href="global.html#jsonInformationsEquipe">jsonInformationsEquipe</a></li><li><a href="global.html#jsonListeEquipeProjet">jsonListeEquipeProjet</a></li><li><a href="global.html#jsonMesEquipes">jsonMesEquipes</a></li><li><a href="global.html#listeEquipeProjet">listeEquipeProjet</a></li><li><a href="global.html#listeEquipes">listeEquipes</a></li><li><a href="global.html#listeProjetsJson">listeProjetsJson</a></li><li><a href="global.html#modifierEquipe">modifierEquipe</a></li><li><a href="global.html#modifierEtudiant">modifierEtudiant</a></li><li><a href="global.html#modifierEvent">modifierEvent</a></li><li><a href="global.html#modifierExterne">modifierExterne</a></li><li><a href="global.html#modifierIapau">modifierIapau</a></li><li><a href="global.html#modifierProjet">modifierProjet</a></li><li><a href="global.html#modifierUser">modifierUser</a></li><li><a href="global.html#ouvrirEquipe">ouvrirEquipe</a></li><li><a href="global.html#promouvoir">promouvoir</a></li><li><a href="global.html#quitterEquipe">quitterEquipe</a></li><li><a href="global.html#rattacherProjetEvent">rattacherProjetEvent</a></li><li><a href="global.html#recupInfoEvent">recupInfoEvent</a></li><li><a href="global.html#recupererAncienEvents">recupererAncienEvents</a></li><li><a href="global.html#recupererDemande">recupererDemande</a></li><li><a href="global.html#recupererEventActuel">recupererEventActuel</a></li><li><a href="global.html#recupererJSON">recupererJSON</a></li><li><a href="global.html#recupererMessageEquipe">recupererMessageEquipe</a></li><li><a href="global.html#recupererMot">recupererMot</a></li><li><a href="global.html#recuperer_projets">recuperer_projets</a></li><li><a href="global.html#recuperer_regles">recuperer_regles</a></li><li><a href="global.html#recuperer_ressourcesPrivees">recuperer_ressourcesPrivees</a></li><li><a href="global.html#recuperer_ressourcesPubliques">recuperer_ressourcesPubliques</a></li><li><a href="global.html#recuperer_toutes_ressources">recuperer_toutes_ressources</a></li><li><a href="global.html#salageMdp">salageMdp</a></li><li><a href="global.html#supprimerDemandes">supprimerDemandes</a></li><li><a href="global.html#supprimerEquipe">supprimerEquipe</a></li><li><a href="global.html#supprimerEvent">supprimerEvent</a></li><li><a href="global.html#supprimerMot">supprimerMot</a></li><li><a href="global.html#supprimerProjet">supprimerProjet</a></li><li><a href="global.html#supprimerRegles">supprimerRegles</a></li><li><a href="global.html#supprimerUnMembre">supprimerUnMembre</a></li><li><a href="global.html#supprimerUser">supprimerUser</a></li><li><a href="global.html#tousLesProjets">tousLesProjets</a></li><li><a href="global.html#toutesInfosProjet">toutesInfosProjet</a></li><li><a href="global.html#updateMdp">updateMdp</a></li><li><a href="global.html#validerEtudiant">validerEtudiant</a></li><li><a href="global.html#verifIdEquipe">verifIdEquipe</a></li><li><a href="global.html#verifIdEvent">verifIdEvent</a></li><li><a href="global.html#verifIdProjet">verifIdProjet</a></li><li><a href="global.html#verifIdUser">verifIdUser</a></li><li><a href="global.html#voirEvent">voirEvent</a></li><li><a href="global.html#voirListeGestionnaires">voirListeGestionnaires</a></li><li><a href="global.html#voirListeProjets">voirListeProjets</a></li><li><a href="global.html#voirTousEvents">voirTousEvents</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.2</a> on Sun Aug 27 2023 19:13:11 GMT+0200 (Central European Summer Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.2</a> on Fri Sep 01 2023 11:42:28 GMT+0200 (Central European Summer Time)
 </footer>
 
 <script> prettyPrint(); </script>

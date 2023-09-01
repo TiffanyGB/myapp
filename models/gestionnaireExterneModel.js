@@ -30,7 +30,14 @@ async function validerGestionnaireExterne(req) {
 }
 
 
-/**Liste des étudiants */
+/**
+ * Cherche la liste des gestionnaires externes
+ * @async
+ * @function
+ * @author Tiffany GAY-BELLILE <tiffany.gbellile@gmail.com>
+ * @returns {Object} Les lignes de la bdd trouvées par la requête SQL
+ * @throws {Error} Une erreur si la requête échoue.
+*/
 async function chercherListeGestionnairesExt() {
 
     const users = `SELECT * FROM Gestionnaire_externe`;
@@ -43,7 +50,15 @@ async function chercherListeGestionnairesExt() {
     }
 }
 
-/**Chercher un gestionnaire externe par son id*/
+/**
+ * Cherche un gestionnaire avec son id
+ * @async
+ * @function
+ * @author Tiffany GAY-BELLILE <tiffany.gbellile@gmail.com>
+ * @param {Int} idUser id du gestionnaire externe à rechercher
+ * @returns {Object} Les lignes de la bdd trouvées par la requête SQL
+ * @throws {Error} Une erreur si la requête échoue.
+*/
 async function chercherGestionnaireExtID(IdUser) {
 
     const users = `SELECT * FROM Gestionnaire_externe WHERE id_g_externe = $1`;
@@ -57,19 +72,14 @@ async function chercherGestionnaireExtID(IdUser) {
 }
 
 /**
- * Crée un nouveau gestionnaire externe.
- * @async
- * @param {Array} values_user - Les valeurs des champs utilisateur.
- * @param {Array} values_id - Les valeurs des champs identifiant (pseudo et email).
- * @param {string} entreprise - L'entreprise du gestionnaire externe.
- * @param {string} metier - Le métier du gestionnaire externe.
- * @returns {string} - Résultat de la création du gestionnaire externe.
- * - 'true' si le gestionnaire externe a été créé avec succès.
- * - 'erreur' en cas d'échec de l'insertion dans la table gestionnaire externe.
- * - 'les2' si à la fois le pseudo et l'email existent déjà.
- * - 'pseudo' si le pseudo existe déjà.
- * - 'mail' si l'email existe déjà.
- */
+ * Crée un gestionnaireExterne
+ * @function
+ * @author Tiffany GAY-BELLILE <tiffany.gbellile@gmail.com>
+ * @param {Int} id Id de l'étudiant
+ * @param {String} entreprise Entreprise du gestionnaire
+ * @param {String} metier Métier du gestionnaire
+ * @throws {Error} Une erreur si la requête échoue.
+*/
 async function creerGestionnaireExterne(id, entreprise, metier) {
 
     const valeurs_ges = [id, entreprise, metier];
@@ -82,6 +92,15 @@ async function creerGestionnaireExterne(id, entreprise, metier) {
         throw error;
     }
 }
+
+/**
+ * Crée un json avec les infos du gestionnaire voulu
+ * @function
+ * @author Tiffany GAY-BELLILE <tiffany.gbellile@gmail.com>
+ * @param {Int} userId Id du gestionnaire externe
+ * @returns {JSON} Json avec les informations
+ * @throws {Error} Une erreur si la requête échoue.
+*/
 async function getExterneInfo(userId) {
 
     try{

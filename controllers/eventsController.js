@@ -8,16 +8,18 @@ const { body, validationResult } = require('express-validator');
  * @async
  * @param {object} req - L'objet de requête HTTP.
  * @param {object} res - L'objet de réponse HTTP.
- * @returns {object} Une erreur 
- * @description Cette fonction permet à un utilisateur de se connecter à son compte avec 
- * un login/email et un mot de passe.
+ * @description Cette fonction permet d'appeler la fonction de création d'événement.
  * 
- * Le champ 'identifiant' peut être un pseudo ou une adresse mail.
- * Le champ 'seSouvenir' vaut 'true' si l'utilisteur a coché cette option sur la page de connexion,
- * 'false' dans le cas contraire. Ce champ permet d'ajuster la date d'expiration du token, plus longue
- * si il vaut 'true'.
- * @headers
- *    {string} Authorization - Token d'authentification JWT.
+ * Les données concernant celui-ci sont récupérées et vérifiées. Par exemple, les titres des règles
+ * ne doivent pas être vides.
+ * Si des règles et des projets sont associés, on les y rattache.
+ *  
+ * Accès à ce controller: Administrateurs.
+ * 
+ * Route: events.js
+ * @returns {Object} - Message de succès ou d'erreur.
+
+ * 
  */
 async function createEvent(req, res) {
   if (req.method === 'OPTIONS') {
@@ -96,6 +98,21 @@ async function createEvent(req, res) {
   }
 }
 
+/**
+ * @async
+ * @param {object} req - L'objet de requête HTTP.
+ * @param {object} res - L'objet de réponse HTTP.
+ * @description Ce contrôleur permet d'appeler la fonction de modification d'événement.
+ * 
+ * L'id de l'événement est récupéré de l'url de la requête.
+ * Les données sont vérifiées comme lors de la création de l'événement.
+ * Des projets et des règles peuvent être rajoutés ou détachés.
+ *  
+ * Accès à ce controller: Administrateurs.
+ * 
+ * Route: events.js
+ * @returns {Object} - Message de succès ou d'erreur.
+ */
 async function modifierEvent(req, res) {
 
   if (req.method === 'OPTIONS') {
@@ -180,6 +197,20 @@ async function modifierEvent(req, res) {
   }
 }
 
+/**
+ * @async
+ * @param {object} req - L'objet de requête HTTP.
+ * @param {object} res - L'objet de réponse HTTP.
+ * @description Ce contrôleur permet d'appeler la fonction de suppression d'événement.
+ * 
+ * L'id de l'événement est récupéré de l'url de la requête.
+ *  
+ * Accès à ce controller: Administrateurs.
+ * 
+ * Route: events.js
+ * @returns {Object} - Message de succès ou d'erreur.
+
+ */
 function supprimerEvent(req, res) {
   if (req.method === 'OPTIONS') {
     return res.status(200).json({ sucess: 'Agress granted' });
@@ -199,6 +230,22 @@ function supprimerEvent(req, res) {
   }
 }
 
+/**
+ * @async
+ * @function
+ * @param {object} req - L'objet de requête HTTP.
+ * @param {object} res - L'objet de réponse HTTP.
+ * @description Ce contrôleur permet de récupérer la liste des équipes qui 
+ * participent à un événement donné.
+ * 
+ * L'id de l'événement est récupéré de l'url de la requête.
+ *  
+ * Accès à ce controller: Administrateurs.
+ * 
+ * Route: events.js
+ * @returns {Object} -JSON de la liste des équipes ou message d'erreur si la 
+ * requête échoue.
+ */
 async function listeEquipes(req, res) {
 
   if (req.method === 'OPTIONS') {
@@ -218,6 +265,23 @@ async function listeEquipes(req, res) {
   }
 }
 
+/**
+ * @async
+ * @param {object} req - L'objet de requête HTTP.
+ * @param {object} res - L'objet de réponse HTTP.
+ * @description Ce contrôleur permet de récupérer les informations liées à un événement.
+ * 
+ * L'id de l'événement est récupéré de l'url de la requête.
+ * La différence avec le contrôleur 'voirEvent' est que ce dernier permet à l'affichage 
+ * des informations de l'événement sur la page d'accueil alors que ce contrôleur récupère
+ * toutes les informations modifiables par l'administrateur (page de modification).
+ *  
+ * Accès à ce controller: Administrateurs.
+ * 
+ * Route: events.js
+ * @returns {Object} -JSON des informations ou message d'erreur si la 
+ * requête échoue.
+ */
 async function recupInfoEvent(req, res) {
   if (req.method === 'OPTIONS') {
     return res.status(200).json({ sucess: 'Agress granted' });
@@ -238,15 +302,20 @@ async function recupInfoEvent(req, res) {
 }
 
 /**
- * Voir un événement spécifique.
+ * @async
  * @param {object} req - L'objet de requête HTTP.
  * @param {object} res - L'objet de réponse HTTP.
- * @returns {object} Un JSON contenant les informations de l'événement nécessaires pour l'affichage
- * @throws {Error}Erreur lors de la récupération des informations de l'événement.
- * @description Cette fonction permet à un utilisateur voir les informations d'un événement selon son statut ie 
- * gestionnaire (IA ou externe), administrateur, étudiant, non connecté.
- * Informations en plus pour un étudiant: Numéro équipe (si existe).
- * Informations en moins pour un non connecté: Ressources privées d'un projet.
+ * @description Ce contrôleur permet de récupérer les informations liées à un événement.
+ * 
+ * L'id de l'événement est récupéré de l'url de la requête.
+ * 
+ * Le JSON des informations varient selon le profil d'utilisateur.
+ *  
+ * Accès à ce controller: Connectés et non connectés.
+ * 
+ * Route: index.js
+ * @returns {Object} -JSON des informations ou message d'erreur si la 
+ * requête échoue.
  */
 async function voirEvent(req, res) {
   if (req.method === 'OPTIONS') {
@@ -282,13 +351,19 @@ async function voirEvent(req, res) {
 }
 
 /**
- * Voir la liste des événements (anciens et actuels).
+ * @async
  * @param {object} req - L'objet de requête HTTP.
  * @param {object} res - L'objet de réponse HTTP.
- * @returns {object} Un JSON contenant les informations des événements ie:
- * Titre, image, date début, fin, statut(en cours, inscription, fini), gain.
- * @throws {Error}Erreur lors de la requete qui récupère tous les événements de la bdd.
- * @description Cette fonction permet d'envoyer au client les informations à afficher pour tous les événements.
+ * @description Ce contrôleur permet de récupérer la liste de tous les événements qui existent.
+ * 
+ * Le JSON des informations varient selon le profil d'utilisateur.
+ *  
+ * Accès à ce controller: Connectés et non connectés.
+ * 
+ * Route: index.js
+ * 
+ * @returns {Object} -JSON des informations ou message d'erreur si la 
+ * requête échoue.
  */
 async function voirTousEvents(req, res) {
   if (req.method === 'OPTIONS') {

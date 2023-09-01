@@ -61,7 +61,15 @@ async function chercherEvenement(idEvent) {
 
 }
 
-/* toutes les équipes d'un projet */
+/**
+ * Récupère la liste des équipes d'un projet en fonction de l'identifiant du projet.
+ * @async
+ * @function
+ * @param {number} idProjet - L'identifiant du projet pour lequel récupérer les équipes.
+ * @returns {Promise<Array>} - Une promesse résolue avec un tableau d'objets représentant les équipes.
+ * @throws {Error} Une erreur si la récupération des équipes échoue.
+ * @author Tiffany GAY-BELLILE <tiffany.gbellile@gmail.com>
+ */
 async function listeEquipeProjet(idProjet) {
 
     const listeEquipe = `SELECT * FROM Equipe WHERE idProjet = $1`;
@@ -74,6 +82,15 @@ async function listeEquipeProjet(idProjet) {
     }
 }
 
+/**
+ * Récupère les informations d'une équipe en fonction de son identifiant.
+ * @async
+ * @function
+ * @param {number} id - L'identifiant de l'équipe à rechercher.
+ * @returns {Promise<Object>} - Une promesse résolue avec un objet représentant l'équipe trouvée.
+ * @throws {Error} Une erreur si la recherche de l'équipe échoue.
+ * @author Tiffany GAY-BELLILE <tiffany.gbellile@gmail.com>
+ */
 async function chercherEquipeID(id) {
 
     const chercher = `SELECT * FROM Equipe WHERE idEquipe = $1`;
@@ -86,7 +103,15 @@ async function chercherEquipeID(id) {
     }
 }
 
-/* requete pour les equipes ouvertes */
+
+/**
+ * Récupère la liste des équipes ouvertes (statut de recrutement "ouvert").
+ * @async
+ * @function
+ * @returns {Promise<Array>} - Une promesse résolue avec un tableau d'objets représentant les équipes ouvertes.
+ * @throws {Error} Une erreur si la récupération des équipes ouvertes échoue.
+ * @author Tiffany GAY-BELLILE <tiffany.gbellile@gmail.com>
+ */
 async function equipesOuvertes() {
 
     const chercher = `SELECT * FROM Equipe
@@ -99,6 +124,14 @@ async function equipesOuvertes() {
     }
 }
 
+/**
+ * Ferme une équipe en fonction de son identifiant.
+ * @async
+ * @function
+ * @param {number} idEquipe - L'identifiant de l'équipe à fermer.
+ * @throws {Error} Une erreur si la fermeture de l'équipe échoue.
+ * @author Tiffany GAY-BELLILE <tiffany.gbellile@gmail.com>
+ */
 async function fermerEquipe(idEquipe) {
 
     const modifier = `UPDATE Equipe
@@ -112,6 +145,14 @@ async function fermerEquipe(idEquipe) {
     }
 }
 
+/**
+ * Ouvre une équipe en fonction de son identifiant.
+ * @async
+ * @function
+ * @param {number} idEquipe - L'identifiant de l'équipe à ouvrir.
+ * @throws {Error} Une erreur si l'ouverture de l'équipe échoue.
+ * @author Tiffany GAY-BELLILE <tiffany.gbellile@gmail.com>
+ */
 async function ouvrirEquipe(idEquipe) {
 
     const modifier = `UPDATE Equipe
@@ -125,6 +166,15 @@ async function ouvrirEquipe(idEquipe) {
     }
 }
 
+/**
+ * Récupère les informations d'accès GitLab d'une équipe en fonction de son identifiant.
+ * @async
+ * @function
+ * @param {number} idEquipe - L'identifiant de l'équipe pour laquelle récupérer les informations d'accès GitLab.
+ * @returns {Promise<Array>} - Une promesse résolue avec un tableau d'objets représentant les informations d'accès GitLab.
+ * @throws {Error} Une erreur si la récupération des informations d'accès GitLab échoue.
+ * @author Tiffany GAY-BELLILE <tiffany.gbellile@gmail.com>
+ */
 async function chercheraccesGitlab(idEquipe) {
     const chercher = `SELECT login_gitlab, mdp_gitlab
     FROM Equipe
@@ -138,7 +188,15 @@ async function chercheraccesGitlab(idEquipe) {
     }
 }
 
-/* Requete créer équipe */
+/**
+ * Crée une nouvelle équipe en fonction des valeurs fournies.
+ * @async
+ * @function
+ * @param {Array} valeurs - Les valeurs à insérer pour créer l'équipe.
+ * @returns {Promise<number>} - Une promesse résolue avec l'identifiant de la nouvelle équipe créée.
+ * @throws {Error} Une erreur si la création de l'équipe échoue.
+ * @author Tiffany GAY-BELLILE <tiffany.gbellile@gmail.com>
+ */
 async function creerEquipe(valeurs) {
 
     const inserer = `INSERT INTO Equipe (idCapitaine, nom, description_equipe, statut_recrutement, idProjet)
@@ -152,6 +210,13 @@ async function creerEquipe(valeurs) {
     }
 }
 
+/**
+ * Modifie les informations d'une équipe en fonction des valeurs fournies.
+ * @function
+ * @param {Array} valeurs - Les valeurs à utiliser pour mettre à jour l'équipe.
+ * @throws {Error} Une erreur si la modification de l'équipe échoue.
+ * @author Tiffany GAY-BELLILE <tiffany.gbellile@gmail.com>
+ */
 function modifierEquipe(valeurs) {
 
     const modifier = `UPDATE Equipe
@@ -171,6 +236,15 @@ function modifierEquipe(valeurs) {
     }
 }
 
+/**
+ * Insère les informations d'accès GitLab pour une équipe en fonction des valeurs fournies.
+ * @function
+ * @param {string} login - Le login GitLab à insérer.
+ * @param {string} mdp - Le mot de passe GitLab à insérer.
+ * @param {number} idEquipe - L'identifiant de l'équipe pour laquelle insérer les informations d'accès GitLab.
+ * @throws {Error} Une erreur si l'insertion des informations d'accès GitLab échoue.
+ * @author Tiffany GAY-BELLILE <tiffany.gbellile@gmail.com>
+ */
 function insererAccesEquipeGit(login, mdp, idEquipe) {
     const inserer = `UPDATE Equipe 
     SET login_gitlab = $1,
@@ -184,6 +258,16 @@ function insererAccesEquipeGit(login, mdp, idEquipe) {
     }
 }
 
+/**
+ * Vérifie si un utilisateur appartient à une équipe en fonction des identifiants de l'utilisateur et de l'équipe.
+ * @async
+ * @function
+ * @param {number} idUser - L'identifiant de l'utilisateur à vérifier.
+ * @param {number} idEquipe - L'identifiant de l'équipe à vérifier.
+ * @returns {Promise<Array>} - Une promesse résolue avec un tableau d'objets représentant l'appartenance de l'utilisateur à l'équipe.
+ * @throws {Error} Une erreur si la vérification de l'appartenance à l'équipe échoue.
+ * @author Tiffany GAY-BELLILE <tiffany.gbellile@gmail.com>
+ */
 async function appartenirEquipe(idUser, idEquipe) {
 
     const chercher = `SELECT * FROM Appartenir 
@@ -197,6 +281,15 @@ async function appartenirEquipe(idUser, idEquipe) {
     }
 }
 
+/**
+ * Récupère la liste des membres d'une équipe en fonction de l'identifiant de l'équipe.
+ * @async
+ * @function
+ * @param {number} idEquipe - L'identifiant de l'équipe pour laquelle récupérer la liste des membres.
+ * @returns {Promise<Array>} - Une promesse résolue avec un tableau d'objets représentant les membres de l'équipe.
+ * @throws {Error} Une erreur si la récupération de la liste des membres de l'équipe échoue.
+ * @author Tiffany GAY-BELLILE <tiffany.gbellile@gmail.com>
+ */
 async function ListeMembre(idEquipe) {
 
     const chercher = `SELECT idUser FROM Appartenir 
@@ -210,6 +303,14 @@ async function ListeMembre(idEquipe) {
     }
 }
 
+/**
+ * Ajoute un membre à une équipe en fonction des identifiants de l'utilisateur et de l'équipe.
+ * @function
+ * @param {number} idUser - L'identifiant de l'utilisateur à ajouter à l'équipe.
+ * @param {number} idEquipe - L'identifiant de l'équipe à laquelle ajouter le membre.
+ * @throws {Error} Une erreur si l'ajout du membre à l'équipe échoue.
+ * @author Tiffany GAY-BELLILE <tiffany.gbellile@gmail.com>
+ */
 function ajouterMembre(idUser, idEquipe) {
 
     let inserer = `INSERT INTO Appartenir (idUser, idEquipe)
@@ -223,19 +324,14 @@ function ajouterMembre(idUser, idEquipe) {
 
 }
 
-async function suprimerTousMembres(idEquipe) {
-
-    const supprimer = `DELETE FROM Appartenir
-    WHERE idEquipe = $1`;
-
-    try {
-        pool.query(supprimer, [idEquipe]);
-    } catch (error) {
-        throw error;
-    }
-
-}
-
+/**
+ * Supprime un membre d'une équipe en fonction des identifiants de l'utilisateur et de l'équipe.
+ * @function
+ * @param {number} idUser - L'identifiant de l'utilisateur à supprimer de l'équipe.
+ * @param {number} idEquipe - L'identifiant de l'équipe de laquelle supprimer le membre.
+ * @throws {Error} Une erreur si la suppression du membre de l'équipe échoue.
+ * @author Tiffany GAY-BELLILE <tiffany.gbellile@gmail.com>
+ */
 function supprimerUnMembre(idUser, idEquipe) {
 
     let supprimer = `DELETE FROM Appartenir 
@@ -248,6 +344,13 @@ function supprimerUnMembre(idUser, idEquipe) {
     }
 }
 
+/**
+ * Supprime une équipe en fonction de son identifiant.
+ * @function
+ * @param {number} idEquipe - L'identifiant de l'équipe à supprimer.
+ * @throws {Error} Une erreur si la suppression de l'équipe échoue.
+ * @author Tiffany GAY-BELLILE <tiffany.gbellile@gmail.com>
+ */
 function supprimerEquipe(idEquipe) {
 
     const supprimer = `DELETE FROM Equipe 
@@ -260,6 +363,14 @@ function supprimerEquipe(idEquipe) {
     }
 }
 
+/**
+ * Fait quitter un membre d'une équipe en fonction des identifiants de l'utilisateur et de l'équipe.
+ * @function
+ * @param {number} idEquipe - L'identifiant de l'équipe dont le membre doit quitter.
+ * @param {number} idMembre - L'identifiant de l'utilisateur qui doit quitter l'équipe.
+ * @throws {Error} Une erreur si le membre ne peut pas quitter l'équipe.
+ * @author Tiffany GAY-BELLILE <tiffany.gbellile@gmail.com>
+ */
 function quitterEquipe(idEquipe, idMembre) {
 
     const quitter = `DELETE FROM Appartenir
@@ -272,6 +383,15 @@ function quitterEquipe(idEquipe, idMembre) {
     }
 }
 
+/**
+ * Récupère les demandes d'équipe en fonction de l'identifiant de l'équipe.
+ * @async
+ * @function
+ * @param {number} idEquipe - L'identifiant de l'équipe pour laquelle récupérer les demandes.
+ * @returns {Promise<Array>} - Une promesse résolue avec un tableau d'objets représentant les demandes d'équipe.
+ * @throws {Error} Une erreur si la récupération des demandes d'équipe échoue.
+ * @author Tiffany GAY-BELLILE <tiffany.gbellile@gmail.com>
+ */
 async function recupererDemande(idEquipe) {
 
     const chercher = `SELECT * FROM DemandeEquipe 
@@ -285,19 +405,18 @@ async function recupererDemande(idEquipe) {
     }
 }
 
-/* Les équipes de l'user */
-async function aUneEquipe(idEtudiant) {
 
-    const appartientAUneEquipe = `SELECT * FROM Appartenir WHERE idUser = $1`;
-
-    try {
-        const res = await pool.query(appartientAUneEquipe, [idEtudiant]);
-        return res.rows;
-    } catch (error) {
-        throw (error);
-    }
-}
-
+/**
+ * Vérifie si un utilisateur appartient à au moins une équipe 
+ * dans un événement en fonction de son identifiant de celui de l'événement.
+ * @async
+ * @function
+ * @param {number} idEtudiant - L'identifiant de l'utilisateur à vérifier.
+ * @param {number} idEvent - Identifiant de l'événement
+ * @returns {Promise<Array>} - Une promesse résolue avec un tableau d'objets représentant l'appartenance de l'utilisateur à des équipes.
+ * @throws {Error} Une erreur si la vérification de l'appartenance à une équipe échoue.
+ * @author Tiffany GAY-BELLILE <tiffany.gbellile@gmail.com>
+ */
 async function aUneEquipeDansEvent(idUser, idEvent) {
     try {
 
@@ -321,7 +440,14 @@ async function aUneEquipeDansEvent(idUser, idEvent) {
     }
 }
 
-/* Promouvoir capitaine */
+/**
+ * Promouvoir un membre de l'équipe au poste de capitaine en fonction des identifiants de l'équipe et de l'étudiant.
+ * @function
+ * @param {number} idEquipe - L'identifiant de l'équipe.
+ * @param {number} idEtudiant - L'identifiant de l'étudiant à promouvoir en tant que capitaine.
+ * @throws {Error} Une erreur si la promotion du capitaine échoue.
+ * @author Tiffany GAY-BELLILE <tiffany.gbellile@gmail.com>
+ */
 function promouvoir(idEquipe, idEtudiant) {
 
     const promouvoir = `UPDATE Equipe
@@ -335,6 +461,21 @@ function promouvoir(idEquipe, idEtudiant) {
     }
 }
 
+/**
+ * Récupère les informations d'une équipe au format JSON en fonction de son identifiant et de la requête utilisateur.
+ * Selon le profil de l'utilisateur, des informations sont présentes en plus.
+ * 
+ * Voir le profil, d'une équipe et pour la modif
+ *Si c'est un etudiant lambda ou gestionnaire (qui ne gère pas le projet de l'équipe), voir le minimum
+ *si membre/gestionnaire de l'équipe ou admin voir tout
+ * @async
+ * @function
+ * @param {number} idEquipe - L'identifiant de l'équipe pour laquelle récupérer les informations.
+ * @param {object} req - La requête utilisateur.
+ * @returns {Promise<object>} - Une promesse résolue avec un objet représentant les informations de l'équipe au format JSON.
+ * @throws {Error} Une erreur si la récupération des informations de l'équipe échoue.
+ * @author Tiffany GAY-BELLILE <tiffany.gbellile@gmail.com>
+ */
 async function jsonInformationsEquipe(idEquipe, req) {
 
     try {
@@ -413,7 +554,7 @@ async function jsonInformationsEquipe(idEquipe, req) {
         jsonRetour.sujet.id_projet = projet[0].idprojet;
         jsonRetour.sujet.description = projet[0].description_projet;
         jsonRetour.sujet.lien_sujet = projet[0].sujet;
-        jsonRetour.sujet.image = url_images + "/"+ projet[0].imgprojet;
+        jsonRetour.sujet.image = url_images + "/" + projet[0].imgprojet;
         jsonRetour.sujet.mots = [];
 
         let listeMots = await motCleModel.recupererMot(projet[0].idprojet);
@@ -536,26 +677,27 @@ async function jsonInformationsEquipe(idEquipe, req) {
             jsonRetour.liste_user_attente.push(temp);
         }
 
-        // const result = await recupererJSON(idEquipe, event[0].nom);
+        const result = await recupererJSON(idEquipe, event[0].nom);
         jsonRetour.resultats = [];
 
-        // for (i = 0; i < result.length; i++) {
-        //     let temp = {};
+        for (i = 0; i < result.length; i++) {
+            let temp = {};
 
-        //     temp.content = JSON.stringify(result[i]);
-        //     temp.date = result[i].end;
+            temp.result = 'success'
+            temp.content = JSON.stringify(result[i]);
+            temp.date = result[i].end;
 
-        //     jsonRetour.resultats.push(temp)
-        // }
+            jsonRetour.resultats.push(temp)
+        }
 
         /*Accès à gitlab */
-        // const acces = (await chercheraccesGitlab(idEquipe))[0];
+        const acces = (await chercheraccesGitlab(idEquipe))[0];
         jsonRetour.acces_gitlab = [];
         temp = {};
-        // temp.login = acces.login_gitlab;
-        // temp.mot_de_passe = acces.mdp_gitlab;
-        temp.login = 'acces.login_gitlab';
-        temp.mot_de_passe = 'acces.mdp_gitlab';
+        temp.login = acces.login_gitlab;
+        temp.mot_de_passe = acces.mdp_gitlab;
+        // temp.login = 'acces.login_gitlab';
+        // temp.mot_de_passe = 'acces.mdp_gitlab';
         temp.lien_gitlab = env.app.computationImpact.gitlab.host;
         jsonRetour.acces_gitlab.push(temp);
 
@@ -566,7 +708,15 @@ async function jsonInformationsEquipe(idEquipe, req) {
     }
 }
 
-/*Permet de voir les équipes associées à un projet */
+/**
+ * Récupère la liste des équipes associées à un projet au format JSON en fonction de l'identifiant du projet.
+ * @async
+ * @function
+ * @param {number} idProjet - L'identifiant du projet pour lequel récupérer la liste des équipes.
+ * @returns {Promise<object>} - Une promesse résolue avec un objet représentant la liste des équipes au format JSON.
+ * @throws {Error} Une erreur si la récupération de la liste des équipes échoue.
+ * @author Tiffany GAY-BELLILE <tiffany.gbellile@gmail.com>
+ */
 async function jsonListeEquipeProjet(idProjet) {
 
     try {
@@ -619,17 +769,17 @@ async function jsonListeEquipeProjet(idProjet) {
             temp.idCapitaine = equipeCourante.idcapitaine;
             temp.pseudoCapitaine = ((await userModel.chercherUserID(equipeCourante.idcapitaine))[0].pseudo);
 
-            // const result = await recupererJSON(equipeCourante.idequipe, event.nom);
+            const result = await recupererJSON(equipeCourante.idequipe, event.nom);
             temp.resultats = [];
-    
-            // for (i = 0; i < result.length; i++) {
-            //     let temp2 = {};
-    
-            //     temp2.content = JSON.stringify(result[i]);
-            //     temp2.date = result[i].end;
-    
-            //     temp.resultats.push(temp2)
-            // }
+
+            for (i = 0; i < result.length; i++) {
+                let temp2 = {};
+                temp2.result = 'success';
+                temp2.content = JSON.stringify(result[i]);
+                temp2.date = result[i].end;
+
+                temp.resultats.push(temp2)
+            }
             jsonRetour.equipe.push(temp);
         }
         return jsonRetour;
@@ -638,6 +788,15 @@ async function jsonListeEquipeProjet(idProjet) {
     }
 }
 
+/**
+ * Récupère les équipes auxquelles un étudiant appartient au format JSON en fonction de son identifiant.
+ * @async
+ * @function
+ * @param {number} idUser - L'identifiant de l'étudiant pour lequel récupérer les équipes.
+ * @returns {Promise<object>} - Une promesse résolue avec un objet représentant les équipes auxquelles l'étudiant appartient au format JSON.
+ * @throws {Error} Une erreur si la récupération des équipes de l'étudiant échoue.
+ * @author Tiffany GAY-BELLILE <tiffany.gbellile@gmail.com>
+ */
 async function jsonMesEquipes(idUser) {
 
     let jsonRetour = {};
@@ -692,6 +851,18 @@ async function jsonMesEquipes(idUser) {
     return jsonRetour;
 }
 
+/**
+ * Récupère les équipes ouvertes d'un événement au format JSON en fonction de l'identifiant de l'événement et de la requête utilisateur.
+ * Quelques informations de l'équipe sont renvoyées comme le pseudo du capitaine ou le nom de l'équipe.
+ * Mais aussi, si l'étudiant a déjà envoyé une demande d'admission.
+ * @async
+ * @function
+ * @param {number} idEvent - L'identifiant de l'événement pour lequel récupérer les équipes ouvertes.
+ * @param {object} req - La requête utilisateur.
+ * @returns {Promise<object>} - Une promesse résolue avec un objet représentant les équipes ouvertes au format JSON.
+ * @throws {Error} Une erreur si la récupération des équipes ouvertes échoue.
+ * @author Tiffany GAY-BELLILE <tiffany.gbellile@gmail.com>
+ */
 async function jsonEquipesOuvertes(idEvent, req) {
 
     jsonRetour = {};
@@ -756,7 +927,6 @@ async function jsonEquipesOuvertes(idEvent, req) {
 
 
 module.exports = {
-    aUneEquipe,
     jsonListeEquipeProjet,
     promouvoir,
     supprimerEquipe,
@@ -766,7 +936,6 @@ module.exports = {
     validerEquipe,
     ajouterMembre,
     modifierEquipe,
-    suprimerTousMembres,
     equipesOuvertes,
     jsonEquipesOuvertes,
     jsonInformationsEquipe,

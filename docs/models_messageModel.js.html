@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: controllers/annotationController.js</title>
+    <title>JSDoc: Source: models/messageModel.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: controllers/annotationController.js</h1>
+    <h1 class="page-title">Source: models/messageModel.js</h1>
 
     
 
@@ -26,121 +26,198 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>/**
- * @fileoverview Contrôleur des annotations d'une équipes.
- * 
- * @version 1.0.0 
- * @author Tiffany GAY-BELLILE
- * @requires ../../models/annotationEquipeModel
- * @requires express-validator
- */
+            <pre class="prettyprint source linenums"><code>const pool = require("../database/configDB");
+const userModel = require('./userModel');
+const equipeModel = require('./equipeModel');
+const projetModel = require('../models/projetModel');
+const { body, validationResult } = require('express-validator');
 
-const annotationModel = require('../models/annotationEquipeModel');
-const { validationResult } = require('express-validator');
+async function validateMessageContenu(req, res) {
 
+    await body('contenu')
+        .notEmpty()
+        .isLength({ min: 1, max: 1000 })
+        .withMessage('Le message est trop long (maximum 1000 caractères)')
+        .custom((value) => !(/^\s+$/.test(value))) // Vérifier que ce n'est pas que des espaces
+        .withMessage('Le message ne peut pas être composé uniquement d\'espaces')
+        .run(req);
+
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return { isValid: false, errors: errors.array() };
+    }
+
+    return { isValid: true, errors: null };
+}
 
 /**
- * Contrôleur pour créer une nouvelle annotation associée à une équipe.
- * 
+ * Envoie un message à une équipe spécifiée.
  * @function
- * @param {Object} req - L'objet de la requête (express request object).
- * @param {Object} res - L'objet de la réponse (express response object).
- * @returns {Object} - Retourne un objet JSON avec un message indiquant si l'annotation a été créée
- * avec succès ou une erreur en cas d'échec.
- * @description  Contrôleur fait appel à la fonction de création d'une nouvelle annotation associée à une équipe.
- * 
- * Récupère les informations utiles à l'insertion dans la base de données:
- * 
- * Le contenu de l'annotation: est récupéré du body, message que laisse l'administrateur
- * ou le gestionnaire du projet,
- * L'id de l'équipe: Directement depuis l'url de la route,
- * L'id de l'auteur de l'annotation depuis son token.
- * 
- * Elle vérifie les données du body avec sa fonction de validation.
- * 
- * Accès à ce controller: Gestionnaires du projet et les administrateurs.
- * 
- * 
- * Route: annotation.js
- * 
-*/
-async function ecrireAnnotation(req, res) {
+ * @param {Array} valeurs - Un tableau contenant les valeurs à insérer : [idEquipe, contenu, idExpediteur].
+ * @throws {Error} Une erreur si l'envoi du message échoue.
+ */function envoyerMessageEquipe(valeurs) {
+    const envoyer = `INSERT INTO MessageEquipe
+    (idEquipe, contenu, idExpediteur) VALUES ($1, $2, $3)`;
 
-    if (req.method === 'OPTIONS') {
-        res.status(200).json({ sucess: 'Access granted' });
+    try {
+        pool.query(envoyer, valeurs);
+    } catch (error) {
+        throw error;
+    }
 
-    } else if (req.method === 'POST') {
+}
 
-        const idEquipe = res.locals.idEquipe;
-        const auteur = req.id;
-        let contenu = req.body.contenu;
+/**
+ * Envoie un message global à toutes les équipes d'un projet.
+ * @async
+ * @function
+ * @param {string} contenu - Le contenu du message.
+ * @param {number} idProjet - Identifiant du projet.
+ * @param {number} idUser - Identifiant de l'utilisateur.
+ * @throws {Error} Une erreur si l'envoi du message échoue.
+ */
+async function envoyerMessageGlobalProjet(contenu, idProjet, idUser) {
 
-        /*Supprimer les espcaces au début et à la fin de la chaîne de caractères */
-        contenu = contenu.trim();
+    const envoyer = `INSERT INTO MessageEquipe
+    (idEquipe, contenu, idExpediteur, typeMessage)
+    VALUES ($1, $2, $3, $4)`;
 
-        await annotationModel.validerAnnotation(req);
+    const equipesProjet = await equipeModel.listeEquipeProjet(idProjet);
 
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            errorDetected = true;
-            return res.status(400).json({ errors: errors.array() });
-        }
+    for (i = 0; i &lt; equipesProjet.length; i++) {
+
+        let equipesCourantes = equipesProjet[i];
+        let donnees = [equipesCourantes.idequipe, contenu, idUser, 'projet'];
 
         try {
-            annotationModel.creerAnnotation([idEquipe, auteur, contenu]);
-            return res.status(200).json({ message: 'Annotation créée.' });
+            pool.query(envoyer, donnees);
         } catch (error) {
-            return res.status(400).json({ error: 'Echec lors de la création de l\'annotation.' });
+            throw (error);
         }
-    } else {
-        return res.status(404).json('Page not found');
     }
 }
 
 /**
- * Contrôleur pour récupérer toutes les annotations associées à une équipe.
- * 
+ * Envoie un message global à toutes les équipes de tous les projets d'un événement.
+ * @async
  * @function
- * @param {Object} req - L'objet de la requête (express request object).
- * @param {Object} res - L'objet de la réponse (express response object).
- * @returns {Object} - Retourne un objet JSON contenant l'ensemble des annotations de l'équipe.
- * Si la requête échoue, code d'erreur 400 et message d'erreur.
- * @description  Ce contrôleur récupère l'ensemble des annotations liées à une équipe.
- * 
- * L'id de l'équipe est directement récupéré depuis l'url de la route.
- * 
- * Accès à ce controller: Gestionnaires du projet et les administrateurs.
- * 
- * Route: annotation.js
+ * @param {string} contenu - Le contenu du message.
+ * @param {number} idEvent - Identifiant de l'événement.
+ * @param {number} idUser - Identifiant de l'utilisateur.
+ * @throws {Error} Une erreur si l'envoi du message échoue.
+ */
+async function envoyerMessageGlobalEvent(contenu, idEvent, idUser) {
 
-*/
-async function getAnnotationEquipe(req, res) {
-    if (req.method === 'OPTIONS') {
-        return res.status(200).json({ sucess: 'Access granted' });
+    const envoyer = `INSERT INTO MessageEquipe
+    (idEquipe, contenu, idExpediteur, typeMessage)
+    VALUES ($1, $2, $3, $4)`;
 
-    } else if (req.method === 'GET') {
-        const idEquipe = res.locals.idEquipe;
+    const projets = await projetModel.recuperer_projets(idEvent);
 
-        try {
-            const annotation = await annotationModel.jsonGetAnnotation(idEquipe);
+    for (i = 0; i &lt; projets.length; i++) {
+        const equipesProjet = await equipeModel.listeEquipeProjet(projets[i].idprojet);
 
-            /*On enlève le champs idAnnotation du json avant de l'envoyer au client,
-            inutile pour lui */
-            for (i = 0; i &lt; annotation.length; i++) {
-                delete annotation[i].idannotation;
+        for (j = 0; j &lt; equipesProjet.length; j++) {
+
+            let equipesCourantes = equipesProjet[j];
+            let donnees = [equipesCourantes.idequipe, contenu, idUser, 'event'];
+
+            try {
+                pool.query(envoyer, donnees);
+            } catch (error) {
+                throw (error);
             }
-            return res.status(200).json(annotation);
-        } catch {
-            return res.status(400).json({ error: 'Echec lors de la création de l\'annotation.' });
         }
-    } else {
-        return res.status(404).json('Page not found');
     }
+}
+
+/**
+ * Récupère tous les messages d'une équipe spécifiée.
+ * @async
+ * @function
+ * @param {number} idEquipe - Identifiant de l'équipe.
+ * @returns {Promise&lt;Array>} - Une promesse résolue avec un tableau de messages de l'équipe.
+ * @throws {Error} Une erreur si la récupération des messages échoue.
+ */
+async function getMessageEquipe(idEquipe) {
+    const envoyer = `SELECT * FROM MessageEquipe
+    WHERE idEquipe = $1`;
+
+    try {
+        const chercher = await pool.query(envoyer, [idEquipe]);
+        return chercher.rows;
+    } catch (error) {
+        throw error;
+    }
+}
+
+/**
+ * Crée un JSON personnalisé avec tous les messages d'une équipe spécifiée.
+ * @async
+ * @function
+ * @param {number} idEquipe - Identifiant de l'équipe.
+ * @param {express.Request} req - La requête Express.
+ * @returns {Promise&lt;Object>} - Une promesse résolue avec un objet JSON contenant les messages au format détaillé.
+ * @throws {Error} Une erreur si la création du JSON échoue.
+ */
+async function jsonGetMessegaeEquipe(idEquipe, req) {
+
+    const equipe = await getMessageEquipe(idEquipe);
+    jsonRetour = {};
+    jsonRetour.message = [];
+
+    for (i = 0; i &lt; equipe.length; i++) {
+
+        temp = {};
+        let messageCourant = equipe[i];
+        temp.idSender = messageCourant.idexpediteur;
+
+        let user = (await userModel.chercherUserID(temp.idSender))[0];
+        temp.pseudoSender = user.pseudo;
+        let id = user.iduser;
+
+        /*Chercher le role de l'utilisateur */
+        const type = await userModel.chercherType(id);
+        switch (type) {
+            case 'etudiant':
+                temp.roleSender = 'Étudiant';
+                break;
+            case 'administrateur':
+                temp.roleSender = 'Administrateur';
+                break;
+            case 'gestionnaireIA':
+                temp.roleSender = 'Gestionnaire IA PAU';
+                break;
+            case 'etudiant':
+                temp.roleSender = 'Gestionnaire Externe';
+                break;
+            default:
+                break;
+        }
+
+        temp.dateMessage = messageCourant.date_envoie;
+
+        if (req.id === temp.idSender) {
+            temp.userIsSender = true;
+        } else {
+            temp.userIsSender = false;
+        }
+
+        temp.content = messageCourant.contenu;
+        temp.range = messageCourant.typemessage;
+
+        jsonRetour.message.push(temp);
+    }
+    return jsonRetour;
 }
 
 module.exports = {
-    ecrireAnnotation,
-    getAnnotationEquipe,
+    envoyerMessageEquipe,
+    jsonGetMessegaeEquipe,
+    envoyerMessageGlobalProjet,
+    getMessageEquipe,
+    envoyerMessageGlobalEvent,
+    validateMessageContenu
 }</code></pre>
         </article>
     </section>

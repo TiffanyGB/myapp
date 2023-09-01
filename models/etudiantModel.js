@@ -18,7 +18,14 @@ async function validerEtudiant(req) {
         .run(req);
 }
 
-/**Liste des étudiants */
+/**
+ * Cherche la liste de tous les utilisateurs
+ * @async
+ * @function
+ * @author Tiffany GAY-BELLILE <tiffany.gbellile@gmail.com>
+ * @throws {Error} Une erreur si la requête échoue.
+ * @returns {Array} - Les lignes de la bdd concernées.
+*/
 async function chercherListeStudents() {
 
     const users = 'SELECT * FROM Etudiant';
@@ -31,7 +38,15 @@ async function chercherListeStudents() {
     }
 }
 
-/**Chercher un étudiant par son id*/
+/**
+ * Cherche un étudiant par son id
+ * @async
+ * @function
+ * @param {Int} idUser Id de l'utilisateur
+ * @author Tiffany GAY-BELLILE <tiffany.gbellile@gmail.com>
+ * @throws {Error} Une erreur si la requête échoue.
+ * @returns {Array} - Les lignes de la bdd concernées.
+*/
 async function chercherStudent(idUser) {
 
     const users = 'SELECT * FROM Etudiant WHERE idEtudiant = $1';
@@ -44,31 +59,38 @@ async function chercherStudent(idUser) {
     }
 }
 
+/**
+ * Crée un json avec les infos d'un étudiant
+ * @async
+ * @function
+ * @param {Int} userId Id de l'utilisateur
+ * @author Tiffany GAY-BELLILE <tiffany.gbellile@gmail.com>
+ * @throws {Error} Une erreur si la requête échoue.
+ * @returns {JSON} Json avec les infos de l'étudiant
+*/
 async function getStudentInfo(userId) {
-    const chercher = await chercherStudent(userId);
-    const etudiantCourant = chercher[0];
+    try{
+        const chercher = await chercherStudent(userId);
+        const etudiantCourant = chercher[0];
+    
+        return {
+            niveauEtude: etudiantCourant.niveau_etude,
+            ecole: etudiantCourant.ecole,
+        };
+    }catch (error){
+        throw error;
+    }
 
-    return {
-        niveauEtude: etudiantCourant.niveau_etude,
-        ecole: etudiantCourant.ecole,
-    };
 }
 
-/**Créer un étudiant */
 /**
  * Crée un nouvel étudiant.
  * @async
- * @param {Array} values_user - Les valeurs des champs utilisateur.
- * @param {Array} values_id - Les valeurs des champs identifiant (pseudo et email).
+ * @author Tiffany GAY-BELLILE <tiffany.gbellile@gmail.com>
  * @param {string} ecole - L'école de l'étudiant.
- * @param {string} codePostale - Le code postal de l'école de l'étudiant.
+ * @param {string} id - Identifiant bdd de l'utilisateur.
  * @param {string} niveau - Le niveau d'étude de l'étudiant.
- * @returns {string} - Résultat de la création de l'étudiant.
- * - 'true' si l'étudiant a été créé avec succès.
- * - 'erreur' en cas d'échec de l'insertion dans la table étudiant.
- * - 'les2' si à la fois le pseudo et l'email existent déjà.
- * - 'pseudo' si le pseudo existe déjà.
- * - 'mail' si l'email existe déjà.
+ * @throws {Error} Une erreur si la requête échoue.
  */
 async function creerEtudiant(ecole, niveau, id) {
 
@@ -83,7 +105,17 @@ async function creerEtudiant(ecole, niveau, id) {
     }
 }
 
-/**Modifier un étudiant */
+/**
+ * Modifie un étudiant.
+ * @async
+ * @function
+ * @author Tiffany GAY-BELLILE <tiffany.gbellile@gmail.com>
+ * @param {string} valeurs_etudiant - Les données spécifiques à l'étudiants, ecole, niveau scolaire.
+ * @param {string} password - Le nouveau mdp (peut être vide).
+ * @param {string} idUser - Identifiant bdd de l'utilisateur.
+ * @param {string} valeurs - Valeurs communes à tous les utilisateurs comme le nom, prénom.
+ * @throws {Error} Une erreur si la requête échoue.
+ */
 async function modifierEtudiant(idUser, valeurs, valeurs_etudiant, password) {
 
     try {

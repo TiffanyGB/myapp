@@ -25,15 +25,17 @@ const gestionnaireExterneModel = require('../models/gestionnaireExterneModel');
 const { validationResult } = require('express-validator');
 
 /**
- * Récupère la liste des utilisateurs et renvoie un JSON contenant les informations des utilisateurs,
- * si le profil est 'administrateur'.
+ * @async
+ * @function
+ * @param {object} req - L'objet de requête HTTP.
+ * @param {object} res - L'objet de réponse HTTP.
+ * @description Ce contrôleur permet d'appeler la fonction qui
+ * récupère la liste de tous les utilisateurs.
+ *  
+ * Accès à ce controller: Administrateurs.
  * 
- * @param {Object} req - L'objet de requête HTTP.
- * @param {Object} res - L'objet de réponse HTTP.
- * @returns {Promise} Une promesse résolue avec les informations des utilisateurs au format JSON.
- * @throws {Error} Une erreur si la récupération des utilisateurs échoue ou si le profil de l'utilisateur n'est pas valide.
- * 
- * @memberof module:Contrôleur/Admin
+ * Route: users.js
+ * @returns {Object} - Message d'erreur ou JSON avec la liste.
  */
 async function voirUtilisateurs(req, res) {
 
@@ -52,12 +54,17 @@ async function voirUtilisateurs(req, res) {
 }
 
 /**
- * Créer un utilisateur.
- *
- * @route POST /users
- * @group Users - Opérations liées aux utilisateurs
- * @returns {object} 200 - Un tableau contenant tous les utilisateurs.
- * @returns {Error}  500 - Erreur serveur.
+ * @async
+ * @function
+ * @param {object} req - L'objet de requête HTTP.
+ * @param {object} res - L'objet de réponse HTTP.
+ * @description Ce contrôleur permet de créer un nouvel utilisateur.
+ *  
+ * Si l'adresse mail ou le pseudo sont déjà pris, une erreur est renvoyée.
+ * Accès à ce controller: Administrateurs.
+ * 
+ * Route: users.js
+ * @returns {Object} - Message de succès ou d'erreur.
  */
 async function createUser(req, res) {
   if (req.method == "OPTIONS") {
@@ -157,8 +164,19 @@ async function createUser(req, res) {
   }
 }
 
-/**Modification users */
-/*NB il y a une fonctionnalité des profils au début */
+/**
+ * @async
+ * @function
+ * @param {object} req - L'objet de requête HTTP.
+ * @param {object} res - L'objet de réponse HTTP.
+ * @description Ce contrôleur permet de mofidier utilisateur.
+ *  
+ * Si l'adresse mail ou le pseudo sont déjà pris par un autre utilisateur, une erreur est renvoyée.
+ * Accès à ce controller: Administrateurs.
+ * 
+ * Route: users.js
+ * @returns {Object} - Message de succès ou d'erreur.
+*/
 async function modifierUser(req, res) {
 
   if (req.method == "OPTIONS") {
@@ -168,12 +186,7 @@ async function modifierUser(req, res) {
 
     /*Si n'est pas admin, vérifier si l'id de l'url est la même que l'utilisteur qui veut modifier */
     const idUser = res.locals.userId;
-    const idToken = req.id;
     const profil = req.userProfile;
-
-    if (profil != 'admin' && idUser != idToken) {
-      return res.status(404).json({ erreur: 'Il faut être administrateur pour modifier un autre compte que le sien.' });
-    }
 
     /**Récupération des données */
     let userData = req.body;
@@ -264,7 +277,17 @@ async function modifierUser(req, res) {
   }
 }
 
-/**Suppression */
+/**
+ * @async
+ * @function
+ * @param {object} req - L'objet de requête HTTP.
+ * @param {object} res - L'objet de réponse HTTP.
+ * @description Ce contrôleur permet de supprimer un utilisateur.
+ *  
+ * Son identidiant est récuépré dans la requête.
+ * Route: users.js
+ * @returns {Object} - Message de succès ou d'erreur.
+*/
 async function supprimerUser(req, res) {
   if (req.method === "OPTIONS") {
     return res.status(200).json({ success: 'Access granted' });

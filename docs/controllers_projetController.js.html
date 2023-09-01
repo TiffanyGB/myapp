@@ -33,27 +33,53 @@ const gestionnaireExterneModel = require('../models/gestionnaireExterneModel');
 const gestionnaireIaModel = require('../models/gestionnaireIaModel');
 const ressourceModel = require('../models/ressourceModel');
 const { body } = require('express-validator');
-const {validationResult } = require('express-validator');
+const { validationResult } = require('express-validator');
 
-
-/**Liste des projets */
+/**
+ * @async
+ * @function
+ * @param {object} req - L'objet de requête HTTP.
+ * @param {object} res - L'objet de réponse HTTP.
+ * @description Ce contrôleur permet de récupérer la liste des projets existants.
+ *  
+ * Accès à ce controller: Administrateurs.
+ * 
+ * Route: projet.js
+ * @returns {Object} -JSON des informations ou message d'erreur si la 
+ * requête échoue.
+ */
 async function voirListeProjets(req, res) {
     if (req.method === 'OPTION') {
-        res.status(200).json({ sucess: 'Agress granted' });
+        return res.status(200).json({ sucess: 'Agress granted' });
     }
     else if (req.method === 'GET') {
-
-        /*Récupérer la liste des projets */
         try {
             const jsonretour = await projetModel.listeProjetsJson(req)
-            res.status(200).json(jsonretour);
+            return res.status(200).json(jsonretour);
         } catch (error) {
-            res.status(400).json({ erreur: "Erreur lors de la récupération des données côté étudiant" });
+            return res.status(400).json({ erreur: "Erreur lors de la récupération des données côté étudiant" });
         }
+    } else {
+        return res.status(404).json('Page not found');
     }
 }
 
-/**Informations d'un projet */
+/**
+ * @async
+ * @function
+ * @param {object} req - L'objet de requête HTTP.
+ * @param {object} res - L'objet de réponse HTTP.
+ * @description Ce contrôleur permet de récupérer la liste des 
+ * informations liées à un projet.
+ * 
+ * L'id de ce projet est dans l'url de la requête.
+ *  
+ * Accès à ce controller: Administrateurs, Gestionnaires du projet.
+ * 
+ * Route: projet.js
+ * @returns {Object} -JSON des informations ou message d'erreur si la 
+ * requête échoue.
+ */
 async function infosProjet(req, res) {
     if (req.method === 'OPTION') {
         return res.status(200).json({ success: 'Access granted' });
@@ -66,19 +92,35 @@ async function infosProjet(req, res) {
         } catch (error) {
             return res.status(400).json({ erreur: "Erreur lors de la récupération des équipes" });
         }
+    } else {
+        return res.status(404).json('Page not found');
     }
 }
 
+/**
+ * @async
+ * @function
+ * @param {object} req - L'objet de requête HTTP.
+ * @param {object} res - L'objet de réponse HTTP.
+ * @description Ce contrôleur permet d'appeler la fonction de création de projet.
+ * 
+ * Les données à insérées dans la base de données sont vérifiées (mots-clés, ressources).
+ * Des gestionnaires peuvent être rattachés. On vérifie si leur identifiant existe dans une table 
+ * gestionnaire.
+ *  
+ * Accès à ce controller: Administrateurs.
+ * 
+ * Route: projet.js
+ * @returns {Object} - Message de succès ou d'erreur.
 
-/**Créer */
+ */
 async function creationProjet(req, res) {
     if (req.method === 'OPTION') {
-        res.status(200).json({ sucess: 'Agress granted' });
+        return res.status(200).json({ sucess: 'Agress granted' });
     }
     else if (req.method === 'POST') {
 
-        /**Vérifier ces valeurs */
-        const {
+        let {
             nom,
             lienSujet,
             motClefs,
@@ -87,31 +129,39 @@ async function creationProjet(req, res) {
             gestionnaireIA,
             recompense,
             description,
-            image
+            image,
+            template
         } = req.body;
+
+        nom = nom.trim();
+        description = description.trim();
+
         const valeurs_projets = [
             nom,
             description,
             recompense,
             lienSujet,
-            image
+            image,
+            template
         ];
 
         /*Vérification des données des mots-clés */
-        if (motClefs.length > 0) {
-            for (const mot of motClefs) {
-                await body('motClefs')
-                    .optional()
-                    .notEmpty().withMessage('Le mot-clé ne doit pas être vide.')
-                    .isLength({ min: 1, max: 25 }).withMessage('Le mot-clé doit avoir une longueur comprise entre 1 et 25 caractères.')
-                    .run(req);
 
-                    const errors = validationResult(req);
-                    if (!errors.isEmpty()) {
-                        errorDetected = true; // Marquer qu'une erreur a été détectée
-                        return res.status(400).json({ errors: errors.array() });
-                    }            }
+        for (let mot of motClefs) {
+            await body('motClefs')
+                .optional()
+                .notEmpty().withMessage('Le mot-clé ne doit pas être vide.')
+                .isLength({ min: 1, max: 25 }).withMessage('Le mot-clé doit avoir une longueur comprise entre 1 et 25 caractères.')
+                .run(req);
+
+            // mot.motClefs = mot.motClefs.trim();
+
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                return res.status(400).json({ errors: errors.array() });
+            }
         }
+
 
         for (const ressource of Ressources) {
             await body('Ressources')
@@ -153,10 +203,8 @@ async function creationProjet(req, res) {
 
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
-                errorDetected = true; // Marquer qu'une erreur a été détectée
                 return res.status(400).json({ errors: errors.array() });
             }
-    
         }
 
         /*Vérification des données des gestionnaires, les id doivent être des entiers
@@ -175,7 +223,6 @@ async function creationProjet(req, res) {
             }
         }
 
-
         for (const element of gestionnaireIA) {
             const parsedElement = parseInt(element, 10);
 
@@ -193,7 +240,6 @@ async function creationProjet(req, res) {
         try {
             /*On crée le projet et on récupère son id dans la bdd */
             const projetInsertion = await projetModel.creerProjet(valeurs_projets);
-
             if (typeof projetInsertion === 'number') {
 
                 /*Insertion des mots-clés */
@@ -233,114 +279,116 @@ async function creationProjet(req, res) {
         } catch (error) {
             return res.status(400).json({ erreur: "Erreur lors de la création du projet" });
         }
-
+    } else {
+        return res.status(404).json('Page not found');
     }
 }
 
-/**Modifier */
+/**
+ * @async
+ * @function
+ * @param {object} req - L'objet de requête HTTP.
+ * @param {object} res - L'objet de réponse HTTP.
+ * @description Ce contrôleur permet d'appeler la fonction de modification de projet.
+ * 
+ * Les données à insérées dans la base de données sont vérifiées (mots-clés, ressources).
+ * Des gestionnaires peuvent être rattachés ou détachés. On vérifie si leur identifiant existe dans une table 
+ * gestionnaire.
+ *  
+ * Accès à ce controller: Administrateurs.
+ * 
+ * Route: projet.js
+ * @returns {Object} - Message de succès ou d'erreur.
+ */
 async function modifierProjet(req, res) {
     if (req.method === 'OPTION') {
-        res.status(200).json({ sucess: 'Agress granted' });
+        return res.status(200).json({ sucess: 'Agress granted' });
     }
     else if (req.method === 'PATCH') {
 
-        const idProjet = res.locals.idProjet;
+        let idProjet = res.locals.idProjet;
+        const data = req.body;
+
+        data.nom = data.nom.trim();
+        data.description = data.description.trim();
 
         try {
-            // Vérifier que l'id existe dans la bdd, sinon 404 error
-            const user = await projetModel.chercheridProjet(idProjet);
-            if (user.length === 0) {
-                return res.status(404).json({ erreur: 'L\'id n\'existe pas' });
-            }
-
-            const {
-                nom,
-                lienSujet,
-                motClefs,
-                Ressources,
-                gestionnaireExterne,
-                gestionnaireIA,
-                recompense,
-                description,
-                image
-            } = req.body;
-
 
             const valeurs_projets = [
-                nom,
-                description,
-                recompense,
-                lienSujet,
-                image,
+                data.nom,
+                data.description,
+                data.recompense,
+                data.lienSujet,
+                data.image,
                 idProjet
             ];
 
-
-        /*Vérification des données des mots-clés */
-        if (motClefs.length > 0) {
-            for (const mot of motClefs) {
-                await body('motClefs')
-                    .optional()
-                    .notEmpty().withMessage('Le mot-clé ne doit pas être vide.')
-                    .isLength({ min: 1, max: 25 }).withMessage('Le mot-clé doit avoir une longueur comprise entre 1 et 25 caractères.')
-                    .run(req);
+            /*Vérification des données des mots-clés */
+            if (data.motClefs.length > 0) {
+                for (const mot of data.motClefs) {
+                    await body('motClefs')
+                        .optional()
+                        .notEmpty().withMessage('Le mot-clé ne doit pas être vide.')
+                        .isLength({ min: 1, max: 25 }).withMessage('Le mot-clé doit avoir une longueur comprise entre 1 et 25 caractères.')
+                        .run(req);
 
                     const errors = validationResult(req);
                     if (!errors.isEmpty()) {
                         errorDetected = true; // Marquer qu'une erreur a été détectée
                         return res.status(400).json({ errors: errors.array() });
-                    }            }
-        }
-
-        for (const ressource of Ressources) {
-            await body('Ressources')
-                .optional()
-                .isArray({ min: 1 }).withMessage('Le tableau des ressources ne doit pas être vide.')
-                .run(req);
-
-            await body('Ressources.*.nom')
-                .notEmpty().withMessage('Le nom des ressources est obligatoire.')
-                .isLength({ min: 2, max: 100 }).withMessage('Le nom des ressources doit avoir une longueur comprise entre 3 et 100 caractères.')
-                .run(req);
-
-            await body('Ressources.*.type')
-                .notEmpty().withMessage('Le type des ressources est obligatoire.')
-                .matches(/^(video|lien|drive|téléchargment)$/).withMessage('Le type doit avoir "video", "lien", "drive" ou "téléchargement".')
-                .isLength({ min: 2, max: 18 })
-                .run(req);
-
-            await body('Ressources.*.lien')
-                .notEmpty().withMessage('Le lien des ressources est obligatoire.')
-                .isURL()
-                .isLength({ min: 3, max: 2000 }).withMessage('Le lien de la ressource doit  être valide.')
-                .run(req);
-            await body('Ressources.*.description')
-                .notEmpty().withMessage('La description des ressources est obligatoire.')
-                .isLength({ min: 10, max: 10000 }).withMessage('La description de la ressource doit avoir une longueur comprise entre 10 et 10000 caractères.')
-                .run(req);
-            await body('Ressources.*.consultation')
-                .notEmpty().withMessage('La consultation des ressources ne doit pas être vide.')
-                .matches(/^(privé|public)$/).withMessage('Le consultation des ressources doit être "privé" ou "public".')
-                .isLength({ min: 2, max: 6 })
-                .run(req);
-
-            await body('Ressources.*.publication')
-                .notEmpty().withMessage('La date de publication des ressources ne doit pas être vide.')
-                .isLength({ min: 10, max: 30 }).withMessage('La date doit avoir une longueur comprise entre 3 et 30 caractères.')
-                .matches(/^[0-9a-zA-Z\-\ :.]+$/).withMessage('La date ne doit contenir que des lettres et des chiffres.')
-                .run(req);
-
-            const errors = validationResult(req);
-            if (!errors.isEmpty()) {
-                errorDetected = true; // Marquer qu'une erreur a été détectée
-                return res.status(400).json({ errors: errors.array() });
+                    }
+                }
             }
-    
-        }
+
+            for (const ressource of data.Ressources) {
+                await body('Ressources')
+                    .optional()
+                    .isArray({ min: 1 }).withMessage('Le tableau des ressources ne doit pas être vide.')
+                    .run(req);
+
+                await body('Ressources.*.nom')
+                    .notEmpty().withMessage('Le nom des ressources est obligatoire.')
+                    .isLength({ min: 2, max: 100 }).withMessage('Le nom des ressources doit avoir une longueur comprise entre 3 et 100 caractères.')
+                    .run(req);
+
+                await body('Ressources.*.type')
+                    .notEmpty().withMessage('Le type des ressources est obligatoire.')
+                    .matches(/^(video|lien|drive|téléchargment)$/).withMessage('Le type doit avoir "video", "lien", "drive" ou "téléchargement".')
+                    .isLength({ min: 2, max: 18 })
+                    .run(req);
+
+                await body('Ressources.*.lien')
+                    .notEmpty().withMessage('Le lien des ressources est obligatoire.')
+                    .isURL()
+                    .isLength({ min: 3, max: 2000 }).withMessage('Le lien de la ressource doit  être valide.')
+                    .run(req);
+                await body('Ressources.*.description')
+                    .notEmpty().withMessage('La description des ressources est obligatoire.')
+                    .isLength({ min: 10, max: 10000 }).withMessage('La description de la ressource doit avoir une longueur comprise entre 10 et 10000 caractères.')
+                    .run(req);
+                await body('Ressources.*.consultation')
+                    .notEmpty().withMessage('La consultation des ressources ne doit pas être vide.')
+                    .matches(/^(privé|public)$/).withMessage('Le consultation des ressources doit être "privé" ou "public".')
+                    .isLength({ min: 2, max: 6 })
+                    .run(req);
+
+                await body('Ressources.*.publication')
+                    .notEmpty().withMessage('La date de publication des ressources ne doit pas être vide.')
+                    .isLength({ min: 10, max: 30 }).withMessage('La date doit avoir une longueur comprise entre 3 et 30 caractères.')
+                    .matches(/^[0-9a-zA-Z\-\ :.]+$/).withMessage('La date ne doit contenir que des lettres et des chiffres.')
+                    .run(req);
+
+                const errors = validationResult(req);
+                if (!errors.isEmpty()) {
+                    errorDetected = true; // Marquer qu'une erreur a été détectée
+                    return res.status(400).json({ errors: errors.array() });
+                }
+
+            }
 
             /*Vérification des données des gestionnaires, les id doivent être des entiers
             et doivent correspondre à des gestionnaires */
-            for (const element of gestionnaireExterne) {
+            for (const element of data.gestionnaireExterne) {
                 const parsedElement = parseInt(element, 10);
 
                 if (!Number.isInteger(parsedElement)) {
@@ -354,7 +402,7 @@ async function modifierProjet(req, res) {
                 }
             }
 
-            for (const element of gestionnaireIA) {
+            for (const element of data.gestionnaireIA) {
                 const parsedElement = parseInt(element, 10);
 
                 if (!Number.isInteger(parsedElement)) {
@@ -368,60 +416,67 @@ async function modifierProjet(req, res) {
                 }
             }
             projetModel.modifierProjet(valeurs_projets)
-                .then(() => {
 
-                    /**Supprimer anciennes données */
-                    gererProjet.destituerProjetExterne(idProjet);
-                    gererProjet.destituerProjetIa(idProjet);
-                    motModel.supprimerMot(idProjet);
-                    ressourceModel.supprimerRessources(idProjet);
+            /**Supprimer anciennes données */
+            gererProjet.destituerProjetExterne(idProjet);
+            gererProjet.destituerProjetIa(idProjet);
+            motModel.supprimerMot(idProjet);
+            ressourceModel.supprimerRessources(idProjet);
 
-                    for (i = 0; i &lt; motClefs.length; i++) {
-                        let motValeurs = [motClefs[i], idProjet];
-                        motModel.insererMot(motValeurs);
-                    }
-                    for (let i = 0; i &lt; gestionnaireExterne.length; i++) {
+            for (i = 0; i &lt; data.motClefs.length; i++) {
+                let motValeurs = [data.motClefs[i], idProjet];
+                motModel.insererMot(motValeurs);
+            }
+            for (let i = 0; i &lt; data.gestionnaireExterne.length; i++) {
 
-                        let id = gestionnaireExterne[i];
-                        gererProjet.attribuerProjetExterne(idProjet, id);
-                    }
-                    for (let i = 0; i &lt; gestionnaireIA.length; i++) {
-                        let id2 = gestionnaireIA[i];
-                        gererProjet.attribuerProjetIA(idProjet, id2);
-                    }
+                let id = data.gestionnaireExterne[i];
+                gererProjet.attribuerProjetExterne(idProjet, id);
+            }
+            for (let i = 0; i &lt; data.gestionnaireIA.length; i++) {
+                let id2 = data.gestionnaireIA[i];
+                gererProjet.attribuerProjetIA(idProjet, id2);
+            }
 
-                    for (i = 0; i &lt; Ressources.length; i++) {
+            for (i = 0; i &lt; data.Ressources.length; i++) {
 
-                        let courant = Ressources[i];
+                let courant = data.Ressources[i];
 
-                        let valeurs_ressources = [
-                            courant.nom,
-                            courant.type,
-                            courant.lien,
-                            courant.publication,
-                            courant.consultation,
-                            courant.description,
-                            idProjet
-                        ]
+                let valeurs_ressources = [
+                    courant.nom,
+                    courant.type,
+                    courant.lien,
+                    courant.publication,
+                    courant.consultation,
+                    courant.description,
+                    idProjet
+                ]
 
-                        ressourceModel.ajouterRessources(valeurs_ressources);
-                    }
-
-                    return res.status(200).json({ message: "Projet modifié" });
-                })
-                .catch(() => {
-                    return res.status(400).json({ erreur: "Le projet n'a pas pu être modifié" });
-                });
-        } catch {
-            return res.status(400).json({ erreur: "erreur" });
+                ressourceModel.ajouterRessources(valeurs_ressources);
+            }
+            return res.status(200).json({ message: "Projet modifié" });
+        } catch (error) {
+            return res.status(400).json({ erreur: "Le projet n'a pas pu être modifié" });
         }
     }
 }
 
-/**Supprimer */
+/**
+ * @async
+ * @function
+ * @param {object} req - L'objet de requête HTTP.
+ * @param {object} res - L'objet de réponse HTTP.
+ * @description Ce contrôleur permet d'appeler la fonction de suppression de projet.
+ * 
+ * L'id du projet est récupéré dans l'url de la requête.
+ *  
+ * Accès à ce controller: Administrateurs.
+ * 
+ * Route: projet.js
+ * @returns {Object} - Message de succès ou d'erreur.
+ */
 async function supprimerProjet(req, res) {
     if (req.method === 'OPTION') {
-        res.status(200).json({ sucess: 'Agress granted' });
+        return res.status(200).json({ sucess: 'Agress granted' });
     }
     else if (req.method === 'DELETE') {
 
@@ -453,13 +508,13 @@ module.exports = {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Annotation_%2525C3%2525A9quipes.html">Annotation_équipes</a></li><li><a href="module-Connexion.html">Connexion</a></li><li><a href="module-Equipe.html">Equipe</a></li><li><a href="module-Evenement.html">Evenement</a></li><li><a href="module-Gestion_demandes_admission.html">Gestion_demandes_admission</a></li><li><a href="module-Gestion_des_utilisateurs.html">Gestion_des_utilisateurs</a></li><li><a href="module-Inscription.html">Inscription</a></li><li><a href="module-Projet.html">Projet</a></li><li><a href="module-Token.html">Token</a></li><li><a href="module-UserRouter.html">UserRouter</a></li><li><a href="module-VerifierProfil.html">VerifierProfil</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-UserRouter-UserRouter.html">UserRouter</a></li></ul><h3>Global</h3><ul><li><a href="global.html#ajouterRegle">ajouterRegle</a></li><li><a href="global.html#chercherGestionnaireExtID">chercherGestionnaireExtID</a></li><li><a href="global.html#chercherGestionnaireIapau">chercherGestionnaireIapau</a></li><li><a href="global.html#chercherListeGestionnaireIapau">chercherListeGestionnaireIapau</a></li><li><a href="global.html#chercherListeGestionnairesExt">chercherListeGestionnairesExt</a></li><li><a href="global.html#chercherListeStudents">chercherListeStudents</a></li><li><a href="global.html#chercherStudent">chercherStudent</a></li><li><a href="global.html#chercheridProjet">chercheridProjet</a></li><li><a href="global.html#comparerMdp">comparerMdp</a></li><li><a href="global.html#creationProjet">creationProjet</a></li><li><a href="global.html#creerEtudiant">creerEtudiant</a></li><li><a href="global.html#creerGestionnaireExterne">creerGestionnaireExterne</a></li><li><a href="global.html#creerGestionnaireIA">creerGestionnaireIA</a></li><li><a href="global.html#creerProjet">creerProjet</a></li><li><a href="global.html#equipeExiste">equipeExiste</a></li><li><a href="global.html#infosProjet">infosProjet</a></li><li><a href="global.html#insererMot">insererMot</a></li><li><a href="global.html#listeProjetsJson">listeProjetsJson</a></li><li><a href="global.html#modifierEtudiant">modifierEtudiant</a></li><li><a href="global.html#modifierExterne">modifierExterne</a></li><li><a href="global.html#modifierIapau">modifierIapau</a></li><li><a href="global.html#modifierProjet">modifierProjet</a></li><li><a href="global.html#recupererAncienEvents">recupererAncienEvents</a></li><li><a href="global.html#recupererEventActuel">recupererEventActuel</a></li><li><a href="global.html#recuperer_projets">recuperer_projets</a></li><li><a href="global.html#recuperer_regles">recuperer_regles</a></li><li><a href="global.html#recuperer_ressourcesPrivees">recuperer_ressourcesPrivees</a></li><li><a href="global.html#recuperer_ressourcesPubliques">recuperer_ressourcesPubliques</a></li><li><a href="global.html#recuperer_toutes_ressources">recuperer_toutes_ressources</a></li><li><a href="global.html#salageMdp">salageMdp</a></li><li><a href="global.html#supprimerProjet">supprimerProjet</a></li><li><a href="global.html#tousLesProjets">tousLesProjets</a></li><li><a href="global.html#updateMdp">updateMdp</a></li><li><a href="global.html#validerEtudiant">validerEtudiant</a></li><li><a href="global.html#verifIdEquipe">verifIdEquipe</a></li><li><a href="global.html#verifIdEvent">verifIdEvent</a></li><li><a href="global.html#verifIdProjet">verifIdProjet</a></li><li><a href="global.html#voirEvent">voirEvent</a></li><li><a href="global.html#voirListeGestionnaires">voirListeGestionnaires</a></li><li><a href="global.html#voirListeProjets">voirListeProjets</a></li><li><a href="global.html#voirTousEvents">voirTousEvents</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Connexion.html">Connexion</a></li><li><a href="module-Equipe.html">Equipe</a></li><li><a href="module-Gestion_des_utilisateurs.html">Gestion_des_utilisateurs</a></li><li><a href="module-Inscription.html">Inscription</a></li><li><a href="module-Token.html">Token</a></li><li><a href="module-UserRouter.html">UserRouter</a></li><li><a href="module-VerifierProfil.html">VerifierProfil</a></li></ul><h3>Global</h3><ul><li><a href="global.html#ListeMembre">ListeMembre</a></li><li><a href="global.html#aUneEquipeDansEvent">aUneEquipeDansEvent</a></li><li><a href="global.html#ajouterMembre">ajouterMembre</a></li><li><a href="global.html#ajouterRegle">ajouterRegle</a></li><li><a href="global.html#appartenirEquipe">appartenirEquipe</a></li><li><a href="global.html#attribuerProjetExterne">attribuerProjetExterne</a></li><li><a href="global.html#attribuerProjetIA">attribuerProjetIA</a></li><li><a href="global.html#chercherAdminID">chercherAdminID</a></li><li><a href="global.html#chercherEquipeID">chercherEquipeID</a></li><li><a href="global.html#chercherGestionnaireExt">chercherGestionnaireExt</a></li><li><a href="global.html#chercherGestionnaireExtID">chercherGestionnaireExtID</a></li><li><a href="global.html#chercherGestionnaireIA">chercherGestionnaireIA</a></li><li><a href="global.html#chercherGestionnaireIAID">chercherGestionnaireIAID</a></li><li><a href="global.html#chercherGestionnaireIapau">chercherGestionnaireIapau</a></li><li><a href="global.html#chercherListeGestionnaireIapau">chercherListeGestionnaireIapau</a></li><li><a href="global.html#chercherListeGestionnairesExt">chercherListeGestionnairesExt</a></li><li><a href="global.html#chercherListeStudents">chercherListeStudents</a></li><li><a href="global.html#chercherListeUtilisateurs">chercherListeUtilisateurs</a></li><li><a href="global.html#chercherStudent">chercherStudent</a></li><li><a href="global.html#chercherUserID">chercherUserID</a></li><li><a href="global.html#chercherUserPseudo">chercherUserPseudo</a></li><li><a href="global.html#chercheraccesGitlab">chercheraccesGitlab</a></li><li><a href="global.html#chercheridProjet">chercheridProjet</a></li><li><a href="global.html#comparerMdp">comparerMdp</a></li><li><a href="global.html#copieDuTemplate">copieDuTemplate</a></li><li><a href="global.html#createEvent">createEvent</a></li><li><a href="global.html#creationProjet">creationProjet</a></li><li><a href="global.html#creerAdmin">creerAdmin</a></li><li><a href="global.html#creerAnnotation">creerAnnotation</a></li><li><a href="global.html#creerDossier">creerDossier</a></li><li><a href="global.html#creerEquipe">creerEquipe</a></li><li><a href="global.html#creerEtudiant">creerEtudiant</a></li><li><a href="global.html#creerGestionnaireExterne">creerGestionnaireExterne</a></li><li><a href="global.html#creerGestionnaireIA">creerGestionnaireIA</a></li><li><a href="global.html#creerProjet">creerProjet</a></li><li><a href="global.html#creerUtilisateur">creerUtilisateur</a></li><li><a href="global.html#declinerDemande">declinerDemande</a></li><li><a href="global.html#demandeDejaEnvoyee">demandeDejaEnvoyee</a></li><li><a href="global.html#destituerProjetExterne">destituerProjetExterne</a></li><li><a href="global.html#destituerProjetIa">destituerProjetIa</a></li><li><a href="global.html#detacherProjetEvent">detacherProjetEvent</a></li><li><a href="global.html#ecrireAnnotation">ecrireAnnotation</a></li><li><a href="global.html#envoyerDemande">envoyerDemande</a></li><li><a href="global.html#envoyerMessage">envoyerMessage</a></li><li><a href="global.html#envoyerMessageEquipe">envoyerMessageEquipe</a></li><li><a href="global.html#envoyerMessageGlobalEvent">envoyerMessageGlobalEvent</a></li><li><a href="global.html#envoyerMessageGlobalProjet">envoyerMessageGlobalProjet</a></li><li><a href="global.html#envoyer_json_liste_gestionnaires">envoyer_json_liste_gestionnaires</a></li><li><a href="global.html#equipesOuvertes">equipesOuvertes</a></li><li><a href="global.html#fermerEquipe">fermerEquipe</a></li><li><a href="global.html#genererChaineAleatoire">genererChaineAleatoire</a></li><li><a href="global.html#getAnnotationEquipe">getAnnotationEquipe</a></li><li><a href="global.html#getAnnotationEquipes">getAnnotationEquipes</a></li><li><a href="global.html#getExterneInfo">getExterneInfo</a></li><li><a href="global.html#getIAGestionnaireInfo">getIAGestionnaireInfo</a></li><li><a href="global.html#getMessageEquipe">getMessageEquipe</a></li><li><a href="global.html#getStudentInfo">getStudentInfo</a></li><li><a href="global.html#infosProjet">infosProjet</a></li><li><a href="global.html#insererAccesEquipeGit">insererAccesEquipeGit</a></li><li><a href="global.html#insererMot">insererMot</a></li><li><a href="global.html#insererUser">insererUser</a></li><li><a href="global.html#jsonEquipesOuvertes">jsonEquipesOuvertes</a></li><li><a href="global.html#jsonGetAnnotation">jsonGetAnnotation</a></li><li><a href="global.html#jsonGetMessegaeEquipe">jsonGetMessegaeEquipe</a></li><li><a href="global.html#jsonInformationsEquipe">jsonInformationsEquipe</a></li><li><a href="global.html#jsonListeEquipeProjet">jsonListeEquipeProjet</a></li><li><a href="global.html#jsonMesEquipes">jsonMesEquipes</a></li><li><a href="global.html#listeEquipeProjet">listeEquipeProjet</a></li><li><a href="global.html#listeEquipes">listeEquipes</a></li><li><a href="global.html#listeProjetsJson">listeProjetsJson</a></li><li><a href="global.html#modifierEquipe">modifierEquipe</a></li><li><a href="global.html#modifierEtudiant">modifierEtudiant</a></li><li><a href="global.html#modifierEvent">modifierEvent</a></li><li><a href="global.html#modifierExterne">modifierExterne</a></li><li><a href="global.html#modifierIapau">modifierIapau</a></li><li><a href="global.html#modifierProjet">modifierProjet</a></li><li><a href="global.html#modifierUser">modifierUser</a></li><li><a href="global.html#ouvrirEquipe">ouvrirEquipe</a></li><li><a href="global.html#promouvoir">promouvoir</a></li><li><a href="global.html#quitterEquipe">quitterEquipe</a></li><li><a href="global.html#rattacherProjetEvent">rattacherProjetEvent</a></li><li><a href="global.html#recupInfoEvent">recupInfoEvent</a></li><li><a href="global.html#recupererAncienEvents">recupererAncienEvents</a></li><li><a href="global.html#recupererDemande">recupererDemande</a></li><li><a href="global.html#recupererEventActuel">recupererEventActuel</a></li><li><a href="global.html#recupererJSON">recupererJSON</a></li><li><a href="global.html#recupererMessageEquipe">recupererMessageEquipe</a></li><li><a href="global.html#recupererMot">recupererMot</a></li><li><a href="global.html#recuperer_projets">recuperer_projets</a></li><li><a href="global.html#recuperer_regles">recuperer_regles</a></li><li><a href="global.html#recuperer_ressourcesPrivees">recuperer_ressourcesPrivees</a></li><li><a href="global.html#recuperer_ressourcesPubliques">recuperer_ressourcesPubliques</a></li><li><a href="global.html#recuperer_toutes_ressources">recuperer_toutes_ressources</a></li><li><a href="global.html#salageMdp">salageMdp</a></li><li><a href="global.html#supprimerDemandes">supprimerDemandes</a></li><li><a href="global.html#supprimerEquipe">supprimerEquipe</a></li><li><a href="global.html#supprimerEvent">supprimerEvent</a></li><li><a href="global.html#supprimerMot">supprimerMot</a></li><li><a href="global.html#supprimerProjet">supprimerProjet</a></li><li><a href="global.html#supprimerRegles">supprimerRegles</a></li><li><a href="global.html#supprimerUnMembre">supprimerUnMembre</a></li><li><a href="global.html#supprimerUser">supprimerUser</a></li><li><a href="global.html#tousLesProjets">tousLesProjets</a></li><li><a href="global.html#toutesInfosProjet">toutesInfosProjet</a></li><li><a href="global.html#updateMdp">updateMdp</a></li><li><a href="global.html#validerEtudiant">validerEtudiant</a></li><li><a href="global.html#verifIdEquipe">verifIdEquipe</a></li><li><a href="global.html#verifIdEvent">verifIdEvent</a></li><li><a href="global.html#verifIdProjet">verifIdProjet</a></li><li><a href="global.html#verifIdUser">verifIdUser</a></li><li><a href="global.html#voirEvent">voirEvent</a></li><li><a href="global.html#voirListeGestionnaires">voirListeGestionnaires</a></li><li><a href="global.html#voirListeProjets">voirListeProjets</a></li><li><a href="global.html#voirTousEvents">voirTousEvents</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.2</a> on Sun Aug 27 2023 19:13:11 GMT+0200 (Central European Summer Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.2</a> on Fri Sep 01 2023 11:42:28 GMT+0200 (Central European Summer Time)
 </footer>
 
 <script> prettyPrint(); </script>

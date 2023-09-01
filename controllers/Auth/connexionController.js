@@ -1,5 +1,6 @@
 /**
- * @fileoverview Controller de la connexion
+ * @fileoverview Controller de la connexion. Ce fichier contient la fonction
+ * liée à la connexion du site
  * @module Connexion
  * 
  * @version 1.0.0 
@@ -9,6 +10,7 @@
  * @requires ../../models/tokenModel
  * @requires ../../database/configDB
  * @requires jsonwebtoken
+ * @requires ../../models/userModels
  */
 
 const passwordModel = require('../../models/passwordModel');
@@ -22,18 +24,18 @@ const { chercherType } = require('../../models/userModel');
  * @async
  * @param {object} req - L'objet de requête HTTP.
  * @param {object} res - L'objet de réponse HTTP.
- * @returns {object} Un JSON contenant le token généré, les informations de l'utilisateur suivantes:
- * id, nom, prénom, pseudo, rôle (Etudiant, gestionnaire externe, gestionnaire IA Pau, administrateur)
- * @description Cette fonction permet à un utilisateur de se connecter à son compte avec. Si la connexion
- * a échoué, un code 400 est retourné avec un message d'erreur.
- * un login/email et un mot de passe.
+ * @returns {object} Si la connexion s'est bien déroulée, elle renvoie un JSON contenant le token généré, 
+ * les informations de l'utilisateur suivantes: id, nom, prénom, pseudo, rôle (Etudiant, gestionnaire externe, 
+ * gestionnaire IA Pau, administrateur), ainsi qu'un code 200. Si la connexion échoue, un code 400 est retourné avec un message d'erreur.
+ * @description Cette fonction permet à un utilisateur de se connecter à son compte avec un identifiant
+ * et un mot de passe.  
  * 
  * Le champ 'identifiant' peut être un pseudo ou une adresse mail.
  * Le champ 'seSouvenir' vaut 'true' si l'utilisteur a coché cette option sur la page de connexion,
  * 'false' dans le cas contraire. Ce champ permet d'ajuster la date d'expiration du token, plus longue
  * si il vaut 'true'.
- * @headers
- *    {string} Authorization - Token d'authentification JWT.
+ * 
+ * La route de ce controller se trouve dans routes/index.js
  */
 async function connexion(req, res) {
     if (req.method === 'POST') {

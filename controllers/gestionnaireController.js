@@ -1,6 +1,19 @@
 const gestionnaireModel = require('../models/gestionnaireModel');
 
-/**Liste des gestionnaire IA et externes */
+/**
+ * @async
+ * @param {object} req - L'objet de requête HTTP.
+ * @param {object} res - L'objet de réponse HTTP.
+ * @description Ce contrôleur permet de récupérer la liste des gestionnaires externes et internes.
+ * Ceci est utile pour les affecter à des projets.
+ * 
+ * Accès à ce controller: Administrateurs.
+ * 
+ * Route: gestionnaires.js
+ * @returns {Object} -JSON des informations ou message d'erreur si la 
+ * requête échoue.
+ *  
+ */
 async function voirListeGestionnaires(req, res) {
     if (req.method === 'OPTION') {
         return res.status(200).json({ sucess: 'Agress granted' });

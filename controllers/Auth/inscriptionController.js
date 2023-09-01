@@ -1,5 +1,5 @@
 /** 
- * @fileoverview Controller de l'inscription
+ * @fileoverview Contrôleur de l'inscription
  * @module Inscription
  * 
  * @version 1.0.0 
@@ -15,20 +15,22 @@ const userModel = require('../../models/userModel');
 const etudiantModel = require('../../models/etudiantModel');
 const tokenModel = require('../../models/tokenModel');
 const jwt = require('jsonwebtoken');
-const { body, validationResult } = require('express-validator');
+const { validationResult } = require('express-validator');
 
 /**
  * Inscription d'un étudiant.
  * Permet à un étudiant sans compte d'en créer un.
- * 
+ * @function
  * @param {Object} req - L'objet requête Express.
  * @param {Object} res - L'objet réponse Express.
- * @throws {Error}Erreur lors de l'inscription.
  * @returns {Object} - Un code 200
  * @description Cette fonction récupère les données du formulaire d'inscription renvoyées par la requête. 
  * Elle vérifie que les données soient bonnes grâce à la fonction de validation des données d'un étudiant.
  * S'il y a un problème dans ses données, elle renvoie la liste des erreurs. Sinon, elle insère l'étudiant dans
  * la base de données.
+ * 
+ * La route de ce controller se trouve dans routes/index.js
+
  */
 async function inscriptionEleve(req, res) {
     if (req.method === 'POST') {
@@ -47,6 +49,7 @@ async function inscriptionEleve(req, res) {
             password
         } = req.body;
 
+        /*Permet de supprimer les espaces au début et la fin */
         let userNom = nom.trim();
         let userPrenom = prenom.trim();
         let userVille = ville.trim();

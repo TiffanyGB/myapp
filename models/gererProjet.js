@@ -12,6 +12,8 @@ const pool = require('../database/configDB');
  *
  * @async
  * @function
+ * @author Tiffany GAY-BELLILE <tiffany.gbellile@gmail.com>
+
  * @param {number} idProjet - L'identifiant du projet pour lequel chercher les gestionnaires IA.
  * @returns {Promise<Array>} - Une promesse résolue avec un tableau contenant les informations des gestionnaires IA associés au projet.
  *                           - Si aucun gestionnaire IA n'est trouvé, la promesse est résolue avec un tableau vide.
@@ -75,8 +77,6 @@ async function chercherGestionnaireExtID(idProjet, idGestionnaire) {
  *                           - Si aucun gestionnaire IA n'est trouvé, la promesse est résolue avec un tableau vide.
  * @throws {Error} Une erreur si la requête de récupération échoue.
  */
-
-/**Changer nom si j'ai le temps */
 async function chercherGestionnaireIAID(idProjet, idGestionnaire) {
     try {
         const valeurs = [idProjet, idGestionnaire];
@@ -99,6 +99,7 @@ async function chercherGestionnaireIAID(idProjet, idGestionnaire) {
  *
  * @async
  * @function
+ * @author Tiffany GAY-BELLILE <tiffany.gbellile@gmail.com>
  * @param {number} idProjet - L'identifiant du projet pour lequel chercher les gestionnaires externes.
  * @returns {Promise<Array>} - Une promesse résolue avec un tableau contenant les informations des gestionnaires externes associés au projet.
  *                           - Si aucun gestionnaire externe n'est trouvé, la promesse est résolue avec un tableau vide.
@@ -124,9 +125,9 @@ async function chercherGestionnaireExt(idProjet) {
  *
  * @async
  * @function
+ * @author Tiffany GAY-BELLILE <tiffany.gbellile@gmail.com>
  * @param {number} idProjet - L'identifiant du projet à attribuer.
  * @param {number} idGestionnaire - L'identifiant du gestionnaire IA auquel attribuer le projet.
- * @returns {Promise<string>} - Une promesse résolue avec la chaîne de caractères 'ok' si l'attribution réussit.
  * @throws {Error} Une erreur si l'attribution échoue.
  */
 async function attribuerProjetIA(idProjet, idGestionnaire) {
@@ -150,9 +151,9 @@ async function attribuerProjetIA(idProjet, idGestionnaire) {
  *
  * @async
  * @function
+ * @author Tiffany GAY-BELLILE <tiffany.gbellile@gmail.com>
  * @param {number} idProjet - L'identifiant du projet à attribuer.
  * @param {number} idGestionnaire - L'identifiant du gestionnaire externe auquel attribuer le projet.
- * @returns {Promise<string>} - Une promesse résolue avec la chaîne de caractères 'ok' si l'attribution réussit.
  * @throws {Error} Une erreur si l'attribution échoue.
  */
 async function attribuerProjetExterne(idProjet, idGestionnaire) {
@@ -173,7 +174,7 @@ async function attribuerProjetExterne(idProjet, idGestionnaire) {
  * Destituer un projet d'un gestionnaire externe.
  *
  * Cette fonction effectue une requête SQL pour destituer un projet d'un gestionnaire externe en supprimant l'entrée correspondante de la table Gerer_externe.
- *
+ * @author Tiffany GAY-BELLILE <tiffany.gbellile@gmail.com>
  * @async
  * @function
  * @param {number} idProjet - L'identifiant du projet à destituer.
@@ -197,7 +198,7 @@ async function destituerProjetExterne(idProjet) {
  * Destituer un projet d'un gestionnaire IA.
  *
  * Cette fonction effectue une requête SQL pour destituer un projet d'un gestionnaire IA en supprimant l'entrée correspondante de la table Gerer_ia_pau.
- *
+ * @author Tiffany GAY-BELLILE <tiffany.gbellile@gmail.com>
  * @async
  * @function
  * @param {number} idProjet - L'identifiant du projet à destituer.

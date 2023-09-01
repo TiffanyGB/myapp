@@ -18,7 +18,14 @@ async function validerGestionnaireIA(req) {
         .run(req);
 }
 
-/**Liste des gestionnaires ia pau */
+/**
+ * Cherche la liste des gestionnaires iapau
+ * @async
+ * @function
+ * @author Tiffany GAY-BELLILE <tiffany.gbellile@gmail.com>
+ * @returns {Object} Les lignes de la bdd trouvées par la requête SQL
+ * @throws {Error} Une erreur si la requête échoue.
+*/
 function chercherListeGestionnaireIapau() {
 
     const users = `SELECT * FROM Gestionnaire_iapau`;
@@ -35,7 +42,15 @@ function chercherListeGestionnaireIapau() {
 }
 
 
-/**Chercher un gestionnaire ia pau par son id*/
+/**
+ * Cherche un gestionnaire avec son id
+ * @async
+ * @function
+ * @author Tiffany GAY-BELLILE <tiffany.gbellile@gmail.com>
+ * @param {Int} idUser id du gestionnaire externe à rechercher
+ * @returns {Object} Les lignes de la bdd trouvées par la requête SQL
+ * @throws {Error} Une erreur si la requête échoue.
+*/
 function chercherGestionnaireIapau(idUser) {
 
     const users = `SELECT * FROM Gestionnaire_iapau WHERE id_g_iapau = $1`;
@@ -53,20 +68,14 @@ function chercherGestionnaireIapau(idUser) {
 }
 
 
-/**Créer un gestionnaire ia pau */
 /**
- * Crée un nouveau gestionnaire IA.
- * @async
- * @param {Array} values_user - Les valeurs des champs utilisateur.
- * @param {Array} values_id - Les valeurs des champs identifiant (pseudo et email).
- * @param {string} role - Le rôle du gestionnaire IA au sein de l'association.
- * @returns {string} - Résultat de la création du gestionnaire IA.
- * - 'true' si le gestionnaire IA a été créé avec succès.
- * - 'erreur' en cas d'échec de l'insertion dans la table gestionnaire ia.
- * - 'les2' si à la fois le pseudo et l'email existent déjà.
- * - 'pseudo' si le pseudo existe déjà.
- * - 'mail' si l'email existe déjà.
- */
+ * Crée un gestionnaire iapau
+ * @function
+ * @author Tiffany GAY-BELLILE <tiffany.gbellile@gmail.com>
+ * @param {Int} id Id de l'étudiant
+ * @param {String} role_asso ROle du gestionnaire dans IA PAU
+ * @throws {Error} Une erreur si la requête échoue.
+*/
 async function creerGestionnaireIA(id, role_asso) {
 
     const valeurs_ges = [id, role_asso];
@@ -80,6 +89,14 @@ async function creerGestionnaireIA(id, role_asso) {
     }
 }
 
+/**
+ * Crée un json avec les infos du gestionnaire voulu
+ * @function
+ * @author Tiffany GAY-BELLILE <tiffany.gbellile@gmail.com>
+ * @param {Int} userId Id du gestionnaire iapau
+ * @returns {JSON} Json avec les informations
+ * @throws {Error} Une erreur si la requête échoue.
+*/
 async function getIAGestionnaireInfo(userId) {
     const chercherGIA = await chercherGestionnaireIapau(userId);
     const gia = chercherGIA[0];

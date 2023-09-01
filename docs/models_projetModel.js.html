@@ -37,10 +37,14 @@ const gererProjet = require('../models/gererProjet');
 const userModel = require('./userModel');
 const { chercherGestionnaireExtID } = require('./gestionnaireExterneModel');
 const { chercherGestionnaireIapau } = require('./gestionnaireIaModel');
+const env = require('../environnement.json');
+const img_url = env.backend.assets.images;
+
 
 const validateProjet = [
     body('nom')
         .notEmpty().withMessage('Le nom ne doit pas être vide.')
+        .custom((value) => !(/^\s+$/.test(value))).withMessage('Le nom ne doit pas être vide.')
         .isLength({ min: 2, max: 30 }).withMessage('Le nom doit avoir une longueur comprise entre 3 et 40 caractères.'),
 
 
@@ -51,84 +55,117 @@ const validateProjet = [
 
     body('recompense')
         .notEmpty().withMessage('La récompense ne doit pas être vide.')
+        .custom((value) => !(/^\s+$/.test(value)))
         .isLength({ min: 0, max: 100000 }).withMessage('La récompense doit être un nombre entre 0 et 100 000.'),
 
 
     body('description')
         .notEmpty().withMessage('La description est obligatoire.')
+        .custom((value) => !(/^\s+$/.test(value))).withMessage('La description ne doit pas être vide.')
         .isLength({ min: 5, max: 10000 }).withMessage('La description doit avoir une longueur comprise entre 5 et 10000 caractères.'),
+    body('template')
+        .notEmpty().withMessage('Le template est obligatoire.')
+        .isURL()
+        .isLength({ max: 1000 }).withMessage('La description doit avoir une longueur de 1000 caractères maximum.'),
 
-    /**Appel du validateur */
+    /*Appel du validateur */
     validateurDonnéesMiddleware
 ];
 
-/**Liste des projets */
-function tousLesProjets() {
+
+/**
+ * Récupère la liste de tous les projets.
+ * @async
+ * @function
+ * @returns {Promise&lt;Array>} - Une promesse résolue avec un tableau de tous les projets.
+ * @throws {Error} Une erreur si la récupération des projets échoue.
+ * @author Tiffany GAY-BELLILE &lt;tiffany.gbellile@gmail.com>
+ */
+async function tousLesProjets() {
 
     const projets = `SELECT * FROM Projet`;
 
-    return new Promise((resolve, reject) => {
-        pool.query(projets)
-            .then((res) => {
-                resolve(res.rows);
-            })
-            .catch((error) => {
-                reject(error);
-            });
-    });
+    try {
+        const chercher = await pool.query(projets);
+        return chercher.rows;
+    } catch {
+        throw (error);
+    }
+
 }
 
-/**Chercher la liste des projets d'un event */
-function recuperer_projets(idEvent) {
+/**
+ * Récupère la liste des projets associés à un événement en fonction de son identifiant.
+ * @async
+ * @function
+ * @param {number} idEvent - Identifiant de l'événement.
+ * @returns {Promise&lt;Array>} - Une promesse résolue avec un tableau des projets associés à l'événement.
+ * @throws {Error} Une erreur si la récupération des projets échoue.
+ * @author Tiffany GAY-BELLILE &lt;tiffany.gbellile@gmail.com>
+ */
+async function recuperer_projets(idEvent) {
 
     const chercherProjets = `SELECT * FROM Projet WHERE idevent = $1`
 
-    return new Promise((resolve, reject) => {
-        pool.query(chercherProjets, [idEvent])
-            .then((res) => {
-                resolve(res.rows);
-            })
-            .catch((error) => {
-                reject(error);
-            });
-    });
+    try {
+        const chercher = await pool.query(chercherProjets, [idEvent]);
+        return chercher.rows;
+    } catch {
+        throw (error);
+    }
 }
 
-/**Chercher un projet par son id*/
-function chercheridProjet(idProjet) {
+/**
+ * Recherche un projet par son identifiant.
+ * @async
+ * @function
+ * @param {number} idProjet - Identifiant du projet.
+ * @returns {Promise&lt;Array>} - Une promesse résolue avec un tableau contenant les informations du projet trouvé.
+ * @throws {Error} Une erreur si la recherche du projet échoue.
+ * @author Tiffany GAY-BELLILE &lt;tiffany.gbellile@gmail.com>
+ */
+async function chercheridProjet(idProjet) {
     const users = 'SELECT * FROM Projet WHERE idProjet = $1';
 
-    return new Promise((resolve, reject) => {
-        pool.query(users, [idProjet])
-            .then((res) => {
-                resolve(res.rows);
-            })
-            .catch((error) => {
-                reject(error);
-            });
-    });
+    try {
+        const chercher = await pool.query(users, [idProjet]);
+        return chercher.rows;
+    } catch {
+        throw (error);
+    }
 }
 
-/**Créer un projet */
+/**
+ * Recherche un projet par son identifiant.
+ * @async
+ * @function
+ * @param {number} idProjet - Identifiant du projet.
+ * @returns {Promise&lt;Array>} - Une promesse résolue avec un tableau contenant les informations du projet trouvé.
+ * @throws {Error} Une erreur si la recherche du projet échoue.
+ * @author Tiffany GAY-BELLILE &lt;tiffany.gbellile@gmail.com>
+ */
 async function creerProjet(valeur_projet) {
 
-    const inserer = `INSERT INTO Projet (nom, description_projet, recompense, sujet, imgProjet)
-      VALUES ($1, $2, $3, $4, $5) RETURNING idProjet`;
+    const inserer = `INSERT INTO Projet (nom, description_projet, recompense, sujet, imgProjet, template)
+      VALUES ($1, $2, $3, $4, $5, $6) RETURNING idProjet`;
 
-    return new Promise((resolve, reject) => {
-        pool.query(inserer, valeur_projet)
-            .then((result) => {
-                const idProjet = result.rows[0].idprojet;
-                resolve(idProjet);
-            })
-            .catch((error) => {
-                reject(error);
-            });
-    });
+    try {
+        const chercher = await pool.query(inserer, valeur_projet);
+        return chercher.rows[0].idprojet;
+    } catch (error) {
+        throw (error);
+    }
 }
 
-
-/**Modifier un projet */
+/**
+ * Crée un nouveau projet avec les informations fournies.
+ * @async
+ * @function
+ * @param {Array} valeur_projet - Un tableau contenant les nouvelles valeurs du projet : [nom, description_projet, recompense, sujet, imgProjet, template].
+ * @returns {Promise&lt;number>} - Une promesse résolue avec l'identifiant du nouveau projet créé.
+ * @throws {Error} Une erreur si la création du projet échoue.
+ * @author Tiffany GAY-BELLILE &lt;tiffany.gbellile@gmail.com>
+ */
 async function modifierProjet(valeur_projet) {
 
     const modifier = `UPDATE Projet 
@@ -142,14 +179,20 @@ async function modifierProjet(valeur_projet) {
 
     try {
         pool.query(modifier, valeur_projet)
-
     }
     catch (error) {
         throw error;
     }
 }
 
-/**Supprimer un projet */
+/**
+ * Modifie les informations d'un projet en fonction des valeurs fournies.
+ * @async
+ * @function
+ * @param {Array} valeur_projet - Un tableau contenant les nouvelles valeurs du projet : [nom, description_projet, recompense, sujet, imgProjet, idProjet].
+ * @throws {Error} Une erreur si la modification du projet échoue.
+ * @author Tiffany GAY-BELLILE &lt;tiffany.gbellile@gmail.com>
+ */
 async function supprimerProjet(idProjet) {
 
     const supprimer = `DELETE FROM Projet WHERE idProjet = $1`;
@@ -161,7 +204,15 @@ async function supprimerProjet(idProjet) {
     }
 }
 
-/**JSON avec tous les projets */
+/**
+ * Génère un objet JSON contenant la liste des projets en fonction des informations de la requête.
+ * @async
+ * @function
+ * @param {Object} req - Objet de requête contenant les informations nécessaires.
+ * @returns {Promise&lt;Object>} - Une promesse résolue avec un objet JSON contenant la liste des projets filtrée.
+ * @throws {Error} Une erreur si la génération de la liste de projets échoue.
+ * @author Tiffany GAY-BELLILE &lt;tiffany.gbellile@gmail.com>
+ */
 async function listeProjetsJson(req) {
 
     try {
@@ -196,7 +247,7 @@ async function listeProjetsJson(req) {
                 temp.description = projetCourant.description_projet;
                 temp.derniereModif = projetCourant.dernieremodif;
                 temp.recompense = projetCourant.recompense;
-                temp.image = projetCourant.imgprojet;
+                temp.image = img_url + "/" + projetCourant.imgprojet;
                 temp.sujet = projetCourant.sujet;
                 temp.themes = [];
 
@@ -226,7 +277,6 @@ async function listeProjetsJson(req) {
                 }
                 jsonRetour.projets.push(temp);
             }
-
         }
         return jsonRetour;
     }
@@ -235,14 +285,22 @@ async function listeProjetsJson(req) {
     }
 }
 
-/*Crée un json avec toutes les informations dans la bdd d'un evenement sauf la derniere modification */
-/*Peut etre l'ajouter? */
+
+/**
+ * Génère un objet JSON contenant les informations détaillées d'un projet en fonction de son identifiant.
+ * @async
+ * @function
+ * @param {Object} projetCourant - Objet contenant les informations de projet.
+ * @param {Object} projetInfos - Objet dans lequel stocker les informations détaillées du projet.
+ * @throws {Error} Une erreur si la génération des informations détaillées du projet échoue.
+ * @author Tiffany GAY-BELLILE &lt;tiffany.gbellile@gmail.com>
+ */
 async function toutesInfosProjet(projetCourant, projetInfos) {
 
     if (projetCourant.imgprojet == null) {
         projetInfos.img = '';
     } else {
-        projetInfos.img = projetCourant.imgprojet;
+        projetInfos.img = img_url + "/" + projetCourant.imgprojet;
     }
     projetInfos.titre = projetCourant.nom;
     projetInfos.idprojet = projetCourant.idprojet;
@@ -253,7 +311,15 @@ async function toutesInfosProjet(projetCourant, projetInfos) {
     projetInfos.ressources = [];
 }
 
-/**Informations d'un projet */
+/**
+ * Récupère toutes les informations d'un projet en fonction de son identifiant.
+ * @async
+ * @function
+ * @param {number} idProjet - Identifiant du projet.
+ * @returns {Promise&lt;Object>} - Une promesse résolue avec un objet contenant toutes les informations du projet.
+ * @throws {Error} Une erreur si la récupération des informations du projet échoue.
+ * @author Tiffany GAY-BELLILE &lt;tiffany.gbellile@gmail.com>
+ */
 async function infosProjet(idProjet) {
 
     try {
@@ -275,6 +341,12 @@ async function infosProjet(idProjet) {
             jsonRetour.sujet = projet.sujet;
             jsonRetour.derniereModif = projet.dernieremodif;
             jsonRetour.image = projet.imgprojet;
+
+            if (jsonRetour.image == null) {
+                jsonRetour.image = '';
+            } else {
+                jsonRetour.image = projet.imgprojet;
+            }
 
             if (jsonRetour.idevent == null) {
                 jsonRetour.idevent = '';
@@ -361,6 +433,15 @@ async function infosProjet(idProjet) {
     }
 }
 
+/**
+ * Attache un projet à un événement en fonction de leurs identifiants respectifs.
+ * @async
+ * @function
+ * @param {number} idEvent - Identifiant de l'événement.
+ * @param {number} idProjet - Identifiant du projet à attacher à l'événement.
+ * @throws {Error} Une erreur si l'attache du projet à l'événement échoue.
+ * @author Tiffany GAY-BELLILE &lt;tiffany.gbellile@gmail.com>
+ */
 async function rattacherProjetEvent(idEvent, idProjet) {
     const rattacher = `
       UPDATE Projet 
@@ -375,6 +456,14 @@ async function rattacherProjetEvent(idEvent, idProjet) {
     }
 }
 
+/**
+ * Détache un projet d'un événement en fonction de l'identifiant de l'événement.
+ * @async
+ * @function
+ * @param {number} idEvent - Identifiant de l'événement dont le projet doit être détaché.
+ * @throws {Error} Une erreur si la détache du projet de l'événement échoue.
+ * @author Tiffany GAY-BELLILE &lt;tiffany.gbellile@gmail.com>
+ */
 async function detacherProjetEvent(idEvent) {
     const rattacher = `
       UPDATE Projet 
@@ -412,13 +501,13 @@ module.exports = {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Annotation_%2525C3%2525A9quipes.html">Annotation_équipes</a></li><li><a href="module-Connexion.html">Connexion</a></li><li><a href="module-Equipe.html">Equipe</a></li><li><a href="module-Evenement.html">Evenement</a></li><li><a href="module-Gestion_demandes_admission.html">Gestion_demandes_admission</a></li><li><a href="module-Gestion_des_utilisateurs.html">Gestion_des_utilisateurs</a></li><li><a href="module-Inscription.html">Inscription</a></li><li><a href="module-Projet.html">Projet</a></li><li><a href="module-Token.html">Token</a></li><li><a href="module-UserRouter.html">UserRouter</a></li><li><a href="module-VerifierProfil.html">VerifierProfil</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-UserRouter-UserRouter.html">UserRouter</a></li></ul><h3>Global</h3><ul><li><a href="global.html#ajouterRegle">ajouterRegle</a></li><li><a href="global.html#chercherGestionnaireExtID">chercherGestionnaireExtID</a></li><li><a href="global.html#chercherGestionnaireIapau">chercherGestionnaireIapau</a></li><li><a href="global.html#chercherListeGestionnaireIapau">chercherListeGestionnaireIapau</a></li><li><a href="global.html#chercherListeGestionnairesExt">chercherListeGestionnairesExt</a></li><li><a href="global.html#chercherListeStudents">chercherListeStudents</a></li><li><a href="global.html#chercherStudent">chercherStudent</a></li><li><a href="global.html#chercheridProjet">chercheridProjet</a></li><li><a href="global.html#comparerMdp">comparerMdp</a></li><li><a href="global.html#creationProjet">creationProjet</a></li><li><a href="global.html#creerEtudiant">creerEtudiant</a></li><li><a href="global.html#creerGestionnaireExterne">creerGestionnaireExterne</a></li><li><a href="global.html#creerGestionnaireIA">creerGestionnaireIA</a></li><li><a href="global.html#creerProjet">creerProjet</a></li><li><a href="global.html#equipeExiste">equipeExiste</a></li><li><a href="global.html#infosProjet">infosProjet</a></li><li><a href="global.html#insererMot">insererMot</a></li><li><a href="global.html#listeProjetsJson">listeProjetsJson</a></li><li><a href="global.html#modifierEtudiant">modifierEtudiant</a></li><li><a href="global.html#modifierExterne">modifierExterne</a></li><li><a href="global.html#modifierIapau">modifierIapau</a></li><li><a href="global.html#modifierProjet">modifierProjet</a></li><li><a href="global.html#recupererAncienEvents">recupererAncienEvents</a></li><li><a href="global.html#recupererEventActuel">recupererEventActuel</a></li><li><a href="global.html#recuperer_projets">recuperer_projets</a></li><li><a href="global.html#recuperer_regles">recuperer_regles</a></li><li><a href="global.html#recuperer_ressourcesPrivees">recuperer_ressourcesPrivees</a></li><li><a href="global.html#recuperer_ressourcesPubliques">recuperer_ressourcesPubliques</a></li><li><a href="global.html#recuperer_toutes_ressources">recuperer_toutes_ressources</a></li><li><a href="global.html#salageMdp">salageMdp</a></li><li><a href="global.html#supprimerProjet">supprimerProjet</a></li><li><a href="global.html#tousLesProjets">tousLesProjets</a></li><li><a href="global.html#updateMdp">updateMdp</a></li><li><a href="global.html#validerEtudiant">validerEtudiant</a></li><li><a href="global.html#verifIdEquipe">verifIdEquipe</a></li><li><a href="global.html#verifIdEvent">verifIdEvent</a></li><li><a href="global.html#verifIdProjet">verifIdProjet</a></li><li><a href="global.html#voirEvent">voirEvent</a></li><li><a href="global.html#voirListeGestionnaires">voirListeGestionnaires</a></li><li><a href="global.html#voirListeProjets">voirListeProjets</a></li><li><a href="global.html#voirTousEvents">voirTousEvents</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-Connexion.html">Connexion</a></li><li><a href="module-Equipe.html">Equipe</a></li><li><a href="module-Gestion_des_utilisateurs.html">Gestion_des_utilisateurs</a></li><li><a href="module-Inscription.html">Inscription</a></li><li><a href="module-Token.html">Token</a></li><li><a href="module-UserRouter.html">UserRouter</a></li><li><a href="module-VerifierProfil.html">VerifierProfil</a></li></ul><h3>Global</h3><ul><li><a href="global.html#ListeMembre">ListeMembre</a></li><li><a href="global.html#aUneEquipeDansEvent">aUneEquipeDansEvent</a></li><li><a href="global.html#ajouterMembre">ajouterMembre</a></li><li><a href="global.html#ajouterRegle">ajouterRegle</a></li><li><a href="global.html#appartenirEquipe">appartenirEquipe</a></li><li><a href="global.html#attribuerProjetExterne">attribuerProjetExterne</a></li><li><a href="global.html#attribuerProjetIA">attribuerProjetIA</a></li><li><a href="global.html#chercherAdminID">chercherAdminID</a></li><li><a href="global.html#chercherEquipeID">chercherEquipeID</a></li><li><a href="global.html#chercherGestionnaireExt">chercherGestionnaireExt</a></li><li><a href="global.html#chercherGestionnaireExtID">chercherGestionnaireExtID</a></li><li><a href="global.html#chercherGestionnaireIA">chercherGestionnaireIA</a></li><li><a href="global.html#chercherGestionnaireIAID">chercherGestionnaireIAID</a></li><li><a href="global.html#chercherGestionnaireIapau">chercherGestionnaireIapau</a></li><li><a href="global.html#chercherListeGestionnaireIapau">chercherListeGestionnaireIapau</a></li><li><a href="global.html#chercherListeGestionnairesExt">chercherListeGestionnairesExt</a></li><li><a href="global.html#chercherListeStudents">chercherListeStudents</a></li><li><a href="global.html#chercherListeUtilisateurs">chercherListeUtilisateurs</a></li><li><a href="global.html#chercherStudent">chercherStudent</a></li><li><a href="global.html#chercherUserID">chercherUserID</a></li><li><a href="global.html#chercherUserPseudo">chercherUserPseudo</a></li><li><a href="global.html#chercheraccesGitlab">chercheraccesGitlab</a></li><li><a href="global.html#chercheridProjet">chercheridProjet</a></li><li><a href="global.html#comparerMdp">comparerMdp</a></li><li><a href="global.html#copieDuTemplate">copieDuTemplate</a></li><li><a href="global.html#createEvent">createEvent</a></li><li><a href="global.html#creationProjet">creationProjet</a></li><li><a href="global.html#creerAdmin">creerAdmin</a></li><li><a href="global.html#creerAnnotation">creerAnnotation</a></li><li><a href="global.html#creerDossier">creerDossier</a></li><li><a href="global.html#creerEquipe">creerEquipe</a></li><li><a href="global.html#creerEtudiant">creerEtudiant</a></li><li><a href="global.html#creerGestionnaireExterne">creerGestionnaireExterne</a></li><li><a href="global.html#creerGestionnaireIA">creerGestionnaireIA</a></li><li><a href="global.html#creerProjet">creerProjet</a></li><li><a href="global.html#creerUtilisateur">creerUtilisateur</a></li><li><a href="global.html#declinerDemande">declinerDemande</a></li><li><a href="global.html#demandeDejaEnvoyee">demandeDejaEnvoyee</a></li><li><a href="global.html#destituerProjetExterne">destituerProjetExterne</a></li><li><a href="global.html#destituerProjetIa">destituerProjetIa</a></li><li><a href="global.html#detacherProjetEvent">detacherProjetEvent</a></li><li><a href="global.html#ecrireAnnotation">ecrireAnnotation</a></li><li><a href="global.html#envoyerDemande">envoyerDemande</a></li><li><a href="global.html#envoyerMessage">envoyerMessage</a></li><li><a href="global.html#envoyerMessageEquipe">envoyerMessageEquipe</a></li><li><a href="global.html#envoyerMessageGlobalEvent">envoyerMessageGlobalEvent</a></li><li><a href="global.html#envoyerMessageGlobalProjet">envoyerMessageGlobalProjet</a></li><li><a href="global.html#envoyer_json_liste_gestionnaires">envoyer_json_liste_gestionnaires</a></li><li><a href="global.html#equipesOuvertes">equipesOuvertes</a></li><li><a href="global.html#fermerEquipe">fermerEquipe</a></li><li><a href="global.html#genererChaineAleatoire">genererChaineAleatoire</a></li><li><a href="global.html#getAnnotationEquipe">getAnnotationEquipe</a></li><li><a href="global.html#getAnnotationEquipes">getAnnotationEquipes</a></li><li><a href="global.html#getExterneInfo">getExterneInfo</a></li><li><a href="global.html#getIAGestionnaireInfo">getIAGestionnaireInfo</a></li><li><a href="global.html#getMessageEquipe">getMessageEquipe</a></li><li><a href="global.html#getStudentInfo">getStudentInfo</a></li><li><a href="global.html#infosProjet">infosProjet</a></li><li><a href="global.html#insererAccesEquipeGit">insererAccesEquipeGit</a></li><li><a href="global.html#insererMot">insererMot</a></li><li><a href="global.html#insererUser">insererUser</a></li><li><a href="global.html#jsonEquipesOuvertes">jsonEquipesOuvertes</a></li><li><a href="global.html#jsonGetAnnotation">jsonGetAnnotation</a></li><li><a href="global.html#jsonGetMessegaeEquipe">jsonGetMessegaeEquipe</a></li><li><a href="global.html#jsonInformationsEquipe">jsonInformationsEquipe</a></li><li><a href="global.html#jsonListeEquipeProjet">jsonListeEquipeProjet</a></li><li><a href="global.html#jsonMesEquipes">jsonMesEquipes</a></li><li><a href="global.html#listeEquipeProjet">listeEquipeProjet</a></li><li><a href="global.html#listeEquipes">listeEquipes</a></li><li><a href="global.html#listeProjetsJson">listeProjetsJson</a></li><li><a href="global.html#modifierEquipe">modifierEquipe</a></li><li><a href="global.html#modifierEtudiant">modifierEtudiant</a></li><li><a href="global.html#modifierEvent">modifierEvent</a></li><li><a href="global.html#modifierExterne">modifierExterne</a></li><li><a href="global.html#modifierIapau">modifierIapau</a></li><li><a href="global.html#modifierProjet">modifierProjet</a></li><li><a href="global.html#modifierUser">modifierUser</a></li><li><a href="global.html#ouvrirEquipe">ouvrirEquipe</a></li><li><a href="global.html#promouvoir">promouvoir</a></li><li><a href="global.html#quitterEquipe">quitterEquipe</a></li><li><a href="global.html#rattacherProjetEvent">rattacherProjetEvent</a></li><li><a href="global.html#recupInfoEvent">recupInfoEvent</a></li><li><a href="global.html#recupererAncienEvents">recupererAncienEvents</a></li><li><a href="global.html#recupererDemande">recupererDemande</a></li><li><a href="global.html#recupererEventActuel">recupererEventActuel</a></li><li><a href="global.html#recupererJSON">recupererJSON</a></li><li><a href="global.html#recupererMessageEquipe">recupererMessageEquipe</a></li><li><a href="global.html#recupererMot">recupererMot</a></li><li><a href="global.html#recuperer_projets">recuperer_projets</a></li><li><a href="global.html#recuperer_regles">recuperer_regles</a></li><li><a href="global.html#recuperer_ressourcesPrivees">recuperer_ressourcesPrivees</a></li><li><a href="global.html#recuperer_ressourcesPubliques">recuperer_ressourcesPubliques</a></li><li><a href="global.html#recuperer_toutes_ressources">recuperer_toutes_ressources</a></li><li><a href="global.html#salageMdp">salageMdp</a></li><li><a href="global.html#supprimerDemandes">supprimerDemandes</a></li><li><a href="global.html#supprimerEquipe">supprimerEquipe</a></li><li><a href="global.html#supprimerEvent">supprimerEvent</a></li><li><a href="global.html#supprimerMot">supprimerMot</a></li><li><a href="global.html#supprimerProjet">supprimerProjet</a></li><li><a href="global.html#supprimerRegles">supprimerRegles</a></li><li><a href="global.html#supprimerUnMembre">supprimerUnMembre</a></li><li><a href="global.html#supprimerUser">supprimerUser</a></li><li><a href="global.html#tousLesProjets">tousLesProjets</a></li><li><a href="global.html#toutesInfosProjet">toutesInfosProjet</a></li><li><a href="global.html#updateMdp">updateMdp</a></li><li><a href="global.html#validerEtudiant">validerEtudiant</a></li><li><a href="global.html#verifIdEquipe">verifIdEquipe</a></li><li><a href="global.html#verifIdEvent">verifIdEvent</a></li><li><a href="global.html#verifIdProjet">verifIdProjet</a></li><li><a href="global.html#verifIdUser">verifIdUser</a></li><li><a href="global.html#voirEvent">voirEvent</a></li><li><a href="global.html#voirListeGestionnaires">voirListeGestionnaires</a></li><li><a href="global.html#voirListeProjets">voirListeProjets</a></li><li><a href="global.html#voirTousEvents">voirTousEvents</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.2</a> on Sun Aug 27 2023 19:13:11 GMT+0200 (Central European Summer Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.2</a> on Fri Sep 01 2023 11:42:28 GMT+0200 (Central European Summer Time)
 </footer>
 
 <script> prettyPrint(); </script>

@@ -29,10 +29,14 @@ const validatePasswordModif = [
     validateurDonnéesMiddleware,
 ];
 
-/**Insérer un mot de passe */
 
-
-/**Changer le mot de passe */
+/**
+ * Met à jour le mot de passe d'un utilisateur.
+ * @function
+ * @param {string} mdp - Le nouveau mot de passe crypté.
+ * @param {number} id - Identifiant de l'utilisateur.
+ * @throws {Error} Une erreur si la mise à jour du mot de passe échoue.
+ */
 function updateMdp(mdp, id) {
 
     const inserer = `UPDATE utilisateur
@@ -46,7 +50,14 @@ function updateMdp(mdp, id) {
     }
 }
 
-/**Crypter le mot de passe */
+/**
+ * Crypte un mot de passe en utilisant une fonction de hachage avec salage.
+ * @async
+ * @function
+ * @param {string} password - Le mot de passe clair à crypter.
+ * @returns {Promise<string>} - Une promesse résolue avec le mot de passe crypté.
+ * @throws {Error} Une erreur si le cryptage du mot de passe échoue.
+ */
 async function salageMdp(password) {
     try {
         const salt = await bcrypt.genSalt(10);
@@ -57,7 +68,15 @@ async function salageMdp(password) {
     }
 }
 
-/**ComparerMdp */
+/**
+ * Compare un mot de passe clair avec un mot de passe crypté pour vérifier s'ils correspondent.
+ * @async
+ * @function
+ * @param {string} mdpClair - Le mot de passe clair à comparer.
+ * @param {string} mdpCrypte - Le mot de passe crypté à comparer.
+ * @returns {Promise<boolean>} - Une promesse résolue avec `true` si les mots de passe correspondent, sinon `false`.
+ * @throws {Error} Une erreur si la comparaison des mots de passe échoue.
+ */
 async function comparerMdp(mdpClair, mdpCrypte) {
     try {
         const match = await bcrypt.compare(mdpClair, mdpCrypte);

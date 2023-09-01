@@ -1,6 +1,5 @@
 /**
- * @fileoverview Controllers des annotations d'une équipes.
- * @module Annotation_équipes
+ * @fileoverview Contrôleur des annotations d'une équipes.
  * 
  * @version 1.0.0 
  * @author Tiffany GAY-BELLILE
@@ -13,15 +12,14 @@ const { validationResult } = require('express-validator');
 
 
 /**
- * Controller pour créer une nouvelle annotation associée à une équipe.
+ * Contrôleur pour créer une nouvelle annotation associée à une équipe.
  * 
  * @function
  * @param {Object} req - L'objet de la requête (express request object).
  * @param {Object} res - L'objet de la réponse (express response object).
  * @returns {Object} - Retourne un objet JSON avec un message indiquant si l'annotation a été créée
  * avec succès ou une erreur en cas d'échec.
- * @throws {Error} Une erreur si la création de l'annotation échoue.
- * @description  Controller pour créer une nouvelle annotation associée à une équipe.
+ * @description  Contrôleur fait appel à la fonction de création d'une nouvelle annotation associée à une équipe.
  * 
  * Récupère les informations utiles à l'insertion dans la base de données:
  * 
@@ -30,11 +28,13 @@ const { validationResult } = require('express-validator');
  * L'id de l'équipe: Directement depuis l'url de la route,
  * L'id de l'auteur de l'annotation depuis son token.
  * 
- * L'appel du controller dans la route, se fait après l'appel de ces middlewares:
- * la vérification du token, la vérification de l'existence de l'équipe et (*)la vérification
- * du profil (dans cet ordre, les middlewares dépendants les uns des autres).
+ * Elle vérifie les données du body avec sa fonction de validation.
  * 
- * Accès à ce controller: Gestionnaires du projet et les administrateurs ((*)verifProfil/checkAG).
+ * Accès à ce controller: Gestionnaires du projet et les administrateurs.
+ * 
+ * 
+ * Route: annotation.js
+ * 
 */
 async function ecrireAnnotation(req, res) {
 
@@ -47,6 +47,7 @@ async function ecrireAnnotation(req, res) {
         const auteur = req.id;
         let contenu = req.body.contenu;
 
+        /*Supprimer les espcaces au début et à la fin de la chaîne de caractères */
         contenu = contenu.trim();
 
         await annotationModel.validerAnnotation(req);
@@ -69,20 +70,21 @@ async function ecrireAnnotation(req, res) {
 }
 
 /**
- * Controller pour récupérer toutes les annotations associées à une équipe.
+ * Contrôleur pour récupérer toutes les annotations associées à une équipe.
  * 
- * L'id de l'équipe voulue est directement depuis l'url de la route,
- * 
- * L'appel du controller dans la route , se fait après l'appel de ces middlewares
- * la vérification du token, la vérification de l'existence de l'équipe et (*)la vérification
- * du profil (dans cet ordre, les middlewares dépendants les uns des autres).
- * 
- * Accès à ce controller: Gestionnaires du projet et les administrateurs ((*)verifProfil/checkAG).
  * @function
  * @param {Object} req - L'objet de la requête (express request object).
  * @param {Object} res - L'objet de la réponse (express response object).
  * @returns {Object} - Retourne un objet JSON contenant l'ensemble des annotations de l'équipe.
- * @throws {Error} Une erreur si la récupération des annotations échoue.
+ * Si la requête échoue, code d'erreur 400 et message d'erreur.
+ * @description  Ce contrôleur récupère l'ensemble des annotations liées à une équipe.
+ * 
+ * L'id de l'équipe est directement récupéré depuis l'url de la route.
+ * 
+ * Accès à ce controller: Gestionnaires du projet et les administrateurs.
+ * 
+ * Route: annotation.js
+
 */
 async function getAnnotationEquipe(req, res) {
     if (req.method === 'OPTIONS') {

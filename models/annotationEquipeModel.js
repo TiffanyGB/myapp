@@ -1,6 +1,5 @@
 /**
  * @fileoverview Models des annotations d'une équipes.
- * @module Annotation_équipes
  */
 
 const pool = require('../database/configDB');
@@ -16,14 +15,12 @@ async function validerAnnotation(req) {
 }
 
 /**
- * Créer une nouvelle annotation associée à une équipe.
- * 
- * Le controller lui passe en paramètres les informations à rentrer dans la table
- * Annotation.
- * 
  * @function
+ * @author Tiffany GAY-BELLILE <tiffany.gbellile@gmail.com>
  * @param {Array} valeurs - Un tableau contenant les valeurs à insérer :
  *                         [idEquipe, auteur, contenu]
+ * @description Cette fonction permet de créer une nouvelle annotation.
+ * @returns {Object} Toutes les informations sur l'administrateur
  * @throws {Error} Une erreur si la création de l'annotation échoue.
 */
 function creerAnnotation(valeurs) {
@@ -40,12 +37,11 @@ function creerAnnotation(valeurs) {
 }
 
 /**
- * Récupérer les annotations associées à une équipe.
- * 
- * L'id de l'équipe souhaitée est récupéré du controller
- * 
+ * @async
  * @function
- * @param {number} idEquipe - L'identifiant de l'équipe pour laquelle récupérer les annotations.
+ * @author Tiffany GAY-BELLILE <tiffany.gbellile@gmail.com>
+ * @param {Int} idEquipe - identifiant de l'équipe
+ * @description Cette fonction permet de chercher toutes les annotation d'une équipe.
  * @returns {Promise<Array>} - Une promesse résolue avec un tableau d'annotations associées à l'équipe.
  * @throws {Error} Une erreur si la récupération des annotations échoue.
 */
@@ -63,16 +59,15 @@ async function getAnnotationEquipes(idEquipe) {
 }
 
 /**
- * Récupérer les annotations associées à une équipe au format JSON.
- * 
- * Cette fonction permet de récupérer les annotations associées à une équipe spécifiée et de les
- * retourner au format JSON avec des détails sur le contenu, la date et l'auteur.
- * 
+ * @async
  * @function
- * @param {number} idEquipe - L'identifiant de l'équipe pour laquelle récupérer les annotations.
+ * @author Tiffany GAY-BELLILE <tiffany.gbellile@gmail.com>
+ * @param {Int} idEquipe - identifiant de l'équipe
+ * @description Cette fonction permet de créer un json personnalisé avec toutes les annotations de l'équipe
+ * mais également des éléments en plus comme les noms et prénoms des auteurs.
  * @returns {Promise<Object>} - Une promesse résolue avec un objet JSON contenant les annotations au format détaillé.
  * @throws {Error} Une erreur si la récupération des annotations échoue.
- */
+*/
 async function jsonGetAnnotation(idEquipe){
 
     try{
