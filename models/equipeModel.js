@@ -925,7 +925,6 @@ async function jsonEquipesOuvertes(idEvent, req) {
     return jsonRetour;
 }
 
-
 module.exports = {
     jsonListeEquipeProjet,
     promouvoir,

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #Nom de l'application
-PM2_APP_NAME="bin/www"
+PM2_APP_NAME="main.js"
 
 stop_pm2_app() {
   echo "Arrêt du serveur Node.js..."

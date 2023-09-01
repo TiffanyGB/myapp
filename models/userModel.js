@@ -72,8 +72,14 @@ const connexion = [
     validateurDonnéesMiddleware,
 ]
 
-/*Avoir le type d'un utilisateur */
-async function chercherType(idUser) {
+/**
+ * Cherche le type d'un utilisateur en fonction de son identifiant.
+ * @async
+ * @function
+ * @param {number} idUser - L'identifiant de l'utilisateur à rechercher.
+ * @returns {Promise<string>} - Une promesse résolue avec le type de l'utilisateur (gestionnaireIA, administrateur, etudiant, gestionnaireExterne).
+ * @throws {Error} Une erreur si la recherche échoue.
+ */async function chercherType(idUser) {
     let result;
 
     try {
@@ -100,7 +106,13 @@ async function chercherType(idUser) {
     }
 }
 
-/**Liste des utilisateurs  */
+/**
+ * Récupère la liste de tous les utilisateurs.
+ * @async
+ * @function
+ * @returns {Promise<Array<object>>} - Une promesse résolue avec un tableau d'objets représentant les utilisateurs.
+ * @throws {Error} Une erreur si la recherche échoue.
+ */
 async function chercherListeUtilisateurs() {
 
     const users = `SELECT * FROM Utilisateur`;
@@ -113,7 +125,14 @@ async function chercherListeUtilisateurs() {
     }
 }
 
-/**Chercher un utilisateur par son id*/
+/**
+ * Cherche un utilisateur par son identifiant.
+ * @async
+ * @function
+ * @param {number} idUser - L'identifiant de l'utilisateur à rechercher.
+ * @returns {Promise<Array<object>>} - Une promesse résolue avec un tableau d'objets représentant les informations de l'utilisateur.
+ * @throws {Error} Une erreur si la recherche échoue.
+ */
 async function chercherUserID(idUser) {
     const users = 'SELECT * FROM Utilisateur WHERE idUser = $1';
 
@@ -125,7 +144,14 @@ async function chercherUserID(idUser) {
     }
 }
 
-/**Pour supprimer, odifier la fonction de hachage de l'admin */
+/**
+ * Cherche l'identifiant d'un utilisateur par son pseudo.
+ * @async
+ * @function
+ * @param {string} pseudo - Le pseudo de l'utilisateur à rechercher.
+ * @returns {Promise<number>} - Une promesse résolue avec l'identifiant de l'utilisateur ou undefined s'il n'est pas trouvé.
+ * @throws {Error} Une erreur si la recherche échoue.
+ */
 async function chercherUserPseudo(pseudo) {
     const user = `SELECT idUser FROM utilisateur WHERE pseudo = $1`;
 
@@ -137,7 +163,17 @@ async function chercherUserPseudo(pseudo) {
     }
 }
 
-/**Création utilisateur */
+/**
+ * Insère un nouvel utilisateur dans la base de données.
+ * Il hache le mot de passe.
+ * @async
+ * @function
+ * @param {Array<any>} values - Les valeurs des colonnes de l'utilisateur à insérer.
+ * @param {string} password - Le mot de passe de l'utilisateur à insérer.
+ * @param {Array<string>} values2 - Les valeurs du pseudo et de l'email pour vérifier les conflits.
+ * @returns {Promise<string>} - Une promesse résolue avec un message de confirmation ou une chaîne indiquant le type de conflit rencontré (les2, pseudo, mail).
+ * @throws {Error} Une erreur si l'insertion échoue.
+ */
 async function insererUser(values, password, values2) {
 
     const insertUser = `
@@ -173,7 +209,16 @@ async function insererUser(values, password, values2) {
     }
 }
 
-/**Modifier un utilisateur, injections sql */
+/**
+ * Insère un nouvel utilisateur dans la base de données.
+ * @async
+ * @function
+ * @param {Array<any>} values - Les valeurs des colonnes de l'utilisateur à insérer.
+ * @param {string} password - Le mot de passe de l'utilisateur à hacher et insérer, s'il n'est pas vide.
+ * @param {Array<string>} values2 - Les valeurs du pseudo et de l'email pour vérifier les conflits.
+ * @returns {Promise<string>} - Une promesse résolue avec un message de confirmation ou une chaîne indiquant le type de conflit rencontré (les2, pseudo, mail).
+ * @throws {Error} Une erreur si l'insertion échoue.
+ */
 async function modifierUser(idUser, valeurs, password) {
 
     const temp = await chercherUserID(idUser);
@@ -233,7 +278,13 @@ async function modifierUser(idUser, valeurs, password) {
     }
 }
 
-/**Supprimer */
+/**
+ * Supprime un utilisateur de la base de données.
+ * @function
+ * @param {number} idUser - L'identifiant de l'utilisateur à supprimer.
+ * @returns {void}
+ * @throws {Error} Une erreur si la suppression échoue.
+ */
 function supprimerUser(idUser) {
 
     const suppr = `DELETE FROM Utilisateur WHERE idUser = $1`;
@@ -245,6 +296,13 @@ function supprimerUser(idUser) {
     }
 }
 
+/**
+ * Récupère et renvoie un JSON contenant la liste des utilisateurs avec leurs informations.
+ * @async
+ * @function
+ * @returns {Promise<object>} - Une promesse résolue avec un objet JSON contenant la liste des utilisateurs et leurs informations.
+ * @throws {Error} Une erreur si la récupération échoue.
+ */
 async function envoyer_json_liste_user() {
     try {
         const listeUsers = await chercherListeUtilisateurs();

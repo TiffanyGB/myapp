@@ -1,12 +1,12 @@
 #!/bin/bash
 
 # Nom de l'application PM2 
-PM2_APP_NAME="bin/www"
+PM2_APP_NAME="main.js"
 
 restart_pm2_app() {
-  echo "Redémarrage de l'application PM2..."
+  echo "Démarrage de l'application PM2..."
   pm2 start "$PM2_APP_NAME"
-  echo "Application PM2 redémarrée."
+  echo "Application PM2 démarrée."
 }
 
 # Appel de la fonction
