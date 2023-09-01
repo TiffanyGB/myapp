@@ -405,9 +405,32 @@ async function recupererDemande(idEquipe) {
     }
 }
 
-
 /**
  * Vérifie si un utilisateur appartient à au moins une équipe 
+ * @async
+ * @function
+ * @param {number} idEtudiant - L'identifiant de l'utilisateur à vérifier.
+ * @returns {Promise<Array>} - Une promesse résolue avec un tableau d'objets représentant l'appartenance de l'utilisateur à des équipes.
+ * @throws {Error} Une erreur si la vérification de l'appartenance à une équipe échoue.
+ * @author Tiffany GAY-BELLILE <tiffany.gbellile@gmail.com>
+ */
+async function aUneEquipe(idEtudiant) {
+
+    const appartientAUneEquipe = `SELECT * FROM Appartenir WHERE idUser = $1`;
+
+    return new Promise((resolve, reject) => {
+        pool.query(appartientAUneEquipe, [idEtudiant])
+            .then((res) => {
+                resolve(res.rows);
+            })
+            .catch((error) => {
+                reject(error);
+            });
+    });
+}
+
+/**
+ * Vérifie si un utilisateur appartient à au moins une équipe
  * dans un événement en fonction de son identifiant de celui de l'événement.
  * @async
  * @function
@@ -771,8 +794,9 @@ async function jsonListeEquipeProjet(idProjet) {
 
             const result = await recupererJSON(equipeCourante.idequipe, event.nom);
             temp.resultats = [];
+            console.log(result)
 
-            for (i = 0; i < result.length; i++) {
+            for (j = 0; j < result.length; j++) {
                 let temp2 = {};
                 temp2.result = 'success';
                 temp2.content = JSON.stringify(result[i]);
@@ -946,5 +970,6 @@ module.exports = {
     fermerEquipe,
     ouvrirEquipe,
     ListeMembre,
-    insererAccesEquipeGit
+    insererAccesEquipeGit,
+    aUneEquipe
 }

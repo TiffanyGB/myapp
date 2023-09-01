@@ -686,6 +686,7 @@ async function voirMesEquipes(req, res) {
       return res.status(200).json(jsonInfos);
 
     } catch (error) {
+      console.log(error)
       return res.status(400).json({ erreur: "Erreur lors de la récupération des données." });
     }
   } else {

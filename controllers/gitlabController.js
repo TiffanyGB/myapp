@@ -86,7 +86,6 @@ function creerDossier(idEquipe, nom_event) {
  * Le nombre de fichiers dans le dossier est récupéré. Puis, le contenu de chaque fichier json est récupéré.
  * @throws {Error} Si la récupération a échoué.
  * @returns {Array} Un tableau contenant tous les json de l'équipe.
-
 */
 async function recupererJSON(idEquipe, event) {
   const nomEquipe = 'Equipe_' + idEquipe;

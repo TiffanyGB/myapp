@@ -17,7 +17,7 @@ const passwordModel = require('../../models/passwordModel');
 const pool = require('../../database/configDB');
 const jwt = require('jsonwebtoken');
 const tokenModel = require('../../models/tokenModel');
-const { chercherType } = require('../../models/userModel');
+const { chercherType } = require('../../models/aDeplacer');
 
 /**
  * Connexion d'un utilisateur.

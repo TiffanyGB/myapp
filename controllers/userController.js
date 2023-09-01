@@ -23,7 +23,7 @@ const etudiantModel = require('../models/etudiantModel');
 const gestionnaireIaModel = require('../models/gestionnaireIaModel');
 const gestionnaireExterneModel = require('../models/gestionnaireExterneModel');
 const { validationResult } = require('express-validator');
-
+const aDeplacer = require('../models/aDeplacer')
 /**
  * @async
  * @function
@@ -41,7 +41,7 @@ async function voirUtilisateurs(req, res) {
 
   /*Récupérer la liste des utilisateurs formatée au format json*/
   try {
-    const result = await userModel.envoyer_json_liste_user();
+    const result = await aDeplacer.envoyer_json_liste_user();
     if (result === "erreur_user") {
       return res.status(400).json({ erreur: "Erreur lors de la récupération des données côté étudiant" })
     } else {
@@ -213,7 +213,7 @@ async function modifierUser(req, res) {
       userData.niveau_etude
     ]
 
-    let type = await userModel.chercherType(idUser);
+    let type = await aDeplacer.chercherType(idUser);
 
     try {
       let resultMessage = '';

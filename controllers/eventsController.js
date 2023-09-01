@@ -259,7 +259,8 @@ async function listeEquipes(req, res) {
       const event = await eventModel.jsonlisteEquipeEvent(idevent);
       return res.status(200).json(event)
     }
-    catch {
+    catch (error){
+      console.log(error)
       return res.status(404).json({ erreur: 'Erreur lors de la récupération des informations' });
     }
   }

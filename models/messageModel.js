@@ -3,6 +3,7 @@ const userModel = require('./userModel');
 const equipeModel = require('./equipeModel');
 const projetModel = require('../models/projetModel');
 const { body, validationResult } = require('express-validator');
+const aDeplacer = require('../models/aDeplacer')
 
 async function validateMessageContenu(req, res) {
 
@@ -149,7 +150,7 @@ async function jsonGetMessegaeEquipe(idEquipe, req) {
         let id = user.iduser;
 
         /*Chercher le role de l'utilisateur */
-        const type = await userModel.chercherType(id);
+        const type = await aDeplacer.chercherType(id);
         switch (type) {
             case 'etudiant':
                 temp.roleSender = 'Étudiant';
